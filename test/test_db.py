@@ -28,4 +28,6 @@ class BasicDBTest(DBTestCase):
                 if not name.startswith('sqlite'):
                     tables.add(name)
 
-        self.assertEqual(tables, set(('job',)))
+        self.assertEqual(tables, set((
+            'job', 'input_file', 'output_file', 'log',
+        )))
