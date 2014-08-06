@@ -48,3 +48,12 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
             self.assertEqual(job.tag, tag)
             self.assertRegexpMatches(job.parameters,
                                      "-drparameters='[A-Z_]*'")
+
+    def test_recipe_files(self):
+        """Test retrieval of recipe file list.
+        """
+
+        files = self.db.get_recipe_input_files(1004)
+
+        self.assertEqual(sorted(files),
+            ['s4a20140401_00051_0001', 's4a20140401_00052_0001'])

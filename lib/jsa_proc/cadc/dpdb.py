@@ -129,6 +129,30 @@ class CADCDP:
 
         return result
 
+    def get_recipe_input_files(self, id_):
+        """Fetch the list of input files for a particular recipe instance.
+        """
+
+        result = []
+
+        with self.db as c:
+            c.execute('SELECT dp_input FROM dp_file_input '
+                      'WHERE input_role="infile" '
+                      'AND identity_instance_id=@i',
+                      {'i': id_})
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                (uri,) = row
+
+                assert(uri.startswith('ad:JCMT/'))
+                result.append(uri[8:])
+
+        return result
+
     def _determine_jsa_recipe(self):
         """Fetch the list of JSA recipes from the CADC database.
 

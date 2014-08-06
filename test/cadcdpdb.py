@@ -33,6 +33,12 @@ CREATE TABLE dp_recipe_instance (
     identity_instance_id INTEGER,
     recipe_id INTEGER
 );
+
+CREATE TABLE dp_file_input (
+    dp_input VARCHAR(255),
+    input_role CHAR(8),
+    identity_instance_id INTEGER
+);
 """
 
 test_data = """
@@ -57,6 +63,15 @@ INSERT INTO dp_recipe_instance VALUES ("Y",
     "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1006-850um", 1006, 2);
 INSERT INTO dp_recipe_instance VALUES ("E",
     "-drparameters='REDUCE_SCIENCE_LEGACY'", "hpx-1007-850um", 1007, 4);
+
+INSERT INTO dp_file_input VALUES
+    ('ad:JCMT/s4a20140401_00051_0001', 'infile', 1004);
+INSERT INTO dp_file_input VALUES
+    ('ad:JCMT/s4a20140401_00052_0001', 'infile', 1004);
+INSERT INTO dp_file_input VALUES
+    ('ad:JCMT/s4a20140401_00052_9999', 'xfile', 1004);
+INSERT INTO dp_file_input VALUES
+    ('ad:JCMT/s4a20140401_00053_0001', 'infile', 1006);
 """
 
 
