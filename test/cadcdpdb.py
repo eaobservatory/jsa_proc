@@ -20,6 +20,20 @@ from jsa_proc.cadc.dpdb import CADCDP
 from jsa_proc.db.sqlite import JSAProcSQLiteLock
 
 schema = """
+CREATE TABLE dp_recipe (
+    script_name VARCHAR(30),
+    project VARCHAR(30),
+    recipe_id INTEGER
+);
+"""
+
+test_data = """
+INSERT INTO dp_recipe VALUES ("jcmtProcessScubaRWS.pl", "JCMT_JAC", 1);
+INSERT INTO dp_recipe VALUES ("jsawrapdr", "JCMT_JAC", 2);
+INSERT INTO dp_recipe VALUES ("jsawrapdr", "JCMT_JAC", 3);
+INSERT INTO dp_recipe VALUES ("jsawrapdr", "JCMT_JAC", 4);
+INSERT INTO dp_recipe VALUES ("chftprevwrap.py", "CFHT", 5);
+INSERT INTO dp_recipe VALUES ("ukirtwrapdr", "UKIRT_JAC", 6);
 """
 
 
@@ -47,6 +61,7 @@ class CADCDPDBTestCase(TestCase):
 
         with self.db.db as c:
             c.executescript(schema)
+            c.executescript(test_data)
 
     def tearDown(self):
         """Disconnect from the database by deleting the

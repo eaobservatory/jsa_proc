@@ -81,6 +81,7 @@ class CADCDP:
             auto_commit=0)
 
         self.db = CADCDPLock(conn)
+        self.recipe = None
 
     def __del__(self):
         """Destroy CADC DP database object.
@@ -89,3 +90,27 @@ class CADCDP:
         """
 
         self.db.close()
+
+    def _determine_jsa_recipe(self):
+        """Fetch the list of JSA recipes from the CADC database.
+
+        The resultant set of recipes is stored in the object.
+        """
+
+        recipe = set()
+
+        with self.db as c:
+            c.execute('SELECT recipe_id FROM dp_recipe '
+                      'WHERE project="JCMT_JAC" '
+                      'AND script_name="jsawrapdr"')
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                (id_,) = row
+
+                recipe.add(id_)
+
+        self.recipe = recipe

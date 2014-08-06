@@ -17,5 +17,7 @@ from .cadcdpdb import CADCDPDBTestCase
 
 
 class BasicCADCPDPDBTest(CADCDPDBTestCase):
-    def test_nothing(self):
-        pass
+    def test_recipe(self):
+        self.db._determine_jsa_recipe()
+
+        self.assertEqual(self.db.recipe, set((2, 3, 4)))
