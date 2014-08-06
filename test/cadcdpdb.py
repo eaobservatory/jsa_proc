@@ -25,6 +25,14 @@ CREATE TABLE dp_recipe (
     project VARCHAR(30),
     recipe_id INTEGER
 );
+
+CREATE TABLE dp_recipe_instance (
+    state CHAR(1),
+    parameters VARCHAR(255),
+    tag VARCHAR(80),
+    identity_instance_id INTEGER,
+    recipe_id INTEGER
+);
 """
 
 test_data = """
@@ -34,6 +42,21 @@ INSERT INTO dp_recipe VALUES ("jsawrapdr", "JCMT_JAC", 3);
 INSERT INTO dp_recipe VALUES ("jsawrapdr", "JCMT_JAC", 4);
 INSERT INTO dp_recipe VALUES ("chftprevwrap.py", "CFHT", 5);
 INSERT INTO dp_recipe VALUES ("ukirtwrapdr", "UKIRT_JAC", 6);
+
+INSERT INTO dp_recipe_instance VALUES ("Q",
+    "-drparameters='REDUCE_SCIENCE_LEGACY'", "hpx-1001-850um", 1001, 4);
+INSERT INTO dp_recipe_instance VALUES ("Q",
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1002-850um", 1002, 3);
+INSERT INTO dp_recipe_instance VALUES ("N",
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1003-850um", 1003, 6);
+INSERT INTO dp_recipe_instance VALUES ("N",
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1004-850um", 1004, 2);
+INSERT INTO dp_recipe_instance VALUES ("Y",
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1005-850um", 1005, 1);
+INSERT INTO dp_recipe_instance VALUES ("Y",
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1006-850um", 1006, 2);
+INSERT INTO dp_recipe_instance VALUES ("E",
+    "-drparameters='REDUCE_SCIENCE_LEGACY'", "hpx-1007-850um", 1007, 4);
 """
 
 
@@ -46,6 +69,7 @@ class DummyCADCDP(CADCDP):
         c.close()
 
         self.db = JSAProcSQLiteLock(conn)
+        self.recipe = None
 
 
 class CADCDPDBTestCase(TestCase):

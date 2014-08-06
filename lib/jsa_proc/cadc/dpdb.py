@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import namedtuple
 import Sybase
 from threading import Lock
 
@@ -20,6 +21,13 @@ from jsa_proc.omp.siteconfig import get_omp_siteconfig
 
 cadc_dp_server = 'CADC_ASE'
 cadc_dp_db = 'data_proc'
+
+CADCDPInfo = namedtuple('CADCDPInfo', 'id_ state tag parameters')
+
+jsa_tile_recipes = (
+    'REDUCE_SCAN_JSA_PUBLIC',
+    'REDUCE_SCIENCE_LEGACY',
+)
 
 
 class CADCDPLock:
@@ -90,6 +98,36 @@ class CADCDP:
         """
 
         self.db.close()
+
+    def get_recipe_info(self):
+        """Fetch info for all JSA recipes in the CADC DP database.
+
+        Returns a list of CADCDPInfo named tuples.
+        """
+
+        if self.recipe is None:
+            self._determine_jsa_recipe()
+
+        result = []
+
+        with self.db as c:
+            c.execute('SELECT identity_instance_id, state, tag, parameters '
+                      'FROM dp_recipe_instance '
+                      'WHERE recipe_id IN (' +
+                          ', '.join((str(x) for x in self.recipe)) + ') '
+                      'AND (' +
+                          ' OR '.join((
+                              'parameters LIKE "%-drparameters=\'' + x +
+                              '\'%"' for x in jsa_tile_recipes)) + ')')
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                result.append(CADCDPInfo(*row))
+
+        return result
 
     def _determine_jsa_recipe(self):
         """Fetch the list of JSA recipes from the CADC database.
