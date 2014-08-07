@@ -8,7 +8,7 @@ CREATE TABLE job (
 );
 
 CREATE INDEX job_state ON job (state);
-CREATE INDEX job_tag ON job (tag);
+CREATE UNIQUE INDEX job_tag ON job (tag);
 CREATE INDEX job_location ON job (location);
 CREATE INDEX job_foreign_id ON job (foreign_id);
 
