@@ -15,25 +15,25 @@ CREATE INDEX job_foreign_id ON job (foreign_id);
 
 CREATE TABLE input_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job INTEGER NOT NULL REFERENCES job(id)
+    job_id INTEGER NOT NULL REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT,
     filename VARCHAR(80) NOT NULL
 );
 
-CREATE INDEX input_file_job ON input_file (job);
+CREATE INDEX input_file_job_id ON input_file (job_id);
 
 CREATE TABLE output_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job INTEGER NOT NULL REFERENCES job(id)
+    job_id INTEGER NOT NULL REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT,
     filename VARCHAR(80) NOT NULL
 );
 
-CREATE INDEX output_file_job ON output_file (job);
+CREATE INDEX output_file_job_id ON output_file (job_id);
 
 CREATE TABLE log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job INTEGER NOT NULL REFERENCES job(id)
+    job_id INTEGER NOT NULL REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT,
     datetime INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
     state_prev CHAR(1) DEFAULT NULL,
@@ -41,4 +41,4 @@ CREATE TABLE log (
     message TEXT NOT NULL DEFAULT ""
 );
 
-CREATE INDEX log_job ON log (job);
+CREATE INDEX log_job_id ON log (job_id);
