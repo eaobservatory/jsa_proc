@@ -16,30 +16,33 @@ CREATE UNIQUE INDEX job_location_id ON job (location, foreign_id);
 
 CREATE TABLE input_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL REFERENCES job(id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT,
-    filename VARCHAR(80) NOT NULL
+    job_id INTEGER NOT NULL,
+    filename VARCHAR(80) NOT NULL,
+    FOREIGN KEY (job_id) REFERENCES job (id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE INDEX input_file_job_id ON input_file (job_id);
 
 CREATE TABLE output_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL REFERENCES job(id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT,
-    filename VARCHAR(80) NOT NULL
+    job_id INTEGER NOT NULL,
+    filename VARCHAR(80) NOT NULL,
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE INDEX output_file_job_id ON output_file (job_id);
 
 CREATE TABLE log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL REFERENCES job(id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT,
+    job_id INTEGER NOT NULL,
     datetime INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
     state_prev CHAR(1) DEFAULT NULL,
     state_new CHAR(1) DEFAULT NULL,
-    message TEXT NOT NULL DEFAULT ""
+    message TEXT NOT NULL DEFAULT "",
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE INDEX log_job_id ON log (job_id);
