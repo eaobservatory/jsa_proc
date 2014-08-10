@@ -1,0 +1,5 @@
+[database]
+host=127.0.0.1
+database=jsa_proc_test
+user=jsa_proc_test
+password=jsa_proc_test
