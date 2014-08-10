@@ -40,14 +40,14 @@ class JSAProcSQLiteLock():
         self._cursor = self._conn.cursor()
         return self._cursor
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, type_, value, tb):
         """Context manager block exit method.
 
         If the block exited cleanly, commit, otherwise rollback
         the current transaction.  Also closes the cursor object.
         """
 
-        if type is None:
+        if type_ is None:
             self._conn.commit()
         else:
             self._conn.rollback()

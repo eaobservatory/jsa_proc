@@ -50,7 +50,7 @@ class CADCDPLock:
         self._cursor = self._conn.cursor()
         return self._cursor
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, type_, value, tb):
         """Context manager  block exit method.
 
         Closes the cursor and releases the lock.  Since this module
