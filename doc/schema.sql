@@ -37,7 +37,7 @@ CREATE INDEX output_file_job_id ON output_file (job_id);
 CREATE TABLE log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     job_id INTEGER NOT NULL,
-    datetime INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     state_prev CHAR(1) DEFAULT NULL,
     state_new CHAR(1) DEFAULT NULL,
     message TEXT NOT NULL DEFAULT "",
