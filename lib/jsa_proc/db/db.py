@@ -14,6 +14,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from collections import namedtuple
+
+# Named tuples that are created ahead of time instead of dynamically
+# defined from table rows:
+JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message')
+
+
 class JSAProcDB:
     """JSA Processing database access class.
 
@@ -29,6 +36,7 @@ class JSAProcDB:
 
         assert(hasattr(self, 'db'))
 
+
     def get_job(self, id_=None, tag=None):
         """
         Get a JSA data processing job from the database. 
@@ -41,10 +49,13 @@ class JSAProcDB:
         id_: integer
 
         tag: string
+
+        Returns: namedtuple of values of all columns in job database.
         """
     
         if not id_ or tag:
-            raise JSAProcDBError("You must set either id_ or tag to use get_job")
+            raise Exception("You must set either id_ or tag to use get_job")
+
         if id_:
             name='id'
             value=id_
@@ -52,10 +63,28 @@ class JSAProcDB:
             name='tag'
             value=tag
 
-        self.db.db.execute('SELECT all FROM job WHERE '+name+'=?', (value))
-        job = db.db.fetch_all()
+        # Get the values form the database
+        with self.db as c:
+            c.execute('SELECT * FROM job WHERE '+name+'=?', (value,))
+            job = c.fetchall()
+            if len(job) == 0:
+                raise exception('get_job found 0 jobs matching %s=%s'%(name, str(value)))
+            if len(job) > 1:
+                raise Exception('get_job found more than one job with id or tag %s'%(value))
+            # Turn list into single item
+            job = job[0]
+            rows = c.description
 
-        # Should this check to see that only 1 result is returned?
+        # Define namedtuple dynamically, to ensure we always return
+        # full information about jobs (specific to this function),
+        # define others at top of this file. (Can be defined
+        # statically instead if wanted).
+        rows = ' '.join([i[0] for i in rows])
+        JSAProcJob = namedtuple('JSAProcJob', rows) 
+
+        # Turn job into namedtuple
+        job = JSAProcJob(*job)
+        
         return job
 
     def add_job(self, tag, location, input_file_names, foreign_id=None):
@@ -115,6 +144,9 @@ class JSAProcDB:
         
         message: string, human readable text describin the change of state.
 
+        Return:
+        job_id, integer
+
         """
 
         with self.db as c:
@@ -124,12 +156,82 @@ class JSAProcDB:
                       (newstate, job_id))
 
             # Get state_prev value.
-            c.execute('SELECT state_prev FROM job where id=job_id')
-            state_prev = c.fetch_all()
+            c.execute('SELECT state_prev FROM job where id=?',
+                      (job_id,))
+            state_prev = c.fetchall()
+
+            if len(state_prev) > 1:
+                raise Exception('more than one result for state_prev for job %i'%(job_id), 
+                                    state_prev)
+            state_prev=state_prev[0][0]
 
             # Update log table.
-            c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (?, ?, ?)',
+            c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (?, ?, ?, ?)',
                       (job_id, state_prev, newstate, message))
             
-        
         return job_id
+
+    def get_input_files(self, job_id):
+        """
+        Get the list of input files for specific job from the
+        input_file table.
+
+        takes integer job_id to identify file (this is the
+        auto-incremented primary key from the job table)
+
+        Returns a list of filepaths
+        """
+
+        with self.db as c:
+            c.execute('SELECT filename FROM input_file where job_id=?',
+                      (job_id,))
+            input_files = c.fetchall()
+
+        # input_files will be a list of tuples, each tuple containgin
+        # one file. Flatten this into a list of strings.
+        input_files = [file for i in input_files for file in i]
+
+        return input_files
+
+
+    def get_logs(self, job_id):
+        """
+        Get the full log of states of a given job from the log table.
+
+        Parameters:
+        job_id : integer (id from job table)
+
+        Returns:
+        list of JSAProcLog nametuples, 1 entry per row in file for that job_id.
+        """
+        with self.db as c:
+            c.execute('SELECT * FROM log WHERE job_id='+str(job_id))
+            logs = c.fetchall()
+        
+        # Create JSAProcLog namedtuple object to hold values.
+        logs = [JSAProcLog(*i) for i in logs]
+        
+        return logs
+        
+
+    def get_last_log(self, job_id):
+        """
+        Return the last log entry for a given job.
+
+        Parameters:
+        job_id: integer (id from job tale)
+
+        Returns:
+        logentry: namedtuple JSAProcLog
+        """
+
+        with self.db as c:
+            c.execute('SELECT * FROM log WHERE id = (SELECT MAX(id) FROM log WHERE job_id = ?)',
+                      (job_id,))
+            log = c.fetchall()
+        if len(log) > 1:
+            raise StandardError('get_last_log found more than one row?', log)
+
+        log = JSAProcLog(*log[0])
+        return log
+

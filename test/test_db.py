@@ -31,3 +31,89 @@ class BasicDBTest(DBTestCase):
         self.assertEqual(tables, set((
             'job', 'input_file', 'output_file', 'log',
         )))
+
+
+
+
+class InterfaceDBTest(DBTestCase):
+    """
+    Perform tests of the itnerface to the database.
+    """
+
+    # self.db is the instance of the JSAProc
+    
+    def test_add_job(self):
+        """
+        Test that a job can be added to the database.
+
+        (This Uses get_job and get_input_files to test add_job.)
+        """
+
+        tag = 'scuba2_20121009_5_850'
+        location = 'JSA'
+        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+
+        
+        # Add a test job.
+        job_id = self.db.add_job(tag, location, input_file_names)
+        
+        # Check its added correctly to job database.
+        job  = self.db.get_job(id_=job_id)
+        self.assertEqual([job.id, job.tag, job.location],[job_id, tag, location])
+
+        # Check that file list is added correctly.
+        files = self.db.get_input_files(job_id)
+        self.assertEqual(set(files), set(input_file_names))
+        
+        
+    def test_change_state(self):
+        """
+        Change the state of a job in the database using change_state.
+
+        (This also tests add_job,get_job, get_logs and get_last_log).
+
+        """
+        # Add a job to database to ensure one is there
+        tag = 'scuba2_20121009_5_850'
+        location = 'JSA'
+        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+
+        self.db.add_job(tag, location, input_file_names)
+
+        # Values to change to.
+        job_id = 1
+        newstate = 'R'
+        message = 'Changed state of job %s to R'%(job_id)
+        newstate2 = 'W'
+        message2 = 'Changed state of job %s to %s'%(job_id, newstate2)
+        
+
+        # Get the original  state of job 1.
+        job = self.db.get_job(id_=job_id)
+        state_orig = job.state
+
+        # Change the state of job 1 twice.
+        self.db.change_state(job_id, newstate, message)
+        self.db.change_state(job_id, newstate2, message2)
+
+        # Check the state and previous state of job 1
+        job = self.db.get_job(id_=job_id)
+        self.assertEqual(job.state, newstate2)
+        self.assertEqual(job.state_prev, newstate)
+        
+        # Check log for state and messages. (check both get_last_log and get_logs).
+        last_log = self.db.get_last_log(job_id)
+        self.assertEqual([last_log.state_new, last_log.state_prev, last_log.message],
+                         [newstate2, newstate, message2])
+        logs = self.db.get_logs(job_id)
+        maxid = max([l.id for l in logs])
+        for l in logs:
+            if l.id == maxid:
+                self.assertEqual([l.state_new, l.state_prev, l.message], 
+                                 [newstate2, newstate, message2])
+
+        # Check two log lines were retrieved.
+        self.assertEqual(len(logs), 2)
+
+        
+
