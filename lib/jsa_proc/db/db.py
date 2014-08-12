@@ -16,13 +16,17 @@
 
 from collections import namedtuple
 
+from jsa_proc.error import *
+
+
 # Named tuples that are created ahead of time instead of dynamically
 # defined from table rows:
 JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message')
 
 
 class JSAProcDB:
-    """JSA Processing database access class.
+    """
+    JSA Processing database access class.
 
     This is an abstract class -- only database-specific subclasses
     may be constructed.
@@ -39,7 +43,7 @@ class JSAProcDB:
 
     def get_job(self, id_=None, tag=None):
         """
-        Get a JSA data processing job from the database. 
+        Get a JSA data processing job from the database.
 
         Requires either the tag or id of the job table, and raises a
         JSAProcDBError if one or the other is not provided. If the tag
@@ -52,9 +56,9 @@ class JSAProcDB:
 
         Returns: namedtuple of values of all columns in job database.
         """
-    
+
         if not id_ or tag:
-            raise Exception("You must set either id_ or tag to use get_job")
+            raise JSAProcError("You must set either id_ or tag to use get_job")
 
         if id_:
             name='id'
@@ -68,9 +72,10 @@ class JSAProcDB:
             c.execute('SELECT * FROM job WHERE '+name+'=?', (value,))
             job = c.fetchall()
             if len(job) == 0:
-                raise exception('get_job found 0 jobs matching %s=%s'%(name, str(value)))
+                raise NoRowsError('job',
+                                  'SELECT * FROM job WHERE '+name+'='+str(value))
             if len(job) > 1:
-                raise Exception('get_job found more than one job with id or tag %s'%(value))
+                raise ExcessRowsError('job', 'SELECT * FROM job WHERE '+name+'='+str(value))
             # Turn list into single item
             job = job[0]
             rows = c.description
@@ -80,11 +85,11 @@ class JSAProcDB:
         # define others at top of this file. (Can be defined
         # statically instead if wanted).
         rows = ' '.join([i[0] for i in rows])
-        JSAProcJob = namedtuple('JSAProcJob', rows) 
+        JSAProcJob = namedtuple('JSAProcJob', rows)
 
         # Turn job into namedtuple
         job = JSAProcJob(*job)
-        
+
         return job
 
     def add_job(self, tag, location, input_file_names, foreign_id=None):
@@ -94,7 +99,9 @@ class JSAProcDB:
         This will raise an error if the job already exists, if the
         database interface raises an erro. The job must be specified
         by its unique tag.
-        
+
+        Parameters:
+
         tag: string, unique identifier for observation/job
 
         location: string, where the job will be run.
@@ -104,19 +111,18 @@ class JSAProcDB:
 
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
-        
 
         Does not return anything
         """
 
         # insert job into table
         with self.db as c:
-            c.execute('INSERT INTO job (tag, location, foreign_id) VALUES (?, ?, ?)', 
+            c.execute('INSERT INTO job (tag, location, foreign_id) VALUES (?, ?, ?)',
                            (tag, location, foreign_id))
-        
+
             # Get the autoincremented id from job table (job_id in all other tables)
             job_id = c.lastrowid
-        
+
             # Need to get input file names and add them to table input_file
             for filepath in input_file_names:
                 c.execute('INSERT INTO input_file (job_id, filename) VALUES (?, ?)',
@@ -124,8 +130,8 @@ class JSAProcDB:
 
         # job_id may not be necessary but sometimes useful.
         return job_id
-            
-                       
+
+
     def change_state(self, job_id, newstate, message):
         """
         Change the state of a job in the JSA processing database.
@@ -137,11 +143,11 @@ class JSAProcDB:
         The log table will be updated with a line corresponding to
         this change, using the message.
 
-        variables:
+        Parameters:
         id: integer, job_id of the job whose state is being changed.
 
         newstate: string, one character, new state of the job.
-        
+
         message: string, human readable text describin the change of state.
 
         Return:
@@ -150,7 +156,7 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            
+
             # Change the state to new state and update the state_prev
             c.execute('UPDATE job SET state_prev = state, state = ? WHERE id = ?',
                       (newstate, job_id))
@@ -161,14 +167,15 @@ class JSAProcDB:
             state_prev = c.fetchall()
 
             if len(state_prev) > 1:
-                raise Exception('more than one result for state_prev for job %i'%(job_id), 
-                                    state_prev)
+                raise ExcessRowsError('job',
+                                      'SELECT state_prev FROM job where id=?,(%s,))'%(str(job_id)))
+
             state_prev=state_prev[0][0]
 
             # Update log table.
             c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (?, ?, ?, ?)',
                       (job_id, state_prev, newstate, message))
-            
+
         return job_id
 
     def get_input_files(self, job_id):
@@ -202,17 +209,17 @@ class JSAProcDB:
         job_id : integer (id from job table)
 
         Returns:
-        list of JSAProcLog nametuples, 1 entry per row in file for that job_id.
+        list of JSAProcLog nametuples, 1 entry per row in log table for that job_id.
         """
         with self.db as c:
             c.execute('SELECT * FROM log WHERE job_id='+str(job_id))
             logs = c.fetchall()
-        
+
         # Create JSAProcLog namedtuple object to hold values.
         logs = [JSAProcLog(*i) for i in logs]
-        
+
         return logs
-        
+
 
     def get_last_log(self, job_id):
         """
@@ -230,8 +237,8 @@ class JSAProcDB:
                       (job_id,))
             log = c.fetchall()
         if len(log) > 1:
-            raise StandardError('get_last_log found more than one row?', log)
+            raise NoRowsError('job','SELECT * FROM log WHERE id = (SELECT MAX(id) FROM log WHERE job_id = ?),(%s,)'%(str(job_id))
+                              )
 
         log = JSAProcLog(*log[0])
         return log
-
