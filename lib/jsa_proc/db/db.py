@@ -162,13 +162,13 @@ class JSAProcDB:
                       (newstate, job_id))
 
             # Get state_prev value.
-            c.execute('SELECT state_prev FROM job where id=?',
+            c.execute('SELECT state_prev FROM job WHERE id=?',
                       (job_id,))
             state_prev = c.fetchall()
 
             if len(state_prev) > 1:
                 raise ExcessRowsError('job',
-                                      'SELECT state_prev FROM job where id=?,(%s,))'%(str(job_id)))
+                                      'SELECT state_prev FROM job WHERE id=?,(%s,))'%(str(job_id)))
 
             state_prev=state_prev[0][0]
 
@@ -190,7 +190,7 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT filename FROM input_file where job_id=?',
+            c.execute('SELECT filename FROM input_file WHERE job_id=?',
                       (job_id,))
             input_files = c.fetchall()
 
@@ -212,7 +212,7 @@ class JSAProcDB:
         list of JSAProcLog nametuples, 1 entry per row in log table for that job_id.
         """
         with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id='+str(job_id))
+            c.execute('SELECT * FROM log WHERE job_id = ?',(job_id,))
             logs = c.fetchall()
 
         # Create JSAProcLog namedtuple object to hold values.
@@ -242,3 +242,90 @@ class JSAProcDB:
 
         log = JSAProcLog(*log[0])
         return log
+
+    def set_location(self, job_id, location, foreign_id=None):
+        """
+        Update the location, and optionally the foreign_id of a job.
+
+        parameters;
+        job_id (required), ingteger, identifies the job to update.
+
+        location (required), string, where to process the job.
+
+        foregin_id (option), string or special case can be 'NULL' to
+        overwrite the current value with None.
+
+        """
+
+        with self.db as c:
+            if not foreign_id:
+                c.execute('UPDATE job SET location = ? where id = ?',(location, job_id))
+            else:
+                if foreign_id == 'NULL':
+                    foreign_id = None
+                c.execute('UPDATE job SET location = ?, foreign_id = ? where id = ?',
+                          (location, foreign_id, job_id))
+
+    def set_foreign_id(self, job_id, foreign_id):
+        """
+        Update the foreign_id of a job of id job_id.
+
+        parameters:
+        job_id (required), integer, identify job to update (id of table=job).
+
+        foreign_id (reuiqred), string.
+        """
+        with self.db as c:
+            c.execute('UPDATE job SET foreign_id = ? where id = ?', (foreign_id, job_id))
+
+    def get_output_file_list(self, job_id):
+        """
+        Get the output file list for a job.
+
+        parameters:
+        job_id, (required), integer.
+        Identify which job to get the output file list from.
+
+        Returns:
+        list of output files.
+
+        Will raise an NoRowsError if there are no output files found.
+        """
+
+        with self.db as c:
+            c.execute('SELECT filename FROM output_file WHERE job_id = ?', (job_id,))
+            output_files = c.fetchall()
+            if len(output_files) == 0:
+                raise NoRowsError('output_file',
+                                  'SELECT filename FROM output_file WHERE job_id = ?'+(str(job_id)))
+
+        # Turn list of tuples into single list of strings.
+        output_files = [file for i in output_files for file in i]
+
+        return output_files
+
+    def set_output_file_list(self, job_id, output_files):
+
+        """
+        This will set the output file list for a job.
+
+        This first blanks any lines set with that job_id, and then
+        creates new entries for each item in output_files.
+
+        parameters:
+        job_id, required, integer
+        Identify which job to change/set the output file list from.
+
+        output_files, required, list of strings.
+        List of output files for the job (can be any iterable of strings, e.g. tuple etc.)
+
+        """
+
+
+        with self.db as c:
+            # First of all blank out any current output files for this job_id.
+            c.execute('DELETE FROM output_file WHERE job_id = ?', (job_id,))
+            for f in output_files:
+                # Now add in the new output files, one at a time.
+                c.execute('INSERT INTO output_file (job_id, filename) VALUES (?,?)',
+                          (job_id, f))

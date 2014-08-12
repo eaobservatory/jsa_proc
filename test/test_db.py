@@ -41,7 +41,7 @@ class InterfaceDBTest(DBTestCase):
     """
 
     # self.db is the instance of the JSAProc
-    
+
     def test_add_job(self):
         """
         Test that a job can be added to the database.
@@ -53,10 +53,9 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
-        
         # Add a test job.
         job_id = self.db.add_job(tag, location, input_file_names)
-        
+
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
         self.assertEqual([job.id, job.tag, job.location],[job_id, tag, location])
@@ -64,8 +63,7 @@ class InterfaceDBTest(DBTestCase):
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)
         self.assertEqual(set(files), set(input_file_names))
-        
-        
+
     def test_change_state(self):
         """
         Change the state of a job in the database using change_state.
@@ -86,7 +84,6 @@ class InterfaceDBTest(DBTestCase):
         message = 'Changed state of job %s to R'%(job_id)
         newstate2 = 'W'
         message2 = 'Changed state of job %s to %s'%(job_id, newstate2)
-        
 
         # Get the original  state of job 1.
         job = self.db.get_job(id_=job_id)
@@ -100,7 +97,7 @@ class InterfaceDBTest(DBTestCase):
         job = self.db.get_job(id_=job_id)
         self.assertEqual(job.state, newstate2)
         self.assertEqual(job.state_prev, newstate)
-        
+
         # Check log for state and messages. (check both get_last_log and get_logs).
         last_log = self.db.get_last_log(job_id)
         self.assertEqual([last_log.state_new, last_log.state_prev, last_log.message],
@@ -109,11 +106,73 @@ class InterfaceDBTest(DBTestCase):
         maxid = max([l.id for l in logs])
         for l in logs:
             if l.id == maxid:
-                self.assertEqual([l.state_new, l.state_prev, l.message], 
+                self.assertEqual([l.state_new, l.state_prev, l.message],
                                  [newstate2, newstate, message2])
 
         # Check two log lines were retrieved.
         self.assertEqual(len(logs), 2)
 
-        
+    def test_set_location_foreign_id(self):
+        """
+        Test setting a location and foreign id.
+        """
+        # First of all put a dummy job into the database.
+        # Add a job to database to ensure one is there
+        tag = 'scuba2_20121009_5_850'
+        location = 'JSA'
+        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        self.db.add_job(tag, location, input_file_names)
 
+        # Values for testing
+        job_id = 1
+        location = 'CADC'
+        foreign_id = 'DummyCADCId'
+        foreign_id2 = 'DummyCADCId2'
+
+        # Change the location and foreign_id
+        self.db.set_location(job_id, location, foreign_id=foreign_id)
+
+        # Check its changed correctly.
+        job = self.db.get_job(id_=job_id)
+
+        self.assertEqual(job.location, location)
+        self.assertEqual(job.foreign_id, foreign_id)
+
+        #Change the foreign_id on its own
+        self.db.set_foreign_id(job_id, foreign_id2)
+
+        # Check foreign_id has been updated correctly.
+        job = self.db.get_job(id_=job_id)
+        self.assertEqual(job.foreign_id, foreign_id2)
+
+    def test_set_output_file_list(self):
+        """
+        Test setting output files for a job.
+        """
+        # First of all put a dummy job into the database.
+        tag = 'scuba2_20121009_5_850'
+        location = 'JSA'
+        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        self.db.add_job(tag, location, input_file_names)
+
+        # Values used in updating.
+        job_id = 1
+        output_files1 = ['/dummy/data/output/myoutputfile1.sdf',
+                        '/dummy/data/output2/myoutputfile2.sdf']
+
+        output_files2 = ['/dummy/data/output/myoutputfile3.sdf',
+                        '/dummy/data/output4/myoutputfile4.sdf']
+
+        # Update the output files for this job.
+        self.db.set_output_file_list(job_id, output_files1)
+
+        # Check the values
+        out_f = self.db.get_output_file_list(job_id)
+        self.assertEqual(set(out_f), set(output_files1))
+
+        # Re update to check it works when there are already files written in.
+        self.db.set_output_file_list(job_id, output_files2)
+
+        # Check new values
+        out_f = self.db.get_output_file_list(job_id)
+        self.assertEqual(set(out_f), set(output_files2))
