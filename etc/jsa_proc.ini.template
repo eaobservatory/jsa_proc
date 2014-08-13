@@ -7,3 +7,8 @@ password=jsa_proc_test
 [cadc]
 username=DummyCADCName
 password=DummyCADCPassword
+
+[directories]
+input=/net/kamaka/export/data/jsa_proc/input
+output=/net/kamaka/export/data/jsa_proc/output
+scratch=/export/data/jsa_proc/scratch
