@@ -18,7 +18,7 @@ import os.path
 
 from jsa_proc.error import JSAProcError
 
-scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_0001$')
+scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_[0-9]{4}$')
 
 
 def get_jac_data_dir(filename):
