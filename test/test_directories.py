@@ -17,7 +17,7 @@ from unittest import TestCase
 
 from jsa_proc.error import JSAProcError
 from jsa_proc.job_run.directories \
-    import get_input_dir, get_output_dir, get_scratch_dir
+    import get_input_dir, get_output_dir, get_scratch_dir, get_log_dir
 
 
 class DirectoryTestCase(TestCase):
@@ -30,6 +30,9 @@ class DirectoryTestCase(TestCase):
 
         self.assertEqual(get_scratch_dir(92),
                          '/export/data/jsa_proc/scratch/92')
+
+        self.assertEqual(get_log_dir(844),
+                         '/net/kamaka/export/data/jsa_proc/log/844')
 
         with self.assertRaises(JSAProcError):
             get_input_dir('not an integer')

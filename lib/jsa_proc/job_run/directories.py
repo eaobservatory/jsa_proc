@@ -37,6 +37,12 @@ def get_scratch_dir(job_id):
     return _get_dir('scratch', job_id)
 
 
+def get_log_dir(job_id):
+    """Get the log directory for a given job."""
+
+    return _get_dir('log', job_id)
+
+
 def _get_dir(type_, job_id):
     if not isinstance(job_id, int):
         raise JSAProcError('Cannot determine directory '
