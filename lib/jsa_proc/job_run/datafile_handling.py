@@ -57,7 +57,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
 
     # Make the input directory if it doesn't exist. (Permissions?).
     if (not os.path.exists(input_directory)
-            it and not os.path.isdir(input_directory)):
+            and not os.path.isdir(input_directory)):
         os.mkdir(input_directory)
 
     # Create list of files to write to.
