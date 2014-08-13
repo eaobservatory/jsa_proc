@@ -259,11 +259,11 @@ class JSAProcDB:
 
         with self.db as c:
             if not foreign_id:
-                c.execute('UPDATE job SET location = %s where id = %s',(location, job_id))
+                c.execute('UPDATE job SET location = %s WHERE id = %s',(location, job_id))
             else:
                 if foreign_id == 'NULL':
                     foreign_id = None
-                c.execute('UPDATE job SET location = %s, foreign_id = %s where id = %s',
+                c.execute('UPDATE job SET location = %s, foreign_id = %s WHERE id = %s',
                           (location, foreign_id, job_id))
 
     def set_foreign_id(self, job_id, foreign_id):
@@ -276,7 +276,7 @@ class JSAProcDB:
         foreign_id (reuiqred), string.
         """
         with self.db as c:
-            c.execute('UPDATE job SET foreign_id = %s where id = %s', (foreign_id, job_id))
+            c.execute('UPDATE job SET foreign_id = %s WHERE id = %s', (foreign_id, job_id))
 
     def get_output_file_list(self, job_id):
         """
