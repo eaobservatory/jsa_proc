@@ -39,6 +39,8 @@ def fetch_cadc_file(filename, output_directory):
     Path to save file to.
 
     Will raise an requests.except.HTTPError if it can't connect.
+
+    Returns name of file with path
     """
 
     # Data path.
@@ -52,14 +54,17 @@ def fetch_cadc_file(filename, output_directory):
     # Local name to save to (requests automatically decompresses, so
     # don't need the .gz).
     local_file = filename+'.sdf'
+    output_file_path = os.path.join(output_directory, local_file)
 
     # Connect with stream=True for large files.
     r = requests.get(data_path, auth=(cadc_username, cadc_password), stream=True)
-    
+
     # Check if its worked. (raises error if not okay)
     r.raise_for_status()
 
     # write out to a file in the requested output directory
-    with open(os.path.join(output_directory, local_file), 'wb') as f:
+    with open(output_file_path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             f.write(chunk)
+
+    return output_file_path

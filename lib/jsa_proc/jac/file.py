@@ -38,6 +38,36 @@ def get_jac_data_dir(filename):
                        'an expected pattern'.format(filename))
 
 
+
+def file_in_dir(filename, dir):
+    """
+    Check whether a filename is present in an arbitrary directory.
+    Checks for both .sdf and .sdf.gz files.
+
+    If present, return full pathname to it.
+    Otherwise return False
+
+    filename:
+    filename without extension
+
+    dir: string
+    directory to check for file
+    """
+
+    pathname = os.path.join(dir, filename) + '.sdf'
+
+    if os.path.exists(pathname):
+        return pathname
+
+    # Try again with .gz suffix
+    pathname += '.gz'
+
+    if os.path.exists(pathname):
+        return pathname
+
+    return False
+
+
 def file_in_jac_data_dir(filename):
     """Check whether a file is present in the JAC data directories.
 
@@ -47,16 +77,5 @@ def file_in_jac_data_dir(filename):
 
     dir = get_jac_data_dir(filename)
 
-    pathname = os.path.join(dir, filename) + '.sdf'
+    return file_in_dir(filename, dir)
 
-    if os.path.exists(pathname):
-        return pathname
-
-    # Try again with .gz suffix
-
-    pathname += '.gz'
-
-    if os.path.exists(pathname):
-        return pathname
-
-    return False
