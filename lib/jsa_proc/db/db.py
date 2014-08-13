@@ -243,7 +243,7 @@ class JSAProcDB:
         log = JSAProcLog(*log[0])
         return log
 
-    def set_location(self, job_id, location, foreign_id=None):
+    def set_location(self, job_id, location, foreign_id=()):
         """
         Update the location, and optionally the foreign_id of a job.
 
@@ -252,17 +252,15 @@ class JSAProcDB:
 
         location (required), string, where to process the job.
 
-        foregin_id (option), string or special case can be 'NULL' to
-        overwrite the current value with None.
+        foregin_id (option), string, None to set to NULL or empty
+        tuple (default) to not alter the current value.
 
         """
 
         with self.db as c:
-            if not foreign_id:
+            if foreign_id == ():
                 c.execute('UPDATE job SET location = %s WHERE id = %s',(location, job_id))
             else:
-                if foreign_id == 'NULL':
-                    foreign_id = None
                 c.execute('UPDATE job SET location = %s, foreign_id = %s WHERE id = %s',
                           (location, foreign_id, job_id))
 
