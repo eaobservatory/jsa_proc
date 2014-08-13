@@ -124,6 +124,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Values for testing
         location = 'CADC'
+        location2 = 'SomewhereElse'
         foreign_id = 'DummyCADCId'
         foreign_id2 = 'DummyCADCId2'
 
@@ -139,8 +140,18 @@ class InterfaceDBTest(DBTestCase):
         #Change the foreign_id on its own
         self.db.set_foreign_id(job_id, foreign_id2)
 
-        # Check foreign_id has been updated correctly.
+        # Check foreign_id has been updated correctly
+        # but the location was left alone.
         job = self.db.get_job(id_=job_id)
+        self.assertEqual(job.location, location)
+        self.assertEqual(job.foreign_id, foreign_id2)
+
+        # Change the location only.
+        self.db.set_location(job_id, location2)
+
+        # Check that the location changed but the foreign ID did not.
+        job = self.db.get_job(id_=job_id)
+        self.assertEqual(job.location, location2)
         self.assertEqual(job.foreign_id, foreign_id2)
 
     def test_set_output_file_list(self):
