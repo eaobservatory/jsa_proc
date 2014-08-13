@@ -69,7 +69,7 @@ class JSAProcDB:
 
         # Get the values form the database
         with self.db as c:
-            c.execute('SELECT * FROM job WHERE '+name+'=?', (value,))
+            c.execute('SELECT * FROM job WHERE '+name+'=%s', (value,))
             job = c.fetchall()
             if len(job) == 0:
                 raise NoRowsError('job',
@@ -117,7 +117,7 @@ class JSAProcDB:
 
         # insert job into table
         with self.db as c:
-            c.execute('INSERT INTO job (tag, location, foreign_id) VALUES (?, ?, ?)',
+            c.execute('INSERT INTO job (tag, location, foreign_id) VALUES (%s, %s, %s)',
                            (tag, location, foreign_id))
 
             # Get the autoincremented id from job table (job_id in all other tables)
@@ -125,7 +125,7 @@ class JSAProcDB:
 
             # Need to get input file names and add them to table input_file
             for filepath in input_file_names:
-                c.execute('INSERT INTO input_file (job_id, filename) VALUES (?, ?)',
+                c.execute('INSERT INTO input_file (job_id, filename) VALUES (%s, %s)',
                           (job_id, filepath))
 
         # job_id may not be necessary but sometimes useful.
@@ -158,22 +158,22 @@ class JSAProcDB:
         with self.db as c:
 
             # Change the state to new state and update the state_prev
-            c.execute('UPDATE job SET state_prev = state, state = ? WHERE id = ?',
+            c.execute('UPDATE job SET state_prev = state, state = %s WHERE id = %s',
                       (newstate, job_id))
 
             # Get state_prev value.
-            c.execute('SELECT state_prev FROM job WHERE id=?',
+            c.execute('SELECT state_prev FROM job WHERE id=%s',
                       (job_id,))
             state_prev = c.fetchall()
 
             if len(state_prev) > 1:
                 raise ExcessRowsError('job',
-                                      'SELECT state_prev FROM job WHERE id=?,(%s,))'%(str(job_id)))
+                                      'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
 
             state_prev=state_prev[0][0]
 
             # Update log table.
-            c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (?, ?, ?, ?)',
+            c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (%s, %s, %s, %s)',
                       (job_id, state_prev, newstate, message))
 
         return job_id
@@ -190,7 +190,7 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT filename FROM input_file WHERE job_id=?',
+            c.execute('SELECT filename FROM input_file WHERE job_id=%s',
                       (job_id,))
             input_files = c.fetchall()
 
@@ -212,7 +212,7 @@ class JSAProcDB:
         list of JSAProcLog nametuples, 1 entry per row in log table for that job_id.
         """
         with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id = ?',(job_id,))
+            c.execute('SELECT * FROM log WHERE job_id = %s',(job_id,))
             logs = c.fetchall()
 
         # Create JSAProcLog namedtuple object to hold values.
@@ -233,11 +233,11 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT * FROM log WHERE id = (SELECT MAX(id) FROM log WHERE job_id = ?)',
+            c.execute('SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1',
                       (job_id,))
             log = c.fetchall()
         if len(log) > 1:
-            raise NoRowsError('job','SELECT * FROM log WHERE id = (SELECT MAX(id) FROM log WHERE job_id = ?),(%s,)'%(str(job_id))
+            raise NoRowsError('job','SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1'%(str(job_id))
                               )
 
         log = JSAProcLog(*log[0])
@@ -259,11 +259,11 @@ class JSAProcDB:
 
         with self.db as c:
             if not foreign_id:
-                c.execute('UPDATE job SET location = ? where id = ?',(location, job_id))
+                c.execute('UPDATE job SET location = %s where id = %s',(location, job_id))
             else:
                 if foreign_id == 'NULL':
                     foreign_id = None
-                c.execute('UPDATE job SET location = ?, foreign_id = ? where id = ?',
+                c.execute('UPDATE job SET location = %s, foreign_id = %s where id = %s',
                           (location, foreign_id, job_id))
 
     def set_foreign_id(self, job_id, foreign_id):
@@ -276,7 +276,7 @@ class JSAProcDB:
         foreign_id (reuiqred), string.
         """
         with self.db as c:
-            c.execute('UPDATE job SET foreign_id = ? where id = ?', (foreign_id, job_id))
+            c.execute('UPDATE job SET foreign_id = %s where id = %s', (foreign_id, job_id))
 
     def get_output_file_list(self, job_id):
         """
@@ -293,11 +293,11 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT filename FROM output_file WHERE job_id = ?', (job_id,))
+            c.execute('SELECT filename FROM output_file WHERE job_id = %s', (job_id,))
             output_files = c.fetchall()
             if len(output_files) == 0:
                 raise NoRowsError('output_file',
-                                  'SELECT filename FROM output_file WHERE job_id = ?'+(str(job_id)))
+                                  'SELECT filename FROM output_file WHERE job_id = '+(str(job_id)))
 
         # Turn list of tuples into single list of strings.
         output_files = [file for i in output_files for file in i]
@@ -324,8 +324,8 @@ class JSAProcDB:
 
         with self.db as c:
             # First of all blank out any current output files for this job_id.
-            c.execute('DELETE FROM output_file WHERE job_id = ?', (job_id,))
+            c.execute('DELETE FROM output_file WHERE job_id = %s', (job_id,))
             for f in output_files:
                 # Now add in the new output files, one at a time.
-                c.execute('INSERT INTO output_file (job_id, filename) VALUES (?,?)',
+                c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s,%s)',
                           (job_id, f))
