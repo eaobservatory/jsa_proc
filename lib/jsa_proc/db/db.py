@@ -57,10 +57,10 @@ class JSAProcDB:
         Returns: namedtuple of values of all columns in job database.
         """
 
-        if not id_ or tag:
+        if (id_ is None) and (tag is None):
             raise JSAProcError("You must set either id_ or tag to use get_job")
 
-        if id_:
+        if id_ is not None:
             name='id'
             value=id_
         else:
