@@ -112,7 +112,7 @@ class JSAProcDB:
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
 
-        Does not return anything
+        Returns the job identifier.
         """
 
         # insert job into table
