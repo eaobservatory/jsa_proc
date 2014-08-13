@@ -36,3 +36,27 @@ def get_jac_data_dir(filename):
 
     raise JSAProcError('Filename {0} does not match '
                        'an expected pattern'.format(filename))
+
+
+def file_in_jac_data_dir(filename):
+    """Check whether a file is present in the JAC data directories.
+
+    If it is present, return the full pathname to it.
+    Otherwise return False.
+    """
+
+    dir = get_jac_data_dir(filename)
+
+    pathname = os.path.join(dir, filename) + '.sdf'
+
+    if os.path.exists(pathname):
+        return pathname
+
+    # Try again with .gz suffix
+
+    pathname += '.gz'
+
+    if os.path.exists(pathname):
+        return pathname
+
+    return False
