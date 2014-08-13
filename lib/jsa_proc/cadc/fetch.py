@@ -25,26 +25,21 @@ from jsa_proc.config import get_config
 
 jcmt_data_url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
 
-def fetch_cadc_file(filename):
+def fetch_cadc_file(filename, output_directory):
     """
-    Routine which will fetch a file from CADC into the current
+    Routine which will fetch a file from CADC and save it into the output
     directory. It assumes the url is of the form:
     http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/s4d20130401_00001_0002
 
     parameters;
     filename, string
-    This can remove a .sdf or .sdf.gz extension, but not any others.
+    This assumes a filename without extension or path.
+
+    output_directory, string
+    Path to save file to.
 
     Will raise an requests.except.HTTPError if it can't connect.
     """
-
-    # Filename -- remove .sdf or .sdf.gz if present, otherwise leave
-    # as given.
-    split = os.path.splitext(filename)
-    if split[1] == '.gz':
-        split = os.path.splitext(split[0])
-    if split[1] == '.sdf':
-        filename = split[0]
 
     # Data path.
     data_path = jcmt_data_url+filename
@@ -64,7 +59,7 @@ def fetch_cadc_file(filename):
     # Check if its worked. (raises error if not okay)
     r.raise_for_status()
 
-    # write out to a file.
-    with open(local_file, 'wb') as f:
+    # write out to a file in the requested output directory
+    with open(os.path.join(output_directory, local_file), 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             f.write(chunk)
