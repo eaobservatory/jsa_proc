@@ -14,10 +14,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import sqlite3
 from threading import Lock
 
 from .db import JSAProcDB
+
+
+class FormatCursor(sqlite3.Cursor):
+    """Custom SQLite cursor class.
+
+    This is a custom subclass of sqlite3.Cursor which
+    aims to improve compatability with MySQL.
+    """
+
+    def execute(self, query, *args, **kwargs):
+        """
+        Overridden execute method.
+
+        Replaces format style parameter placeholders (%s) with question
+        marks (?).  This allows queries intended for MySQL to be used
+        with SQLite.
+        """
+        query = re.sub('\%s', '?', query)
+        return sqlite3.Cursor.execute(self, query, *args, **kwargs)
 
 
 class JSAProcSQLiteLock():
@@ -37,7 +57,7 @@ class JSAProcSQLiteLock():
         """
 
         self._lock.acquire(True)
-        self._cursor = self._conn.cursor()
+        self._cursor = self._conn.cursor(FormatCursor)
         return self._cursor
 
     def __exit__(self, type_, value, tb):
