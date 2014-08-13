@@ -76,10 +76,9 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
-        self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, input_file_names)
 
         # Values to change to.
-        job_id = 1
         newstate = 'R'
         message = 'Changed state of job %s to R'%(job_id)
         newstate2 = 'W'
@@ -121,10 +120,9 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, input_file_names)
 
         # Values for testing
-        job_id = 1
         location = 'CADC'
         foreign_id = 'DummyCADCId'
         foreign_id2 = 'DummyCADCId2'
@@ -153,10 +151,9 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, input_file_names)
 
         # Values used in updating.
-        job_id = 1
         output_files1 = ['/dummy/data/output/myoutputfile1.sdf',
                         '/dummy/data/output2/myoutputfile2.sdf']
 
