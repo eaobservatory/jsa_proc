@@ -51,10 +51,11 @@ class InterfaceDBTest(DBTestCase):
 
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
+        mode = 'obs'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
         # Add a test job.
-        job_id = self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, input_file_names)
 
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
@@ -74,9 +75,10 @@ class InterfaceDBTest(DBTestCase):
         # Add a job to database to ensure one is there
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
+        mode = 'obs'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
-        job_id = self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, input_file_names)
 
         # Values to change to.
         newstate = 'R'
@@ -119,8 +121,9 @@ class InterfaceDBTest(DBTestCase):
         # Add a job to database to ensure one is there
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
+        mode = 'obs'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        job_id = self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, input_file_names)
 
         # Values for testing
         location = 'CADC'
@@ -161,8 +164,9 @@ class InterfaceDBTest(DBTestCase):
         # First of all put a dummy job into the database.
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
+        mode = 'obs'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        job_id = self.db.add_job(tag, location, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, input_file_names)
 
         # Values used in updating.
         output_files1 = ['/dummy/data/output/myoutputfile1.sdf',

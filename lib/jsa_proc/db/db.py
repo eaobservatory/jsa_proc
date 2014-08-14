@@ -92,7 +92,7 @@ class JSAProcDB:
 
         return job
 
-    def add_job(self, tag, location, input_file_names, foreign_id=None):
+    def add_job(self, tag, location, mode, input_file_names, foreign_id=None):
         """
         Add a JSA data processing job to the database.
 
@@ -105,6 +105,10 @@ class JSAProcDB:
         tag: string, unique identifier for observation/job
 
         location: string, where the job will be run.
+
+        mode: JSA processing mode (obs / night / project / public),
+        ignored for now but included in this function's interface for
+        future use.
 
         input_file_names: iterable, each item being a string that
         idetnifies the path of an input file for the job.
