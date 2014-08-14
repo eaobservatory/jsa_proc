@@ -53,7 +53,7 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
-        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        input_file_names=['testfile1', 'testfile2']
 
         # Add a test job.
         job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
@@ -78,7 +78,7 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
-        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        input_file_names=['testfile1', 'testfile2']
 
         job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
@@ -125,7 +125,7 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
-        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        input_file_names=['testfile1', 'testfile2']
         job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values for testing
@@ -169,15 +169,15 @@ class InterfaceDBTest(DBTestCase):
         location = 'JSA'
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
-        input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
+        input_file_names=['testfile1', 'testfile2']
         job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values used in updating.
-        output_files1 = ['/dummy/data/output/myoutputfile1.sdf',
-                        '/dummy/data/output2/myoutputfile2.sdf']
+        output_files1 = ['myoutputfile1',
+                        'myoutputfile2']
 
-        output_files2 = ['/dummy/data/output/myoutputfile3.sdf',
-                        '/dummy/data/output4/myoutputfile4.sdf']
+        output_files2 = ['myoutputfile3',
+                        'myoutputfile4']
 
         # Update the output files for this job.
         self.db.set_output_file_list(job_id, output_files1)
