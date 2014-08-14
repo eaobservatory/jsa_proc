@@ -26,6 +26,7 @@ import tempfile
 
 from jsa_proc.config import get_config
 from jsa_proc.job_run.directories import get_scratch_dir, get_log_dir
+from jsa_proc.error import JSAProcError
 
 def jsawrapdr_run(job_id, input_file_list,  mode,
                   cleanup='cadc',location='JAC' ):
@@ -102,11 +103,11 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
     # inside WrapDR.pm->run_pipeline
 
     # Run jsawrapdr and get the returncode and error information
-    p = subprocess.Popen(jsawrapdrcom,
+    p = subprocess.Popen(jsawrapdrcom, env=jsa_env,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
     stdout, stderr = p.communicate()
 
-    # Write out the stdout to file (stdout includes stderr)
+    # Write out the stdout to file (stdout includes stderr).
     if os.path.exists(logfile):
         log = tempfile.NamedTemporaryFile(prefix='jsawrapdr_'+timestamp,
                                           dir=log_dir, suffix='.log', delete=False)
@@ -117,5 +118,11 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
 
     retcode = p.returncode
 
-    return retcode, log.name
+    if retcode != 0:
+        raise JSAProcError('jsawrapdr exited with non zero status. '
+                           'Retcode was %i; job_id is %i.'
+                           'stdin/stderr are written in %s'%(retcode, job_id, log.name),
+                           retcode, job_id, log.name)
+
+    return log.name
 
