@@ -13,3 +13,7 @@ input=/net/kamaka/export/data/jsa_proc/input
 output=/net/kamaka/export/data/jsa_proc/output
 scratch=/export/data/jsa_proc/scratch
 log=/net/kamaka/export/data/jsa_proc/log
+
+[job_run]
+starpath=/net/kamaka/export/data/stardev-stable
+
