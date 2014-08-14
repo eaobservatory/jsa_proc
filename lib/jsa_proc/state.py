@@ -18,6 +18,7 @@ class JSAProcState:
     """Class for handling data processing states.
     """
 
+    UNKNOWN = '?'
     QUEUED = 'Q'
     FETCHING = 'F'
     WAITING = 'W'
