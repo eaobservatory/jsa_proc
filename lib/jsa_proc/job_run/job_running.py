@@ -23,13 +23,18 @@ STARLINK_DIR and ORAC_DIR need to be set in environment?
 
 import subprocess
 import tempfile
+import time
+import os
+import sys
 
 from jsa_proc.config import get_config
-from jsa_proc.job_run.directories import get_scratch_dir, get_log_dir
+from jsa_proc.job_run.directories import get_scratch_dir, get_log_dir, get_output_dir
 from jsa_proc.error import JSAProcError
 
-def jsawrapdr_run(job_id, input_file_list,  mode,
-                  cleanup='cadc',location='JAC' ):
+
+def jsawrapdr_run(job_id, input_file_list,  mode, recipe,
+                  cleanup='cadc', location='JAC', persist=False, jsawrapdr=None, debug=False,
+                  logscreen=False):
     """Routine to execute jsawrapdr from python.
 
     Takes in a job_id, input_file_list, and mode.
@@ -38,9 +43,12 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
     jsawrapdr --outdir=configbase/scratch/$job_id
               --inputs=input_file_list
               --id = jac-$job_id
-              --mode=$mode 
+              --mode=$mode
               --cleanup=$cleanup (cadc by default)
               --location=$location (JAC by default)
+              --drparameters=recipe
+         if persist is True, then it adds the flag:
+              -persist
 
     job_id, integer
     job identifier from jsaproc database
@@ -49,14 +57,38 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
     list of files (with extensions and full path).
 
     mode, string
-    night, obs, public or project.
+
+    'night', 'obs', 'public' or 'project'.
+
+    recipe, string
+    name of oracdr/picard recipe ot be used.
 
     cleanup, optional, string |'cadc'|'none'|'all'
+
     The jsawrapdr clean option, default is 'cadc'.
+
+    persist, boolean, defaults to False
+
+    If persist is turned on, then dpCapture will copy acceptable
+    products to the default output directory. Otherwise it won't (used
+    for debugging purposes). The output directory is determined by
+    jsa_proc.job_run.directories 'get_output_dir' for the given job_id.
 
     # Location is not currently implemented!
     location, string |'cadc'|'JAC'|
+
     The default is 'JAC', others probably never used?
+
+    jsawrapdr, string, optional
+    path to jsawrapdr, otherwise uses one in configured starlink
+
+    debug, boolean, optional (default False)
+    turn on jsawrapdr debugging if true
+
+    logscreen, boolean, optional (default False)
+
+    log *only* to screen, useful for interactive use. jsawrapdr
+    stdout/stderr output will not be in logfile.
 
     Returns: (retcode, logfilename)
     This is the retcode from jsawrapdr (integer) and the path+name of
@@ -66,7 +98,12 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
 
     # Get config information.
     scratch_base_dir = get_scratch_dir(job_id)
+    if not os.path.exists(scratch_base_dir):
+        os.mkdir(scratch_base_dir)
+
     log_dir = get_log_dir(job_id)
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
 
     # Get scratchdir and logfile name using timestamp
     timestamp = time.strftime('%Y-%m-%d_%H-%M-%s')
@@ -77,52 +114,70 @@ def jsawrapdr_run(job_id, input_file_list,  mode,
         os.mkdir(scratch_dir)
     logfile = os.path.join(log_dir, 'jsawrapdr_'+timestamp+'.log')
 
-    # Find path to jsawrapdr
+    # Get output directory name
+    out_dir = get_output_dir(job_id)
+
+    # Find path to jsawrapdr and orac_dr
     config = get_config()
     starpath = config.get('job_run', 'starpath')
-    jsawrapdr_path = os.path.join(starpath, 'Perl', 'bin', 'jsawrapdr')
+    if not jsawrapdr:
+        jsawrapdr = os.path.join(starpath, 'Perl', 'bin', 'jsawrapdr')
     orac_dir = os.path.join(starpath, 'bin', 'oracdr', 'src')
-
 
     # jac recipe id
     jacid = 'jac-'+str(job_id)
 
     # jsawrapdr arguments.
-    jsawrapdrcom = [jsawrapdr_path,
+    jsawrapdrcom = [jsawrapdr,
                     '--outdir='+scratch_dir,
                     '--inputs='+input_file_list,
                     '--id='+jacid,
                     '--mode='+mode,
-                    '--cleanup='+cleanup]
+                    '--cleanup='+cleanup,
+                    '--drparameters='+recipe]
+    if persist:
+        jsawrapdrcom.append('-persist')
+        jsawrapdrcom.append('--transdir='+out_dir)
+
+    if debug:
+        jsawrapdrcom.append('-debug')
 
     # environment
     jsa_env = os.environ.copy()
     jsa_env['STARLINK_DIR'] = starpath
     jsa_env['ORAC_DIR'] = orac_dir
+    jsa_env['ORAC_LOGDIR'] = log_dir
     # Remainder of oracdr required environmental variables are set
     # inside WrapDR.pm->run_pipeline
 
-    # Run jsawrapdr and get the returncode and error information
-    p = subprocess.Popen(jsawrapdrcom, env=jsa_env,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
-    stdout, stderr = p.communicate()
-
-    # Write out the stdout to file (stdout includes stderr).
+    # Set up logfile
     if os.path.exists(logfile):
         log = tempfile.NamedTemporaryFile(prefix='jsawrapdr_'+timestamp,
-                                          dir=log_dir, suffix='.log', delete=False)
+                                          dir=log_dir, suffix='.log',
+                                          delete=False)
     else:
         log = open(logfile, 'w')
-    log.write(stdout)
+
+    # Run jsawrapdr
+    p = subprocess.Popen(jsawrapdrcom, env=jsa_env, bufsize=1,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    for line in iter(p.stdout.readline, ''):
+        if logscreen:
+            sys.stdout.write(line)
+        log.write(line)
+        p.wait()
+
     log.close()
+    p.stdout.close()
 
     retcode = p.returncode
 
     if retcode != 0:
         raise JSAProcError('jsawrapdr exited with non zero status. '
                            'Retcode was %i; job_id is %i.'
-                           'stdin/stderr are written in %s'%(retcode, job_id, log.name),
+                           'stdin/stderr are written in %s' % (retcode, job_id, log.name),
                            retcode, job_id, log.name)
+    # Need to return list of produced files in output directory?
 
     return log.name
-
