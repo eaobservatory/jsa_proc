@@ -52,10 +52,11 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         mode = 'obs'
+        parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
         # Add a test job.
-        job_id = self.db.add_job(tag, location, mode, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
@@ -76,9 +77,10 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         mode = 'obs'
+        parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
 
-        job_id = self.db.add_job(tag, location, mode, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values to change to.
         newstate = 'R'
@@ -122,8 +124,9 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         mode = 'obs'
+        parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        job_id = self.db.add_job(tag, location, mode, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values for testing
         location = 'CADC'
@@ -165,8 +168,9 @@ class InterfaceDBTest(DBTestCase):
         tag = 'scuba2_20121009_5_850'
         location = 'JSA'
         mode = 'obs'
+        parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names=['/dummy/data/loc/testfile1.sdf', '/dummy/data/local/testfile2.sdf']
-        job_id = self.db.add_job(tag, location, mode, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values used in updating.
         output_files1 = ['/dummy/data/output/myoutputfile1.sdf',

@@ -92,7 +92,8 @@ class JSAProcDB:
 
         return job
 
-    def add_job(self, tag, location, mode, input_file_names, foreign_id=None):
+    def add_job(self, tag, location, mode, parameters,
+                input_file_names, foreign_id=None):
         """
         Add a JSA data processing job to the database.
 
@@ -110,6 +111,9 @@ class JSAProcDB:
         ignored for now but included in this function's interface for
         future use.
 
+        parameters: processing parameters to pass to jsawrapdr
+        (typically the recipe name). (string)
+
         input_file_names: iterable, each item being a string that
         idetnifies the path of an input file for the job.
 
@@ -121,8 +125,10 @@ class JSAProcDB:
 
         # insert job into table
         with self.db as c:
-            c.execute('INSERT INTO job (tag, location, foreign_id) VALUES (%s, %s, %s)',
-                           (tag, location, foreign_id))
+            c.execute('INSERT INTO job '
+                      '(tag, location, parameters, foreign_id) '
+                      'VALUES (%s, %s, %s, %s)',
+                      (tag, location, parameters, foreign_id))
 
             # Get the autoincremented id from job table (job_id in all other tables)
             job_id = c.lastrowid
