@@ -13,6 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import namedtuple
+
+from jsa_proc.error import JSAProcError
+
+StateInfo = namedtuple('StateInfo', 'name')
+
 
 class JSAProcState:
     """Class for handling data processing states.
@@ -27,3 +33,22 @@ class JSAProcState:
     INGESTION = 'I'
     COMPLETE = 'Y'
     ERROR = 'E'
+
+    _info = {
+        UNKNOWN:      StateInfo('Unknown'),
+        QUEUED:       StateInfo('Queued'),
+        FETCHING:     StateInfo('Fetching'),
+        WAITING:      StateInfo('Waiting'),
+        RUNNING:      StateInfo('Running'),
+        TRANSFERRING: StateInfo('Transferring'),
+        INGESTION:    StateInfo('Ingestion'),
+        COMPLETE:     StateInfo('Complete'),
+        ERROR:        StateInfo('Error'),
+    }
+
+    @classmethod
+    def get_name(cls, state):
+        try:
+            return cls._info[state].name
+        except KeyError:
+            raise JSAProcError('Unknown state code {0}'.format(state))

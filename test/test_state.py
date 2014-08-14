@@ -15,6 +15,7 @@
 
 from unittest import TestCase
 
+from jsa_proc.error import JSAProcError
 from jsa_proc.state import JSAProcState
 from jsa_proc.cadc.dpstate import CADCDPState
 
@@ -41,3 +42,24 @@ class StateTestCase(TestCase):
 
         with self.assertRaises(Exception):
                 CADCDPState.jsaproc_state('X')
+
+    def test_state_name(self):
+        """Test lookup of state names."""
+
+        states = {
+            JSAProcState.UNKNOWN: 'Unknown',
+            JSAProcState.QUEUED: 'Queued',
+            JSAProcState.FETCHING: 'Fetching',
+            JSAProcState.WAITING: 'Waiting',
+            JSAProcState.RUNNING: 'Running',
+            JSAProcState.TRANSFERRING: 'Transferring',
+            JSAProcState.INGESTION: 'Ingestion',
+            JSAProcState.COMPLETE: 'Complete',
+            JSAProcState.ERROR: 'Error',
+        }
+
+        for (state, name) in states.items():
+            self.assertEqual(JSAProcState.get_name(state), name)
+
+        with self.assertRaises(JSAProcError):
+            JSAProcState.get_name('Z')
