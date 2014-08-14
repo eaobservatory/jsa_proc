@@ -22,6 +22,7 @@ from jsa_proc.error import *
 # Named tuples that are created ahead of time instead of dynamically
 # defined from table rows:
 JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message')
+JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id')
 
 
 class JSAProcDB:
@@ -337,3 +338,49 @@ class JSAProcDB:
                 # Now add in the new output files, one at a time.
                 c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s,%s)',
                           (job_id, f))
+
+    def find_jobs(self, state=None, location=None):
+        """Retrieve a list of jobs matching the given values.
+
+        Searches by the following values:
+
+            * state
+            * location
+
+        Returns a list (which may be empty) of namedtuples including
+        values:
+
+            * id
+            * tag
+            * state
+            * location
+        """
+
+        query = 'SELECT id, tag, state, location, foreign_id FROM job'
+        where = []
+        param = []
+
+        if state is not None:
+            where.append('state=%s')
+            param.append(state)
+
+        if location is not None:
+            where.append('location=%s')
+            param.append(location)
+
+        if where:
+            query += ' WHERE ' + ' AND '.join(where)
+
+        result = []
+
+        with self.db as c:
+            c.execute(query, param)
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                result.append(JSAProcJobInfo(*row))
+
+        return result
