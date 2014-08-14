@@ -18,8 +18,6 @@ from __future__ import absolute_import
 import mysql.connector
 from threading import Lock
 
-from jsa_proc.config import get_config
-
 from .db import JSAProcDB
 
 
@@ -85,10 +83,11 @@ class JSAProcMySQLLock():
 class JSAProcMySQL(JSAProcDB):
     """JSA processing database MySQL database access class."""
 
-    def __init__(self):
-        """Construct MySQL access object."""
+    def __init__(self, config):
+        """Construct MySQL access object.
 
-        config = get_config()
+        Takes as an argument the configuration object.
+        """
 
         conn = mysql.connector.connect(
                 host=config.get('database', 'host'),
