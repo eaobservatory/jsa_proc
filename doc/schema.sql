@@ -24,6 +24,7 @@ CREATE TABLE input_file (
 );
 
 CREATE INDEX input_file_job_id ON input_file (job_id);
+CREATE UNIQUE INDEX input_file_job_file ON input_file (job_id, filename);
 
 CREATE TABLE output_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,6 +35,7 @@ CREATE TABLE output_file (
 );
 
 CREATE INDEX output_file_job_id ON output_file (job_id);
+CREATE UNIQUE INDEX output_file_job_file ON output_file (job_id, filename);
 
 CREATE TABLE log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

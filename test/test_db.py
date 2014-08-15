@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from jsa_proc.error import NoRowsError, ExcessRowsError
+from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
@@ -69,6 +69,11 @@ class InterfaceDBTest(DBTestCase):
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)
         self.assertEqual(set(files), set(input_file_names))
+
+        # Check we can't give the same file more than once (a database
+        # constraint).
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag4', 'JAC', 'obs', 'REC', ['file1', 'file1'])
 
     def test_change_state(self):
         """
