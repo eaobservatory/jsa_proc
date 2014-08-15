@@ -17,8 +17,6 @@
 """
 Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
-
-STARLINK_DIR and ORAC_DIR need to be set in environment?
 """
 
 import subprocess
@@ -90,9 +88,9 @@ def jsawrapdr_run(job_id, input_file_list,  mode, recipe,
     log *only* to screen, useful for interactive use. jsawrapdr
     stdout/stderr output will not be in logfile.
 
-    Returns: (retcode, logfilename)
-    This is the retcode from jsawrapdr (integer) and the path+name of
-    the logfile (string).
+    Returns: logfilename, string
+
+    Returns the filename (including path) of the logfile (string).
 
     """
 
