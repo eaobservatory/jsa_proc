@@ -63,8 +63,8 @@ class InterfaceDBTest(DBTestCase):
 
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
-        self.assertEqual([job.id, job.tag, job.location, job.parameters],
-                         [job_id, tag, location, parameters])
+        self.assertEqual([job.id, job.tag, job.location, job.mode, job.parameters],
+                         [job_id, tag, location, mode, parameters])
 
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)

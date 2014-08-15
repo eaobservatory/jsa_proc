@@ -127,9 +127,9 @@ class JSAProcDB:
         # insert job into table
         with self.db as c:
             c.execute('INSERT INTO job '
-                      '(tag, location, parameters, foreign_id) '
-                      'VALUES (%s, %s, %s, %s)',
-                      (tag, location, parameters, foreign_id))
+                      '(tag, location, mode, parameters, foreign_id) '
+                      'VALUES (%s, %s, %s, %s, %s)',
+                      (tag, location, mode, parameters, foreign_id))
 
             # Get the autoincremented id from job table (job_id in all other tables)
             job_id = c.lastrowid

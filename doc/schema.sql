@@ -5,6 +5,7 @@ CREATE TABLE job (
     state_prev CHAR(1) DEFAULT NULL,
     location VARCHAR(80) NOT NULL,
     foreign_id VARCHAR(80) DEFAULT NULL,
+    mode VARCHAR(10) NOT NULL,
     parameters TEXT DEFAULT ""
 );
 
