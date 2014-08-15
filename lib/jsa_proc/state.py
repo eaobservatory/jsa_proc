@@ -54,3 +54,7 @@ class JSAProcState:
             return cls._info[state].name
         except KeyError:
             raise JSAProcError('Unknown state code {0}'.format(state))
+
+    @classmethod
+    def is_valid(cls, state):
+        return state in cls._info

@@ -17,6 +17,7 @@
 from collections import namedtuple
 
 from jsa_proc.error import *
+from jsa_proc.state import JSAProcState
 
 
 # Named tuples that are created ahead of time instead of dynamically
@@ -94,7 +95,7 @@ class JSAProcDB:
         return job
 
     def add_job(self, tag, location, mode, parameters,
-                input_file_names, foreign_id=None):
+                input_file_names, foreign_id=None, state='?'):
         """
         Add a JSA data processing job to the database.
 
@@ -121,15 +122,21 @@ class JSAProcDB:
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
 
+        state: initial job state (character, default ?).
+
         Returns the job identifier.
         """
+
+        # Validate input.
+        if not JSAProcState.is_valid(state):
+            raise JSAProcError('State {0} is not recognised'.format(state))
 
         # insert job into table
         with self.db as c:
             c.execute('INSERT INTO job '
-                      '(tag, location, mode, parameters, foreign_id) '
-                      'VALUES (%s, %s, %s, %s, %s)',
-                      (tag, location, mode, parameters, foreign_id))
+                      '(tag, state, location, mode, parameters, foreign_id) '
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (tag, state, location, mode, parameters, foreign_id))
 
             # Get the autoincremented id from job table (job_id in all other tables)
             job_id = c.lastrowid

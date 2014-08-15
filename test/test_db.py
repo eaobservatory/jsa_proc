@@ -63,12 +63,21 @@ class InterfaceDBTest(DBTestCase):
 
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
+        self.assertEqual(job.state, '?')
         self.assertEqual([job.id, job.tag, job.location, job.mode, job.parameters],
                          [job_id, tag, location, mode, parameters])
 
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)
         self.assertEqual(set(files), set(input_file_names))
+
+        # Try adding a job with a state specified
+        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', [], state='X')
+        job2 = self.db.get_job(id_=id_2)
+        self.assertEqual(job2.state, 'X')
+
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag3', 'CADC', 'night', 'REC', [], state='Z')
 
         # Check we can't give the same file more than once (a database
         # constraint).
