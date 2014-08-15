@@ -52,6 +52,7 @@ class StateTestCase(TestCase):
             JSAProcState.FETCHING: 'Fetching',
             JSAProcState.WAITING: 'Waiting',
             JSAProcState.RUNNING: 'Running',
+            JSAProcState.PROCESSED: 'Processed',
             JSAProcState.TRANSFERRING: 'Transferring',
             JSAProcState.INGESTION: 'Ingestion',
             JSAProcState.COMPLETE: 'Complete',

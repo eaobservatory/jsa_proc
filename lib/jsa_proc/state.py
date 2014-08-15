@@ -29,6 +29,7 @@ class JSAProcState:
     FETCHING = 'F'
     WAITING = 'W'
     RUNNING = 'S'
+    PROCESSED = 'P'
     TRANSFERRING = 'X'
     INGESTION = 'I'
     COMPLETE = 'Y'
@@ -40,6 +41,7 @@ class JSAProcState:
         FETCHING:     StateInfo('Fetching'),
         WAITING:      StateInfo('Waiting'),
         RUNNING:      StateInfo('Running'),
+        PROCESSED:    StateInfo('Processed'),
         TRANSFERRING: StateInfo('Transferring'),
         INGESTION:    StateInfo('Ingestion'),
         COMPLETE:     StateInfo('Complete'),
