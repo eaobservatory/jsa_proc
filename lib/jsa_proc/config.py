@@ -14,7 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ConfigParser import SafeConfigParser
+import os
 
+from jsa_proc.error import JSAProcError
 from jsa_proc.db.mysql import JSAProcMySQL
 
 config_file = 'etc/jsa_proc.ini'
@@ -31,8 +33,13 @@ def get_config():
     global config
 
     if config is None:
-        config = SafeConfigParser()
+        dir = get_home()
+        file = os.path.join(dir, config_file)
 
+        if not os.path.exists(file):
+            raise JSAProcError('Config file {0} doesn\'t exist'.format(file))
+
+        config = SafeConfigParser()
         config.read(config_file)
 
     return config
@@ -52,3 +59,14 @@ def get_database():
         database = JSAProcMySQL(get_config())
 
     return database
+
+
+def get_home():
+    """Determine the processing system home directory.
+
+    Assumed to be the current directory (returning '') unless
+    an environment variable $JSA_PROC_DIR exists.
+    """
+
+    env = os.environ
+    return env.get('JSA_PROC_DIR', '')

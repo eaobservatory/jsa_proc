@@ -13,12 +13,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 from unittest import TestCase
 
+import jsa_proc.config
 from jsa_proc.config import get_config
+from jsa_proc.error import JSAProcError
 
 
 class ConfigTestCase(TestCase):
+    def setUp(self):
+        # Unload existing configuation.
+        jsa_proc.config.config = None
+
+        # Unset home directory variable.
+        if 'JSA_PROC_DIR' in os.environ:
+            del os.environ['JSA_PROC_DIR']
+
+    def tearDown(self):
+        # Same clean-up as setUp().
+        self.setUp()
+
     def test_database_config(self):
         config = get_config()
 
@@ -33,4 +48,13 @@ class ConfigTestCase(TestCase):
         self.assertTrue(config.has_section('cadc'))
         self.assertTrue(config.has_option('cadc', 'username'))
         self.assertTrue(config.has_option('cadc', 'password'))
-                        
+
+    def test_home_var(self):
+        """Test that we get an error if the file doesn't exists.
+
+        Also checks that the environment variable is being read.
+        """
+
+        os.environ['JSA_PROC_DIR'] = '/HORSEFEATHERS'
+        with self.assertRaises(JSAProcError):
+            config = get_config()
