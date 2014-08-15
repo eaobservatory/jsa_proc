@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from jsa_proc.error import NoRowsError, ExcessRowsError
+from jsa_proc.state import JSAProcState
+
 from .db import DBTestCase
 
 class BasicDBTest(DBTestCase):
@@ -115,6 +118,18 @@ class InterfaceDBTest(DBTestCase):
 
         # Check two log lines were retrieved.
         self.assertEqual(len(logs), 2)
+
+        # Check an error is raised if the job does not exist.
+        with self.assertRaises(NoRowsError):
+            self.db.change_state(job_id + 1, JSAProcState.INGESTION, 'test')
+
+        # Try state_prev-checked version of the method.
+        self.db.change_state(job_id, JSAProcState.RUNNING, 'test',
+                             state_prev=JSAProcState.WAITING)
+
+        with self.assertRaises(NoRowsError):
+            self.db.change_state(job_id, JSAProcState.RUNNING, 'test',\
+                                 state_prev=JSAProcState.WAITING)
 
     def test_set_location_foreign_id(self):
         """

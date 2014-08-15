@@ -143,7 +143,7 @@ class JSAProcDB:
         return job_id
 
 
-    def change_state(self, job_id, newstate, message):
+    def change_state(self, job_id, newstate, message, state_prev=None):
         """
         Change the state of a job in the JSA processing database.
 
@@ -161,6 +161,10 @@ class JSAProcDB:
 
         message: string, human readable text describin the change of state.
 
+        state_prev: the state we expect the job to currently be in
+        (optional character).  If this is specified and the job is
+        not already in that state, an error is raised.
+
         Return:
         job_id, integer
 
@@ -169,19 +173,31 @@ class JSAProcDB:
         with self.db as c:
 
             # Change the state to new state and update the state_prev
-            c.execute('UPDATE job SET state_prev = state, state = %s WHERE id = %s',
-                      (newstate, job_id))
+            query = 'UPDATE job SET state_prev = state, state = %s WHERE id = %s'
+            param = [newstate, job_id]
 
-            # Get state_prev value.
-            c.execute('SELECT state_prev FROM job WHERE id=%s',
-                      (job_id,))
-            state_prev = c.fetchall()
+            if state_prev is not None:
+                query += ' AND state=%s'
+                param.append(state_prev)
 
-            if len(state_prev) > 1:
-                raise ExcessRowsError('job',
-                                      'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
+            c.execute(query, param)
 
-            state_prev=state_prev[0][0]
+            if c.rowcount == 0:
+                raise NoRowsError('job', query % tuple(param))
+            elif c.rowcount > 1:
+                raise ExcessRowsError('job', query % tuple(param))
+
+            # Get state_prev value if we were not given it.
+            if state_prev is None:
+                c.execute('SELECT state_prev FROM job WHERE id=%s',
+                          (job_id,))
+                state_prev = c.fetchall()
+
+                if len(state_prev) > 1:
+                    raise ExcessRowsError('job',
+                                          'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
+
+                state_prev=state_prev[0][0]
 
             # Update log table.
             c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (%s, %s, %s, %s)',
