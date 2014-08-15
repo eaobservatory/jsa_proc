@@ -40,7 +40,7 @@ class StateTestCase(TestCase):
         for (cadc, jsa) in states.items():
             self.assertEqual(CADCDPState.jsaproc_state(cadc), jsa)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(JSAProcError):
                 CADCDPState.jsaproc_state('X')
 
     def test_state_name(self):

@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ..state import JSAProcState
+from jsa_proc.error import JSAProcError
 
 
 class CADCDPState:
@@ -54,4 +55,4 @@ class CADCDPState:
             return JSAProcState.ERROR
 
         else:
-            raise Exception('Unknown CADC DP state: ' + state)
+            raise JSAProcError('Unknown CADC DP state: ' + state)
