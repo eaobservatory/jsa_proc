@@ -19,6 +19,8 @@
 Decorators for functions related to running jobs.
 """
 
+from jsa_proc.config import get_database
+from jsa_proc.state import JSAProcState
 
 class ErrorDecorator(object):
     """
@@ -30,6 +32,10 @@ class ErrorDecorator(object):
 
     Can only be used around functions which have an integer job_id as
     their first argument.
+
+    Will connect to the database in config, unless the function
+    called has a keyword argument db, in which case it will assume
+    that is a db instance it can uses instead.
     """
 
     def __init__(self, function):
@@ -38,7 +44,11 @@ class ErrorDecorator(object):
         try:
             return self.function(*args, **kwargs)
         except Exception as theexception:
-            change_state(args[0], JSAProcState.ERROR,
+            if 'db' in kwargs and kwargs['db'] is not None:
+                db = kwargs['db']
+            else:
+                db = get_database()
+            db.change_state(args[0], JSAProcState.ERROR,
                          'Error message and args: ' + \
                          ' '.join([str(i) for i in theexception.args]))
             raise
