@@ -17,6 +17,7 @@ from collections import namedtuple
 import Sybase
 from threading import Lock
 
+from jsa_proc.error import JSAProcError
 from jsa_proc.omp.siteconfig import get_omp_siteconfig
 
 cadc_dp_server = 'CADC_ASE'
@@ -62,6 +63,11 @@ class CADCDPLock:
         del self._cursor
 
         self._lock.release()
+
+        # If we got a database-specific error, re-raise it as our
+        # generic error.  Let other exceptions through unchanged.
+        if type_ is not None and issubclass(type_, Sybase.Error):
+            raise JSAProcError(str(value))
 
     def close(self):
         """Close the database connection."""

@@ -19,6 +19,7 @@ import mysql.connector
 from threading import Lock
 
 from .db import JSAProcDB
+from jsa_proc.error import JSAProcError
 
 
 class JSAProcMySQLLock():
@@ -73,6 +74,11 @@ class JSAProcMySQLLock():
         del self._cursor
 
         self._lock.release()
+
+        # If we got a database-specific error, re-raise it as our
+        # generic error.  Let other exceptions through unchanged.
+        if type_ is not None and issubclass(type_, mysql.connector.Error):
+            raise JSAProcError(str(value))
 
     def close(self):
         """Close the database connection."""
