@@ -30,21 +30,23 @@ from jsa_proc.job_run.directories import get_scratch_dir, get_log_dir, get_outpu
 from jsa_proc.error import JSAProcError
 
 
-def jsawrapdr_run(job_id, input_file_list,  mode, recipe,
-                  cleanup='cadc', location='JAC', persist=False, jsawrapdr=None, debug=False,
+def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
+                  cleanup='cadc', location='JAC', persist=False, jsawrapdr=None, 
+                  debug=False,
                   logscreen=False):
     """Routine to execute jsawrapdr from python.
 
-    Takes in a job_id, input_file_list, and mode.
+    Takes in a job_id, input_file_list, mode and drparameters..
 
     Calls jsawrapdr with following options
     jsawrapdr --outdir=configbase/scratch/$job_id
               --inputs=input_file_list
               --id = jac-$job_id
               --mode=$mode
+              --drparameters=$drparameters
               --cleanup=$cleanup (cadc by default)
               --location=$location (JAC by default)
-              --drparameters=recipe
+
          if persist is True, then it adds the flag:
               -persist
 
@@ -55,11 +57,10 @@ def jsawrapdr_run(job_id, input_file_list,  mode, recipe,
     list of files (with extensions and full path).
 
     mode, string
-
     'night', 'obs', 'public' or 'project'.
 
-    recipe, string
-    name of oracdr/picard recipe ot be used.
+    drparameters, string
+
 
     cleanup, optional, string |'cadc'|'none'|'all'
 
@@ -132,7 +133,7 @@ def jsawrapdr_run(job_id, input_file_list,  mode, recipe,
                     '--id='+jacid,
                     '--mode='+mode,
                     '--cleanup='+cleanup,
-                    '--drparameters='+recipe]
+                    '--drparameters='+drparameters]
     if persist:
         jsawrapdrcom.append('-persist')
         jsawrapdrcom.append('--transdir='+out_dir)
