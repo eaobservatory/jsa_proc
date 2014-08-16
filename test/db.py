@@ -17,6 +17,26 @@ from unittest import TestCase
 
 from jsa_proc.db.sqlite import JSAProcSQLite
 
+schema = None
+
+
+def create_dummy_database():
+    """Create an in-memory SQLite database from the schema."""
+
+    global schema
+
+    if schema is None:
+        with open('doc/schema.sql') as f:
+            schema = f.read()
+
+    db = JSAProcSQLite(':memory:')
+
+    with db.db as c:
+        c.executescript(schema)
+
+    return db
+
+
 class DBTestCase(TestCase):
     """Base test case class for tests using the database.
     """
@@ -26,13 +46,7 @@ class DBTestCase(TestCase):
         SQLite database from the schema file.
         """
 
-        with open('doc/schema.sql') as f:
-            schema = f.read()
-
-        self.db = JSAProcSQLite(':memory:')
-
-        with self.db.db as c:
-            c.executescript(schema)
+        self.db = create_dummy_database()
 
     def tearDown(self):
         """Disconnect from the database by deleting the
