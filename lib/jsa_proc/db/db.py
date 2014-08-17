@@ -177,6 +177,10 @@ class JSAProcDB:
 
         """
 
+        # Validate input.
+        if not JSAProcState.is_valid(newstate):
+            raise JSAProcError('State {0} is not recognised'.format(newstate))
+
         with self.db as c:
 
             # Change the state to new state and update the state_prev

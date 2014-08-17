@@ -101,9 +101,9 @@ class InterfaceDBTest(DBTestCase):
         job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
 
         # Values to change to.
-        newstate = 'R'
-        message = 'Changed state of job %s to R'%(job_id)
-        newstate2 = 'W'
+        newstate = JSAProcState.RUNNING
+        message = 'Changed state of job %s to S'%(job_id)
+        newstate2 = JSAProcState.WAITING
         message2 = 'Changed state of job %s to %s'%(job_id, newstate2)
 
         # Get the original  state of job 1.
@@ -144,6 +144,10 @@ class InterfaceDBTest(DBTestCase):
         with self.assertRaises(NoRowsError):
             self.db.change_state(job_id, JSAProcState.RUNNING, 'test',\
                                  state_prev=JSAProcState.WAITING)
+
+        # Check that an error is raised if the new state is bad.
+        with self.assertRaises(JSAProcError):
+            self.db.change_state(job_id, '!', 'test bad state')
 
     def test_set_location_foreign_id(self):
         """
