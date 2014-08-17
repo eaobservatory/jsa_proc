@@ -18,22 +18,7 @@ from jsa_proc.cadc.initial_import import import_from_cadcdp
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
-
-
-class DummyCADCDP:
-    def __init__(self, ris):
-        self.info = []
-        self.file = {}
-
-        for (info, input) in ris:
-            self.info.append(info)
-            self.file[info.id_] = input
-
-    def get_recipe_info(self):
-        return self.info
-
-    def get_recipe_input_files(self, id_):
-        return self.file.get(id_, [])
+from .dummycadcdp import DummyCADCDP
 
 
 class CADCImportTestCase(DBTestCase):
