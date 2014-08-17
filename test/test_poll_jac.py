@@ -22,5 +22,27 @@ from .dummycadcdp import DummyCADCDP
 
 class PollJACTestCase(DBTestCase):
     def test_poll_jac(self):
+        # A job which should pass validation:
+        job1 = self.db.add_job(
+            'tag1', 'JAC', 'obs', 'RECIPE_NAME', ['f_1_01'])
+
+        # Jobs which should fail validation:
+        job2 = self.db.add_job(
+            'tag2', 'JAC', 'fortnight', 'RECIPE_NAME', ['f_2_01'])
+        job3 = self.db.add_job(
+            'tag3', 'JAC', 'obs', 'RECIPE_NAME', [])
+        job4 = self.db.add_job(
+            'tag4', 'JAC', 'obs', 'RECIPE_NAME', ['/jcmtdata/f_4_01'])
+        job5 = self.db.add_job(
+            'tag5', 'JAC', 'obs', 'RECIPE_NAME', ['f_4_01.sdf'])
+
+        # Run state machine.
         sm = JSAProcStateMachine(self.db, None)
         self.assertTrue(sm.poll_jac_jobs())
+
+        # Check results of validation.
+        self.assertEqual(self.db.get_job(job1).state, JSAProcState.QUEUED)
+        self.assertEqual(self.db.get_job(job2).state, JSAProcState.ERROR)
+        self.assertEqual(self.db.get_job(job3).state, JSAProcState.ERROR)
+        self.assertEqual(self.db.get_job(job4).state, JSAProcState.ERROR)
+        self.assertEqual(self.db.get_job(job5).state, JSAProcState.ERROR)

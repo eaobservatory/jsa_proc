@@ -13,6 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
+from jsa_proc.state import JSAProcState
+
+valid_modes = ('obs', 'mode', 'project', 'public')
+valid_file = re.compile('^[_a-z0-9]+$')
+
 
 def validate_job(job_id, db):
     """Attempt to validate a job.
@@ -22,5 +29,30 @@ def validate_job(job_id, db):
     did not validate, move it to the ERROR state.
     """
 
-    # TODO: implement function
-    pass
+    job = db.get_job(id_=job_id)
+    input = db.get_input_files(job_id)
+
+    try:
+        # Check that the job has a mode string which jsawrapdr will
+        # acccept.
+        assert job.mode in valid_modes
+
+        # Check that we have some input files.
+        assert input
+
+        # Ensure input filenames are plain names without path or
+        # extension.
+        for file in input:
+            assert valid_file.match(file)
+
+    except AssertionError:
+        db.change_state(job_id,
+                        JSAProcState.ERROR,
+                        'Job failed validation',
+                        state_prev=JSAProcState.UNKNOWN)
+
+    else:
+        db.change_state(job_id,
+                        JSAProcState.QUEUED,
+                        'Job passed validation',
+                        state_prev=JSAProcState.UNKNOWN)
