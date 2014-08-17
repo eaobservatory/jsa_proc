@@ -18,7 +18,7 @@ import re
 import sqlite3
 from threading import Lock
 
-from .db import JSAProcDB
+from jsa_proc.db.db import JSAProcDB
 from jsa_proc.error import JSAProcError
 
 
