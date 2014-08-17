@@ -64,3 +64,25 @@ class StateTestCase(TestCase):
 
         with self.assertRaises(JSAProcError):
             JSAProcState.get_name('Z')
+
+    def test_cadc_state_name(self):
+        """Test lookup of CADC state names."""
+
+        states = {
+            CADCDPState.QUEUED: 'Queued',
+            CADCDPState.DRM_QUEUED: 'DRM Queued',
+            CADCDPState.RETRIEVE_STARTED: 'Retrieve started',
+            CADCDPState.RETRIEVE_ENDED: 'Retrieve ended',
+            CADCDPState.CAPTURE_STARTED: 'Capture started',
+            CADCDPState.CAPTURE_ENDED: 'Capture ended',
+            CADCDPState.COMPLETE: 'Complete',
+            CADCDPState.ERROR: 'Error',
+            CADCDPState.DO_AGAIN: 'Do again',
+            CADCDPState.UNDOABLE: 'Un-doable',
+        }
+
+        for (state, name) in states.items():
+            self.assertEqual(CADCDPState.get_name(state), name)
+
+        with self.assertRaises(JSAProcError):
+            CADCDPState.get_name('Z')

@@ -40,6 +40,19 @@ class CADCDPState:
 
     STATE_ALL = STATE_QUEUED | STATE_RUNNING | STATE_COMPLETE | STATE_ERROR
 
+    _info = {
+        QUEUED: 'Queued',
+        DRM_QUEUED: 'DRM Queued',
+        RETRIEVE_STARTED: 'Retrieve started',
+        RETRIEVE_ENDED: 'Retrieve ended',
+        CAPTURE_STARTED: 'Capture started',
+        CAPTURE_ENDED: 'Capture ended',
+        COMPLETE: 'Complete',
+        ERROR: 'Error',
+        DO_AGAIN: 'Do again',
+        UNDOABLE: 'Un-doable',
+    }
+
     @classmethod
     def jsaproc_state(cls, state):
         if state in cls.STATE_QUEUED:
@@ -56,3 +69,10 @@ class CADCDPState:
 
         else:
             raise JSAProcError('Unknown CADC DP state: ' + state)
+
+    @classmethod
+    def get_name(cls, state):
+        try:
+            return cls._info[state]
+        except KeyError:
+            raise JSAProcError('Unknown CADC state code {0}'.format(state))
