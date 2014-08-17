@@ -117,7 +117,7 @@ class JSAProcDB:
         (typically the recipe name). (string)
 
         input_file_names: iterable, each item being a string that
-        idetnifies the name of an input file for the job.
+        identifies the name of an input file for the job.
 
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
