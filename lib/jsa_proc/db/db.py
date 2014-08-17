@@ -117,7 +117,7 @@ class JSAProcDB:
         (typically the recipe name). (string)
 
         input_file_names: iterable, each item being a string that
-        idetnifies the path of an input file for the job.
+        idetnifies the name of an input file for the job.
 
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
@@ -142,9 +142,9 @@ class JSAProcDB:
             job_id = c.lastrowid
 
             # Need to get input file names and add them to table input_file
-            for filepath in input_file_names:
+            for filename in input_file_names:
                 c.execute('INSERT INTO input_file (job_id, filename) VALUES (%s, %s)',
-                          (job_id, filepath))
+                          (job_id, filename))
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -220,7 +220,7 @@ class JSAProcDB:
         takes integer job_id to identify file (this is the
         auto-incremented primary key from the job table)
 
-        Returns a list of filepaths
+        Returns a list of file names.
         """
 
         with self.db as c:
