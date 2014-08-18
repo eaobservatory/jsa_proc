@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 # Copyright (C) 2014 Science and Technology Facilities Council.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -12,22 +14,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import argparse
 
-from jsa_proc.job_run.scripts import fetch
+import argparse
+import logging
+
+from jsa_proc.job_run.scripts import run_job
 
 description = """
-Script which looks at a jsa processing job in the queued state,
-assembles the data for it, and then advances the job to the waiting state.
+Script which runs a jsa_processing job locally,
+and marks the state appropriately.
 """
-
-
 # Handle arguments
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('job_id', type=int,
                     help = 'Integer identifying the job in the JSA Job processing database')
+parser.add_argument('-v', '--verbose', required=False, default=False,
+                    action='store_true', help='Use DEBUG level of logging (otherwise use INFO)')
 args = parser.parse_args()
-job_id = args.job_id
 
-# Fetch the data.
-fetch(job_id)
+# Set up logger.
+logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+
+# Run job.
+run_job(args.job_id)
