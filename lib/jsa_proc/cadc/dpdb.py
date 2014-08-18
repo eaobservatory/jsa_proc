@@ -145,7 +145,7 @@ class CADCDP:
             c.execute('SELECT dp_input FROM dp_file_input '
                       'WHERE input_role="infile" '
                       'AND identity_instance_id=@i',
-                      {'i': id_})
+                      {'@i': id_})
 
             while True:
                 row = c.fetchone()

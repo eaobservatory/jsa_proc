@@ -41,14 +41,37 @@ class FormatCursor(sqlite3.Cursor):
         return sqlite3.Cursor.execute(self, query, *args, **kwargs)
 
 
+class AtCursor(sqlite3.Cursor):
+    """Custom SQLite cursor class.
+
+    This is a custom subclass of sqlite3.Cursor which
+    aims to improve compatability with Sybase.
+    """
+
+    def execute(self, query, *args, **kwargs):
+        # We really need to get the list of placeholders so we can extract
+        # the values from the dictionary in the right order.  However for
+        # now assume there are either 0 or 1 placeholders, in which case
+        # we can simply replace the placeholder and use the single argument
+        # if present.
+        query = re.sub('\@[a-z]+', '?', query)
+        if args:
+            args = (args[0].values(),)
+            if len(args) > 1:
+                raise Exception('This compatability class can not yet '
+                                'handle multiple placeholders')
+        return sqlite3.Cursor.execute(self, query, *args, **kwargs)
+
+
 class JSAProcSQLiteLock():
     """SQLite locking and cursor management class."""
 
-    def __init__(self, conn):
+    def __init__(self, conn, paramstyle='format'):
         """Construct new locking object."""
 
         self._lock = Lock()
         self._conn = conn
+        self.paramstyle = paramstyle
 
     def __enter__(self):
         """Context manager block entry method.
@@ -58,7 +81,12 @@ class JSAProcSQLiteLock():
         """
 
         self._lock.acquire(True)
-        self._cursor = self._conn.cursor(FormatCursor)
+        if self.paramstyle == 'format':
+            self._cursor = self._conn.cursor(FormatCursor)
+        elif self.paramstyle == 'at':
+            self._cursor = self._conn.cursor(AtCursor)
+        else:
+            raise Exception('Unknown paramstyle {0}'.format(self.paramstyle))
         return self._cursor
 
     def __exit__(self, type_, value, tb):

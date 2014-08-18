@@ -83,7 +83,7 @@ class DummyCADCDP(CADCDP):
         c.execute('PRAGMA foreign_keys = ON')
         c.close()
 
-        self.db = JSAProcSQLiteLock(conn)
+        self.db = JSAProcSQLiteLock(conn, paramstyle='at')
         self.recipe = None
 
 
