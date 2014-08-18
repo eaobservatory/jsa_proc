@@ -40,9 +40,9 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
         }
 
         for job in info:
-            self.assertIn(job.id_, expect)
+            self.assertIn(job.id, expect)
 
-            (state, tag) = expect.pop(job.id_)
+            (state, tag) = expect.pop(job.id)
 
             self.assertEqual(job.state, state)
             self.assertEqual(job.tag, tag)

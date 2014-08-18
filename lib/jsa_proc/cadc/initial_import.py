@@ -49,11 +49,11 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
                 (' (DRY RUN)' if dry_run else ''))
 
     for job in cadc.get_recipe_info():
-        logger.debug('Importing recipe instance %s', job.id_)
+        logger.debug('Importing recipe instance %s', job.id)
 
         if job.tag in tags:
             logger.warning('Tag %s already present (recipe instance %s)',
-                           job.tag, job.id_)
+                           job.tag, job.id)
             n_already += 1
             continue
 
@@ -62,21 +62,21 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
 
             info = parse_cadc_param(job.parameters)
 
-            logger.debug('Getting input files for recipe instance %s', job.id_)
-            input = cadc.get_recipe_input_files(job.id_)
+            logger.debug('Getting input files for recipe instance %s', job.id)
+            input = cadc.get_recipe_input_files(job.id)
 
             if not dry_run:
-                logger.debug('Inserting job for recipe instance %s', job.id_)
+                logger.debug('Inserting job for recipe instance %s', job.id)
                 job_id = db.add_job(tag=job.tag,
                                     location='CADC',
                                     mode=info.mode,
                                     parameters=info.parameters,
                                     input_file_names=input,
-                                    foreign_id=job.id_,
+                                    foreign_id=job.id,
                                     state=state)
 
                 logger.debug('Recipe instance %s inserted as job %i',
-                             job.id_, job_id)
+                             job.id, job_id)
 
             else:
                 logger.debug('Skipping job insert due to dry run mode')
@@ -84,7 +84,7 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
             n_ok += 1
 
         except JSAProcError:
-            logger.exception('Failed to import recipe instance %s', job.id_)
+            logger.exception('Failed to import recipe instance %s', job.id)
 
             n_err += 1
 

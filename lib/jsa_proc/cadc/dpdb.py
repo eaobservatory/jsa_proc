@@ -23,7 +23,7 @@ from jsa_proc.omp.siteconfig import get_omp_siteconfig
 cadc_dp_server = 'CADC_ASE'
 cadc_dp_db = 'data_proc'
 
-CADCDPInfo = namedtuple('CADCDPInfo', 'id_ state tag parameters')
+CADCDPInfo = namedtuple('CADCDPInfo', 'id state tag parameters')
 
 jsa_tile_recipes = (
     'REDUCE_SCAN_JSA_PUBLIC',

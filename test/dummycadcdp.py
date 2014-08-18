@@ -21,7 +21,7 @@ class DummyCADCDP:
 
         for (info, input) in ris:
             self.info.append(info)
-            self.file[info.id_] = input
+            self.file[info.id] = input
 
     def get_recipe_info(self):
         return self.info

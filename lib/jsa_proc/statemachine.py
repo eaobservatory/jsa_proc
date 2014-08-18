@@ -134,23 +134,23 @@ class JSAProcStateMachine:
 
         for job in jobs:
             logger.debug('Checking state of %s, tag: %s',
-                         job.id_, job.tag)
+                         job.id, job.tag)
 
             # If we do not have this job in our database, issue a warning
             # and continue to the next job.
-            if job.id_ not in id_:
-                logger.warning('Foreign ID %s is unknown', job.id_)
+            if job.id not in id_:
+                logger.warning('Foreign ID %s is unknown', job.id)
                 continue
 
             # Pop the job ID out of the dictionary so that we can tell if
             # any jobs were not updated.
-            job_id = id_.pop(job.id_)
+            job_id = id_.pop(job.id)
 
             try:
                 # See if the state is the same, in which case we don't need
                 # to do anything for this job.
                 state = CADCDPState.jsaproc_state(job.state)
-                if state == states[job.id_]:
+                if state == states[job.id]:
                     logger.debug('Job state has not changed')
                     continue
 
