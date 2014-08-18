@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from jsa_proc.config.get_database()
+from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError
 from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
@@ -51,7 +51,7 @@ def fetch(job_id, db=None):
     # Advance the state of the job to 'Waiting'.
     db.change_state(job_id, JSAProcState.WAITING,
                  'Data has been assembled for job and job can now be executed',
-                 state_prev=JSAProcSTATE.FETCHING)
+                 state_prev=JSAProcState.FETCHING)
 
     return job_id
 
@@ -77,11 +77,11 @@ def run_job(job_id, db=None):
     db.change_state(job_id, JSAProcState.RUNNING,
                  'Job is about to be run', state_prev=JSAProcState.WAITING)
 
-    # input file_list -- this hsould be better? or in jsawrapdr?
+    # Input file_list -- this should be better? or in jsawrapdr?
     input_dir = get_input_dir(job_id)
     input_file_list = os.path.join(input_dir, 'input_files_job.lis')
     if not os.path.exists(input_file_list):
-        raise JSAProcERROR('Input file list %s not found for job_id %i'
+        raise JSAProcError('Input file list %s not found for job_id %i'
                            % (input_file_list, job_id))
 
     # Get the mode and drparameters of the job.
@@ -93,8 +93,8 @@ def run_job(job_id, db=None):
     log = jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                        'REDUCE_SCAN_JSA_PUBLIC',
                        cleanup='CADC', location='JAC', persist=True)
-    # Change state
-    db.change_state(job_id, JSAProcSTATE.PROCESSED,
+    # Change state.
+    db.change_state(job_id, JSAProcState.PROCESSED,
                  'Job has been sucessfully processed',
                  state_prev = JSAProcState.RUNNING)
 

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 
 from jsa_proc.job_run.scripts import run_job
 from jsa_proc.job_run.decorators import ErrorDecorator
