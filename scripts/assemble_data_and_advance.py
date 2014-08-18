@@ -15,8 +15,6 @@
 import argparse
 
 from jsa_proc.job_run.scripts import fetch
-from jsa_proc.job_run.decorators import ErrorDecorator
-
 
 description = """
 Script which looks at a jsa processing job in the queued state,
@@ -32,5 +30,4 @@ args = parser.parse_args()
 job_id = args.job_id
 
 # Fetch the data.
-@ErrorDecorator
 fetch(job_id)

@@ -16,15 +16,11 @@
 import argparse
 
 from jsa_proc.job_run.scripts import run_job
-from jsa_proc.job_run.decorators import ErrorDecorator
-
 
 description = """
 Script which runs a jsa_processing job locally,
 and marks the state appropriately.
 """
-
-
 # Handle arguments
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('job_id', type=int,
@@ -32,6 +28,4 @@ parser.add_argument('job_id', type=int,
 args = parser.parse_args()
 job_id = args.job_id
 
-
-@ErrorDecorator
 run_job(job_id)

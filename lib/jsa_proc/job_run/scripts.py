@@ -17,10 +17,11 @@
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError
+from jsa_proc.job_run.decorators import ErrorDecorator
 from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
 from jsa_proc.job_run.job_running import jsawrapdr_run
 
-
+@ErrorDecorator
 def fetch(job_id, db=None):
     """
     Assemble the files required to process a job.
@@ -56,7 +57,7 @@ def fetch(job_id, db=None):
     return job_id
 
 
-
+@ErrorDecorator
 def run_job(job_id, db=None):
     """
     Run the JSA processing of a given job.
