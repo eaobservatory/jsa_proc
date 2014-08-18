@@ -103,6 +103,9 @@ class JSAProcDB:
         database interface raises an erro. The job must be specified
         by its unique tag.
 
+        If the job creation is successful, an entry will be added to the
+        log table to record this event.
+
         Parameters:
 
         tag: string, unique identifier for observation/job
@@ -145,6 +148,10 @@ class JSAProcDB:
             for filename in input_file_names:
                 c.execute('INSERT INTO input_file (job_id, filename) VALUES (%s, %s)',
                           (job_id, filename))
+
+            # Log the job creation
+            self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
+                                'Job added to the database')
 
         # job_id may not be necessary but sometimes useful.
         return job_id

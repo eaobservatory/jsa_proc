@@ -71,6 +71,11 @@ class InterfaceDBTest(DBTestCase):
         files = self.db.get_input_files(job_id)
         self.assertEqual(set(files), set(input_file_names))
 
+        # Check that a log entry was written.
+        logs = self.db.get_logs(job_id)
+        self.assertEqual(len(logs), 1)
+        self.assertIn('added to the database', logs[0].message)
+
         # Try adding a job with a state specified
         id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', [], state='X')
         job2 = self.db.get_job(id_=id_2)
@@ -131,7 +136,7 @@ class InterfaceDBTest(DBTestCase):
                                  [newstate2, newstate, message2])
 
         # Check two log lines were retrieved.
-        self.assertEqual(len(logs), 2)
+        self.assertEqual(len(logs), 3)
 
         # Check an error is raised if the job does not exist.
         with self.assertRaises(NoRowsError):
