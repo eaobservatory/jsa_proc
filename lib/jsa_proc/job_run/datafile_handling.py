@@ -134,10 +134,11 @@ def valid_hds(filepath):
     myenv['ADAM_EXIT'] = '1'
 
     # Run hdstrace.
-    p = subprocess.Popen([com_path, filepath, 'QUIET'], env=myenv)
-    p.communicate()
+    with open('/dev/null', 'w') as null:
+        returncode = subprocess.call([com_path, filepath, 'QUIET'],
+                                     env=myenv,
+                                     stdout=null, stderr=subprocess.STDOUT,
+                                     shell=False)
 
-    # status is True for returncode=0, False otherwise
-    status = not bool(p.returncode)
-
-    return status
+    # Status is True for returncode=0, False otherwise.
+    return returncode == 0
