@@ -211,8 +211,7 @@ class JSAProcDB:
                 state_prev=state_prev[0][0]
 
             # Update log table.
-            c.execute('INSERT INTO log (job_id, state_prev, state_new, message) VALUES (%s, %s, %s, %s)',
-                      (job_id, state_prev, newstate, message))
+            self._add_log_entry(c, job_id, state_prev, newstate, message)
 
         return job_id
 
@@ -238,6 +237,16 @@ class JSAProcDB:
 
         return input_files
 
+    def _add_log_entry(self, c, job_id, state_prev, state_new, message):
+        """Private method to add an entry to the log table.
+
+        Assumes the database is already locked an takes a cursor
+        object as argument "c".
+        """
+
+        c.execute('INSERT INTO log (job_id, state_prev, state_new, message) '
+                  'VALUES (%s, %s, %s, %s)',
+                  (job_id, state_prev, state_new, message))
 
     def get_logs(self, job_id):
         """
