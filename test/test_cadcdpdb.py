@@ -32,11 +32,11 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
         info = self.db.get_recipe_info()
 
         expect = {
-            1001: ('Q', 'hpx-1001-850um'),
-            1002: ('Q', 'hpx-1002-850um'),
-            1004: ('N', 'hpx-1004-850um'),
-            1006: ('Y', 'hpx-1006-850um'),
-            1007: ('E', 'hpx-1007-850um'),
+            1001: ('Q', 'hpx-1001-850um', -200),
+            1002: ('Q', 'hpx-1002-850um', -300),
+            1004: ('N', 'hpx-1004-850um', -1),
+            1006: ('Y', 'hpx-1006-850um', -750),
+            1007: ('E', 'hpx-1007-850um', -250),
         }
 
         for job in info:

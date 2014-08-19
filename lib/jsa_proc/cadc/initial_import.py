@@ -86,6 +86,7 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
                                     parameters=info.parameters,
                                     input_file_names=input,
                                     foreign_id=recipe_instance,
+                                    priority=job.priority,
                                     state=state)
 
                 logger.debug('Recipe instance %s inserted as job %i',

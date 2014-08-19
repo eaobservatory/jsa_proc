@@ -26,8 +26,8 @@ class CADCImportTestCase(DBTestCase):
     def test_dummy_cadc(self):
         """Check that the dummy CADC DP object itself works!"""
 
-        ri5 = CADCDPInfo(5, 'S', 'tag-5', 'PARAM')
-        ri6 = CADCDPInfo(6, 'N', 'tag-6', 'PARAM')
+        ri5 = CADCDPInfo(5, 'S', 'tag-5', 'PARAM', -250)
+        ri6 = CADCDPInfo(6, 'N', 'tag-6', 'PARAM', -750)
 
         cadc = DummyCADCDP([
             (ri5, ['file1', 'file2'], []),
@@ -45,12 +45,14 @@ class CADCImportTestCase(DBTestCase):
         param2 = '-mode="night" -drparameters="ANOTHER_RECIPE_NAME"'
 
         cadc = DummyCADCDP([
-            (CADCDPInfo(11, 'S', 'tag-11', param1), ['f_11_01'], []),
-            (CADCDPInfo(12, 'N', 'tag-12', param1), ['f_12_01', 'f_12_02'], []),
-            (CADCDPInfo(13, 'Q', 'tag-13', param2), ['f_13_01'],
-                                                    ['rf_13.fits']),
-            (CADCDPInfo(14, 'Y', 'tag-14', param2), ['f_14_01', 'f_14_02'],
-                                                    ['rf_14.fits']),
+            (CADCDPInfo(11, 'S', 'tag-11', param1, -100),
+                ['f_11_01'], []),
+            (CADCDPInfo(12, 'N', 'tag-12', param1, -200),
+                ['f_12_01', 'f_12_02'], []),
+            (CADCDPInfo(13, 'Q', 'tag-13', param2, -300),
+                ['f_13_01'], ['rf_13.fits']),
+            (CADCDPInfo(14, 'Y', 'tag-14', param2, -400),
+                ['f_14_01', 'f_14_02'], ['rf_14.fits']),
         ])
 
         # Check that dry-run mode really does nothing.
@@ -88,6 +90,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-11'][0].state, JSAProcState.RUNNING)
         self.assertEqual(tag['tag-11'][0].mode, 'obs')
         self.assertEqual(tag['tag-11'][0].parameters, 'RECIPE_NAME')
+        self.assertEqual(tag['tag-11'][0].priority, -100)
         self.assertEqual(tag['tag-11'][1], ['f_11_01'])
         self.assertEqual(tag['tag-11'][2], [])
 
@@ -97,6 +100,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-12'][0].state, JSAProcState.RUNNING)
         self.assertEqual(tag['tag-12'][0].mode, 'obs')
         self.assertEqual(tag['tag-12'][0].parameters, 'RECIPE_NAME')
+        self.assertEqual(tag['tag-12'][0].priority, -200)
         self.assertEqual(tag['tag-12'][1], ['f_12_01', 'f_12_02'])
         self.assertEqual(tag['tag-12'][2], [])
 
@@ -106,6 +110,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-13'][0].state, JSAProcState.QUEUED)
         self.assertEqual(tag['tag-13'][0].mode, 'night')
         self.assertEqual(tag['tag-13'][0].parameters, 'ANOTHER_RECIPE_NAME')
+        self.assertEqual(tag['tag-13'][0].priority, -300)
         self.assertEqual(tag['tag-13'][1], ['f_13_01'])
         self.assertEqual(tag['tag-13'][2], [])
 
@@ -115,5 +120,6 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-14'][0].state, JSAProcState.COMPLETE)
         self.assertEqual(tag['tag-14'][0].mode, 'night')
         self.assertEqual(tag['tag-14'][0].parameters, 'ANOTHER_RECIPE_NAME')
+        self.assertEqual(tag['tag-14'][0].priority, -400)
         self.assertEqual(tag['tag-14'][1], ['f_14_01', 'f_14_02'])
         self.assertEqual(tag['tag-14'][2], ['rf_14.fits'])

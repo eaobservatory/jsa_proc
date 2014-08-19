@@ -23,7 +23,7 @@ from jsa_proc.omp.siteconfig import get_omp_siteconfig
 cadc_dp_server = 'CADC_ASE'
 cadc_dp_db = 'data_proc'
 
-CADCDPInfo = namedtuple('CADCDPInfo', 'id state tag parameters')
+CADCDPInfo = namedtuple('CADCDPInfo', 'id state tag parameters priority')
 
 jsa_tile_recipes = (
     'REDUCE_SCAN_JSA_PUBLIC',
@@ -132,7 +132,8 @@ class CADCDP:
         result = []
 
         with self.db as c:
-            c.execute('SELECT identity_instance_id, state, tag, parameters '
+            c.execute('SELECT identity_instance_id, state, tag, '
+                      'parameters, priority '
                       'FROM dp_recipe_instance '
                       'WHERE recipe_id IN (' +
                           ', '.join((str(x) for x in self.recipe)) + ') '

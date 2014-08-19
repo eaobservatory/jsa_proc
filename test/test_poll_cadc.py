@@ -30,7 +30,8 @@ class PollCADCTestCase(DBTestCase):
         self.assertEqual(self.db.get_job(job_id).state, JSAProcState.RUNNING)
 
         cadc = DummyCADCDP([
-            (CADCDPInfo('11', 'Y', 'tag-11', 'params...'), ['f_11_01'], []),
+            (CADCDPInfo('11', 'Y', 'tag-11', 'params...', -250),
+                ['f_11_01'], []),
         ])
 
         sm = JSAProcStateMachine(self.db, cadc)
