@@ -40,7 +40,7 @@ def get_config():
             raise JSAProcError('Config file {0} doesn\'t exist'.format(file))
 
         config = SafeConfigParser()
-        config.read(config_file)
+        config.read(file)
 
     return config
 
