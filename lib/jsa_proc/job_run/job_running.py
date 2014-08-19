@@ -149,6 +149,8 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib') + os.pathsep + jsa_env['LD_LIBRARY_PATH']
     jsa_env['ORAC_DIR'] = orac_dir
     jsa_env['ORAC_LOGDIR'] = log_dir
+    jsa_env['STAR_LOGIN'] = '1'
+    jsa_env['CONVERT_DIR'] = os.path.join(starpath, 'bin', 'convert')
     # Remainder of oracdr required environmental variables are set
     # inside WrapDR.pm->run_pipeline
 
