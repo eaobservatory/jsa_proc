@@ -65,6 +65,27 @@ class StateTestCase(TestCase):
         with self.assertRaises(JSAProcError):
             JSAProcState.get_name('Z')
 
+    def test_state_info(self):
+        """Test retrieval of state information."""
+
+        # We should get an error if the state does not exist.
+        with self.assertRaises(JSAProcError):
+            JSAProcState.get_info('!')
+
+        # Try a small sample of info values
+        self.assertEqual(JSAProcState.get_info(JSAProcState.WAITING).active,
+                         False)
+        self.assertEqual(JSAProcState.get_info(JSAProcState.FETCHING).active,
+                         True)
+        self.assertEqual(JSAProcState.get_info(JSAProcState.INGESTION).phase,
+                         JSAProcState.PHASE_RUN)
+        self.assertEqual(JSAProcState.get_info(JSAProcState.UNKNOWN).phase,
+                         JSAProcState.PHASE_QUEUE)
+        self.assertEqual(JSAProcState.get_info(JSAProcState.RUNNING).name,
+                         'Running')
+        self.assertEqual(JSAProcState.get_info(JSAProcState.COMPLETE).name,
+                         'Complete')
+
     def test_cadc_state_name(self):
         """Test lookup of CADC state names."""
 
