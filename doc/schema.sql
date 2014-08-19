@@ -6,7 +6,8 @@ CREATE TABLE job (
     location VARCHAR(80) NOT NULL,
     foreign_id VARCHAR(80) DEFAULT NULL,
     mode VARCHAR(10) NOT NULL,
-    parameters TEXT DEFAULT ""
+    parameters TEXT DEFAULT "",
+    priority INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX job_state ON job (state);
@@ -14,6 +15,7 @@ CREATE UNIQUE INDEX job_tag ON job (tag);
 CREATE INDEX job_location ON job (location);
 CREATE INDEX job_foreign_id ON job (foreign_id);
 CREATE UNIQUE INDEX job_location_id ON job (location, foreign_id);
+CREATE INDEX job_priority ON job (priority);
 
 CREATE TABLE input_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
