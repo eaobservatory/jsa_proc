@@ -382,13 +382,22 @@ class JSAProcDB:
                 c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s,%s)',
                           (job_id, f))
 
-    def find_jobs(self, state=None, location=None):
+    def find_jobs(self, state=None, location=None,
+                  priority=None, number=None, offset=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
 
             * state
             * location
+
+        Results can be affected by:
+
+            * priority (Boolean, results sorted by priority order)
+            * number (integer, number of results to return)
+            * offset (integer, offset the results from start by this many)
+
+        Priority is not yet implemented.
 
         Returns a list (which may be empty) of namedtuples including
         values:
@@ -397,11 +406,13 @@ class JSAProcDB:
             * tag
             * state
             * location
+
         """
 
         query = 'SELECT id, tag, state, location, foreign_id FROM job'
         where = []
         param = []
+        order = []
 
         if state is not None:
             where.append('state=%s')
@@ -414,6 +425,20 @@ class JSAProcDB:
         if where:
             query += ' WHERE ' + ' AND '.join(where)
 
+        # Priority: Uncomment once priority is implemented in db.
+        # if priority:
+        #     query += ' ORDER BY priority ASC '
+
+        # Return [number] of results, starting at [offset]
+        if number:
+            query += ' LIMIT %i '
+
+            if offset:
+                query += ' %i '
+                params.append(offset)
+
+            params.append(number)
+
         result = []
 
         with self.db as c:
@@ -425,5 +450,6 @@ class JSAProcDB:
                     break
 
                 result.append(JSAProcJobInfo(*row))
+
 
         return result
