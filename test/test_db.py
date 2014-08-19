@@ -279,3 +279,6 @@ class InterfaceDBTest(DBTestCase):
 
         # Test number option.
         self.assertEqual(len(self.db.find_jobs(number=2)), 2)
+
+        # Test offset option.
+        self.assertEqual(len(self.db.find_jobs(number=2, offset=1)), 2)

@@ -431,11 +431,11 @@ class JSAProcDB:
 
         # Return [number] of results, starting at [offset]
         if number:
-            query += ' LIMIT %s '
+            query += ' LIMIT %s'
 
             if offset:
-                query += ' %i '
-                params.append(offset)
+                query += ', %s'
+                param.append(offset)
 
             param.append(number)
 
