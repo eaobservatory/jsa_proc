@@ -31,7 +31,7 @@ class ErrorDecorator(object):
 
 
     Can only be used around functions which have an integer job_id as
-    their first argument.
+    a keyword argument (named 'job_id')
 
     Will connect to the database in config, unless the function
     called has a keyword argument db, in which case it will assume
@@ -48,7 +48,7 @@ class ErrorDecorator(object):
                 db = kwargs['db']
             else:
                 db = get_database()
-            db.change_state(args[0], JSAProcState.ERROR,
+            db.change_state(kwargs['job_id'], JSAProcState.ERROR,
                          'Error message and args: ' + \
                          ' '.join([str(i) for i in theexception.args]))
             raise

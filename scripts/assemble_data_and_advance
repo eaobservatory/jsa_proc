@@ -23,12 +23,15 @@ from jsa_proc.job_run.scripts import fetch
 description = """
 Script which looks at a jsa processing job in the queued state,
 assembles the data for it, and then advances the job to the waiting state.
-"""
+
+If the --job_id command line argument is not used, this will run on
+the highest priority job labelled to be reduced at the JAC and in the
+state 'QUEUED'.  """
 
 
 # Handle arguments
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('job_id', type=int,
+parser.add_argument('-j','--job_id', type=int, required=False,
                     help = 'Integer identifying the job in the JSA Job processing database')
 parser.add_argument('-v','--verbose', required=False, default=False,
                     action='store_true', help='Use DEBUG level of logging (otherwise uses INFO)')

@@ -22,14 +22,15 @@ from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
 from jsa_proc.job_run.job_running import jsawrapdr_run
 
 @ErrorDecorator
-def fetch(job_id, db=None):
+def fetch(job_id=None, db=None):
     """
     Assemble the files required to process a job.
 
-    Requires an integer job_id.
+    Optionally requires an integer job_id.
+    If not given, it will take the next job from the queue (following priority)
 
-    Optionally allows a db to be given, for testing purposes. Otherwise 
-    uses usualy database from config
+    Optionally allows a db to be given, for testing purposes. Otherwise
+    uses usual database from config file.
 
     This will raise an error if job is not in QUEUED state to start with.
     This will advance the state of the job to WAITING on completion.
@@ -38,6 +39,12 @@ def fetch(job_id, db=None):
     if not db:
         # Get link to database
         db = get_database()
+
+    # Get next job if a job_id is not specified.
+    if not job_id:
+        job = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
+                           prioritize=True, number=1)
+        job_id = job.id
 
     # Change status of job to 'Fetching', raise error if not in QUEUED
     db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
@@ -58,11 +65,11 @@ def fetch(job_id, db=None):
 
 
 @ErrorDecorator
-def run_job(job_id, db=None):
-    """
-    Run the JSA processing of a given job.
+def run_job(job_id=None, db=None):
+    """Run the JSA processing of a given job.
 
-    Requries an integer job_id.
+    Optionally requries an integer job_id.  If this is not given it
+    will instead use the highest priority job @ JAC in state 'WAITING'.
 
     Optionally allows a db to be provided for testing
     purposes. Otherwise it will link to the database in the jsa_proc
@@ -72,6 +79,12 @@ def run_job(job_id, db=None):
     if not db:
         # Get link to database
         db = get_database()
+
+    # Get next job if a job_id is not specified.
+    if not job_id:
+        job = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
+                           prioritize=True, number=1)
+        job_id = job.id
 
     # Change status of job to Running, raise an error if not currently in
     # WAITING state.

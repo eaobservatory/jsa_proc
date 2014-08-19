@@ -401,8 +401,6 @@ class JSAProcDB:
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
 
-        Priority is not yet implemented.
-
         Returns a list (which may be empty) of namedtuples including
         values:
 

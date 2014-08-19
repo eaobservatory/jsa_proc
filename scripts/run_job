@@ -21,12 +21,15 @@ import logging
 from jsa_proc.job_run.scripts import run_job
 
 description = """
-Script which runs a jsa_processing job locally,
-and marks the state appropriately.
+Script which runs a jsa_processing job locally, and marks the state
+appropriately. If the commandline argument --job_id is not given, it
+will run the highest priority job marked to be performed at the JAC
+and already in the state 'WAITING'
 """
-# Handle arguments
+
+# Handle arguments.
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('job_id', type=int,
+parser.add_argument('-j', '--job_id', type=int, required=False,
                     help = 'Integer identifying the job in the JSA Job processing database')
 parser.add_argument('-v', '--verbose', required=False, default=False,
                     action='store_true', help='Use DEBUG level of logging (otherwise use INFO)')
