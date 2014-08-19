@@ -45,7 +45,7 @@ def fetch(job_id=None, db=None):
     # Get next job if a job_id is not specified.
     if not job_id:
         job = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
-                           prioritize=True, number=1)
+                           prioritize=True, number=1)[0]
         job_id = job.id
 
     fetch_a_job(job_id, db=db)
@@ -107,7 +107,7 @@ def run_job(job_id=None, db=None):
     # Get next job if a job id is not specified
     if not job_id:
         job = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
-                           prioritize=True, number=1)
+                           prioritize=True, number=1)[0]
         job_id = job.id
 
     run_job(job_id, db=db)
