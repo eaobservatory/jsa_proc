@@ -42,10 +42,11 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
         for job in info:
             self.assertIn(job.id, expect)
 
-            (state, tag) = expect.pop(job.id)
+            (state, tag, priority) = expect.pop(job.id)
 
             self.assertEqual(job.state, state)
             self.assertEqual(job.tag, tag)
+            self.assertEqual(job.priority, priority)
             self.assertRegexpMatches(job.parameters,
                                      "-drparameters='[A-Z_]*'")
 
