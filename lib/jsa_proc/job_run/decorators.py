@@ -31,7 +31,7 @@ class ErrorDecorator(object):
 
 
     Can only be used around functions which have an integer job_id as
-    a keyword argument (named 'job_id')
+    the first (non-keyword) argument.
 
     Will connect to the database in config, unless the function
     called has a keyword argument db, in which case it will assume
