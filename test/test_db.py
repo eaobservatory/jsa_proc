@@ -45,6 +45,37 @@ class InterfaceDBTest(DBTestCase):
 
     # self.db is the instance of the JSAProc
 
+    def test_get_job_error(self):
+        """
+        Test that get_job raises error's correctly.
+        """
+        tag = 'scuba2_20121009_5_850'
+        location = 'JSA'
+        mode = 'obs'
+        parameters = 'REDUCE_SCAN_JSA_PUBLIC'
+        input_file_names=['testfile1', 'testfile2']
+        priority=-321
+
+        self.db.add_job(tag, location, mode, parameters, input_file_names, priority=priority)
+
+        with self.assertRaises(JSAProcError):
+            self.db.get_job()
+
+        j = self.db.get_job(tag=tag)
+        j = self.db.get_job(id_=1)
+
+        with self.assertRaises(NoRowsError):
+            self.db.get_job(id_=2)
+
+
+    def test_get_last_log_error(self):
+        """
+        Test the get_last_log raises error if no row.
+        """
+
+        with self.assertRaises(NoRowsError):
+            self.db.get_last_log(1)
+
     def test_add_job(self):
         """
         Test that a job can be added to the database.
@@ -232,6 +263,23 @@ class InterfaceDBTest(DBTestCase):
         # Check new values
         out_f = self.db.get_output_files(job_id)
         self.assertEqual(set(out_f), set(output_files2))
+
+    def test_output_files(self):
+        """
+        Test the set_output_files and get_output_files methods.
+        """
+
+        # Add a job
+        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [], priority=2)
+
+        # Add an output file
+        outputfiles = ['test.sdf','test.png','longfilenametahtisrandom.log']
+        self.db.set_output_files(1, outputfiles)
+
+        addfiles = self.db.get_output_files(1)
+
+        for i in outputfiles:
+            self.assertTrue(i in addfiles)
 
     def test_find_jobs(self):
         """Test the find_jobs method."""
