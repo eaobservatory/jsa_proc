@@ -17,7 +17,6 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.statemachine import JSAProcStateMachine
 
 from .db import DBTestCase
-from .dummycadcdp import DummyCADCDP
 
 
 class PollJACTestCase(DBTestCase):
