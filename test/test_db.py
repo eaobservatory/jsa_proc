@@ -285,8 +285,8 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(len(self.db.find_jobs(number=2, offset=1)), 2)
 
         # Test prioritize option.
-        self.assertEqual([x.tag for x in self.db.find_jobs(priority=True)],
+        self.assertEqual([x.tag for x in self.db.find_jobs(prioritize=True)],
                          ['tag3', 'tag4', 'tag2', 'tag5', 'tag1'])
         self.assertEqual([x.tag for x in self.db.find_jobs(number=3, offset=1,
-                                                           priority=True)],
+                                                           prioritize=True)],
                          ['tag4', 'tag2', 'tag5'])

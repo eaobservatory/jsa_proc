@@ -387,7 +387,7 @@ class JSAProcDB:
                           (job_id, f))
 
     def find_jobs(self, state=None, location=None,
-                  priority=False, number=None, offset=None):
+                  prioritize=False, number=None, offset=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -397,7 +397,7 @@ class JSAProcDB:
 
         Results can be affected by:
 
-            * priority (Boolean, results sorted by priority order)
+            * prioritize (Boolean, results sorted by priority order)
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
 
@@ -430,7 +430,7 @@ class JSAProcDB:
             query += ' WHERE ' + ' AND '.join(where)
 
         # Priority:
-        if priority:
+        if prioritize:
             query += ' ORDER BY priority DESC'
 
         # Return [number] of results, starting at [offset]
