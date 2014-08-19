@@ -105,6 +105,36 @@ def assemble_input_data_for_job(job_id, input_file_list):
     return list_name_path
 
 
+def get_output_files(job_id):
+    """
+    Get the current list of output files from the output directory.
+
+    This command trusts that whatever is in the output directory at the
+    time it is called is the correct list of output files.
+
+    parameter:
+    job_id, integer
+
+    returns: list of strings.
+    Each string is an absolute path
+    """
+
+    # find output_dir
+    output_dir = get_output_dir(job_id)
+
+    # Check it exists and is a directory: raise error if not
+    if not os.path.exists(output_dir) or not os.path.isdir:
+        raise JSAProcError('The output directory %s for job %i does not exits' % (output_dir, job_id))
+
+    # Get list of files in directory:
+    contents = os.listdir(output_dir)
+
+    # Get abspath for each item in directory
+    contents = [os.path.join(output_dir, f) for f in contents]
+
+    return contents
+
+
 def valid_hds(filepath):
     """
     Checks to see if a given file is a valid hds file.

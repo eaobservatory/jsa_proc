@@ -19,7 +19,7 @@ from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError
 from jsa_proc.job_run.decorators import ErrorDecorator
-from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
+from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job, get_output_files
 from jsa_proc.job_run.job_running import jsawrapdr_run
 from jsa_proc.job_run.directories import get_input_dir
 
@@ -157,6 +157,13 @@ def run_a_job(job_id, db=None):
     log = jsawrapdr_run(job_id, input_file_list, mode,
                        'REDUCE_SCAN_JSA_PUBLIC',
                         cleanup='cadc', location='JAC', persist=True, logscreen=False)
+
+    # Create list of output files.
+    output_files = get_output_files(job_id)
+
+    # write output files to table
+    db.set_output_files(job_id, output_files)
+
     # Change state.
     db.change_state(job_id, JSAProcState.PROCESSED,
                  'Job has been sucessfully processed',
