@@ -160,6 +160,14 @@ class JSAProcStateMachine:
                                      'State at CADC changed to {0}'.format(
                                          CADCDPState.get_name(job.state)))
 
+                # Is the (new) state COMPLETE?  If so, fetch the list of
+                # output files.
+                if job.state == CADCDPState.COMPLETE:
+                    logger.debug('Job is complete: fetching output files.')
+                    output = self.cadc.get_recipe_output_files(job.id)
+                    logger.debug('Storing list of output files.')
+                    self.db.set_output_files(job_id, output)
+
             except JSAProcError:
                 logger.exception('Error while updating state of job %i',
                                  job.id)

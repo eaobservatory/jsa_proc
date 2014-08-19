@@ -14,29 +14,48 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from jsa_proc.cadc.dpdb import CADCDPInfo
+from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.statemachine import JSAProcStateMachine
 
 from .db import DBTestCase
 from .dummycadcdp import DummyCADCDP
 
-
 class PollCADCTestCase(DBTestCase):
     def test_poll_cadc(self):
-        job_id = self.db.add_job('tag-11', 'CADC', 'obs', 'params...', [],
-                                 '11', 'S')
+        job_id_11 = self.db.add_job('tag-11', 'CADC', 'obs', 'params...', [],
+                                 '11', JSAProcState.RUNNING)
+        job_id_12 = self.db.add_job('tag-12', 'CADC', 'obs', 'params...', [],
+                                 '12', JSAProcState.RUNNING)
 
-        # Job starts in the running state.
-        self.assertEqual(self.db.get_job(job_id).state, JSAProcState.RUNNING)
+        # Both jobs start in the running state.
+        self.assertEqual(self.db.get_job(job_id_11).state,
+                         JSAProcState.RUNNING)
+        self.assertEqual(self.db.get_job(job_id_12).state,
+                         JSAProcState.RUNNING)
 
+        # Run the state machine.
         cadc = DummyCADCDP([
             (CADCDPInfo('11', 'Y', 'tag-11', 'params...', -250),
-                ['f_11_01'], []),
+                ['f_11_01'], ['rf_11.fits']),
+            (CADCDPInfo('12', 'E', 'tag-12', 'params...', -250),
+                ['f_12_01'], ['rf_12.fits']),
         ])
 
         sm = JSAProcStateMachine(self.db, cadc)
 
         self.assertTrue(sm.poll_cadc_jobs())
 
-        # Job state should have been changed to complete.
-        self.assertEqual(self.db.get_job(job_id).state, JSAProcState.COMPLETE)
+        # Job 11 state should have been changed to COMPLETE,
+        # and the output files should have been added.
+        self.assertEqual(self.db.get_job(job_id_11).state,
+                         JSAProcState.COMPLETE)
+        self.assertEqual(self.db.get_output_files(job_id_11),
+                         ['rf_11.fits'])
+
+        # Job 12 state should have been changed to ERROR,
+        # and the output files should not have been added.
+        self.assertEqual(self.db.get_job(job_id_12).state,
+                         JSAProcState.ERROR)
+        with self.assertRaises(NoRowsError):
+            self.db.get_output_files(job_id_12)
