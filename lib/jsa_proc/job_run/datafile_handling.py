@@ -21,7 +21,7 @@ import shutil
 
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
-from jsa_proc.job_run.directories import get_input_dir
+from jsa_proc.job_run.directories import get_input_dir, get_output_dir
 from jsa_proc.error import JSAProcError
 from jsa_proc.config import get_config
 
@@ -133,6 +133,7 @@ def get_output_files(job_id):
     contents = [os.path.join(output_dir, f) for f in contents]
 
     return contents
+
 
 
 def valid_hds(filepath):
