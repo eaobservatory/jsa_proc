@@ -63,8 +63,9 @@ class CADCDPLock:
         # generic error.  Let other exceptions through unchanged.
         # Sybase appears to need us to read the error before
         # closing the cursor?
+        new_exc = None
         if type_ is None:
-            new_exc = None
+            pass
         elif issubclass(type_, Sybase.Error):
             new_exc = JSAProcError(str(value))
 
