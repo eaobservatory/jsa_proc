@@ -21,13 +21,41 @@ from jsa_proc.job_run.decorators import ErrorDecorator
 from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
 from jsa_proc.job_run.job_running import jsawrapdr_run
 
-@ErrorDecorator
+
 def fetch(job_id=None, db=None):
     """
     Assemble the files required to process a job.
 
-    Optionally requires an integer job_id.
-    If not given, it will take the next job from the queue (following priority)
+    If it is not given a job_id, it will take the next JAC job
+    with the highest priority and a state of QUEUED.
+
+    Optionally allows a database object to be given for testing purposes.
+    Otherwise uses usual database from config file.
+
+    This will raise an error if job is not in QUEUED state to start with.
+    This will advance the state of the job to WAITING on completion.
+    Any error's raised in the process will be logged to the job log.
+
+    """
+
+    # Get the database.
+    if not db:
+        db = get_database()
+
+    # Get next job if a job_id is not specified.
+    if not job_id:
+        job = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
+                           prioritize=True, number=1)
+        job_id = job.id
+
+    fetch_a_job(job_id, db=db)
+
+@ErrorDecorator
+def fetch_a_job(job_id, db=None):
+    """
+    Assemble the files required to process a job.
+
+    Requires an integer job_id.
 
     Optionally allows a db to be given, for testing purposes. Otherwise
     uses usual database from config file.
@@ -40,11 +68,6 @@ def fetch(job_id=None, db=None):
         # Get link to database
         db = get_database()
 
-    # Get next job if a job_id is not specified.
-    if not job_id:
-        job = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
-                           prioritize=True, number=1)
-        job_id = job.id
 
     # Change status of job to 'Fetching', raise error if not in QUEUED
     db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
@@ -64,27 +87,47 @@ def fetch(job_id=None, db=None):
     return job_id
 
 
-@ErrorDecorator
 def run_job(job_id=None, db=None):
-    """Run the JSA processing of a given job.
-
-    Optionally requries an integer job_id.  If this is not given it
-    will instead use the highest priority job @ JAC in state 'WAITING'.
-
-    Optionally allows a db to be provided for testing
-    purposes. Otherwise it will link to the database in the jsa_proc
-    config.
-
     """
+    Run the JSA processing of the next job. This will select the highest
+    priority job in state 'WAITING' with location 'JAC'.
+
+    Optionally an integer job_id can be given isntead to specify a specific job
+
+    By default it will look in the database determined by the JSA_proc config. Optionally
+    a database object can be given for testing purposes.
+
+    Any errors raised will be logged in the 'log' table for the job_id.
+    """
+
+    # Get a link to the database.
     if not db:
-        # Get link to database
         db = get_database()
 
-    # Get next job if a job_id is not specified.
+    # Get next job if a job id is not specified
     if not job_id:
         job = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
                            prioritize=True, number=1)
         job_id = job.id
+
+    run_job(job_id, db=db)
+
+@ErrorDecorator
+def run_job(job_id, db=None):
+    """
+    Run the JSA processing of the given job_id (integer).
+
+    By default it will look in the database determined by the JSA_proc
+    config. Optionally a database object can be given for testing
+    purposes.
+
+    """
+
+
+    if not db:
+        # Get link to database
+        db = get_database()
+
 
     # Change status of job to Running, raise an error if not currently in
     # WAITING state.
