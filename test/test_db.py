@@ -276,3 +276,6 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(jobs[0].tag, 'tag5')
         self.assertEqual(jobs[0].state, '?')
         self.assertEqual(jobs[0].location, 'CADC')
+
+        # Test number option.
+        self.assertEqual(len(self.db.find_jobs(number=2)), 2)
