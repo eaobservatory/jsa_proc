@@ -19,6 +19,7 @@ Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
 """
 
+import shutil
 import signal
 import subprocess
 import tempfile
@@ -116,6 +117,10 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # Get output directory name
     out_dir = get_output_dir(job_id)
+
+    # If output dir currently exists, delete the directory.
+    if os.path.exists(out_dir):
+        shutil.rmtree(out_dir)
 
     # Find path to jsawrapdr and orac_dr
     config = get_config()
