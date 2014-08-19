@@ -243,8 +243,8 @@ class JSAProcDB:
             input_files = c.fetchall()
 
             if len(input_files) == 0:
-                raise NoRowsError('output_file',
-                                  'SELECT filename FROM output_file WHERE job_id = '+(str(job_id)))
+                raise NoRowsError('input_file',
+                                  'SELECT filename FROM input_file WHERE job_id = '+(str(job_id)))
 
         # input_files will be a list of tuples, each tuple containgin
         # one file. Flatten this into a list of strings.
@@ -298,9 +298,10 @@ class JSAProcDB:
             c.execute('SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1',
                       (job_id,))
             log = c.fetchall()
-        if len(log) > 1:
+        if len(log) < 1:
             raise NoRowsError('job','SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1'%(str(job_id))
                               )
+        
 
         log = JSAProcLog(*log[0])
         return log
@@ -383,11 +384,13 @@ class JSAProcDB:
 
 
         with self.db as c:
+
             # First of all blank out any current output files for this job_id.
             c.execute('DELETE FROM output_file WHERE job_id = %s', (job_id,))
+
             for f in output_files:
                 # Now add in the new output files, one at a time.
-                c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s,%s)',
+                c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s, %s)',
                           (job_id, f))
 
     def find_jobs(self, state=None, location=None,
