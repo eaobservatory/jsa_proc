@@ -59,15 +59,29 @@ class CADCDPLock:
         commit a transaction.
         """
 
-        self._cursor.close()
-        del self._cursor
+        # If we got a database-specific error, re-raise it as our
+        # generic error.  Let other exceptions through unchanged.
+        # Sybase appears to need us to read the error before
+        # closing the cursor?
+        if type_ is None:
+            new_exc = None
+        elif issubclass(type_, Sybase.Error):
+            new_exc = JSAProcError(str(value))
+
+        try:
+            self._cursor.close()
+            del self._cursor
+        except Exception as e:
+            # Ignore errors trying to close the cursor if we are
+            # handling an exception, because Sybase can get into
+            # a state where we can't close it!
+            if type_ is None:
+                new_exc = JSAProcError('Failed to close cursor: ' + str(e))
 
         self._lock.release()
 
-        # If we got a database-specific error, re-raise it as our
-        # generic error.  Let other exceptions through unchanged.
-        if type_ is not None and issubclass(type_, Sybase.Error):
-            raise JSAProcError(str(value))
+        if new_exc is not None:
+            raise new_exc
 
     def close(self):
         """Close the database connection."""
