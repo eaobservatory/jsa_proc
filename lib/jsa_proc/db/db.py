@@ -383,7 +383,7 @@ class JSAProcDB:
                           (job_id, f))
 
     def find_jobs(self, state=None, location=None,
-                  priority=None, number=None, offset=None):
+                  priority=False, number=None, offset=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
