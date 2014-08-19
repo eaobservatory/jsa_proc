@@ -95,7 +95,8 @@ class JSAProcDB:
         return job
 
     def add_job(self, tag, location, mode, parameters,
-                input_file_names, foreign_id=None, state='?'):
+                input_file_names, foreign_id=None, state='?',
+                priority=0):
         """
         Add a JSA data processing job to the database.
 
@@ -127,6 +128,9 @@ class JSAProcDB:
 
         state: initial job state (character, default ?).
 
+        priority: priority number (integer, default 0, higher number
+        represents greater priority).
+
         Returns the job identifier.
         """
 
@@ -137,9 +141,9 @@ class JSAProcDB:
         # insert job into table
         with self.db as c:
             c.execute('INSERT INTO job '
-                      '(tag, state, location, mode, parameters, foreign_id) '
-                      'VALUES (%s, %s, %s, %s, %s, %s)',
-                      (tag, state, location, mode, parameters, foreign_id))
+                      '(tag, state, location, mode, parameters, foreign_id, priority) '
+                      'VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                      (tag, state, location, mode, parameters, foreign_id, priority))
 
             # Get the autoincremented id from job table (job_id in all other tables)
             job_id = c.lastrowid

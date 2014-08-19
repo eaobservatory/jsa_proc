@@ -57,15 +57,16 @@ class InterfaceDBTest(DBTestCase):
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names=['testfile1', 'testfile2']
+        priority=-321
 
         # Add a test job.
-        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names)
+        job_id = self.db.add_job(tag, location, mode, parameters, input_file_names, priority=priority)
 
         # Check its added correctly to job database.
         job  = self.db.get_job(id_=job_id)
         self.assertEqual(job.state, '?')
-        self.assertEqual([job.id, job.tag, job.location, job.mode, job.parameters],
-                         [job_id, tag, location, mode, parameters])
+        self.assertEqual([job.id, job.tag, job.location, job.mode, job.parameters, job.priority],
+                         [job_id, tag, location, mode, parameters, priority])
 
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)
