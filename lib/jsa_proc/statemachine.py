@@ -121,7 +121,8 @@ class JSAProcStateMachine:
         id_ = {}
         states = {}
         for job in self.db.find_jobs(location='CADC'):
-            id_[job.foreign_id] = job.id
+            recipe_instance = job.id
+            id_[job.foreign_id] = recipe_instance
             states[job.foreign_id] = job.state
 
         # Check all CADC jobs (this call can be slow).
@@ -133,24 +134,25 @@ class JSAProcStateMachine:
         n_err = 0
 
         for job in jobs:
+            recipe_instance = job.id
             logger.debug('Checking state of %s, tag: %s',
-                         job.id, job.tag)
+                         recipe_instance, job.tag)
 
             # If we do not have this job in our database, issue a warning
             # and continue to the next job.
-            if job.id not in id_:
-                logger.warning('Foreign ID %s is unknown', job.id)
+            if recipe_instance not in id_:
+                logger.warning('Foreign ID %s is unknown', recipe_instance)
                 continue
 
             # Pop the job ID out of the dictionary so that we can tell if
             # any jobs were not updated.
-            job_id = id_.pop(job.id)
+            job_id = id_.pop(recipe_instance)
 
             try:
                 # See if the state is the same, in which case we don't need
                 # to do anything for this job.
                 state = CADCDPState.jsaproc_state(job.state)
-                if state == states[job.id]:
+                if state == states[recipe_instance]:
                     logger.debug('Job state has not changed')
                     continue
 
@@ -164,13 +166,13 @@ class JSAProcStateMachine:
                 # output files.
                 if job.state == CADCDPState.COMPLETE:
                     logger.debug('Job is complete: fetching output files.')
-                    output = self.cadc.get_recipe_output_files(job.id)
+                    output = self.cadc.get_recipe_output_files(recipe_instance)
                     logger.debug('Storing list of output files.')
                     self.db.set_output_files(job_id, output)
 
             except JSAProcError:
                 logger.exception('Error while updating state of job %i',
-                                 job.id)
+                                 recipe_instance)
 
                 n_err += 1
 
