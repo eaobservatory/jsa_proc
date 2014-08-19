@@ -29,7 +29,7 @@ and already in the state 'WAITING'
 
 # Handle arguments.
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('-j', '--job_id', type=int, required=False,
+parser.add_argument('-j', '--job_id', type=int, required=False, default=None,
                     help = 'Integer identifying the job in the JSA Job processing database')
 parser.add_argument('-v', '--verbose', required=False, default=False,
                     action='store_true', help='Use DEBUG level of logging (otherwise use INFO)')
@@ -39,4 +39,4 @@ args = parser.parse_args()
 logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
 # Run job.
-run_job(args.job_id)
+run_job(job_id = args.job_id)

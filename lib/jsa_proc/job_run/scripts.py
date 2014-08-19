@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
@@ -20,7 +21,7 @@ from jsa_proc.error import JSAProcError
 from jsa_proc.job_run.decorators import ErrorDecorator
 from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
 from jsa_proc.job_run.job_running import jsawrapdr_run
-
+from jsa_proc.job_run.directories import get_input_dir
 
 def fetch(job_id=None, db=None):
     """
@@ -44,8 +45,11 @@ def fetch(job_id=None, db=None):
 
     # Get next job if a job_id is not specified.
     if not job_id:
-        job = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
-                           prioritize=True, number=1)[0]
+        jobs = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
+                           prioritize=True, number=1)
+        if len(jobs) ==0:
+            raise JSAProcError('Did not find a job to fetch!')
+        job = jobs[0]
         job_id = job.id
 
     fetch_a_job(job_id, db=db)
@@ -106,14 +110,17 @@ def run_job(job_id=None, db=None):
 
     # Get next job if a job id is not specified
     if not job_id:
-        job = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
-                           prioritize=True, number=1)[0]
+        jobs = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
+                           prioritize=True, number=1)
+        if len(jobs)== 0:
+            raise JSAProcError('Did not find a job to run!')
+        job = jobs[0]
         job_id = job.id
 
-    run_job(job_id, db=db)
+    run_a_job(job_id, db=db)
 
-@ErrorDecorator
-def run_job(job_id, db=None):
+#@ErrorDecorator
+def run_a_job(job_id, db=None):
     """
     Run the JSA processing of the given job_id (integer).
 
@@ -147,9 +154,9 @@ def run_job(job_id, db=None):
     drparameters = job.parameters
 
     # Run the processing job.
-    log = jsawrapdr_run(job_id, input_file_list, mode, drparameters,
+    log = jsawrapdr_run(job_id, input_file_list, mode,
                        'REDUCE_SCAN_JSA_PUBLIC',
-                       cleanup='CADC', location='JAC', persist=True)
+                        cleanup='cadc', location='JAC', persist=True, logscreen=False)
     # Change state.
     db.change_state(job_id, JSAProcState.PROCESSED,
                  'Job has been sucessfully processed',
