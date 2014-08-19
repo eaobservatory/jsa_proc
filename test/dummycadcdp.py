@@ -17,14 +17,19 @@
 class DummyCADCDP:
     def __init__(self, ris):
         self.info = []
-        self.file = {}
+        self.input_file = {}
+        self.output_file = {}
 
-        for (info, input) in ris:
+        for (info, input, output) in ris:
             self.info.append(info)
-            self.file[info.id] = input
+            self.input_file[info.id] = input
+            self.output_file[info.id] = output
 
     def get_recipe_info(self):
         return self.info
 
     def get_recipe_input_files(self, id_):
-        return self.file.get(id_, [])
+        return self.input_file.get(id_, [])
+
+    def get_recipe_output_files(self, id_):
+        return self.output_file.get(id_, [])

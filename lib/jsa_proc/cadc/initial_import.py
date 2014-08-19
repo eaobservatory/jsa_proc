@@ -68,6 +68,15 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
                          recipe_instance)
             input = cadc.get_recipe_input_files(recipe_instance)
 
+            # If the recipe instance is complete, also fetch the
+            # list of output files.
+            if job.state == CADCDPState.COMPLETE:
+                logger.debug('Job is complete: fetching output files.')
+                output = cadc.get_recipe_output_files(recipe_instance)
+
+            else:
+                output = None
+
             if not dry_run:
                 logger.debug('Inserting job for recipe instance %s',
                              recipe_instance)
@@ -81,6 +90,10 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
 
                 logger.debug('Recipe instance %s inserted as job %i',
                              recipe_instance, job_id)
+
+                if output is not None:
+                    logger.debug('Storing output file list.')
+                    db.set_output_files(job_id, output)
 
             else:
                 logger.debug('Skipping job insert due to dry run mode')

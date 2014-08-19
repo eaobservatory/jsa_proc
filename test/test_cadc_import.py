@@ -30,8 +30,8 @@ class CADCImportTestCase(DBTestCase):
         ri6 = CADCDPInfo(6, 'N', 'tag-6', 'PARAM')
 
         cadc = DummyCADCDP([
-            (ri5, ['file1', 'file2']),
-            (ri6, ['file3', 'file4']),
+            (ri5, ['file1', 'file2'], []),
+            (ri6, ['file3', 'file4'], []),
         ])
 
         self.assertEqual(cadc.get_recipe_info(), [ri5, ri6])
@@ -45,10 +45,12 @@ class CADCImportTestCase(DBTestCase):
         param2 = '-mode="night" -drparameters="ANOTHER_RECIPE_NAME"'
 
         cadc = DummyCADCDP([
-            (CADCDPInfo(11, 'S', 'tag-11', param1), ['f_11_01']),
-            (CADCDPInfo(12, 'N', 'tag-12', param1), ['f_12_01', 'f_12_02']),
-            (CADCDPInfo(13, 'Q', 'tag-13', param2), ['f_13_01']),
-            (CADCDPInfo(14, 'Y', 'tag-14', param2), ['f_14_01', 'f_14_02']),
+            (CADCDPInfo(11, 'S', 'tag-11', param1), ['f_11_01'], []),
+            (CADCDPInfo(12, 'N', 'tag-12', param1), ['f_12_01', 'f_12_02'], []),
+            (CADCDPInfo(13, 'Q', 'tag-13', param2), ['f_13_01'],
+                                                    ['rf_13.fits']),
+            (CADCDPInfo(14, 'Y', 'tag-14', param2), ['f_14_01', 'f_14_02'],
+                                                    ['rf_14.fits']),
         ])
 
         # Check that dry-run mode really does nothing.
@@ -70,8 +72,14 @@ class CADCImportTestCase(DBTestCase):
             except NoRowsError:
                 input = []
 
+            try:
+                output = self.db.get_output_files(job.id)
+            except NoRowsError:
+                output = []
+
             tag[job.tag] = (self.db.get_job(id_=job.id),
-                            sorted(input))
+                            sorted(input),
+                            sorted(output))
 
         # Check the retrieved information.
         self.assertIn('tag-11', tag)
@@ -81,6 +89,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-11'][0].mode, 'obs')
         self.assertEqual(tag['tag-11'][0].parameters, 'RECIPE_NAME')
         self.assertEqual(tag['tag-11'][1], ['f_11_01'])
+        self.assertEqual(tag['tag-11'][2], [])
 
         self.assertIn('tag-12', tag)
         self.assertEqual(tag['tag-12'][0].location, 'CADC')
@@ -89,6 +98,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-12'][0].mode, 'obs')
         self.assertEqual(tag['tag-12'][0].parameters, 'RECIPE_NAME')
         self.assertEqual(tag['tag-12'][1], ['f_12_01', 'f_12_02'])
+        self.assertEqual(tag['tag-12'][2], [])
 
         self.assertIn('tag-13', tag)
         self.assertEqual(tag['tag-13'][0].location, 'CADC')
@@ -97,6 +107,7 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-13'][0].mode, 'night')
         self.assertEqual(tag['tag-13'][0].parameters, 'ANOTHER_RECIPE_NAME')
         self.assertEqual(tag['tag-13'][1], ['f_13_01'])
+        self.assertEqual(tag['tag-13'][2], [])
 
         self.assertIn('tag-14', tag)
         self.assertEqual(tag['tag-14'][0].location, 'CADC')
@@ -105,3 +116,4 @@ class CADCImportTestCase(DBTestCase):
         self.assertEqual(tag['tag-14'][0].mode, 'night')
         self.assertEqual(tag['tag-14'][0].parameters, 'ANOTHER_RECIPE_NAME')
         self.assertEqual(tag['tag-14'][1], ['f_14_01', 'f_14_02'])
+        self.assertEqual(tag['tag-14'][2], ['rf_14.fits'])
