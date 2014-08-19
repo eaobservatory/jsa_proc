@@ -242,6 +242,10 @@ class JSAProcDB:
                       (job_id,))
             input_files = c.fetchall()
 
+            if len(input_files) == 0:
+                raise NoRowsError('output_file',
+                                  'SELECT filename FROM output_file WHERE job_id = '+(str(job_id)))
+
         # input_files will be a list of tuples, each tuple containgin
         # one file. Flatten this into a list of strings.
         input_files = [file for i in input_files for file in i]

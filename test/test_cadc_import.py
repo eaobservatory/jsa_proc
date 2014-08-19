@@ -15,6 +15,7 @@
 
 from jsa_proc.cadc.dpdb import CADCDPInfo
 from jsa_proc.cadc.initial_import import import_from_cadcdp
+from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
@@ -64,8 +65,13 @@ class CADCImportTestCase(DBTestCase):
         # Organise data fetched from the database.
         tag = {}
         for job in jobs:
+            try:
+                input = self.db.get_input_files(job.id)
+            except NoRowsError:
+                input = []
+
             tag[job.tag] = (self.db.get_job(id_=job.id),
-                            sorted(self.db.get_input_files(job.id)))
+                            sorted(input))
 
         # Check the retrieved information.
         self.assertIn('tag-11', tag)

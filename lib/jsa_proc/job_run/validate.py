@@ -15,6 +15,7 @@
 
 import re
 
+from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 
 valid_modes = ('obs', 'mode', 'project', 'public')
@@ -30,7 +31,17 @@ def validate_job(job_id, db):
     """
 
     job = db.get_job(id_=job_id)
-    input = db.get_input_files(job_id)
+
+    try:
+        input = db.get_input_files(job_id)
+
+    except NoRowsError:
+        db.change_state(job_id,
+                        JSAProcState.ERROR,
+                        'Job failed validation: no input files found',
+                        state_prev=JSAProcState.UNKNOWN)
+
+        return
 
     try:
         # Check that the job has a mode string which jsawrapdr will
