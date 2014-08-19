@@ -429,9 +429,9 @@ class JSAProcDB:
         if where:
             query += ' WHERE ' + ' AND '.join(where)
 
-        # Priority: Uncomment once priority is implemented in db.
-        # if priority:
-        #     query += ' ORDER BY priority ASC '
+        # Priority:
+        if priority:
+            query += ' ORDER BY priority DESC'
 
         # Return [number] of results, starting at [offset]
         if number:

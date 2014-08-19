@@ -237,11 +237,11 @@ class InterfaceDBTest(DBTestCase):
         """Test the find_jobs method."""
 
         # Add some jobs.
-        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', []) # ?
-        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', []) # Q
-        job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', []) # Q
-        job4 = self.db.add_job('tag4', 'CADC', 'obs', 'RECIPE', []) # Q
-        job5 = self.db.add_job('tag5', 'CADC', 'obs', 'RECIPE', []) # ?
+        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [], priority=2) # ?
+        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', [], priority=4) # Q
+        job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', [], priority=6) # Q
+        job4 = self.db.add_job('tag4', 'CADC', 'obs', 'RECIPE', [], priority=5) # Q
+        job5 = self.db.add_job('tag5', 'CADC', 'obs', 'RECIPE', [], priority=3) # ?
 
         # Put some into another state.
         self.db.change_state(job2, 'Q', 'test')
@@ -283,3 +283,10 @@ class InterfaceDBTest(DBTestCase):
 
         # Test offset option.
         self.assertEqual(len(self.db.find_jobs(number=2, offset=1)), 2)
+
+        # Test prioritize option.
+        self.assertEqual([x.tag for x in self.db.find_jobs(priority=True)],
+                         ['tag3', 'tag4', 'tag2', 'tag5', 'tag1'])
+        self.assertEqual([x.tag for x in self.db.find_jobs(number=3, offset=1,
+                                                           priority=True)],
+                         ['tag4', 'tag2', 'tag5'])
