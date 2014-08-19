@@ -50,7 +50,7 @@ class JSAProcStateMachine:
             try:
                 if job.state == JSAProcState.UNKNOWN:
                     # Attempt to validate the job and move to QUEUED.
-                    validate_job(job.id, self.db)
+                    validate_job(job.id, db=self.db)
 
                 elif job.state == JSAProcState.QUEUED:
                     # Fetching the data could take a long time, so leave
