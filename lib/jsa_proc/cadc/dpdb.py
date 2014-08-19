@@ -145,7 +145,9 @@ class CADCDP:
                 if row is None:
                     break
 
-                result.append(CADCDPInfo(*row))
+                # The Sybase module gives us back its own "NumericType" which
+                # it can't even read itself.  Therefore convert to integer.
+                result.append(CADCDPInfo(int(row[0]), *row[1:]))
 
         return result
 
