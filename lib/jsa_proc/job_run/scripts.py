@@ -119,7 +119,7 @@ def run_job(job_id=None, db=None):
 
     run_a_job(job_id, db=db)
 
-#@ErrorDecorator
+@ErrorDecorator
 def run_a_job(job_id, db=None):
     """
     Run the JSA processing of the given job_id (integer).
