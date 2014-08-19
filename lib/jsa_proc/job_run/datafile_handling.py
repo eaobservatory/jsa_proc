@@ -116,7 +116,7 @@ def get_output_files(job_id):
     job_id, integer
 
     returns: list of strings.
-    Each string is an absolute path
+    Each string is just a filename, with no path attached.
     """
 
     # find output_dir
@@ -128,9 +128,6 @@ def get_output_files(job_id):
 
     # Get list of files in directory:
     contents = os.listdir(output_dir)
-
-    # Get abspath for each item in directory
-    contents = [os.path.join(output_dir, f) for f in contents]
 
     return contents
 
