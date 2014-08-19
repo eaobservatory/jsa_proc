@@ -19,6 +19,7 @@ Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
 """
 
+import signal
 import subprocess
 import tempfile
 import time
@@ -161,7 +162,8 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # Run jsawrapdr
     p = subprocess.Popen(jsawrapdrcom, env=jsa_env, bufsize=1,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         preexec_fn=restore_signals)
 
     for line in iter(p.stdout.readline, ''):
         if logscreen:
@@ -182,3 +184,12 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Need to return list of produced files in output directory?
 
     return log.name
+
+def restore_signals():
+    """Restore signals which Python otherwise ignores.
+
+    For more information about this issue, please see:
+    http://bugs.python.org/issue1652"""
+
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
