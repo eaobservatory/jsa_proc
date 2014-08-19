@@ -200,7 +200,7 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(job.location, location2)
         self.assertEqual(job.foreign_id, foreign_id2)
 
-    def test_set_output_file_list(self):
+    def test_set_output_files(self):
         """
         Test setting output files for a job.
         """
@@ -220,17 +220,17 @@ class InterfaceDBTest(DBTestCase):
                         'myoutputfile4']
 
         # Update the output files for this job.
-        self.db.set_output_file_list(job_id, output_files1)
+        self.db.set_output_files(job_id, output_files1)
 
         # Check the values
-        out_f = self.db.get_output_file_list(job_id)
+        out_f = self.db.get_output_files(job_id)
         self.assertEqual(set(out_f), set(output_files1))
 
         # Re update to check it works when there are already files written in.
-        self.db.set_output_file_list(job_id, output_files2)
+        self.db.set_output_files(job_id, output_files2)
 
         # Check new values
-        out_f = self.db.get_output_file_list(job_id)
+        out_f = self.db.get_output_files(job_id)
         self.assertEqual(set(out_f), set(output_files2))
 
     def test_find_jobs(self):

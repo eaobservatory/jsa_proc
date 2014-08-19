@@ -334,7 +334,7 @@ class JSAProcDB:
         with self.db as c:
             c.execute('UPDATE job SET foreign_id = %s WHERE id = %s', (foreign_id, job_id))
 
-    def get_output_file_list(self, job_id):
+    def get_output_files(self, job_id):
         """
         Get the output file list for a job.
 
@@ -360,7 +360,7 @@ class JSAProcDB:
 
         return output_files
 
-    def set_output_file_list(self, job_id, output_files):
+    def set_output_files(self, job_id, output_files):
 
         """
         This will set the output file list for a job.
