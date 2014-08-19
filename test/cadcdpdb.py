@@ -39,6 +39,11 @@ CREATE TABLE dp_file_input (
     input_role CHAR(8),
     identity_instance_id INTEGER
 );
+
+CREATE TABLE dp_recipe_output (
+    dp_output VARCHAR(255),
+    identity_instance_id INTEGER
+);
 """
 
 test_data = """
@@ -72,6 +77,15 @@ INSERT INTO dp_file_input VALUES
     ('ad:JCMT/s4a20140401_00052_9999', 'xfile', 1004);
 INSERT INTO dp_file_input VALUES
     ('ad:JCMT/s4a20140401_00053_0001', 'infile', 1006);
+
+INSERT INTO dp_recipe_output VALUES
+    ('ad:JCMT/reduced_1006_850.fits', 1006);
+INSERT INTO dp_recipe_output VALUES
+    ('ad:JCMT/reduced_1006_850_preview.png', 1006);
+INSERT INTO dp_recipe_output VALUES
+    ('ad:JCMT/reduced_1007_850.fits', 1007);
+INSERT INTO dp_recipe_output VALUES
+    ('ad:JCMT/reduced_1007_850_preview.png', 1007);
 """
 
 
