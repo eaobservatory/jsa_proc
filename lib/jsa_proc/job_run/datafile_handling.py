@@ -96,7 +96,8 @@ def assemble_input_data_for_job(job_id, input_file_list):
                     shutil.move(filepath, invalid_file)
                     raise JSAProcErrror('Downloaded file %s fails hds validation'
                                         ' Moved to %s'%(filepath, invalid_file))
-
+                else:
+                    avail_file_list.write(filepath + os.linesep)
 
     avail_file_list.close()
 
