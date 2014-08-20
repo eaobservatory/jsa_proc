@@ -161,6 +161,7 @@ def valid_hds(filepath):
     myenv = os.environ.copy()
     myenv['ADAM_NOPROMPT'] = '1'
     myenv['ADAM_EXIT'] = '1'
+    myenv['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
 
     # Run hdstrace.
     with open('/dev/null', 'w') as null:
