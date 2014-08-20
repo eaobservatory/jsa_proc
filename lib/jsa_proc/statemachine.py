@@ -97,7 +97,7 @@ class JSAProcStateMachine:
                     logger.error('Job %i is in unknown state %s',
                                  job.id, job.state)
 
-            except JSAProcError:
+            except Exception:
                 logger.exception('Error while updating state of job %i',
                                  job.id)
 
@@ -170,7 +170,7 @@ class JSAProcStateMachine:
                     logger.debug('Storing list of output files.')
                     self.db.set_output_files(job_id, output)
 
-            except JSAProcError:
+            except Exception:
                 logger.exception('Error while updating state of job %i',
                                  recipe_instance)
 
