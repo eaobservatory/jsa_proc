@@ -77,7 +77,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
     """
     This routine ensure that all the input data is available for running a job.
 
-    It will check to see if the data is present in either a) the
+     It will check to see if the data is present in either a) the
     /jcmtdata tree, or b) the input directory for this job. If it is
     not present it will download the data from CADC into the input
     directory. It will create the input directory if not present.
@@ -101,8 +101,6 @@ def assemble_input_data_for_job(job_id, input_file_list):
             and not os.path.isdir(input_directory)):
         os.mkdir(input_directory)
 
-    # Create list of files to write to.
-    avail_file_list = open(list_name_path, 'w')
 
     # For each file, check if its already in JAC data store, or input
     # directory. Download from CADC if its not. Check downloaded files
