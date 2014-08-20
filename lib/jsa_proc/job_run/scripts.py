@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import socket
 
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
@@ -139,7 +140,8 @@ def run_a_job(job_id, db=None):
     # Change status of job to Running, raise an error if not currently in
     # WAITING state.
     db.change_state(job_id, JSAProcState.RUNNING,
-                 'Job is about to be run', state_prev=JSAProcState.WAITING)
+                    'Job is about to be run on host {0}'.format(socket.gethostname()),
+                    state_prev=JSAProcState.WAITING)
 
     # Input file_list -- this should be better? or in jsawrapdr?
     input_dir = get_input_dir(job_id)
