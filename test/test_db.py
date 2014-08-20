@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from socket import gethostname
+
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.state import JSAProcState
 
@@ -157,15 +159,16 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(job.state_prev, newstate)
 
         # Check log for state and messages. (check both get_last_log and get_logs).
+        hostname = gethostname()
         last_log = self.db.get_last_log(job_id)
-        self.assertEqual([last_log.state_new, last_log.state_prev, last_log.message],
-                         [newstate2, newstate, message2])
+        self.assertEqual([last_log.state_new, last_log.state_prev, last_log.message, last_log.host],
+                         [newstate2, newstate, message2, hostname])
         logs = self.db.get_logs(job_id)
         maxid = max([l.id for l in logs])
         for l in logs:
             if l.id == maxid:
-                self.assertEqual([l.state_new, l.state_prev, l.message],
-                                 [newstate2, newstate, message2])
+                self.assertEqual([l.state_new, l.state_prev, l.message, l.host],
+                                 [newstate2, newstate, message2, hostname])
 
         # Check two log lines were retrieved.
         self.assertEqual(len(logs), 3)

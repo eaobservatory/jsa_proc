@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from collections import namedtuple
+from socket import gethostname
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
@@ -22,7 +22,7 @@ from jsa_proc.state import JSAProcState
 
 # Named tuples that are created ahead of time instead of dynamically
 # defined from table rows:
-JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message')
+JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message host')
 JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id')
 
 
@@ -259,9 +259,9 @@ class JSAProcDB:
         object as argument "c".
         """
 
-        c.execute('INSERT INTO log (job_id, state_prev, state_new, message) '
-                  'VALUES (%s, %s, %s, %s)',
-                  (job_id, state_prev, state_new, message))
+        c.execute('INSERT INTO log (job_id, state_prev, state_new, message, host) '
+                  'VALUES (%s, %s, %s, %s, %s)',
+                  (job_id, state_prev, state_new, message, gethostname()))
 
     def get_logs(self, job_id):
         """
