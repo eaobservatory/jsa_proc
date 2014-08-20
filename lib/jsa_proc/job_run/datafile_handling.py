@@ -131,7 +131,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
                     if not os.path.exists(invalid_dir):
                         os.mkdir(invalid_dir)
                     shutil.move(filepath, invalid_file)
-                    raise JSAProcErrror('Downloaded file %s fails hds validation'
+                    raise JSAProcError('Downloaded file %s fails hds validation'
                                         ' Moved to %s'%(filepath, invalid_file))
                 else:
                     files_list.append(filepath)
