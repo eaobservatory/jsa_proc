@@ -72,3 +72,14 @@ class ExcessRowsError(JSAProcDBError):
 
         message = 'More than the expected number of rows found in table %s, matching "%s"'%(table, query)
         Exception.__init__(self, message, *args)
+
+class NotAtJACError(JSAProcError):
+    """
+    Error indicating something is not at the JAC.
+    """
+    def __init__(self, something, *args):
+        """
+        Something must be a string
+        """
+        message = '%s was not found at the JAC' % (something)
+        Exception.__init__(self, message, *args)

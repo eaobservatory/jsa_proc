@@ -22,7 +22,7 @@ import shutil
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.job_run.directories import get_input_dir, get_output_dir
-from jsa_proc.error import JSAProcError
+from jsa_proc.error import JSAProcError, NotAtJACError
 from jsa_proc.config import get_config
 
 """
@@ -30,6 +30,48 @@ Routines for handling input and output files when running jobs.
 
 """
 
+# Name of .lis file containing each input file with full path.
+input_list_name = 'input_files_job.lis'
+
+
+
+
+def get_jac_input_data(input_file_list):
+    """
+    Try and assemble data for job, if it is all in the JAC
+    standard tree.
+
+    Raise NotAtJACError if data is not  *all* present at JAC.
+
+    Returns list of file paths if all files are present.
+    """
+
+    inputsfiles = []
+    for f in input_file_list:
+        filepath = file_in_jac_data_dir(f)
+        if not filepath:
+            raise NotAtJACError(f)
+        else:
+            inputsfiles.append(filepath)
+    return inputsfiles
+
+def write_input_list(job_id, input_file_list):
+    """
+    Write a textfile to list in the input directory
+    with the full list of file names.
+
+    Returns the name of the textfile.
+    """
+
+    input_directory = get_input_dir(job_id)
+    if not os.path.exists(input_directory):
+        os.mkdir(input_directory)
+    fname = os.path.join(input_directory, input_list_name)
+    f = open(fname, 'w')
+    for i  in input_file_list:
+        f.write(i + os.linesep)
+    f.close()
+    return fname
 
 def assemble_input_data_for_job(job_id, input_file_list):
     """
@@ -54,33 +96,30 @@ def assemble_input_data_for_job(job_id, input_file_list):
     # Get full path to input directory.
     input_directory = get_input_dir(job_id)
 
-    # Name of .lis file containing each input file with full path.
-    lis_name = 'input_files_job.lis'
-
     # Make the input directory if it doesn't exist. (Permissions?).
     if (not os.path.exists(input_directory)
             and not os.path.isdir(input_directory)):
         os.mkdir(input_directory)
 
     # Create list of files to write to.
-    list_name_path = os.path.join(input_directory, lis_name)
     avail_file_list = open(list_name_path, 'w')
 
     # For each file, check if its already in JAC data store, or input
     # directory. Download from CADC if its not. Check downloaded files
     # are valid hds.
+    files_list = []
     for f in input_file_list:
 
         filepath = file_in_jac_data_dir(f)
 
         if filepath:
-            avail_file_list.write(filepath + os.linesep)
+            files_list.append(filepath)
 
         else:
             filepath = file_in_dir(f, input_directory)
 
             if filepath:
-                avail_file_list.write(filepath + os.linesep)
+                files_list.append(filepath)
             else:
                 filepath = fetch_cadc_file(f, input_directory)
                 valid = valid_hds(filepath)
@@ -97,9 +136,9 @@ def assemble_input_data_for_job(job_id, input_file_list):
                     raise JSAProcErrror('Downloaded file %s fails hds validation'
                                         ' Moved to %s'%(filepath, invalid_file))
                 else:
-                    avail_file_list.write(filepath + os.linesep)
+                    files_list.append(filepath)
 
-    avail_file_list.close()
+    list_name_path = write_input_list(job_id, files_list)
 
     # Return filepath for .lis containing all files with paths.
     return list_name_path
