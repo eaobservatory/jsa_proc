@@ -394,7 +394,7 @@ class JSAProcDB:
                           (job_id, f))
 
     def find_jobs(self, state=None, location=None,
-                  prioritize=False, number=None, offset=None):
+                  prioritize=False, number=None, offset=None, sort=False):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -407,6 +407,7 @@ class JSAProcDB:
             * prioritize (Boolean, results sorted by priority order)
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
+            * order (Boolean, sort results by id (after priority))
 
         Returns a list (which may be empty) of namedtuples including
         values:
@@ -434,9 +435,16 @@ class JSAProcDB:
         if where:
             query += ' WHERE ' + ' AND '.join(where)
 
-        # Priority:
+
         if prioritize:
-            query += ' ORDER BY priority DESC'
+            order.append('priority DESC')
+
+        if sort:
+            order.append('id ASC')
+
+        if order:
+            query += ' ORDER BY ' + ', '.join(order)
+
 
         # Return [number] of results, starting at [offset]
         if number:

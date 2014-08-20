@@ -338,3 +338,16 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual([x.tag for x in self.db.find_jobs(number=3, offset=1,
                                                            prioritize=True)],
                          ['tag4', 'tag2', 'tag5'])
+
+        job6 = self.db.add_job('tag6', 'FAKELOC', 'obs', 'RECIPE', [], priority=7)
+        job7 = self.db.add_job('tag7', 'FAKELOC', 'obs', 'RECIPE', [], priority=8)
+        job8 = self.db.add_job('tag8', 'FAKELOC', 'obs', 'RECIPE', [], priority=7)
+
+
+        # Test sort option
+        self.assertEqual([x.tag for x in self.db.find_jobs(prioritize=True,
+                                                           sort=True,
+                                                           location='FAKELOC')],
+                         ['tag7', 'tag6', 'tag8'])
+        self.assertEqual([x.tag for x in self.db.find_jobs(sort=True)],
+                         ['tag1','tag2','tag3','tag4','tag5','tag6','tag7','tag8'])
