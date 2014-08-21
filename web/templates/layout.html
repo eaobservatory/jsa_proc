@@ -3,7 +3,8 @@
 <html>
     <head>
         <title>JSA Processing: {{ title }}</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/jsa_proc.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jsa_proc.css') }}" type="text/css" />
+        <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" sizes="16x16" />
     </head>
     <body>
         {% block body %}
