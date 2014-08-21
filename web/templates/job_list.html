@@ -3,10 +3,16 @@
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
     <div class="tile_title state_{{ job.state | state_phase }}">
-        {{ job.state | state_name }}
+        <a href="{{ job.url }}" title="{{ job.tag }}">
+            {{ job.state | state_name }}
+        </a>
     </div>
     <p>
-        <a href="{{ job.url }}">{{ job.id }}</a>
+        <a href="{{ job.url }}" title="{{ job.tag }}">
+            {{ job.id }}
+            <br />
+            {{ job.location }}
+        </a>
     </p>
 </div>
 {% endfor %}

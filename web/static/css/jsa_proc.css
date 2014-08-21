@@ -20,7 +20,6 @@ div#content {
 div.tile {
     display: inline-block;
     width: 15ex;
-    height: 15ex;
     border: 2px solid black;
     margin: 20px;
     background: white;
@@ -37,6 +36,14 @@ div.tile_title {
 div.tile p {
     margin: 0px;
     padding: 5px;
+    height: 10ex;
+}
+
+div.tile a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    height: 100%;
 }
 
 table, td, th {

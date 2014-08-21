@@ -27,6 +27,7 @@ def prepare_job_list(db):
             'id': job.id,
             'state': job.state,
             'tag': job.tag,
+            'location': job.location,
         })
 
     return {
