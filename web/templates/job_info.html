@@ -1,6 +1,56 @@
 {% extends "layout.html" %}
 {% block content %}
-<p>
-{{ info.state }}
-<p>
+<table>
+<tr><th>State</th><td>{{ info.state | state_name }}</td></tr>
+<tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
+<tr><th>Tag</th><td>{{ info.tag }}</td></tr>
+<tr><th>Location</th><td>{{ info.location }}</td></tr>
+<tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+<tr><th>Mode</th><td>{{ info.mode }}</td></tr>
+<tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
+</table>
+
+{% if log %}
+<h2>Log</h2>
+
+<table>
+<tr>
+    <th>Time</th>
+    <th>State</th>
+    <th>Previous state</th>
+    <th>Host</th>
+    <th>Message</th>
+</tr>
+{% for entry in log %}
+<tr>
+    <td>{{ entry.datetime }}</td>
+    <td class="state_{{ entry.state_new | default('?') | state_phase }}">
+        {{ entry.state_new | default('?') | state_name }}</td>
+    <td>{{ entry.state_prev | default('?') |  state_name }}</td>
+    <td>{{ entry.host }}</td>
+    <td>{{ entry.message }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% if input_files %}
+<h2>Input Files</h2>
+
+<ul>
+{% for file in input_files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if output_files %}
+<h2>Output Files</h2>
+
+<ul>
+{% for file in output_files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
+{% endif %}
 {% endblock %}

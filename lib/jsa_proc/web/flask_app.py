@@ -17,7 +17,9 @@ from __future__ import absolute_import, division
 
 import flask
 import os.path
+
 import jsa_proc.config
+from jsa_proc.state import JSAProcState
 
 from jsa_proc.web.util import \
     url_for, templated, HTTPError, HTTPNotFound, HTTPRedirect
@@ -38,6 +40,8 @@ def create_web_app():
         template_folder=os.path.join(home, 'web', 'templates'),
     )
 
+    # Route Handlers.
+
     @app.route('/')
     def home_page():
         raise HTTPRedirect(url_for('job_list'))
@@ -51,5 +55,32 @@ def create_web_app():
     @templated('job_info.html')
     def job_info(job_id):
         return prepare_job_info(db, job_id)
+
+    # Filters and Tests.
+
+    @app.template_filter('state_name')
+    def state_name_filter(state):
+        return JSAProcState.get_name(state)
+
+    @app.template_test('state_active')
+    def state_active_test(state):
+        return JSAProcState.get_info(state).active
+
+    @app.template_filter('state_phase')
+    def state_phase_filter(state):
+        phase = JSAProcState.get_info(state).phase
+        if phase == JSAProcState.PHASE_QUEUE:
+            return 'queue'
+        elif phase == JSAProcState.PHASE_FETCH:
+            return 'fetch'
+        elif phase == JSAProcState.PHASE_RUN:
+            return 'run'
+        elif phase == JSAProcState.PHASE_COMPLETE:
+            return 'complete'
+        elif phase == JSAProcState.PHASE_ERROR:
+            return 'error'
+        raise HTTPError('Unknown phase {0}'.format(phase))
+
+    # Return the Application.
 
     return app

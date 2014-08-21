@@ -25,9 +25,22 @@ def prepare_job_info(db, job_id):
     except NoRowsError:
         raise HTTPNotFound()
 
+    try:
+        input_files = db.get_input_files(job_id)
+    except NoRowsError:
+        input_files = ['in', 'in']
+
+    try:
+        output_files = db.get_output_files(job.id)
+    except NoRowsError:
+        output_files = []
+
+    log = db.get_logs(job_id)
+
     return {
         'title': 'Job {}'.format(job_id),
-        'info': {
-            'state': job.state,
-        },
+        'info': job,
+        'log': log,
+        'input_files': input_files,
+        'output_files': output_files,
     }

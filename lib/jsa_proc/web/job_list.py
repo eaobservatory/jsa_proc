@@ -24,6 +24,8 @@ def prepare_job_list(db):
     for job in db.find_jobs():
         jobs.append({
             'url': url_for('job_info', job_id=job.id),
+            'id': job.id,
+            'state': job.state,
             'tag': job.tag,
         })
 

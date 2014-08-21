@@ -1,8 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
 {% for job in jobs %}
-<div>
-    <a href="{{ job.url }}">{{ job.tag }}</a>
+<div class="tile{% if job.state is state_active %} state_active{% endif %}">
+    <div class="tile_title state_{{ job.state | state_phase }}">
+        {{ job.state | state_name }}
+    </div>
+    <p>
+        <a href="{{ job.url }}">{{ job.id }}</a>
+    </p>
 </div>
 {% endfor %}
 {% endblock %}
