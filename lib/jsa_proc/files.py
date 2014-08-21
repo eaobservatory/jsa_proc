@@ -29,7 +29,7 @@ def get_size(path):
     Return the disk size of a given path is. This will include the
     size of all subdirectories if it is a folder.
 
-    Uses units of GB.
+    Uses units of GiB.
 
     Parameters:
     path, required, string.
@@ -50,7 +50,7 @@ def get_size(path):
 
 def _get_config_dir_size(type_):
     """
-    Return size of directorie tree described in config Gb.
+    Return size of directorie tree described in config GiB.
 
     """
     config = get_config()
@@ -64,7 +64,7 @@ def get_input_dir_size():
     """
     Get the size of the input data directory tree.
 
-    Returns size in GB.
+    Returns size in GiB.
     """
     return _get_config_dir_size('input')
 
@@ -72,7 +72,7 @@ def get_output_dir_size():
     """
     Get the size of the output data directory tree.
 
-    Returns size in GB.
+    Returns size in GiB.
     """
     return _get_config_dir_size('output')
 
@@ -80,7 +80,7 @@ def get_scratch_dir_size():
     """
     Get the size of the scratch data directory tree.
 
-    Returns size in GB.
+    Returns size in GiB.
     """
     return _get_config_dir_size('scratch')
 
@@ -88,7 +88,7 @@ def get_log_dir_size():
     """
     Get the size of the log data directory tree.
 
-    Returns size in GB.
+    Returns size in GiB.
     """
     return _get_config_dir_size('log')
 
