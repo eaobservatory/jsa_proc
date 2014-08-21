@@ -1,0 +1,12 @@
+body {
+    background: silver;
+    font-family: serif;
+    font-size: 12pt;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+}
+
+div#content {
+    background: white;
+}

@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block body %}
+{% for job in jobs %}
+<div>
+    <a href="{{ job.url }}">{{ job.tag }}</a>
+</div>
+{% endfor %}
+{% endblock %}

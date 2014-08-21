@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        <title>JSA Processing: {{ title }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jsa_proc.css') }}" />
+    </head>
+    <body>
+        {% block body %}
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+        {% endblock %}
+    </body>
+</html>
