@@ -14,16 +14,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import namedtuple
+import logging
 from socket import gethostname
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
 
 
+logger = logging.getLogger(__name__)
+
 # Named tuples that are created ahead of time instead of dynamically
 # defined from table rows:
 JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message host')
-JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id')
+JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id outputs')
 
 
 class JSAProcDB:
@@ -301,7 +304,6 @@ class JSAProcDB:
         if len(log) < 1:
             raise NoRowsError('job','SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1'%(str(job_id))
                               )
-        
 
         log = JSAProcLog(*log[0])
         return log
@@ -394,7 +396,8 @@ class JSAProcDB:
                           (job_id, f))
 
     def find_jobs(self, state=None, location=None,
-                  prioritize=False, number=None, offset=None, sort=False):
+                  prioritize=False, number=None, offset=None,
+                  sort=False, outputs=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -402,45 +405,62 @@ class JSAProcDB:
             * state
             * location
 
-        Results can be affected by:
+        Results can be affected by the following optional parameters:
 
             * prioritize (Boolean, results sorted by priority order)
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
             * order (Boolean, sort results by id (after priority))
+            * outputs (True or string, matches against output table to
+              get output_files that match the string. e.g. 'preview_1024.png'
+              would include all 1024 size preview images with jobs.)
 
-        Returns a list (which may be empty) of namedtuples including
+        Returns a list (which may be empty) of namedtuples, each  of which have
         values:
 
             * id
             * tag
             * state
             * location
+            * outputs (list)
 
         """
 
-        query = 'SELECT id, tag, state, location, foreign_id FROM job'
+        query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id '# FROM job'
+        query_from = ' FROM job '
+
+        # If you're getting outputs
+        if outputs:
+            separator = ' '
+            query_get += ', GROUP_CONCAT(output_file.filename SEPARATOR \'' + separator + '\')'
+            query_from +=' LEFT JOIN output_file ON job.id=output_file.job_id '
+
+        query = query_get + query_from
+
         where = []
         param = []
         order = []
 
         if state is not None:
-            where.append('state=%s')
+            where.append('job.state=%s')
             param.append(state)
 
         if location is not None:
-            where.append('location=%s')
+            where.append('job.location=%s')
             param.append(location)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
 
+        # If getting output files, need to group by job.id:
+        if outputs:
+            query += ' GROUP BY job.id '
 
         if prioritize:
-            order.append('priority DESC')
+            order.append('job.priority DESC')
 
         if sort:
-            order.append('id ASC')
+            order.append('job.id ASC')
 
         if order:
             query += ' ORDER BY ' + ', '.join(order)
@@ -459,13 +479,37 @@ class JSAProcDB:
         result = []
 
         with self.db as c:
+
             c.execute(query, param)
 
             while True:
                 row = c.fetchone()
                 if row is None:
                     break
+                if not outputs:
+                    row += (None,)
+                row = list(row)
 
+                # If getting outputs, fix the results up appropriately
+                if outputs:
+                    # If final value is not None, split it up.
+                    if row[-1]:
+                        row[-1]= row[-1].split(separator)
+
+                        # If a pattern has been provided, try to match it.
+                        if isinstance(outputs, basestring):
+                            returned_outputs=[]
+                            for s in row[-1]:
+                                if s.find(outputs) !=-1:
+                                    returned_outputs.append(s)
+
+                            # Explicitily return None instead of empty
+                            # list if no results.
+                            if not returned_outputs:
+                                returned_outputs=None
+                            row[-1] = returned_outputs
+
+                # Turn the row into a namedtuple and append to results
                 result.append(JSAProcJobInfo(*row))
 
 
