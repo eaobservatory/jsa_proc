@@ -69,4 +69,4 @@ def get_home():
     """
 
     env = os.environ
-    return env.get('JSA_PROC_DIR', '')
+    return env.get('JSA_PROC_DIR', os.getcwd())
