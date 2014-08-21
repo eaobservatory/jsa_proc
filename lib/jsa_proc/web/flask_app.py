@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-import flask
+from flask import Flask, request
 import os.path
 
 import jsa_proc.config
@@ -34,7 +34,7 @@ def create_web_app():
     home = jsa_proc.config.get_home()
     db = jsa_proc.config.get_database()
 
-    app = flask.Flask(
+    app = Flask(
         'jsa_proc',
         static_folder=os.path.join(home, 'web', 'static'),
         template_folder=os.path.join(home, 'web', 'templates'),
@@ -49,7 +49,10 @@ def create_web_app():
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
-        return prepare_job_list(db)
+        return prepare_job_list(
+            db,
+            request.args.get('location', None),
+            request.args.get('state', None))
 
     @app.route('/job/<int:job_id>')
     @templated('job_info.html')

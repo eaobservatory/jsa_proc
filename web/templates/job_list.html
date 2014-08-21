@@ -1,5 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
+<form>
+    <p>
+        <select name="location">
+            <option value="" {{ 'selected="selected"' if selected_location is none }}>Any location</option>
+            {% for location in locations %}
+                <option value="{{ location }}" {{ 'selected="selected"' if location == selected_location }}>{{ location }}</option>
+            {% endfor %}
+        </select>
+        <select name="state">
+            <option value="" {{ 'selected="selected"' if selected_state is none }}>Any state</option>
+            {% for state in states %}
+                <option value="{{ state }}" {{ 'selected="selected"' if state == selected_state }}>{{ state | state_name }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
     <div class="tile_title state_{{ job.state | state_phase }}">

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from jsa_proc.error import JSAProcError
 
@@ -45,20 +45,20 @@ class JSAProcState:
     PHASE_COMPLETE = 'Y'
     PHASE_ERROR = 'E'
 
-    _info = {
-        UNKNOWN:      StateInfo('Unknown',      PHASE_QUEUE,    False),
-        QUEUED:       StateInfo('Queued',       PHASE_QUEUE,    False),
-        FETCHING:     StateInfo('Fetching',     PHASE_FETCH,    True),
-        WAITING:      StateInfo('Waiting',      PHASE_FETCH,    False),
-        RUNNING:      StateInfo('Running',      PHASE_RUN,      True),
-        PROCESSED:    StateInfo('Processed',    PHASE_RUN,      False),
-        TRANSFERRING: StateInfo('Transferring', PHASE_RUN,      False),
-        INGESTION:    StateInfo('Ingestion',    PHASE_RUN,      False),
-        COMPLETE:     StateInfo('Complete',     PHASE_COMPLETE, False),
-        ERROR:        StateInfo('Error',        PHASE_ERROR,    False),
-    }
+    _info = OrderedDict((
+        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False)),
+        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False)),
+        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True)),
+        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False)),
+        (RUNNING,      StateInfo('Running',      PHASE_RUN,      True)),
+        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False)),
+        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False)),
+        (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False)),
+        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False)),
+        (ERROR,        StateInfo('Error',        PHASE_ERROR,    False)),
+    ))
 
-    STATE_ALL = set(_info.keys())
+    STATE_ALL = tuple(_info.keys())
 
     @classmethod
     def get_name(cls, state):

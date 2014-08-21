@@ -15,13 +15,19 @@
 
 from __future__ import absolute_import, division
 
+from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_job_list(db):
+def prepare_job_list(db, location, state):
+    if location == '':
+        location = None
+    if state == '':
+        state = None
+
     jobs = []
 
-    for job in db.find_jobs():
+    for job in db.find_jobs(location=location, state=state, sort=True):
         jobs.append({
             'url': url_for('job_info', job_id=job.id),
             'id': job.id,
@@ -33,4 +39,8 @@ def prepare_job_list(db):
     return {
         'title': 'Job List',
         'jobs': jobs,
+        'locations': ('JAC', 'CADC'),
+        'selected_location': location,
+        'states': JSAProcState.STATE_ALL,
+        'selected_state': state,
     }
