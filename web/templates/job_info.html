@@ -34,12 +34,29 @@
 </table>
 {% endif %}
 
-{% if input_files %}
-<h2>Input Files</h2>
+{% if previews %}
+<h2>PREVIEW IMAGES</h2>
+{% for l in previews %}
+<img src="{{ l }}" />
+{% endfor %}
+{% endif %}
 
+{% if orac_logs %}
+<h2>ORAC-DR Logs</h2>
+<p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
 <ul>
-{% for file in input_files %}
-    <li>{{ file }}</li>
+{% for l in orac_logs %}
+  <li><a href="{{l}}" >{{l}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if wrapdr_logs %}
+<h2>jsawrapdr Logs</h2>
+<p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
+<ul>
+{% for l in wrapdr_logs %}
+  <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
@@ -53,4 +70,16 @@
 {% endfor %}
 </ul>
 {% endif %}
+
+{% if input_files %}
+<h2>Input Files</h2>
+
+<ul>
+{% for file in input_files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+
 {% endblock %}

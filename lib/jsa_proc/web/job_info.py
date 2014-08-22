@@ -15,7 +15,11 @@
 
 from __future__ import absolute_import, division
 
+import glob
+import os
+
 from jsa_proc.error import NoRowsError
+from jsa_proc.job_run.directories import get_log_dir
 from jsa_proc.web.util import url_for, HTTPNotFound
 
 
@@ -32,10 +36,32 @@ def prepare_job_info(db, job_id):
 
     try:
         output_files = db.get_output_files(job.id)
+        previews=[]
+
+        for i in output_files:
+            s = i.find('preview_1024.png')
+            if s != -1:
+                previews.append(i)
+
     except NoRowsError:
         output_files = []
 
+    if previews:
+        previews = [url_for('job_preview', job_id=job.id, preview=i) for i in previews]
+
+    # Logged entries in the database.
     log = db.get_logs(job_id)
+
+
+    # Get the log files on disk (if any)
+    logdir = get_log_dir(job_id)
+    orac_logfiles =  glob.glob(os.path.join(logdir, 'oracdr*.html'))
+    orac_logfiles = [os.path.split(i)[1] for i in orac_logfiles]
+    orac_logfiles =[ url_for('job_log_html', job_id=job.id, log=i) for i in orac_logfiles]
+
+    wrapdr_logfiles = glob.glob(os.path.join(logdir, 'jsawrapdr*.log'))
+    wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
+    wrapdr_logfiles =[ url_for('job_log_text', job_id=job.id, log=i) for i in wrapdr_logfiles]
 
     return {
         'title': 'Job {}'.format(job_id),
@@ -43,4 +69,7 @@ def prepare_job_info(db, job_id):
         'log': log,
         'input_files': input_files,
         'output_files': output_files,
+        'orac_logs': orac_logfiles,
+        'wrapdr_logs': wrapdr_logfiles,
+        'previews': previews,
     }

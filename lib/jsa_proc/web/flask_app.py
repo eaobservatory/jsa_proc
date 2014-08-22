@@ -27,6 +27,8 @@ from jsa_proc.web.util import \
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
+from jsa_proc.web.job_log import prepare_job_log
+
 
 
 def create_web_app():
@@ -63,8 +65,18 @@ def create_web_app():
     # Image handling.
     @app.route('/job/<int:job_id>/preview/<preview>')
     def job_preview(job_id, preview):
-        path = prepare_job_preview(db, job_id, preview)
+        path = prepare_job_preview(job_id, preview)
         return send_file(path, mimetype='image/png')
+
+    @app.route('/job/<int:job_id>/log/<log>')
+    def job_log_html(job_id, log):
+        path = prepare_job_log(job_id, log)
+        return send_file(path, mimetype='text/html')
+
+    @app.route('/job/<int:job_id>/log_text/<log>')
+    def job_log_text(job_id, log):
+        path = prepare_job_log(job_id, log)
+        return send_file(path, mimetype='text/plain')
 
     # Filters and Tests.
 
