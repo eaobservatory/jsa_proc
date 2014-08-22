@@ -24,6 +24,7 @@ div.tile {
     margin: 20px;
     background: white;
     color: black;
+    vertical-align:top;
 }
 
 div.tile_title {
@@ -33,10 +34,13 @@ div.tile_title {
     font-weight: bold;
 }
 
+div.tile img{
+    padding: 5px;
+}
 div.tile p {
     margin: 0px;
     padding: 5px;
-    height: 10ex;
+    height: 15ex;
 }
 
 div.tile a {
