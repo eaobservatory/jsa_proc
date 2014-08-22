@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-from flask import Flask, request
+from flask import Flask, request, send_file
 import os.path
 
 import jsa_proc.config
@@ -26,6 +26,7 @@ from jsa_proc.web.util import \
 
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_info import prepare_job_info
+from jsa_proc.web.job_preview import prepare_job_preview
 
 
 def create_web_app():
@@ -58,6 +59,12 @@ def create_web_app():
     @templated('job_info.html')
     def job_info(job_id):
         return prepare_job_info(db, job_id)
+
+    # Image handling.
+    @app.route('/job/<int:job_id>/preview/<preview>')
+    def job_preview(job_id, preview):
+        path = prepare_job_preview(db, job_id, preview)
+        return send_file(path, mimetype='image/png')
 
     # Filters and Tests.
 

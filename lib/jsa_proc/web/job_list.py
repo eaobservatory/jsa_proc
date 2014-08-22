@@ -27,13 +27,18 @@ def prepare_job_list(db, location, state):
 
     jobs = []
 
-    for job in db.find_jobs(location=location, state=state, sort=True):
+    for job in db.find_jobs(location=location, state=state, sort=True, outputs='preview_64.png'):
+        if job.outputs:
+            preview = url_for('job_preview', job_id=job.id, preview=job.outputs[0])
+        else:
+            preview = None
         jobs.append({
             'url': url_for('job_info', job_id=job.id),
             'id': job.id,
             'state': job.state,
             'tag': job.tag,
             'location': job.location,
+            'preview': preview
         })
 
     return {
