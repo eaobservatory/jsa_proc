@@ -365,4 +365,5 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='preview_64.pngs')][0],
                          None)
 
-        # test the sort
+        # test the count option
+        self.assertEqual(self.db.find_jobs(count=True), 8)

@@ -397,7 +397,7 @@ class JSAProcDB:
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
-                  sort=False, outputs=None):
+                  sort=False, outputs=None, count=False):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -407,6 +407,7 @@ class JSAProcDB:
 
         Results can be affected by the following optional parameters:
 
+            * count (Boolean, only return number of results)
             * prioritize (Boolean, results sorted by priority order)
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
@@ -414,6 +415,7 @@ class JSAProcDB:
             * outputs (True or string, matches against output table to
               get output_files that match the string. e.g. 'preview_1024.png'
               would include all 1024 size preview images with jobs.)
+
 
         Returns a list (which may be empty) of namedtuples, each  of which have
         values:
@@ -426,7 +428,11 @@ class JSAProcDB:
 
         """
 
-        query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'# FROM job'
+        if count is True:
+            query_get = 'SELECT COUNT(*) '
+        else:
+            query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'
+
         query_from = ' FROM job '
 
         # If you're getting outputs
@@ -484,10 +490,16 @@ class JSAProcDB:
 
             while True:
                 row = c.fetchone()
+
+                # If you've asked for a count, just return that (only one row)
+                if count is True:
+                    return row[0]
+
                 if row is None:
                     break
                 if not outputs:
                     row += (None,)
+
                 row = list(row)
 
                 # If getting outputs, fix the results up appropriately
