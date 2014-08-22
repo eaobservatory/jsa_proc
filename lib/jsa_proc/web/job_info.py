@@ -49,8 +49,9 @@ def prepare_job_info(db, job_id):
     if previews:
         previews = [url_for('job_preview', job_id=job.id, preview=i) for i in previews]
 
-    # Logged entries in the database.
+    # Logged entries in the database (newest first).
     log = db.get_logs(job_id)
+    log.reverse()
 
 
     # Get the log files on disk (if any)
