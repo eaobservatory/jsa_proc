@@ -354,3 +354,15 @@ class InterfaceDBTest(DBTestCase):
                          ['tag7', 'tag6', 'tag8'])
         self.assertEqual([x.tag for x in self.db.find_jobs(sort=True)],
                          ['tag1','tag2','tag3','tag4','tag5','tag6','tag7','tag8'])
+
+        # Test the return preview files option..
+        outfiles=['1.sdf', '2.sdf','name_preview_64.png']
+        self.db.set_output_files(1, outfiles)
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs=True)][0],
+                         outfiles)
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='preview_64.png')][0],
+                         [outfiles[2]])
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='preview_64.pngs')][0],
+                         None)
+
+        # test the sort

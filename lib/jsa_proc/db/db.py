@@ -426,13 +426,13 @@ class JSAProcDB:
 
         """
 
-        query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id '# FROM job'
+        query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'# FROM job'
         query_from = ' FROM job '
 
         # If you're getting outputs
         if outputs:
             separator = ' '
-            query_get += ', GROUP_CONCAT(output_file.filename SEPARATOR \'' + separator + '\')'
+            query_get += ', GROUP_CONCAT(output_file.filename, \'' + separator + '\')'
             query_from +=' LEFT JOIN output_file ON job.id=output_file.job_id '
 
         query = query_get + query_from
