@@ -18,11 +18,11 @@ import os
 
 from jsa_proc.job_run.directories import get_output_dir
 
-def prepare_job_preview(db, job_id, preview):
+def prepare_job_preview(job_id, preview):
     """
-    Prepare a preview imgae for a job.
+    Prepare a preview image for a job.
 
-    Slurp in file and return it as a byte string.
+    Return the path to the preview image
     """
 
     preview_path = os.path.join(get_output_dir(job_id), preview)
