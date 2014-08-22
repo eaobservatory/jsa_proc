@@ -34,9 +34,9 @@ def prepare_job_info(db, job_id):
     except NoRowsError:
         input_files = ['in', 'in']
 
+    previews=[]
     try:
         output_files = db.get_output_files(job.id)
-        previews=[]
 
         for i in output_files:
             s = i.find('preview_1024.png')
