@@ -35,8 +35,6 @@ def prepare_job_summary(db):
     """
 
     states = JSAProcState.STATE_ALL
-    state_names = [JSAProcState.get_name(i) for i in states]
-    state_dict = dict(zip(states, state_names))
     locations = ['JAC', 'CADC']
 
     job_summary_dict = OrderedDict()
@@ -52,7 +50,6 @@ def prepare_job_summary(db):
         'title': 'Summary of JSA Processing Jobs',
         'total_count': total_count,
         'job_summary_dict': job_summary_dict,
-        'state_dict':state_dict,
         'locations':locations,
     }
 

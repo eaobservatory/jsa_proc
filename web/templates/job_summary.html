@@ -17,7 +17,7 @@
 </tr>
 {% for s, values  in job_summary_dict.items() %}
 <tr>
-  <td>{{ state_dict[s]}}</td>
+  <td>{{ s | state_name }}</td>
   {% for numb  in values.values() %}
   <td> <a href="{{url_for('job_list', location=l, state=s)}}">{{numb}}</a></td>
   {% endfor %}
