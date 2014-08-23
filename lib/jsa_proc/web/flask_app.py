@@ -25,6 +25,7 @@ from jsa_proc.web.util import \
     url_for, templated, HTTPError, HTTPNotFound, HTTPRedirect
 
 from jsa_proc.web.job_list import prepare_job_list
+from jsa_proc.web.job_summary import prepare_job_summary
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
 from jsa_proc.web.job_log import prepare_job_log
@@ -47,7 +48,7 @@ def create_web_app():
 
     @app.route('/')
     def home_page():
-        raise HTTPRedirect(url_for('job_list'))
+        raise HTTPRedirect(url_for('job_summary'))
 
     @app.route('/job/')
     @templated('job_list.html')
@@ -60,11 +61,18 @@ def create_web_app():
             request.args.get('page', None)
         )
 
+    @app.route('/summary/')
+    @templated('job_summary.html')
+    def job_summary():
+        return prepare_job_summary(db)
+
+
 
     @app.route('/job/<int:job_id>')
     @templated('job_info.html')
     def job_info(job_id):
         return prepare_job_info(db, job_id)
+
 
     # Image handling.
     @app.route('/job/<int:job_id>/preview/<preview>')

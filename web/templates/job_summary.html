@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content%}
+
+<h2> There are {{total_count}} jobs in the database </h2>
+
+<h2> Summary table </h2>
+
+
+<table>
+
+<tr>
+  <th> State</th>
+  {% for l in locations %}
+  <th> {{l}} </th>
+  {% endfor %}
+</tr>
+{% for s, values  in job_summary_dict.items() %}
+<tr>
+  <td>{{ state_dict[s]}}</td>
+  {% for numb  in values.values() %}
+  <td> <a href="{{url_for('job_list', location=l, state=s)}}">{{numb}}</a></td>
+  {% endfor %}
+</tr>
+{% endfor %}
+
+</table>
+
+<h2> <a href="{{url_for('job_list')}}">Full Job List (unfiltered)</a> </h2>
+
+
+
+{% endblock %}
