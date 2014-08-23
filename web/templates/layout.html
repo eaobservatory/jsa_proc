@@ -7,7 +7,16 @@
         <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" sizes="16x16" />
     </head>
     <body>
-        {% block body %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+      {% endif %}
+      {% endwith %}
+      {% block body %}
         <div id="content">
             <h1>{{ title }}</h1>
             {% block content %}{% endblock %}
