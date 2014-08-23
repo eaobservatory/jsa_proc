@@ -46,4 +46,14 @@
 </div>
 {% endfor %}
 
+<div>
+{% if selected_number is not none %}
+{% if selected_page|int > 0 %}
+<a href="{{url_for('job_list', page=selected_page|int-1, number=selected_number)}}"> Page Prev</a>
+{% endif %}
+{% if jobs|length == selected_number|int %}
+<a href="{{url_for('job_list', page=selected_page|int+1, number=selected_number)}}"> Page Next</a>
+{% endif %}
+</div>
+{% endif %}
 {% endblock %}
