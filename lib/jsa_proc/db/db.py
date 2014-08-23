@@ -438,7 +438,7 @@ class JSAProcDB:
         # If you're getting outputs
         if outputs:
             separator = ' '
-            query_get += ', GROUP_CONCAT(output_file.filename, \'' + separator + '\')'
+            query_get += ', GROUP_CONCAT(output_file.filename)'
             query_from +=' LEFT JOIN output_file ON job.id=output_file.job_id '
 
         query = query_get + query_from
@@ -506,7 +506,7 @@ class JSAProcDB:
                 if outputs:
                     # If final value is not None, split it up.
                     if row[-1]:
-                        row[-1]= row[-1].split(separator)
+                        row[-1]= row[-1].split(',')
 
                         # If a pattern has been provided, try to match it.
                         if isinstance(outputs, basestring):
