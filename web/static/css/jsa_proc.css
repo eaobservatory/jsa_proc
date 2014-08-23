@@ -11,7 +11,7 @@ div#content {
     display: inline-block;
     background: white;
     text-align: left;
-    min-width: 100ex;
+    max-width: 120ex;
     margin-left: auto;
     margin-right: auto;
     padding: 10px;
