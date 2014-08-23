@@ -14,6 +14,12 @@
                 <option value="{{ state }}" {{ 'selected="selected"' if state == selected_state }}>{{ state | state_name }}</option>
             {% endfor %}
         </select>
+        <select name="number">
+          <option value="" {{'selected="selected"' if selected_number is none}}>All</option>
+          {% for number in [25,50,75,100] %}
+          <option value="{{ number }}" {{ 'selected="selected"' if number == selected_number }}>{{ number }}</option>
+          {% endfor %}
+        </select>
         <input type="submit" value="Filter" />
     </p>
 </form>
@@ -39,4 +45,5 @@
     </p>
 </div>
 {% endfor %}
+
 {% endblock %}

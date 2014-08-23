@@ -19,15 +19,32 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_job_list(db, location, state):
+def prepare_job_list(db, location, state, number, page):
     if location == '':
         location = None
     if state == '':
         state = None
+    if number == '':
+        number = None
+    if number is not None:
+        number = int(number)
+
+    if page == '':
+        page = 0
+    if page is None:
+        page = 0
+    if number is not None:
+        offset = number * int(page)
+        if offset < 0:
+            offset = 0
+    else:
+        offset=0
+
 
     jobs = []
 
-    for job in db.find_jobs(location=location, state=state, sort=True, outputs='preview_64.png'):
+    for job in db.find_jobs(location=location, state=state, sort=True, outputs='preview_64.png',
+                            number=number, offset=offset):
         if job.outputs:
             preview = url_for('job_preview', job_id=job.id, preview=job.outputs[0])
         else:
@@ -48,4 +65,8 @@ def prepare_job_list(db, location, state):
         'selected_location': location,
         'states': JSAProcState.STATE_ALL,
         'selected_state': state,
+        'selected_number': number,
+        'selected_page': page,
     }
+
+

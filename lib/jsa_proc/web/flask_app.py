@@ -55,7 +55,11 @@ def create_web_app():
         return prepare_job_list(
             db,
             request.args.get('location', None),
-            request.args.get('state', None))
+            request.args.get('state', None),
+            request.args.get('number', None),
+            request.args.get('page', None)
+        )
+
 
     @app.route('/job/<int:job_id>')
     @templated('job_info.html')
