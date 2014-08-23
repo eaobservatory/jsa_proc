@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-from flask import Flask, request, send_file
+from flask import Flask, flash, request, send_file
 import os.path
 
 import jsa_proc.config
@@ -25,6 +25,7 @@ from jsa_proc.web.util import \
     url_for, templated, HTTPError, HTTPNotFound, HTTPRedirect
 
 from jsa_proc.web.job_list import prepare_job_list
+from jsa_proc.web.job_change_state import prepare_change_state
 from jsa_proc.web.job_summary import prepare_job_summary
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
@@ -66,12 +67,29 @@ def create_web_app():
     def job_summary():
         return prepare_job_summary(db)
 
-
-
-    @app.route('/job/<int:job_id>')
+    @app.route('/job/<int:job_id>', methods=['GET'])
     @templated('job_info.html')
     def job_info(job_id):
+        print 'testing job_info'
         return prepare_job_info(db, job_id)
+
+    @app.route('/job_change_state/<int:job_id>' ,methods=['POST'])
+    def job_change_state(job_id):
+
+        # Get the variables from POST
+        newstate = request.form['newstate']
+        message = request.form['message']
+
+        # Change the state.
+        prepare_change_state(db, job_id,
+                             newstate,
+                             message)
+
+        # Redirect the page to correct info.
+        #flash('You have successfully mangled the job status!')
+        raise HTTPRedirect(url_for('job_info', job_id=job_id))
+
+
 
 
     # Image handling.

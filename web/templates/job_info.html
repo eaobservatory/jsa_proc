@@ -32,7 +32,22 @@
 </tr>
 {% endfor %}
 </table>
+
+<!-- Allow users to change state of job. -->
+<h2> Change the state of this Job </h2>
+<form method="POST" action="{{ url_for('job_change_state', job_id=info.id)}}">
+    <select name="newstate">
+      <option value""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
+      {% for state in states %}
+      <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
+      {% endfor %}
+      </select><br/>
+    <textarea rows=3 COLS=30 name="message"></textarea>
+    <input type="submit" value="Submit Change" />
+</form>
 {% endif %}
+
+
 
 {% if previews %}
 <h2>PREVIEW IMAGES</h2>

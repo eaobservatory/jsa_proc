@@ -20,6 +20,7 @@ import os
 
 from jsa_proc.error import NoRowsError
 from jsa_proc.job_run.directories import get_log_dir
+from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, HTTPNotFound
 
 
@@ -73,4 +74,5 @@ def prepare_job_info(db, job_id):
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
         'previews': previews,
+        'states': JSAProcState.STATE_ALL,
     }
