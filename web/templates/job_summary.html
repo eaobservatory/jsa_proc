@@ -15,10 +15,10 @@
   <th> {{l}} </th>
   {% endfor %}
 </tr>
-{% for s, values  in job_summary_dict.items() %}
+{% for s, value in job_summary_dict.items() %}
 <tr>
   <td>{{ s | state_name }}</td>
-  {% for numb  in values.values() %}
+  {% for l, numb  in value.items() %}
   <td> <a href="{{url_for('job_list', location=l, state=s)}}">{{numb}}</a></td>
   {% endfor %}
 </tr>
