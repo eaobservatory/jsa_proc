@@ -30,9 +30,9 @@
 {% for entry in log %}
 <tr>
     <td>{{ entry.datetime }}</td>
-    <td class="state_{{ entry.state_new | default('?') | state_phase }}">
-        {{ entry.state_new | default('?') | state_name }}</td>
-    <td>{{ entry.state_prev | default('?') |  state_name }}</td>
+    <td class="state_{{ entry.state_new | state_phase }}">
+        {{ entry.state_new | state_name }}</td>
+    <td>{{ entry.state_prev  | state_name }}</td>
     <td>{{ entry.host }}</td>
     <td>{{ entry.message }}</td>
 </tr>
