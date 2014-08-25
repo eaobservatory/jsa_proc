@@ -2,7 +2,7 @@ CREATE TABLE job (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tag VARCHAR(80) NOT NULL,
     state CHAR(1) NOT NULL DEFAULT "?",
-    state_prev CHAR(1) DEFAULT NULL,
+    state_prev CHAR(1) NOT NULL DEFAULT "?",
     location VARCHAR(80) NOT NULL,
     foreign_id VARCHAR(80) DEFAULT NULL,
     mode VARCHAR(10) NOT NULL,
