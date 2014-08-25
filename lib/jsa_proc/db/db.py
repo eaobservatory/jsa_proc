@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import logging
 from socket import gethostname
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # defined from table rows:
 JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message host')
 JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id outputs')
-
+JSAProcErrorInfo = namedtuple('JSAProcErrorInfo', 'id time message state location')
 
 class JSAProcDB:
     """
@@ -394,6 +394,43 @@ class JSAProcDB:
                 # Now add in the new output files, one at a time.
                 c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s, %s)',
                           (job_id, f))
+
+
+    def find_errors_logs(self, location=None):
+        """
+        Retrieve list of all jobs in an error state, together with their logs.
+
+        Search is limited by:
+             * location (default None, can be 'JAC' or 'CADC')
+        """
+
+        param = []
+        query = 'SELECT job.id, log.datetime, log.message, log.state_new, job.location  FROM job JOIN log ON job.id=log.job_id'
+        query += ' WHERE job.state="E"'
+
+        if location is not None:
+            query+= 'AND job.location=%s'
+            param.append(location)
+
+        query += ' ORDER BY job.location DESC, job.id DESC, log.id DESC'
+
+        # Execute query
+        with self.db as c:
+
+            print query
+            print param
+            c.execute(query,param)
+            error_jobs = c.fetchall()
+
+            edict = OrderedDict()
+            for j in error_jobs:
+                einfo = JSAProcErrorInfo(*j)
+                edict[einfo.id] = edict.get(einfo.id, []) + [einfo]
+
+
+        return edict
+            # Now sort out error jobs in sensible option
+
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
