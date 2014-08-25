@@ -25,10 +25,20 @@ from jsa_proc.web.util import url_for, HTTPNotFound
 
 
 def prepare_job_info(db, job_id):
+    # Fetch job information from the database.
     try:
         job = db.get_job(job_id)
     except NoRowsError:
         raise HTTPNotFound()
+
+    # Convert the information to a dictionary so that we can augment it.
+    info = job._asdict()
+    if info['foreign_id'] is not None:
+        if info['location'] == 'CADC':
+            info['foreign_url'] = \
+                'http://beta.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/dp/recipe/{0}'.format(info['foreign_id'])
+        else:
+            info['foreign_url'] = None
 
     try:
         input_files = db.get_input_files(job_id)
@@ -67,7 +77,7 @@ def prepare_job_info(db, job_id):
 
     return {
         'title': 'Job {}'.format(job_id),
-        'info': job,
+        'info': info,
         'log': log,
         'input_files': input_files,
         'output_files': output_files,

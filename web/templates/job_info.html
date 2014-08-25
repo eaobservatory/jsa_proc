@@ -5,7 +5,13 @@
 <tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
 <tr><th>Tag</th><td>{{ info.tag }}</td></tr>
 <tr><th>Location</th><td>{{ info.location }}</td></tr>
-<tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+{% if info.foreign_id is not none %}
+    {% if info.foreign_url is none %}
+        <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+    {% else %}
+        <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">{{ info.foreign_id }}</a></td></tr>
+    {% endif %}
+{% endif %}
 <tr><th>Mode</th><td>{{ info.mode }}</td></tr>
 <tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
 </table>
