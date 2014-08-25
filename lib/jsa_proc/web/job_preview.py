@@ -14,9 +14,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import os
+import os.path
+import re
 
 from jsa_proc.job_run.directories import get_output_dir
+from jsa_proc.web.util import HTTPError, HTTPNotFound
+
+valid_preview = re.compile('^[-_a-z0-9]+_preview_\d+\.png$')
+
 
 def prepare_job_preview(job_id, preview):
     """
@@ -25,6 +30,12 @@ def prepare_job_preview(job_id, preview):
     Return the path to the preview image
     """
 
+    if not valid_preview.match(preview):
+        raise HTTPError('Invalid preview filename')
+
     preview_path = os.path.join(get_output_dir(job_id), preview)
+
+    if not os.path.exists(preview_path):
+        raise HTTPNotFound()
 
     return preview_path
