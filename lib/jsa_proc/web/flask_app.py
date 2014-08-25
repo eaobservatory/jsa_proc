@@ -30,6 +30,7 @@ from jsa_proc.web.job_summary import prepare_job_summary
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
 from jsa_proc.web.job_log import prepare_job_log
+from jsa_proc.web.error_summary import prepare_error_summary
 
 
 
@@ -51,6 +52,7 @@ def create_web_app():
     def home_page():
         raise HTTPRedirect(url_for('job_summary'))
 
+
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
@@ -66,6 +68,11 @@ def create_web_app():
     @templated('job_summary.html')
     def job_summary():
         return prepare_job_summary(db)
+
+    @app.route('/error_summary/')
+    @templated('error_summary.html')
+    def error_summary():
+        return prepare_error_summary(db)
 
     @app.route('/job/<int:job_id>', methods=['GET'])
     @templated('job_info.html')

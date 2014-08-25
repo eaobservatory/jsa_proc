@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content%}
+
+{% for l in job_summary_dict.keys() %}
+<h2> {{l}} </h2>
+
+<table style="border:none;font-size:9pt">
+  <tr>
+    <th Select </th>
+    <th> Job ID </th>
+    <th> State</th>
+    <th> Time </th>
+    <th> Message </th>
+  </tr>
+{% for job_id in job_summary_dict[l] %}
+<tr>
+  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="selected_jobids" </td>
+  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <a href="{{ url_for('job_info', job_id=job_id)}}">{{job_id}}</a> </td>
+  {% for row in job_summary_dict[l][job_id] %}
+    <td class="state_{{ row.state | state_phase }}"> {{row.state}} </td>
+    <td> {{row.time}} </td>
+    <td> {{row.message}} </td>
+    </tr>
+  <tr>
+  {% endfor %}
+<tr class="blankrow"><td columnspan="4" style="padding:1ex;border:none"></td></tr>
+
+{% endfor %}
+
+</table>
+{% endfor %}
+{% endblock %}
