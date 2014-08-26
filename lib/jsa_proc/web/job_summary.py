@@ -51,5 +51,5 @@ def prepare_job_summary(db):
         'title': 'Summary of JSA Processing Jobs',
         'total_count': total_count,
         'job_summary_dict': job_summary_dict,
-        'locations':locations,
+        'locations': locations,
     }

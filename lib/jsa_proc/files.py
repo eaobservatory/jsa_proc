@@ -40,7 +40,7 @@ def get_size(path):
     Disk usage of path (and any subidrectories) in units of gigabytes.
     """
 
-    p = subprocess.Popen(['du','-sk',path], stdout=subprocess.PIPE)
+    p = subprocess.Popen(['du', '-sk', path], stdout=subprocess.PIPE)
     stdout, stderr = p.communicate()
 
     sizek = float(stdout.split('\t')[0])

@@ -297,7 +297,7 @@ class JSAProcDB:
         job_id.
         """
         with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id = %s',(job_id,))
+            c.execute('SELECT * FROM log WHERE job_id = %s', (job_id,))
             logs = c.fetchall()
 
         # Create JSAProcLog namedtuple object to hold values.
@@ -448,7 +448,7 @@ class JSAProcDB:
 
             print query
             print param
-            c.execute(query,param)
+            c.execute(query, param)
             error_jobs = c.fetchall()
 
             edict = OrderedDict()

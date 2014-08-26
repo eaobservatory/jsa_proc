@@ -80,7 +80,7 @@ def create_web_app():
     def job_info(job_id):
         return prepare_job_info(db, job_id)
 
-    @app.route('/job_change_state' ,methods=['POST'])
+    @app.route('/job_change_state', methods=['POST'])
     def job_change_state():
 
         # Get the variables from POST
