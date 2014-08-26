@@ -44,7 +44,7 @@ class PollCADCTestCase(DBTestCase):
 
         sm = JSAProcStateMachine(self.db, cadc)
 
-        self.assertTrue(sm.poll_cadc_jobs())
+        self.assertTrue(sm.poll_cadc_jobs(fetch_previews=False))
 
         # Job 11 state should have been changed to COMPLETE,
         # and the output files should have been added.

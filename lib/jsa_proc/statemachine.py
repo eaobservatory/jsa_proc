@@ -16,8 +16,10 @@
 import logging
 
 from jsa_proc.cadc.dpstate import CADCDPState
+from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.error import JSAProcError, NotAtJACError
 from jsa_proc.job_run.datafile_handling import get_jac_input_data, write_input_list
+from jsa_proc.job_run.directories import get_output_dir
 from jsa_proc.job_run.validate import validate_job
 from jsa_proc.state import JSAProcState
 
@@ -122,7 +124,7 @@ class JSAProcStateMachine:
 
         return False if n_err else True
 
-    def poll_cadc_jobs(self):
+    def poll_cadc_jobs(self, fetch_previews=True):
         """Update status of all CADC jobs.
 
         Fetches the status of all relevant jobs from CADC.  Then loops
@@ -182,8 +184,16 @@ class JSAProcStateMachine:
                 if job.state == CADCDPState.COMPLETE:
                     logger.debug('Job is complete: fetching output files.')
                     output = self.cadc.get_recipe_output_files(recipe_instance)
+
+                    # Ensure output filenames are lower case.
+                    output = [f.lower() for f in output]
+
                     logger.debug('Storing list of output files.')
-                    self.db.set_output_files(job_id, [f.lower() for f in output])
+                    self.db.set_output_files(job_id, output)
+
+                    if fetch_previews:
+                        logger.debug('Attempting to download preview files.')
+                        fetch_cadc_previews(output, get_output_dir(job_id))
 
             except Exception:
                 logger.exception('Error while updating state of job %i',
