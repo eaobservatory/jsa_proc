@@ -37,7 +37,7 @@ class JSAProcDBError(JSAProcError):
         """
         Takes in strings for the table name and the query.
         """
-        message = 'Database error from  table %s and query %s'%(table,query)
+        message = 'Database error from  table %s and query %s' % (table, query)
 
         Exception.__init__(self, message, *args)
 
@@ -57,7 +57,7 @@ class NoRowsError(JSAProcDBError):
         Takes in strings for the table name and the query.
         """
 
-        message = 'No rows found in table %s, matching "%s"'%(table,query)
+        message = 'No rows found in table %s, matching "%s"' % (table, query)
 
         Exception.__init__(self, message, *args)
 
@@ -73,7 +73,7 @@ class ExcessRowsError(JSAProcDBError):
         """
 
         message = 'More than the expected number of rows found in table ' \
-                  '%s, matching "%s"'%(table, query)
+                  '%s, matching "%s"' % (table, query)
         Exception.__init__(self, message, *args)
 
 

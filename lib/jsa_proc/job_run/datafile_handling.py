@@ -66,7 +66,7 @@ def write_input_list(job_id, input_file_list):
         os.mkdir(input_directory)
     fname = os.path.join(input_directory, input_list_name)
     f = open(fname, 'w')
-    for i  in input_file_list:
+    for i in input_file_list:
         f.write(i + os.linesep)
     f.close()
     return fname
@@ -133,7 +133,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
                     shutil.move(filepath, invalid_file)
                     raise JSAProcError(
                         'Downloaded file %s fails hds validation'
-                        ' Moved to %s'%(filepath, invalid_file))
+                        ' Moved to %s' % (filepath, invalid_file))
                 else:
                     files_list.append(filepath)
 

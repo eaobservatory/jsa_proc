@@ -38,7 +38,7 @@ def prepare_job_list(db, location, state, number, page):
         if offset < 0:
             offset = 0
     else:
-        offset=0
+        offset = 0
 
     jobs = []
 

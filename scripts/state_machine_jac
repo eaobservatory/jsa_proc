@@ -22,15 +22,15 @@ import argparse
 from jsa_proc.statemachine import JSAProcStateMachine
 from jsa_proc.config import get_database
 
-description="""
+description = """
 This script will carry out simple state changes for JAC jobs in the
 database configured in the JSAProc configuration file. It uses the
 poll_jac_jobs method of the JSAProcStateMachine class which states:
 
-"""+JSAProcStateMachine.poll_jac_jobs.__doc__
+""" + JSAProcStateMachine.poll_jac_jobs.__doc__
 
 # Parse the arguments.
-parser= argparse.ArgumentParser(description=description)
+parser = argparse.ArgumentParser(description=description)
 parser.add_argument(
     '-v','--verbose', required=False, default=False, action='store_true',
     help='Use DEBUG level of logging (otherwise use INFO)')

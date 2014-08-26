@@ -73,11 +73,11 @@ class JSAProcDB:
             raise JSAProcError("You must set either id_ or tag to use get_job")
 
         if id_ is not None:
-            name='id'
-            value=id_
+            name = 'id'
+            value = id_
         else:
-            name='tag'
-            value=tag
+            name = 'tag'
+            value = tag
 
         # Get the values form the database
         with self.db as c:
@@ -86,11 +86,11 @@ class JSAProcDB:
             if len(job) == 0:
                 raise NoRowsError(
                     'job',
-                    'SELECT * FROM job WHERE '+name+'='+str(value))
+                    'SELECT * FROM job WHERE ' + name + '=' + str(value))
             if len(job) > 1:
                 raise ExcessRowsError(
                     'job',
-                    'SELECT * FROM job WHERE '+name+'='+str(value))
+                    'SELECT * FROM job WHERE ' + name + '=' + str(value))
 
             # Turn list into single item
             job = job[0]
@@ -236,9 +236,9 @@ class JSAProcDB:
                 if len(state_prev) > 1:
                     raise ExcessRowsError(
                         'job',
-                        'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
+                        'SELECT state_prev FROM job WHERE id=%s' % (job_id))
 
-                state_prev=state_prev[0][0]
+                state_prev = state_prev[0][0]
 
             # Update log table.
             self._add_log_entry(c, job_id, state_prev, newstate, message)
@@ -264,7 +264,7 @@ class JSAProcDB:
             if len(input_files) == 0:
                 raise NoRowsError(
                     'input_file',
-                    'SELECT filename FROM input_file WHERE job_id = '+
+                    'SELECT filename FROM input_file WHERE job_id = ' +
                     (str(job_id)))
 
         # input_files will be a list of tuples, each tuple containgin
@@ -325,7 +325,7 @@ class JSAProcDB:
             raise NoRowsError(
                 'job',
                 'SELECT * FROM log WHERE job_id = %s '
-                'ORDER BY id DESC LIMIT 1'%(str(job_id)))
+                'ORDER BY id DESC LIMIT 1' % (str(job_id)))
 
         log = JSAProcLog(*log[0])
         return log
@@ -387,7 +387,7 @@ class JSAProcDB:
             if len(output_files) == 0:
                 raise NoRowsError(
                     'output_file',
-                    'SELECT filename FROM output_file WHERE job_id = '+
+                    'SELECT filename FROM output_file WHERE job_id = ' +
                     (str(job_id)))
 
         # Turn list of tuples into single list of strings.
@@ -438,7 +438,7 @@ class JSAProcDB:
         query += ' WHERE job.state="E"'
 
         if location is not None:
-            query+= 'AND job.location=%s'
+            query += 'AND job.location=%s'
             param.append(location)
 
         query += ' ORDER BY job.location DESC, job.id DESC, log.id DESC'
@@ -500,7 +500,7 @@ class JSAProcDB:
 
         if sortdir != 'ASC' and sortdir != 'DESC':
             raise JSAProcError('Can only sort jobs in ASC or DESC direction. '
-                               'You picked %s'%(sortdir))
+                               'You picked %s' % (sortdir))
 
         if count is True:
             query = 'SELECT COUNT(*)'
@@ -517,7 +517,7 @@ class JSAProcDB:
             else:
                 query += ', NULL'
 
-        query  += ' FROM job' + join
+        query += ' FROM job' + join
 
         if state is not None:
             where.append('job.state=%s')
