@@ -51,4 +51,3 @@ status = sm.poll_jac_jobs()
 # Return a status of 1 if status is not True.
 if not status:
     sys.exit(1)
-

@@ -96,4 +96,3 @@ def get_log_dir_size():
     Returns size in GiB.
     """
     return _get_config_dir_size('log')
-

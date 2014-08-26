@@ -52,5 +52,3 @@ def prepare_job_summary(db):
         'job_summary_dict': job_summary_dict,
         'locations':locations,
     }
-
-

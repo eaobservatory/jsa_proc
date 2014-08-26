@@ -77,4 +77,3 @@ def file_in_jac_data_dir(filename):
     dir = get_jac_data_dir(filename)
 
     return file_in_dir(filename, dir)
-

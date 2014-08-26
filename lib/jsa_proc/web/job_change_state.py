@@ -30,7 +30,3 @@ def prepare_change_state(db, job_ids, newstate, message):
         state_prev = db.get_job(id_=job_id).state
 
         db.change_state(job_id, newstate, message, state_prev=state_prev)
-
-
-
-

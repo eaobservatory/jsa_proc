@@ -67,5 +67,3 @@ def prepare_job_list(db, location, state, number, page):
         'selected_number': number,
         'selected_page': page,
     }
-
-

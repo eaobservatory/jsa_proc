@@ -52,4 +52,3 @@ class ErrorDecorator(object):
                          'Error message and args: ' + \
                          ' '.join([str(i) for i in theexception.args]))
             raise
-
