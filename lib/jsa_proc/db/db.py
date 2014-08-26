@@ -324,8 +324,8 @@ class JSAProcDB:
         if len(log) < 1:
             raise NoRowsError(
                 'job',
-                'SELECT * FROM log WHERE job_id = %s '
-                'ORDER BY id DESC LIMIT 1' % (str(job_id)))
+                'SELECT * FROM log WHERE job_id = %i '
+                'ORDER BY id DESC LIMIT 1' % (job_id))
 
         log = JSAProcLog(*log[0])
         return log
