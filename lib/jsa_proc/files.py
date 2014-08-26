@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 """
 Functions for examining the files and disks.
 """
@@ -22,6 +21,7 @@ Functions for examining the files and disks.
 import subprocess
 
 from jsa_proc.config import get_config
+
 
 def get_size(path):
 
@@ -48,6 +48,7 @@ def get_size(path):
 
     return sizeg
 
+
 def _get_config_dir_size(type_):
     """
     Return size of directorie tree described in config GiB.
@@ -60,6 +61,7 @@ def _get_config_dir_size(type_):
 
     return size
 
+
 def get_input_dir_size():
     """
     Get the size of the input data directory tree.
@@ -67,6 +69,7 @@ def get_input_dir_size():
     Returns size in GiB.
     """
     return _get_config_dir_size('input')
+
 
 def get_output_dir_size():
     """
@@ -76,6 +79,7 @@ def get_output_dir_size():
     """
     return _get_config_dir_size('output')
 
+
 def get_scratch_dir_size():
     """
     Get the size of the scratch data directory tree.
@@ -83,6 +87,7 @@ def get_scratch_dir_size():
     Returns size in GiB.
     """
     return _get_config_dir_size('scratch')
+
 
 def get_log_dir_size():
     """

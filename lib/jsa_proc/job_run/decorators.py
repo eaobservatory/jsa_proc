@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """
 Decorators for functions related to running jobs.
 """
 
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
+
 
 class ErrorDecorator(object):
     """
@@ -40,6 +39,7 @@ class ErrorDecorator(object):
 
     def __init__(self, function):
         self.function = function
+
     def __call__(self, *args, **kwargs):
         try:
             return self.function(*args, **kwargs)

@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import os.path
 import subprocess
@@ -32,8 +31,6 @@ Routines for handling input and output files when running jobs.
 
 # Name of .lis file containing each input file with full path.
 input_list_name = 'input_files_job.lis'
-
-
 
 
 def get_jac_input_data(input_file_list):
@@ -55,6 +52,7 @@ def get_jac_input_data(input_file_list):
             inputsfiles.append(filepath)
     return inputsfiles
 
+
 def write_input_list(job_id, input_file_list):
     """
     Write a textfile to list in the input directory
@@ -72,6 +70,7 @@ def write_input_list(job_id, input_file_list):
         f.write(i + os.linesep)
     f.close()
     return fname
+
 
 def assemble_input_data_for_job(job_id, input_file_list):
     """
@@ -100,7 +99,6 @@ def assemble_input_data_for_job(job_id, input_file_list):
     if (not os.path.exists(input_directory)
             and not os.path.isdir(input_directory)):
         os.mkdir(input_directory)
-
 
     # For each file, check if its already in JAC data store, or input
     # directory. Download from CADC if its not. Check downloaded files
@@ -169,7 +167,6 @@ def get_output_files(job_id):
     return contents
 
 
-
 def valid_hds(filepath):
     """
     Checks to see if a given file is a valid hds file.
@@ -192,7 +189,6 @@ def valid_hds(filepath):
     config = get_config()
     starpath = config.get('job_run', 'starpath')
     com_path = os.path.join(starpath, 'bin', 'hdstrace')
-
 
     # Environmental variables.
     myenv = os.environ.copy()

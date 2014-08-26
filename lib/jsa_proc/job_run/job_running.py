@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
@@ -191,6 +190,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Need to return list of produced files in output directory?
 
     return log.name
+
 
 def restore_signals():
     """Restore signals which Python otherwise ignores.

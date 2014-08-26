@@ -24,6 +24,7 @@ config = None
 
 database = None
 
+
 def get_config():
     """Read the configuration file.
 

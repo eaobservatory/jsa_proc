@@ -22,6 +22,7 @@ from jsa_proc.job_run.decorators import ErrorDecorator
 valid_modes = ('obs', 'mode', 'project', 'public')
 valid_file = re.compile('^[_a-z0-9]+$')
 
+
 @ErrorDecorator
 def validate_job(job_id, db):
     """Attempt to validate a job.

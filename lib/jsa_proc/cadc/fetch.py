@@ -27,6 +27,7 @@ from jsa_proc.error import JSAProcError
 
 jcmt_data_url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
 
+
 def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     """
     Routine which will fetch a file from CADC and save it into the output

@@ -29,6 +29,7 @@ JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new m
 JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id outputs')
 JSAProcErrorInfo = namedtuple('JSAProcErrorInfo', 'id time message state location')
 
+
 class JSAProcDB:
     """
     JSA Processing database access class.
@@ -44,7 +45,6 @@ class JSAProcDB:
         """
 
         assert(hasattr(self, 'db'))
-
 
     def get_job(self, id_=None, tag=None):
         """
@@ -162,7 +162,6 @@ class JSAProcDB:
 
         # job_id may not be necessary but sometimes useful.
         return job_id
-
 
     def change_state(self, job_id, newstate, message, state_prev=None):
         """
@@ -285,7 +284,6 @@ class JSAProcDB:
 
         return logs
 
-
     def get_last_log(self, job_id):
         """
         Return the last log entry for a given job.
@@ -384,7 +382,6 @@ class JSAProcDB:
 
         """
 
-
         with self.db as c:
 
             # First of all blank out any current output files for this job_id.
@@ -394,7 +391,6 @@ class JSAProcDB:
                 # Now add in the new output files, one at a time.
                 c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s, %s)',
                           (job_id, f))
-
 
     def find_errors_logs(self, location=None):
         """
@@ -427,10 +423,8 @@ class JSAProcDB:
                 einfo = JSAProcErrorInfo(*j)
                 edict[einfo.id] = edict.get(einfo.id, []) + [einfo]
 
-
         return edict
             # Now sort out error jobs in sensible option
-
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
@@ -516,7 +510,6 @@ class JSAProcDB:
 
         if order:
             query += ' ORDER BY ' + ', '.join(order)
-
 
         # Return [number] of results, starting at [offset]
         if number:

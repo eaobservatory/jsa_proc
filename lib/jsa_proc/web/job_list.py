@@ -40,7 +40,6 @@ def prepare_job_list(db, location, state, number, page):
     else:
         offset=0
 
-
     jobs = []
 
     for job in db.find_jobs(location=location, state=state, sort=True, outputs='%preview_64.png',

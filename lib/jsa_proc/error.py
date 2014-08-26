@@ -19,6 +19,7 @@ Errors defined for the JSA Processing classes.
 
 """
 
+
 class JSAProcError(Exception):
     """
     Base Class to handle errors in this module.
@@ -60,6 +61,7 @@ class NoRowsError(JSAProcDBError):
 
         Exception.__init__(self, message, *args)
 
+
 class ExcessRowsError(JSAProcDBError):
     """
     Error indicating that more than the expected number of rows was found.
@@ -72,6 +74,7 @@ class ExcessRowsError(JSAProcDBError):
 
         message = 'More than the expected number of rows found in table %s, matching "%s"'%(table, query)
         Exception.__init__(self, message, *args)
+
 
 class NotAtJACError(JSAProcError):
     """

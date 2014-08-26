@@ -70,7 +70,6 @@ def prepare_job_info(db, job_id):
     log = db.get_logs(job_id)
     log.reverse()
 
-
     # Get the log files on disk (if any)
     logdir = get_log_dir(job_id)
     orac_logfiles =  glob.glob(os.path.join(logdir, 'oracdr*.html'))

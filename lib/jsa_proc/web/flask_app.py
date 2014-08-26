@@ -33,7 +33,6 @@ from jsa_proc.web.job_log import prepare_job_log
 from jsa_proc.web.error_summary import prepare_error_summary
 
 
-
 def create_web_app():
     """Function to prepare the Flask web application."""
 
@@ -51,7 +50,6 @@ def create_web_app():
     @app.route('/')
     def home_page():
         raise HTTPRedirect(url_for('job_summary'))
-
 
     @app.route('/job/')
     @templated('job_list.html')
@@ -99,9 +97,6 @@ def create_web_app():
         # Redirect the page to correct info.
         #flash('You have successfully mangled the job status!')
         raise HTTPRedirect(url)
-
-
-
 
     # Image handling.
     @app.route('/job/<int:job_id>/preview/<preview>')

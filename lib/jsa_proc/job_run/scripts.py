@@ -24,6 +24,7 @@ from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job, get_
 from jsa_proc.job_run.job_running import jsawrapdr_run
 from jsa_proc.job_run.directories import get_input_dir
 
+
 def fetch(job_id=None, db=None):
     """
     Assemble the files required to process a job.
@@ -54,6 +55,7 @@ def fetch(job_id=None, db=None):
         job_id = job.id
 
     fetch_a_job(job_id, db=db)
+
 
 @ErrorDecorator
 def fetch_a_job(job_id, db=None):
@@ -120,6 +122,7 @@ def run_job(job_id=None, db=None):
 
     run_a_job(job_id, db=db)
 
+
 @ErrorDecorator
 def run_a_job(job_id, db=None):
     """
@@ -131,11 +134,9 @@ def run_a_job(job_id, db=None):
 
     """
 
-
     if not db:
         # Get link to database
         db = get_database()
-
 
     # Change status of job to Running, raise an error if not currently in
     # WAITING state.

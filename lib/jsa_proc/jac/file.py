@@ -38,7 +38,6 @@ def get_jac_data_dir(filename):
                        'an expected pattern'.format(filename))
 
 
-
 def file_in_dir(filename, dir):
     """
     Check whether a filename is present in an arbitrary directory.
