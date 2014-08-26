@@ -95,7 +95,7 @@ def create_web_app():
                              message)
 
         # Redirect the page to correct info.
-        #flash('You have successfully mangled the job status!')
+        # flash('You have successfully mangled the job status!')
         raise HTTPRedirect(url)
 
     # Image handling.
