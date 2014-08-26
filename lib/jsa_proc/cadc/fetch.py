@@ -19,13 +19,15 @@ Routines for downloading data from CADC.
 """
 
 import requests
+from requests.exceptions import HTTPError
 import os.path
 
 from jsa_proc.config import get_config
+from jsa_proc.error import JSAProcError
 
 jcmt_data_url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
 
-def fetch_cadc_file(filename, output_directory):
+def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     """
     Routine which will fetch a file from CADC and save it into the output
     directory. It assumes the url is of the form:
@@ -38,7 +40,11 @@ def fetch_cadc_file(filename, output_directory):
     output_directory, string
     Path to save file to.
 
-    Will raise an requests.except.HTTPError if it can't connect.
+    suffix: additional suffix to be added to the filename
+    before saving to the output directory.
+    (string, default: ".sdf")
+
+    Will raise an JSAProcError if it can't connect.
 
     Returns name of file with path
     """
@@ -53,18 +59,22 @@ def fetch_cadc_file(filename, output_directory):
 
     # Local name to save to (requests automatically decompresses, so
     # don't need the .gz).
-    local_file = filename+'.sdf'
+    local_file = filename + suffix
     output_file_path = os.path.join(output_directory, local_file)
 
-    # Connect with stream=True for large files.
-    r = requests.get(data_path, auth=(cadc_username, cadc_password), stream=True)
+    try:
+        # Connect with stream=True for large files.
+        r = requests.get(data_path, auth=(cadc_username, cadc_password), stream=True)
 
-    # Check if its worked. (raises error if not okay)
-    r.raise_for_status()
+        # Check if its worked. (raises error if not okay)
+        r.raise_for_status()
 
-    # write out to a file in the requested output directory
-    with open(output_file_path, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            f.write(chunk)
+        # write out to a file in the requested output directory
+        with open(output_file_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                f.write(chunk)
+
+    except HTTPError as e:
+        raise JSAProcError('Error fetching CADC file: ' + str(e))
 
     return output_file_path
