@@ -30,14 +30,16 @@ class JSAProcState:
 
     UNKNOWN = '?'
     QUEUED = 'Q'
+    MISSING = 'M'
     FETCHING = 'F'
     WAITING = 'W'
     RUNNING = 'S'
     PROCESSED = 'P'
-    TRANSFERRING = 'X'
+    TRANSFERRING = 'T'
     INGESTION = 'I'
     COMPLETE = 'Y'
     ERROR = 'E'
+    DELETED = 'X'
 
     PHASE_QUEUE = 'Q'
     PHASE_FETCH = 'F'
@@ -48,6 +50,7 @@ class JSAProcState:
     _info = OrderedDict((
         (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False)),
         (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False)),
+        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,    False)),
         (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True)),
         (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False)),
         (RUNNING,      StateInfo('Running',      PHASE_RUN,      True)),
@@ -56,6 +59,7 @@ class JSAProcState:
         (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False)),
         (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False)),
         (ERROR,        StateInfo('Error',        PHASE_ERROR,    False)),
+        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False)),
     ))
 
     STATE_ALL = tuple(_info.keys())

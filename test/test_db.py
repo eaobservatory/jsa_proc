@@ -111,12 +111,12 @@ class InterfaceDBTest(DBTestCase):
         self.assertIn('added to the database', logs[0].message)
 
         # Try adding a job with a state specified
-        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', [], state='X')
+        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', [], state=JSAProcState.TRANSFERRING)
         job2 = self.db.get_job(id_=id_2)
-        self.assertEqual(job2.state, 'X')
+        self.assertEqual(job2.state, JSAProcState.TRANSFERRING)
 
         with self.assertRaises(JSAProcError):
-            self.db.add_job('tag3', 'CADC', 'night', 'REC', [], state='Z')
+            self.db.add_job('tag3', 'CADC', 'night', 'REC', [], state='!')
 
         # Check we can't give the same file more than once (a database
         # constraint).

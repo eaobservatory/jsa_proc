@@ -41,7 +41,7 @@ class StateTestCase(TestCase):
             self.assertEqual(CADCDPState.jsaproc_state(cadc), jsa)
 
         with self.assertRaises(JSAProcError):
-                CADCDPState.jsaproc_state('X')
+                CADCDPState.jsaproc_state('!')
 
     def test_state_name(self):
         """Test lookup of state names."""
@@ -49,6 +49,7 @@ class StateTestCase(TestCase):
         states = {
             JSAProcState.UNKNOWN: 'Unknown',
             JSAProcState.QUEUED: 'Queued',
+            JSAProcState.MISSING: 'Missing',
             JSAProcState.FETCHING: 'Fetching',
             JSAProcState.WAITING: 'Waiting',
             JSAProcState.RUNNING: 'Running',
@@ -57,13 +58,14 @@ class StateTestCase(TestCase):
             JSAProcState.INGESTION: 'Ingestion',
             JSAProcState.COMPLETE: 'Complete',
             JSAProcState.ERROR: 'Error',
+            JSAProcState.DELETED: 'Deleted',
         }
 
         for (state, name) in states.items():
             self.assertEqual(JSAProcState.get_name(state), name)
 
         with self.assertRaises(JSAProcError):
-            JSAProcState.get_name('Z')
+            JSAProcState.get_name('!')
 
     def test_state_info(self):
         """Test retrieval of state information."""
@@ -106,4 +108,4 @@ class StateTestCase(TestCase):
             self.assertEqual(CADCDPState.get_name(state), name)
 
         with self.assertRaises(JSAProcError):
-            CADCDPState.get_name('Z')
+            CADCDPState.get_name('!')
