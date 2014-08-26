@@ -19,16 +19,17 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_change_state(db, job_id, newstate, message):
-    print job_id
+def prepare_change_state(db, job_ids, newstate, message):
+
     if not JSAProcState.get_name(newstate):
         raise Exception('Unknown state %s' % (newstate))
     if message == '':
         raise Exception('You must provide a message to change state!')
 
-    state_prev = db.get_job(id_=job_id).state
+    for job_id in job_ids:
+        state_prev = db.get_job(id_=job_id).state
 
-    db.change_state(job_id, newstate, message, state_prev=state_prev)
+        db.change_state(job_id, newstate, message, state_prev=state_prev)
 
 
 

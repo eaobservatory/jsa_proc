@@ -80,21 +80,23 @@ def create_web_app():
         print 'testing job_info'
         return prepare_job_info(db, job_id)
 
-    @app.route('/job_change_state/<int:job_id>' ,methods=['POST'])
-    def job_change_state(job_id):
+    @app.route('/job_change_state' ,methods=['POST'])
+    def job_change_state():
 
         # Get the variables from POST
         newstate = request.form['newstate']
         message = request.form['message']
+        job_ids = request.form.getlist('job_id')
+        url = request.form['url']
 
         # Change the state.
-        prepare_change_state(db, job_id,
+        prepare_change_state(db, job_ids,
                              newstate,
                              message)
 
         # Redirect the page to correct info.
         #flash('You have successfully mangled the job status!')
-        raise HTTPRedirect(url_for('job_info', job_id=job_id))
+        raise HTTPRedirect(url_for('job_info', job_id=job_ids[0]))
 
 
 
