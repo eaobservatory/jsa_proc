@@ -172,7 +172,6 @@ def run_a_job(job_id, db=None):
     # Change state.
     db.change_state(job_id, JSAProcState.PROCESSED,
                  'Job has been sucessfully processed',
-                 state_prev = JSAProcState.RUNNING)
+                 state_prev=JSAProcState.RUNNING)
 
     return job_id
-

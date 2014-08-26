@@ -72,7 +72,7 @@ def create_web_app():
     def error_summary():
         return prepare_error_summary(
             db,
-            filtering = request.args.get('filtering', None),
+            filtering=request.args.get('filtering', None),
         )
 
     @app.route('/job/<int:job_id>', methods=['GET'])
