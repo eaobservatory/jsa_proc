@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
+
+
+<div id="wrapper">
+<div class="col">
 <table>
 <tr><th>State</th><td>{{ info.state | state_name }}</td></tr>
 <tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
@@ -15,6 +19,17 @@
 <tr><th>Mode</th><td>{{ info.mode }}</td></tr>
 <tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
 </table>
+</div>
+
+{% if previews %}
+<div class="col">
+<a href="{{ previews[0][1] }}"><img src="{{ previews[0][0] }}"></a>
+<p> First preview image (click to embiggen) </p>
+{% endif %}
+</div>
+
+<div class="clear"></div>
+
 
 {% if log %}
 <h2>Log</h2>
@@ -60,16 +75,6 @@
 {% endif %}
 
 
-
-{% if previews %}
-<h2>PREVIEW IMAGES</h2>
-<div style="text-align:center">
-{% for l in previews %}
-<a href="{{ l[1] }}"><img src="{{ l[0] }}"></a>
-{% endfor %}
-</div>
-{% endif %}
-
 {% if orac_logs %}
 <h2>ORAC-DR Logs</h2>
 <p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
@@ -91,6 +96,17 @@
 {% endfor %}
 </ul>
 {% endif %}
+
+
+{% if previews|length > 0 %}
+<h2>All Preview Images</h2>
+<div style="text-align:center">
+{% for l in previews %}
+<a href="{{ l[1] }}"><img src="{{ l[0] }}"></a>
+{% endfor %}
+</div>
+{% endif %}
+
 
 {% if output_files %}
 <hr/>
