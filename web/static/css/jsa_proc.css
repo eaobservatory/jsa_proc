@@ -1,26 +1,22 @@
-
-
 html {
-font-family: sans-serif;
+    font-family: sans-serif;
 }
 
 body {
-margin: 0;
-text-align:center;
-background: silver;
-width:100%;
+    margin: 0;
+    text-align: center;
+    background: silver;
+    width: 100%;
 }
 
-
-
-hr{
-color: green;
-background-color:green;
-height:5px;
+hr {
+    color: green;
+    background-color: green;
+    height: 5px;
 }
 
 a {
-background: transparent;
+    background: transparent;
 }
 
 ul.twocol {
@@ -30,79 +26,80 @@ ul.twocol {
 }
 
 ul.statebar {
-    width:100%;
+    width: 100%;
     margin: auto;
-    padding:0;
-    text-align:center;
+    padding: 0;
+    text-align: center;
 }
-ul.statebar li{
-    vertical-align:middle;
-    display:inline-block;
+
+ul.statebar li {
+    vertical-align: middle;
+    display: inline-block;
     list-style-type: none;
-    margin:0;
-    padding:2ex;
+    margin: 0;
+    padding: 2ex;
 }
 
 h1, h2, h3, h4 {
     padding-top: 1ex;
-    margin-bottom:1ex;
-    text-align:center;
+    margin-bottom: 1ex;
+    text-align: center;
 }
 
-
 div#content {
-max-width: 110ex;
-background:white;
-margin: auto;
-display:block;
-padding: 1ex;
-text-align:left;
+    max-width: 110ex;
+    background: white;
+    margin: auto;
+    display: block;
+    padding: 1ex;
+    text-align: left;
 }
 
 h1  {
-margin: .67em 0;
-font-size: 2em;
+    margin: .67em 0;
+    font-size: 2em;
 }
 
 div#nav {
-    display:block;
-    margin:0px;
-    width:100%;
-    background:green;
-    padding-top:0.3ex;
-    font-size:130%;
-    }
+    display: block;
+    margin: 0px;
+    width: 100%;
+    background: green;
+    padding-top: 0.3ex;
+    font-size: 130%;
+}
 
-div#nav ul{
-    list-style:none;
-    padding:5px;
-    border-bottom:5px solid white;
-    text-align:center;
-    }
-div#nav li{
+div#nav ul {
+    list-style: none;
+    padding: 5px;
+    border-bottom: 5px solid white;
+    text-align: center;
+}
+
+div#nav li {
     padding: 0.3ex 0 0 0;
-    display:inline;
-    background:green;
-    color:white;
-    vertical-align:bottom;
+    display: inline;
+    background: green;
+    color: white;
+    vertical-align: bottom;
 }
 
-div#nav li.active{
+div#nav li.active {
     background: white;
-    color:green;
-    border-bottom:5px solid white;
+    color: green;
+    border-bottom: 5px solid white;
 }
-div#nav li a{
-    text-decoration:none;
-    padding:5px 5px 5px 5px;
-    color:inherit;
-    text-align:center;
+
+div#nav li a {
+    text-decoration: none;
+    padding: 5px 5px 5px 5px;
+    color: inherit;
+    text-align: center;
 }
 
 img { 
-    max-width:100%
+    max-width: 100%;
 }
-
 
 div.tile {
     display: inline-block;
@@ -111,7 +108,7 @@ div.tile {
     margin: 20px;
     background: white;
     color: black;
-    vertical-align:top;
+    vertical-align: top;
 }
 
 div.tile_title {
@@ -121,9 +118,10 @@ div.tile_title {
     font-weight: bold;
 }
 
-div.tile img{
+div.tile img {
     padding: 5px;
 }
+
 div.tile p {
     margin: 0px;
     padding: 5px;
