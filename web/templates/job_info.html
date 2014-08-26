@@ -60,7 +60,7 @@
 {% if previews %}
 <h2>PREVIEW IMAGES</h2>
 {% for l in previews %}
-<img src="{{ l }}" />
+<a href="{{ l[1] }}"><img src="{{ l[0] }}" /></a>
 {% endfor %}
 {% endif %}
 

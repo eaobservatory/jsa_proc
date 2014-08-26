@@ -45,20 +45,26 @@ def prepare_job_info(db, job_id):
     except NoRowsError:
         input_files = ['in', 'in']
 
-    previews=[]
+    previews256 = []
+    previews1024 = []
     try:
         output_files = db.get_output_files(job.id)
 
         for i in output_files:
+            s = i.find('preview_256.png')
+            if s != -1:
+                previews256.append(i)
             s = i.find('preview_1024.png')
             if s != -1:
-                previews.append(i)
+                previews1024.append(i)
 
     except NoRowsError:
         output_files = []
 
-    if previews:
-        previews = [url_for('job_preview', job_id=job.id, preview=i) for i in previews]
+    if previews256:
+        previews256 = [url_for('job_preview', job_id=job.id, preview=i) for i in previews256]
+    if previews1024:
+        previews1024 = [url_for('job_preview', job_id=job.id, preview=i) for i in previews1024]
 
     # Logged entries in the database (newest first).
     log = db.get_logs(job_id)
@@ -83,6 +89,6 @@ def prepare_job_info(db, job_id):
         'output_files': output_files,
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
-        'previews': previews,
+        'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
     }
