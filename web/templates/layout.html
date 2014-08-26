@@ -1,3 +1,5 @@
+{% from 'macros.html' import render_navbar %}
+
 <!DOCTYPE HTML>
 
 <html>
@@ -17,26 +19,14 @@
       {% endif %}
       {% endwith %}
 
-      {% set navigation_bar = [
-        ('/', 'summary', 'Summary'),
-        ('/error_summary', 'error_summary', 'Errors'),
-        ('/job', 'job', 'Full Job List')] -%}
-
-        <div id="nav">
-        <ul >
-          {% for href, id, caption in navigation_bar %}
-          <li {% if id== active_page %} class="active" {% endif %} >
-            <a href="{{ href |e }}"  > {{ caption |e}} </a></li>
-          {% endfor %}
-        </ul>
-        </div>
       {% block body %}
 
         <div id="content">
-            <h1>{{ title }}</h1>
-            {% block content %}
+          {{render_navbar(active_page)}}
+          <h1>{{ title }}</h1>
+          {% block content %}
 
-            {% endblock %}
+          {% endblock %}
         </div>
         {% endblock %}
     </body>
