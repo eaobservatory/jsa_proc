@@ -20,7 +20,8 @@ from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError
 from jsa_proc.job_run.decorators import ErrorDecorator
-from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job, get_output_files
+from jsa_proc.job_run.datafile_handling \
+    import assemble_input_data_for_job, get_output_files
 from jsa_proc.job_run.job_running import jsawrapdr_run
 from jsa_proc.job_run.directories import get_input_dir
 
@@ -101,8 +102,8 @@ def run_job(job_id=None, db=None):
 
     Optionally an integer job_id can be given isntead to specify a specific job
 
-    By default it will look in the database determined by the JSA_proc config. Optionally
-    a database object can be given for testing purposes.
+    By default it will look in the database determined by the JSA_proc config.
+    Optionally a database object can be given for testing purposes.
 
     Any errors raised will be logged in the 'log' table for the job_id.
     """
@@ -159,7 +160,8 @@ def run_a_job(job_id, db=None):
     # Run the processing job.
     log = jsawrapdr_run(job_id, input_file_list, mode,
                        'REDUCE_SCAN_JSA_PUBLIC',
-                        cleanup='cadc', location='JAC', persist=True, logscreen=False)
+                        cleanup='cadc', location='JAC', persist=True,
+                        logscreen=False)
 
     # Create list of output files.
     output_files = get_output_files(job_id)

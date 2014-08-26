@@ -72,7 +72,8 @@ class ExcessRowsError(JSAProcDBError):
         Takes in strings for the table name and the query.
         """
 
-        message = 'More than the expected number of rows found in table %s, matching "%s"'%(table, query)
+        message = 'More than the expected number of rows found in table ' \
+                  '%s, matching "%s"'%(table, query)
         Exception.__init__(self, message, *args)
 
 

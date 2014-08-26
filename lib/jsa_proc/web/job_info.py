@@ -36,7 +36,8 @@ def prepare_job_info(db, job_id):
     if info['foreign_id'] is not None:
         if info['location'] == 'CADC':
             info['foreign_url'] = \
-                'http://beta.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/dp/recipe/{0}'.format(info['foreign_id'])
+                'http://beta.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/' \
+                'dp/recipe/{0}'.format(info['foreign_id'])
         else:
             info['foreign_url'] = None
 
@@ -62,9 +63,11 @@ def prepare_job_info(db, job_id):
         output_files = []
 
     if previews256:
-        previews256 = [url_for('job_preview', job_id=job.id, preview=i) for i in previews256]
+        previews256 = [url_for('job_preview', job_id=job.id, preview=i)
+                       for i in previews256]
     if previews1024:
-        previews1024 = [url_for('job_preview', job_id=job.id, preview=i) for i in previews1024]
+        previews1024 = [url_for('job_preview', job_id=job.id, preview=i)
+                        for i in previews1024]
 
     # Logged entries in the database (newest first).
     log = db.get_logs(job_id)
@@ -74,11 +77,13 @@ def prepare_job_info(db, job_id):
     logdir = get_log_dir(job_id)
     orac_logfiles =  glob.glob(os.path.join(logdir, 'oracdr*.html'))
     orac_logfiles = [os.path.split(i)[1] for i in orac_logfiles]
-    orac_logfiles =[ url_for('job_log_html', job_id=job.id, log=i) for i in orac_logfiles]
+    orac_logfiles =[ url_for('job_log_html', job_id=job.id, log=i)
+                     for i in orac_logfiles]
 
     wrapdr_logfiles = glob.glob(os.path.join(logdir, 'jsawrapdr*.log'))
     wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
-    wrapdr_logfiles =[ url_for('job_log_text', job_id=job.id, log=i) for i in wrapdr_logfiles]
+    wrapdr_logfiles =[ url_for('job_log_text', job_id=job.id, log=i)
+                       for i in wrapdr_logfiles]
 
     return {
         'title': 'Job {}'.format(job_id),

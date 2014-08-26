@@ -42,10 +42,12 @@ def prepare_job_list(db, location, state, number, page):
 
     jobs = []
 
-    for job in db.find_jobs(location=location, state=state, sort=True, outputs='%preview_64.png',
+    for job in db.find_jobs(location=location, state=state,
+                            sort=True, outputs='%preview_64.png',
                             number=number, offset=offset):
         if job.outputs:
-            preview = url_for('job_preview', job_id=job.id, preview=job.outputs[0])
+            preview = url_for('job_preview', job_id=job.id,
+                              preview=job.outputs[0])
         else:
             preview = None
         jobs.append({

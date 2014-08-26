@@ -65,7 +65,8 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
 
     try:
         # Connect with stream=True for large files.
-        r = requests.get(data_path, auth=(cadc_username, cadc_password), stream=True)
+        r = requests.get(data_path, auth=(cadc_username, cadc_password),
+                         stream=True)
 
         # Check if its worked. (raises error if not okay)
         r.raise_for_status()

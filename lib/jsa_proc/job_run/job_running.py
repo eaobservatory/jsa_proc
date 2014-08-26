@@ -27,12 +27,14 @@ import os
 import sys
 
 from jsa_proc.config import get_config
-from jsa_proc.job_run.directories import get_scratch_dir, get_log_dir, get_output_dir
+from jsa_proc.job_run.directories \
+    import get_scratch_dir, get_log_dir, get_output_dir
 from jsa_proc.error import JSAProcError
 
 
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
-                  cleanup='cadc', location='JAC', persist=False, jsawrapdr=None, 
+                  cleanup='cadc', location='JAC', persist=False,
+                  jsawrapdr=None,
                   debug=False,
                   logscreen=False):
     """Routine to execute jsawrapdr from python.
@@ -149,8 +151,10 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # environment
     jsa_env = os.environ.copy()
     jsa_env['STARLINK_DIR'] = starpath
-    jsa_env['PATH'] = os.path.join(starpath, 'bin') + os.pathsep + jsa_env['PATH']
-    jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib') + os.pathsep + jsa_env['LD_LIBRARY_PATH']
+    jsa_env['PATH'] = os.path.join(starpath, 'bin') + os.pathsep + \
+        jsa_env['PATH']
+    jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib') + os.pathsep + \
+        jsa_env['LD_LIBRARY_PATH']
     jsa_env['ORAC_DIR'] = orac_dir
     jsa_env['ORAC_LOGDIR'] = log_dir
     jsa_env['STAR_LOGIN'] = '1'
@@ -185,7 +189,8 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     if retcode != 0:
         raise JSAProcError('jsawrapdr exited with non zero status. '
                            'Retcode was %i; job_id is %i.'
-                           'stdin/stderr are written in %s' % (retcode, job_id, log.name),
+                           'stdin/stderr are written in %s' %
+                           (retcode, job_id, log.name),
                            retcode, job_id, log.name)
     # Need to return list of produced files in output directory?
 

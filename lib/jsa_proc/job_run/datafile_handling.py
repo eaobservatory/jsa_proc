@@ -122,15 +122,18 @@ def assemble_input_data_for_job(job_id, input_file_list):
 
                 if not valid:
 
-                    # Move invalid file to different directory and raise an error.
+                    # Move invalid file to different directory and raise an
+                    # error.
                     invalid_dir = os.path.join(input_directory, 'invalid')
-                    invalid_file = os.path.join(invalid_dir, os.path.split(filepath)[1])
+                    invalid_file = os.path.join(invalid_dir,
+                                                os.path.split(filepath)[1])
 
                     if not os.path.exists(invalid_dir):
                         os.mkdir(invalid_dir)
                     shutil.move(filepath, invalid_file)
-                    raise JSAProcError('Downloaded file %s fails hds validation'
-                                        ' Moved to %s'%(filepath, invalid_file))
+                    raise JSAProcError(
+                        'Downloaded file %s fails hds validation'
+                        ' Moved to %s'%(filepath, invalid_file))
                 else:
                     files_list.append(filepath)
 
@@ -159,7 +162,9 @@ def get_output_files(job_id):
 
     # Check it exists and is a directory: raise error if not
     if not os.path.exists(output_dir) or not os.path.isdir:
-        raise JSAProcError('The output directory %s for job %i does not exits' % (output_dir, job_id))
+        raise JSAProcError(
+            'The output directory %s for job %i does not exits' %
+            (output_dir, job_id))
 
     # Get list of files in directory:
     contents = os.listdir(output_dir)

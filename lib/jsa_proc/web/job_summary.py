@@ -41,10 +41,11 @@ def prepare_job_summary(db):
     for s in states:
         job_summary_dict[s] = OrderedDict()
         for l in locations:
-            job_summary_dict[s][l] = db.find_jobs(location=l, state=s, count=True)
+            job_summary_dict[s][l] = db.find_jobs(location=l, state=s,
+                                                  count=True)
 
-
-    total_count = sum([int(c) for j in job_summary_dict.values() for c in j.values()])
+    total_count = sum([int(c) for j in job_summary_dict.values()
+                       for c in j.values()])
 
     return {
         'title': 'Summary of JSA Processing Jobs',

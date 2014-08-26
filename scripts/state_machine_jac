@@ -31,8 +31,9 @@ poll_jac_jobs method of the JSAProcStateMachine class which states:
 
 # Parse the arguments.
 parser= argparse.ArgumentParser(description=description)
-parser.add_argument('-v','--verbose', required=False, default=False,
-                    action='store_true', help='Use DEBUG level of logging (otherwise use INFO)')
+parser.add_argument(
+    '-v','--verbose', required=False, default=False, action='store_true',
+    help='Use DEBUG level of logging (otherwise use INFO)')
 
 args = parser.parse_args()
 

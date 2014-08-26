@@ -25,9 +25,15 @@ logger = logging.getLogger(__name__)
 
 # Named tuples that are created ahead of time instead of dynamically
 # defined from table rows:
-JSAProcLog = namedtuple('JSAProcLog', 'id job_id datetime state_prev state_new message host')
-JSAProcJobInfo = namedtuple('JSAProcJobInfo', 'id tag state location foreign_id outputs')
-JSAProcErrorInfo = namedtuple('JSAProcErrorInfo', 'id time message state location')
+JSAProcLog = namedtuple(
+    'JSAProcLog',
+    'id job_id datetime state_prev state_new message host')
+JSAProcJobInfo = namedtuple(
+    'JSAProcJobInfo',
+    'id tag state location foreign_id outputs')
+JSAProcErrorInfo = namedtuple(
+    'JSAProcErrorInfo',
+    'id time message state location')
 
 
 class JSAProcDB:
@@ -53,7 +59,8 @@ class JSAProcDB:
         Requires either the tag or id of the job table, and raises a
         JSAProcDBError if one or the other is not provided. If the tag
         or id does not exist in the database than it needs to raise an
-        error. If both are set it does not raise an error, but will use the id value.
+        error. If both are set it does not raise an error, but will use
+        the id value.
 
         id_: integer
 
@@ -77,10 +84,14 @@ class JSAProcDB:
             c.execute('SELECT * FROM job WHERE '+name+'=%s', (value,))
             job = c.fetchall()
             if len(job) == 0:
-                raise NoRowsError('job',
-                                  'SELECT * FROM job WHERE '+name+'='+str(value))
+                raise NoRowsError(
+                    'job',
+                    'SELECT * FROM job WHERE '+name+'='+str(value))
             if len(job) > 1:
-                raise ExcessRowsError('job', 'SELECT * FROM job WHERE '+name+'='+str(value))
+                raise ExcessRowsError(
+                    'job',
+                    'SELECT * FROM job WHERE '+name+'='+str(value))
+
             # Turn list into single item
             job = job[0]
             rows = c.description
@@ -143,17 +154,21 @@ class JSAProcDB:
 
         # insert job into table
         with self.db as c:
-            c.execute('INSERT INTO job '
-                      '(tag, state, location, mode, parameters, foreign_id, priority) '
-                      'VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                      (tag, state, location, mode, parameters, foreign_id, priority))
+            c.execute(
+                'INSERT INTO job '
+                '(tag, state, location, mode, parameters, '
+                'foreign_id, priority) '
+                'VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                (tag, state, location, mode, parameters, foreign_id, priority))
 
-            # Get the autoincremented id from job table (job_id in all other tables)
+            # Get the autoincremented id from job table (job_id in all other
+            # tables).
             job_id = c.lastrowid
 
             # Need to get input file names and add them to table input_file
             for filename in input_file_names:
-                c.execute('INSERT INTO input_file (job_id, filename) VALUES (%s, %s)',
+                c.execute('INSERT INTO input_file (job_id, filename) '
+                          'VALUES (%s, %s)',
                           (job_id, filename))
 
             # Log the job creation
@@ -197,7 +212,8 @@ class JSAProcDB:
         with self.db as c:
 
             # Change the state to new state and update the state_prev
-            query = 'UPDATE job SET state_prev = state, state = %s WHERE id = %s'
+            query = ('UPDATE job SET state_prev = state, state = %s '
+                     'WHERE id = %s')
             param = [newstate, job_id]
 
             if state_prev is not None:
@@ -218,8 +234,9 @@ class JSAProcDB:
                 state_prev = c.fetchall()
 
                 if len(state_prev) > 1:
-                    raise ExcessRowsError('job',
-                                          'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
+                    raise ExcessRowsError(
+                        'job',
+                        'SELECT state_prev FROM job WHERE id=%s'%(str(job_id)))
 
                 state_prev=state_prev[0][0]
 
@@ -245,8 +262,10 @@ class JSAProcDB:
             input_files = c.fetchall()
 
             if len(input_files) == 0:
-                raise NoRowsError('input_file',
-                                  'SELECT filename FROM input_file WHERE job_id = '+(str(job_id)))
+                raise NoRowsError(
+                    'input_file',
+                    'SELECT filename FROM input_file WHERE job_id = '+
+                    (str(job_id)))
 
         # input_files will be a list of tuples, each tuple containgin
         # one file. Flatten this into a list of strings.
@@ -261,7 +280,8 @@ class JSAProcDB:
         object as argument "c".
         """
 
-        c.execute('INSERT INTO log (job_id, state_prev, state_new, message, host) '
+        c.execute('INSERT INTO log '
+                  '(job_id, state_prev, state_new, message, host) '
                   'VALUES (%s, %s, %s, %s, %s)',
                   (job_id, state_prev, state_new, message, gethostname()))
 
@@ -273,7 +293,8 @@ class JSAProcDB:
         job_id : integer (id from job table)
 
         Returns:
-        list of JSAProcLog nametuples, 1 entry per row in log table for that job_id.
+        list of JSAProcLog nametuples, 1 entry per row in log table for that
+        job_id.
         """
         with self.db as c:
             c.execute('SELECT * FROM log WHERE job_id = %s',(job_id,))
@@ -296,12 +317,15 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1',
+            c.execute('SELECT * FROM log WHERE job_id = %s '
+                      'ORDER BY id DESC LIMIT 1',
                       (job_id,))
             log = c.fetchall()
         if len(log) < 1:
-            raise NoRowsError('job','SELECT * FROM log WHERE job_id = %s ORDER BY id DESC LIMIT 1'%(str(job_id))
-                              )
+            raise NoRowsError(
+                'job',
+                'SELECT * FROM log WHERE job_id = %s '
+                'ORDER BY id DESC LIMIT 1'%(str(job_id)))
 
         log = JSAProcLog(*log[0])
         return log
@@ -322,9 +346,11 @@ class JSAProcDB:
 
         with self.db as c:
             if foreign_id == ():
-                c.execute('UPDATE job SET location = %s WHERE id = %s',(location, job_id))
+                c.execute('UPDATE job SET location = %s WHERE id = %s',
+                          (location, job_id))
             else:
-                c.execute('UPDATE job SET location = %s, foreign_id = %s WHERE id = %s',
+                c.execute('UPDATE job SET location = %s, foreign_id = %s '
+                          'WHERE id = %s',
                           (location, foreign_id, job_id))
 
     def set_foreign_id(self, job_id, foreign_id):
@@ -337,7 +363,8 @@ class JSAProcDB:
         foreign_id (reuiqred), string.
         """
         with self.db as c:
-            c.execute('UPDATE job SET foreign_id = %s WHERE id = %s', (foreign_id, job_id))
+            c.execute('UPDATE job SET foreign_id = %s WHERE id = %s',
+                      (foreign_id, job_id))
 
     def get_output_files(self, job_id):
         """
@@ -354,11 +381,14 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT filename FROM output_file WHERE job_id = %s', (job_id,))
+            c.execute('SELECT filename FROM output_file WHERE job_id = %s',
+                      (job_id,))
             output_files = c.fetchall()
             if len(output_files) == 0:
-                raise NoRowsError('output_file',
-                                  'SELECT filename FROM output_file WHERE job_id = '+(str(job_id)))
+                raise NoRowsError(
+                    'output_file',
+                    'SELECT filename FROM output_file WHERE job_id = '+
+                    (str(job_id)))
 
         # Turn list of tuples into single list of strings.
         output_files = [file for i in output_files for file in i]
@@ -378,7 +408,8 @@ class JSAProcDB:
         Identify which job to change/set the output file list from.
 
         output_files, required, list of strings.
-        List of output files for the job (can be any iterable of strings, e.g. tuple etc.)
+        List of output files for the job (can be any iterable of strings,
+        e.g. tuple etc.)
 
         """
 
@@ -389,7 +420,8 @@ class JSAProcDB:
 
             for f in output_files:
                 # Now add in the new output files, one at a time.
-                c.execute('INSERT INTO output_file (job_id, filename) VALUES (%s, %s)',
+                c.execute('INSERT INTO output_file (job_id, filename) '
+                          'VALUES (%s, %s)',
                           (job_id, f))
 
     def find_errors_logs(self, location=None):
@@ -401,7 +433,8 @@ class JSAProcDB:
         """
 
         param = []
-        query = 'SELECT job.id, log.datetime, log.message, log.state_new, job.location  FROM job JOIN log ON job.id=log.job_id'
+        query = 'SELECT job.id, log.datetime, log.message, log.state_new, ' \
+                'job.location  FROM job JOIN log ON job.id=log.job_id'
         query += ' WHERE job.state="E"'
 
         if location is not None:
@@ -466,12 +499,14 @@ class JSAProcDB:
         join = ''
 
         if sortdir != 'ASC' and sortdir != 'DESC':
-            raise JSAProcError('Can only sort jobs in ASC or DESC direction. You picked %s'%(sortdir))
+            raise JSAProcError('Can only sort jobs in ASC or DESC direction. '
+                               'You picked %s'%(sortdir))
 
         if count is True:
             query = 'SELECT COUNT(*)'
         else:
-            query = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'
+            query = 'SELECT job.id, job.tag, job.state, job.location, ' \
+                    'job.foreign_id'
 
             if outputs:
                 query += ', GROUP_CONCAT(output_file.filename) '

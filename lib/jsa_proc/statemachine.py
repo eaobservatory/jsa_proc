@@ -18,7 +18,8 @@ import logging
 from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.error import JSAProcError, NotAtJACError
-from jsa_proc.job_run.datafile_handling import get_jac_input_data, write_input_list
+from jsa_proc.job_run.datafile_handling \
+    import get_jac_input_data, write_input_list
 from jsa_proc.job_run.directories import get_output_dir
 from jsa_proc.job_run.validate import validate_job
 from jsa_proc.state import JSAProcState
@@ -65,9 +66,11 @@ class JSAProcStateMachine:
                         self.db.change_state(job.id, JSAProcState.WAITING,
                                              'All files found at JAC',
                                              state_prev=JSAProcState.QUEUED)
-                        logger.debug('Job %i has been found data and moved to WAITING', job.id)
+                        logger.debug('Job %i has been found data and '
+                                     'moved to WAITING', job.id)
                     except NotAtJACError:
-                        logger.debug('Input files for %i are not at JAC', job.id)
+                        logger.debug('Input files for %i are not at JAC',
+                                     job.id)
                         pass
 
                     # Fetching the data could take a long time, so leave
