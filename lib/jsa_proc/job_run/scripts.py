@@ -76,10 +76,9 @@ def fetch_a_job(job_id, db=None):
         # Get link to database
         db = get_database()
 
-
     # Change status of job to 'Fetching', raise error if not in QUEUED
     db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
-                 state_prev=JSAProcState.QUEUED)
+                    state_prev=JSAProcState.QUEUED)
 
     # Get the list of files.
     input_files = db.get_input_files(job_id)
@@ -88,9 +87,10 @@ def fetch_a_job(job_id, db=None):
     input_file_list = assemble_input_data_for_job(job_id, input_files)
 
     # Advance the state of the job to 'Waiting'.
-    db.change_state(job_id, JSAProcState.WAITING,
-                 'Data has been assembled for job and job can now be executed',
-                 state_prev=JSAProcState.FETCHING)
+    db.change_state(
+        job_id, JSAProcState.WAITING,
+        'Data has been assembled for job and job can now be executed',
+        state_prev=JSAProcState.FETCHING)
 
     return job_id
 
@@ -158,10 +158,11 @@ def run_a_job(job_id, db=None):
     drparameters = job.parameters
 
     # Run the processing job.
-    log = jsawrapdr_run(job_id, input_file_list, mode,
-                       'REDUCE_SCAN_JSA_PUBLIC',
-                        cleanup='cadc', location='JAC', persist=True,
-                        logscreen=False)
+    log = jsawrapdr_run(
+        job_id, input_file_list, mode,
+        'REDUCE_SCAN_JSA_PUBLIC',
+        cleanup='cadc', location='JAC', persist=True,
+        logscreen=False)
 
     # Create list of output files.
     output_files = get_output_files(job_id)
@@ -170,8 +171,9 @@ def run_a_job(job_id, db=None):
     db.set_output_files(job_id, output_files)
 
     # Change state.
-    db.change_state(job_id, JSAProcState.PROCESSED,
-                 'Job has been sucessfully processed',
-                 state_prev=JSAProcState.RUNNING)
+    db.change_state(
+        job_id, JSAProcState.PROCESSED,
+        'Job has been sucessfully processed',
+        state_prev=JSAProcState.RUNNING)
 
     return job_id

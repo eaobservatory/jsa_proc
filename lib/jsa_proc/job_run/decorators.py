@@ -49,6 +49,6 @@ class ErrorDecorator(object):
             else:
                 db = get_database()
             db.change_state(args[0], JSAProcState.ERROR,
-                         'Error message and args: ' + \
-                         ' '.join([str(i) for i in theexception.args]))
+                            'Error message and args: ' +
+                            ' '.join([str(i) for i in theexception.args]))
             raise

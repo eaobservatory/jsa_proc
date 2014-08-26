@@ -457,7 +457,7 @@ class JSAProcDB:
                 edict[einfo.id] = edict.get(einfo.id, []) + [einfo]
 
         return edict
-            # Now sort out error jobs in sensible option
+        # Now sort out error jobs in sensible option
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,

@@ -54,8 +54,9 @@ class JSAProcMySQLLock():
         self._cursor = self._conn.cursor()
 
         if self._tables is not None:
-            self._cursor.execute('LOCK TABLES ' +
-                    ', '.join((x + ' WRITE' for x in self._tables)))
+            self._cursor.execute(
+                'LOCK TABLES ' +
+                ', '.join((x + ' WRITE' for x in self._tables)))
 
         return self._cursor
 
@@ -96,10 +97,10 @@ class JSAProcMySQL(JSAProcDB):
         """
 
         conn = mysql.connector.connect(
-                host=config.get('database', 'host'),
-                database=config.get('database', 'database'),
-                user=config.get('database', 'user'),
-                password=config.get('database', 'password'))
+            host=config.get('database', 'host'),
+            database=config.get('database', 'database'),
+            user=config.get('database', 'user'),
+            password=config.get('database', 'password'))
 
         self.db = JSAProcMySQLLock(conn)
 
