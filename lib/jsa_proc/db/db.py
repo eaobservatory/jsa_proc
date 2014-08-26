@@ -434,7 +434,7 @@ class JSAProcDB:
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
-                  sort=False, outputs=None, count=False):
+                  sort=False, sortdir='ASC', outputs=None, count=False):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -472,6 +472,8 @@ class JSAProcDB:
 
         query_from = ' FROM job '
 
+        if sortdir != 'ASC' and sortdir != 'DESC':
+            raise JSAProcError('Can only sort jobs in ASC or DESC direction. You picked %s'%(sortdir))
         # If you're getting outputs
         if outputs:
             separator = ' '
@@ -503,7 +505,7 @@ class JSAProcDB:
             order.append('job.priority DESC')
 
         if sort:
-            order.append('job.id ASC')
+            order.append('job.id '+sortdir)
 
         if order:
             query += ' ORDER BY ' + ', '.join(order)
