@@ -7,11 +7,36 @@ body {
     padding: 0px;
 }
 
+div#nav {
+    }
+div#nav ul{
+    list-style:none;
+    }
+div#nav li{
+    display:inline;
+    background:green;
+    color:white;
+    border-bottom:5px solid white;
+}
+
+div#nav li.active{
+    background: white;
+    color:green;
+}
+div#nav li a{
+    text-decoration:none;
+    padding:5px 5px;
+    width:300px;
+    color:inherit;
+    text-align:center;
+}
+
+
 div#content {
-    display: inline-block;
+    display: block;
     background: white;
     text-align: left;
-    max-width: 120ex;
+    max-width: 80ex;
     margin-left: auto;
     margin-right: auto;
     padding: 10px;
