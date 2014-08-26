@@ -358,11 +358,11 @@ class InterfaceDBTest(DBTestCase):
         # Test the return preview files option..
         outfiles=['1.sdf', '2.sdf','name_preview_64.png']
         self.db.set_output_files(1, outfiles)
-        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs=True)][0],
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='%')][0],
                          outfiles)
-        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='preview_64.png')][0],
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='%preview_64.png')][0],
                          [outfiles[2]])
-        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='preview_64.pngs')][0],
+        self.assertEqual([x.outputs for x in self.db.find_jobs(number=1, outputs='%preview_64.pngs')][0],
                          None)
 
         # test the count option

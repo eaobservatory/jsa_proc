@@ -449,9 +449,10 @@ class JSAProcDB:
             * number (integer, number of results to return)
             * offset (integer, offset the results from start by this many)
             * order (Boolean, sort results by id (after priority))
-            * outputs (True or string, matches against output table to
-              get output_files that match the string. e.g. 'preview_1024.png'
-              would include all 1024 size preview images with jobs.)
+            * outputs (string, pattern to matche against output table to
+              get output_files that match the string. e.g. '%preview_1024.png'
+              would include all 1024 size preview images with jobs.
+              If this argument is None then no outputs will be fetched.)
 
 
         Returns a list (which may be empty) of namedtuples, each  of which have
@@ -465,26 +466,29 @@ class JSAProcDB:
 
         """
 
-        if count is True:
-            query_get = 'SELECT COUNT(*) '
-        else:
-            query_get = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'
-
-        query_from = ' FROM job '
-
-        if sortdir != 'ASC' and sortdir != 'DESC':
-            raise JSAProcError('Can only sort jobs in ASC or DESC direction. You picked %s'%(sortdir))
-        # If you're getting outputs
-        if outputs:
-            separator = ' '
-            query_get += ', GROUP_CONCAT(output_file.filename)'
-            query_from +=' LEFT JOIN output_file ON job.id=output_file.job_id '
-
-        query = query_get + query_from
-
         where = []
         param = []
         order = []
+        join = ''
+
+        if sortdir != 'ASC' and sortdir != 'DESC':
+            raise JSAProcError('Can only sort jobs in ASC or DESC direction. You picked %s'%(sortdir))
+
+        if count is True:
+            query = 'SELECT COUNT(*)'
+        else:
+            query = 'SELECT job.id, job.tag, job.state, job.location, job.foreign_id'
+
+            if outputs:
+                query += ', GROUP_CONCAT(output_file.filename) '
+                join = (' LEFT JOIN output_file ON job.id=output_file.job_id '
+                        'AND output_file.filename LIKE %s')
+                param.append(outputs)
+
+            else:
+                query += ', NULL'
+
+        query  += ' FROM job' + join
 
         if state is not None:
             where.append('job.state=%s')
@@ -497,8 +501,11 @@ class JSAProcDB:
         if where:
             query += ' WHERE ' + ' AND '.join(where)
 
-        # If getting output files, need to group by job.id:
-        if outputs:
+        # If we performed a join, we need to group by job.id, on the
+        # assumption that it was a one-to-many join.  If we ever
+        # add any one-to-one joins, this step should be made more
+        # conditional.
+        if join:
             query += ' GROUP BY job.id '
 
         if prioritize:
@@ -536,32 +543,15 @@ class JSAProcDB:
 
                 if row is None:
                     break
-                if not outputs:
-                    row += (None,)
 
-                row = list(row)
+                # Turn the row into a namedtuple.
+                row = JSAProcJobInfo(*row)
 
-                # If getting outputs, fix the results up appropriately
-                if outputs:
-                    # If final value is not None, split it up.
-                    if row[-1]:
-                        row[-1]= row[-1].split(',')
+                # If output files were returned, split them into a list.
+                if row.outputs is not None:
+                    row = row._replace(outputs=row.outputs.split(','))
 
-                        # If a pattern has been provided, try to match it.
-                        if isinstance(outputs, basestring):
-                            returned_outputs=[]
-                            for s in row[-1]:
-                                if s.find(outputs) !=-1:
-                                    returned_outputs.append(s)
-
-                            # Explicitily return None instead of empty
-                            # list if no results.
-                            if not returned_outputs:
-                                returned_outputs=None
-                            row[-1] = returned_outputs
-
-                # Turn the row into a namedtuple and append to results
-                result.append(JSAProcJobInfo(*row))
-
+                # Append the (possibly modified) row to the result list.
+                result.append(row)
 
         return result
