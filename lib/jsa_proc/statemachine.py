@@ -183,7 +183,7 @@ class JSAProcStateMachine:
                     logger.debug('Job is complete: fetching output files.')
                     output = self.cadc.get_recipe_output_files(recipe_instance)
                     logger.debug('Storing list of output files.')
-                    self.db.set_output_files(job_id, output)
+                    self.db.set_output_files(job_id, [f.lower() for f in output])
 
             except Exception:
                 logger.exception('Error while updating state of job %i',

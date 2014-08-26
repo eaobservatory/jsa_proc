@@ -94,7 +94,7 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
 
                 if output is not None:
                     logger.debug('Storing output file list.')
-                    db.set_output_files(job_id, output)
+                    db.set_output_files(job_id, [f.lower() for f in output])
 
             else:
                 logger.debug('Skipping job insert due to dry run mode')
