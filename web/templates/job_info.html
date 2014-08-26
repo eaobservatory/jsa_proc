@@ -41,17 +41,21 @@
 
 <!-- Allow users to change state of job. -->
 <h2> Change the state of this Job </h2>
+
+
 <form method="POST" action="{{ url_for('job_change_state')}}">
   <input type="hidden" name="job_id" value="{{ info.id }}" >
   <input type="hidden" name="url" value="{{url_for('job_info', job_id=info.id)}}">
-    <select name="newstate">
+<ul class="statebar">
+<li>    <select name="newstate">
       <option value""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
       {% for state in states %}
       <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
       {% endfor %}
-      </select><br/>
-    <textarea rows=3 COLS=30 name="message"></textarea>
-    <input type="submit" value="Submit Change" />
+      </select></li>
+<li>    <textarea rows=3 COLS=40 name="message"></textarea></li>
+<li>    <input type="submit" value="Submit Change"/></li>
+</ul>
 </form>
 {% endif %}
 
@@ -59,19 +63,23 @@
 
 {% if previews %}
 <h2>PREVIEW IMAGES</h2>
+<div style="text-align:center">
 {% for l in previews %}
-<a href="{{ l[1] }}"><img src="{{ l[0] }}" /></a>
+<a href="{{ l[1] }}"><img src="{{ l[0] }}"></a>
 {% endfor %}
+</div>
 {% endif %}
 
 {% if orac_logs %}
 <h2>ORAC-DR Logs</h2>
 <p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
+<p>
 <ul>
 {% for l in orac_logs %}
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
+</p>
 {% endif %}
 
 {% if wrapdr_logs %}
@@ -85,8 +93,8 @@
 {% endif %}
 
 {% if output_files %}
+<hr/>
 <h2>Output Files</h2>
-
 <ul>
 {% for file in output_files %}
     <li>{{ file }}</li>
@@ -95,13 +103,14 @@
 {% endif %}
 
 {% if input_files %}
+<hr/>
 <h2>Input Files</h2>
-
-<ul>
-{% for file in input_files %}
+  <ul class="twocol">
+    {% for file in input_files %}
     <li>{{ file }}</li>
-{% endfor %}
-</ul>
+    {% endfor %}
+  </ul>
+
 {% endif %}
 
 
