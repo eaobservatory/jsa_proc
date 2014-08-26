@@ -72,12 +72,14 @@ def create_web_app():
     @app.route('/error_summary/')
     @templated('error_summary.html')
     def error_summary():
-        return prepare_error_summary(db)
+        return prepare_error_summary(
+            db,
+            filtering = request.args.get('filtering', None),
+        )
 
     @app.route('/job/<int:job_id>', methods=['GET'])
     @templated('job_info.html')
     def job_info(job_id):
-        print 'testing job_info'
         return prepare_job_info(db, job_id)
 
     @app.route('/job_change_state' ,methods=['POST'])
@@ -96,7 +98,7 @@ def create_web_app():
 
         # Redirect the page to correct info.
         #flash('You have successfully mangled the job status!')
-        raise HTTPRedirect(url_for('job_info', job_id=job_ids[0]))
+        raise HTTPRedirect(url)
 
 
 

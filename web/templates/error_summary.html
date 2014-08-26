@@ -2,23 +2,33 @@
 
 {% block content%}
 
-{% for l in job_summary_dict.keys() %}
-<h2> {{l}} </h2>
+<form>
+  <select name="filtering">
+    <option value="" {{ 'selected="selected"' if filtering is none }}>Any Error type</option>
+    {% for f in filtering_options %}
+    <option value="{{ f }}" {{ 'selected="selected"' if filtering == f }}> {{ f }} </option>
+    {% endfor %}
+  </select>
+  <input type="submit" value="Filter" />
+</form>
 
+{% for l in job_summary_dict.keys() %}
+<h2> {{l}} {{filtering}} Error States</h2>
+<form method="POST" action="{{ url_for('job_change_state') }}"> 
 <table style="border:none;font-size:9pt">
   <tr>
     <th Select </th>
     <th> Job ID </th>
     <th> State</th>
-    <th> Time </th>
+    <th>Time </th>
     <th> Message </th>
   </tr>
 {% for job_id in job_summary_dict[l] %}
 <tr>
-  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="selected_jobids" </td>
+  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="job_id" </td>
   <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <a href="{{ url_for('job_info', job_id=job_id)}}">{{job_id}}</a> </td>
   {% for row in job_summary_dict[l][job_id] %}
-    <td class="state_{{ row.state | state_phase }}"> {{row.state}} </td>
+    <td class="state_{{ row.state | state_phase }}"> {{row.state | state_name }} </td>
     <td> {{row.time}} </td>
     <td> {{row.message}} </td>
     </tr>
@@ -29,5 +39,19 @@
 {% endfor %}
 
 </table>
+</br>
+</br>
+<select name="newstate">
+  <option value""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
+  {% for state in states %}
+  <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
+  {% endfor %}
+</select><br/>
+<p>
+  <textarea rows=2 COLS=100 name="message"></textarea>
+</p>
+<input type="hidden" name="url" value="{{url_for('error_summary')}}">
+<input type="submit" value="submit">
+</form>
 {% endfor %}
 {% endblock %}
