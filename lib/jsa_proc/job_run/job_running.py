@@ -18,11 +18,11 @@ Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
 """
 
+from datetime import datetime
 import shutil
 import signal
 import subprocess
 import tempfile
-import time
 import os
 import sys
 
@@ -108,7 +108,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         os.mkdir(log_dir)
 
     # Get scratchdir and logfile name using timestamp
-    timestamp = time.strftime('%Y-%m-%d_%H-%M-%s')
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
     scratch_dir = os.path.join(scratch_base_dir, timestamp)
     if os.path.exists(scratch_dir):
         scratch_dir = tempfile.mkdtemp(prefix=scratch_dir)
