@@ -445,9 +445,6 @@ class JSAProcDB:
 
         # Execute query
         with self.db as c:
-
-            print query
-            print param
             c.execute(query, param)
             error_jobs = c.fetchall()
 
