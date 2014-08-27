@@ -293,11 +293,13 @@ class InterfaceDBTest(DBTestCase):
         job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', [], priority=6) # Q
         job4 = self.db.add_job('tag4', 'CADC', 'obs', 'RECIPE', [], priority=5) # Q
         job5 = self.db.add_job('tag5', 'CADC', 'obs', 'RECIPE', [], priority=3) # ?
+        jobx = self.db.add_job('tagx', 'JAC',  'obs', 'RECIPE', [], priority=3) # X
 
         # Put some into another state.
         self.db.change_state(job2, 'Q', 'test')
         self.db.change_state(job3, 'Q', 'test')
         self.db.change_state(job4, 'Q', 'test')
+        self.db.change_state(jobx, JSAProcState.DELETED, 'delete this job')
 
         # Now run some searches and check we get the right sets of jobs.
         self.assertEqual(
@@ -319,6 +321,10 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(
                 set((x.tag for x in self.db.find_jobs(state='Q', location='JAC'))),
                 set(('tag2', 'tag3')))
+
+        self.assertEqual(
+                set((x.tag for x in self.db.find_jobs(JSAProcState.DELETED))),
+                set(('tagx',)))
 
         # Finally check a query which should get a single job and check the
         # info is good.

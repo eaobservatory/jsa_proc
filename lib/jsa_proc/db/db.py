@@ -463,7 +463,8 @@ class JSAProcDB:
 
         Searches by the following values:
 
-            * state
+            * state (jobs in the deleted state are not returned unless
+              specifically asked for)
             * location
 
         Results can be affected by the following optional parameters:
@@ -519,6 +520,9 @@ class JSAProcDB:
         if state is not None:
             where.append('job.state=%s')
             param.append(state)
+        else:
+            where.append('job.state<>%s')
+            param.append(JSAProcState.DELETED)
 
         if location is not None:
             where.append('job.location=%s')
