@@ -9,6 +9,31 @@ body {
     width: 100%;
 }
 
+
+#wrapper .col {
+    float:left;
+    text-align:center;
+    margin:0 2ex;
+}
+
+.col img {
+    text-align:center;
+}
+
+div#wrapper {
+    clear:both;
+}
+
+.clear:before,
+.clear:after {
+    content: " ";
+    display: table;
+}
+
+.clear:after {
+    clear:both;
+}
+
 hr {
     color: green;
     background-color: green;
@@ -97,7 +122,7 @@ div#nav li a {
     text-align: center;
 }
 
-img { 
+img {
     max-width: 100%;
 }
 

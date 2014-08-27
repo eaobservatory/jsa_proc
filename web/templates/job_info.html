@@ -24,10 +24,14 @@
 {% if previews %}
 <div class="col">
 <a href="{{ previews[0][1] }}"><img src="{{ previews[0][0] }}"></a>
-<p> First preview image (click to embiggen) </p>
+{% if previews|length == 1 %}
+<p> Preview image (click to embiggen).</p>
+{% elif previews|length > 1 %}
+<p> First preview: (click to embiggen).</p>
 {% endif %}
 </div>
 
+{% endif %}
 <div class="clear"></div>
 
 
@@ -98,9 +102,10 @@
 {% endif %}
 
 
-{% if previews|length > 0 %}
+{% if previews|length > 1 %}
 <h2>All Preview Images</h2>
 <div style="text-align:center">
+{{ previews|length }}
 {% for l in previews %}
 <a href="{{ l[1] }}"><img src="{{ l[0] }}"></a>
 {% endfor %}
