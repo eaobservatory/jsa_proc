@@ -19,7 +19,7 @@ a {
     background: transparent;
 }
 
-ul.twocol {
+ul.multicol {
     columns: 3;
     -moz-columns: 3;
     -webkit-columns: 3;
