@@ -17,8 +17,12 @@
 Decorators for functions related to running jobs.
 """
 
+import logging
+
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
+
+logger = logging.getLogger(__name__)
 
 
 class ErrorDecorator(object):
@@ -44,6 +48,9 @@ class ErrorDecorator(object):
         try:
             return self.function(*args, **kwargs)
         except Exception as theexception:
+            logger.exception('Error caught running function %s',
+                             function.__name__)
+
             if 'db' in kwargs and kwargs['db'] is not None:
                 db = kwargs['db']
             else:
