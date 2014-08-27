@@ -75,12 +75,12 @@ def prepare_job_info(db, job_id):
 
     # Get the log files on disk (if any)
     logdir = get_log_dir(job_id)
-    orac_logfiles = glob.glob(os.path.join(logdir, 'oracdr*.html'))
+    orac_logfiles = sorted(glob.glob(os.path.join(logdir, 'oracdr*.html')), reverse=True)
     orac_logfiles = [os.path.split(i)[1] for i in orac_logfiles]
     orac_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
                      for i in orac_logfiles]
 
-    wrapdr_logfiles = glob.glob(os.path.join(logdir, 'jsawrapdr*.log'))
+    wrapdr_logfiles = sorted(glob.glob(os.path.join(logdir, 'jsawrapdr*.log')), reverse=True)
     wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
     wrapdr_logfiles = [url_for('job_log_text', job_id=job.id, log=i)
                        for i in wrapdr_logfiles]
