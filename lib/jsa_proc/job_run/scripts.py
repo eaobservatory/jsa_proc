@@ -160,7 +160,7 @@ def run_a_job(job_id, db=None):
     # Run the processing job.
     log = jsawrapdr_run(
         job_id, input_file_list, mode,
-        'REDUCE_SCAN_JSA_PUBLIC',
+        drparameters,
         cleanup='cadc', location='JAC', persist=True,
         logscreen=False)
 
