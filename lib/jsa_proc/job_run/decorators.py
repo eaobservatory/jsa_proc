@@ -49,7 +49,7 @@ class ErrorDecorator(object):
             return self.function(*args, **kwargs)
         except Exception as theexception:
             logger.exception('Error caught running function %s',
-                             function.__name__)
+                             self.function.__name__)
 
             if 'db' in kwargs and kwargs['db'] is not None:
                 db = kwargs['db']
