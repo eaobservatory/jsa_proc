@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 from socket import gethostname
 
@@ -24,6 +25,8 @@ from jsa_proc.job_run.datafile_handling \
     import assemble_input_data_for_job, get_output_files
 from jsa_proc.job_run.job_running import jsawrapdr_run
 from jsa_proc.job_run.directories import get_input_dir
+
+logger = logging.getLogger(__name__)
 
 
 def fetch(job_id=None, db=None):
@@ -48,12 +51,17 @@ def fetch(job_id=None, db=None):
 
     # Get next job if a job_id is not specified.
     if not job_id:
+        logger.debug('Looking for a job for which to fetch data')
+
         jobs = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
                             prioritize=True, number=1, sort=True)
-        if len(jobs) == 0:
-            raise JSAProcError('Did not find a job to fetch!')
-        job = jobs[0]
-        job_id = job.id
+
+        if jobs:
+            job_id = jobs[0].id
+
+        else:
+            logger.warning('Did not find a job to fetch!')
+            return
 
     fetch_a_job(job_id, db=db)
 
@@ -76,6 +84,8 @@ def fetch_a_job(job_id, db=None):
         # Get link to database
         db = get_database()
 
+    logger.info('About to fetch data for job %i', job_id)
+
     # Change status of job to 'Fetching', raise error if not in QUEUED
     db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
                     state_prev=JSAProcState.QUEUED)
@@ -91,6 +101,8 @@ def fetch_a_job(job_id, db=None):
         job_id, JSAProcState.WAITING,
         'Data has been assembled for job and job can now be executed',
         state_prev=JSAProcState.FETCHING)
+
+    logger.info('Done fetching data for job %i', job_id)
 
     return job_id
 
@@ -114,12 +126,17 @@ def run_job(job_id=None, db=None):
 
     # Get next job if a job id is not specified
     if not job_id:
+        logger.debug('Looking for a job to run')
+
         jobs = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
                             prioritize=True, number=1, sort=True)
-        if len(jobs) == 0:
-            raise JSAProcError('Did not find a job to run!')
-        job = jobs[0]
-        job_id = job.id
+
+        if jobs:
+            job_id = jobs[0].id
+
+        else:
+            logger.warning('Did not find a job to run!')
+            return
 
     run_a_job(job_id, db=db)
 
@@ -138,6 +155,8 @@ def run_a_job(job_id, db=None):
     if not db:
         # Get link to database
         db = get_database()
+
+    logger.info('About to run job %i', job_id)
 
     # Change status of job to Running, raise an error if not currently in
     # WAITING state.
@@ -158,6 +177,8 @@ def run_a_job(job_id, db=None):
     drparameters = job.parameters
 
     # Run the processing job.
+    logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
+                 mode, drparameters)
     log = jsawrapdr_run(
         job_id, input_file_list, mode,
         drparameters,
@@ -165,9 +186,11 @@ def run_a_job(job_id, db=None):
         logscreen=False)
 
     # Create list of output files.
+    logger.debug('Preparing list of output files')
     output_files = get_output_files(job_id)
 
     # write output files to table
+    logger.debug('Storing list of output files')
     db.set_output_files(job_id, output_files)
 
     # Change state.
@@ -175,5 +198,7 @@ def run_a_job(job_id, db=None):
         job_id, JSAProcState.PROCESSED,
         'Job has been sucessfully processed',
         state_prev=JSAProcState.RUNNING)
+
+    logger.info('Done running job %i', job_id)
 
     return job_id
