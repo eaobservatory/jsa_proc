@@ -19,7 +19,7 @@ from socket import gethostname
 
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
-from jsa_proc.error import JSAProcError
+from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.job_run.decorators import ErrorDecorator
 from jsa_proc.job_run.datafile_handling \
     import assemble_input_data_for_job, get_output_files
@@ -86,9 +86,19 @@ def fetch_a_job(job_id, db=None):
 
     logger.info('About to fetch data for job %i', job_id)
 
-    # Change status of job to 'Fetching', raise error if not in QUEUED
-    db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
-                    state_prev=JSAProcState.QUEUED)
+    try:
+        # Change status of job to 'Fetching', raise error if not in QUEUED
+        db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
+                        state_prev=JSAProcState.QUEUED)
+
+    except NoRowsError:
+        # If the job was not in the QUEUED state, it is likely that another
+        # process is also trying to fetch it.  Trap the error so that the
+        # ErrorDecorator does not put the job into the ERROR state as that
+        # will cause the other process to fail to set the job to WAITING.
+        logger.error('Job %i cannot be fetched because it is not queued',
+                     job_id)
+        return
 
     # Get the list of files.
     input_files = db.get_input_files(job_id)
@@ -158,11 +168,21 @@ def run_a_job(job_id, db=None):
 
     logger.info('About to run job %i', job_id)
 
-    # Change status of job to Running, raise an error if not currently in
-    # WAITING state.
-    db.change_state(job_id, JSAProcState.RUNNING,
-                    'Job is about to be run on host {0}'.format(gethostname()),
-                    state_prev=JSAProcState.WAITING)
+    try:
+        # Change status of job to Running, raise an error if not currently in
+        # WAITING state.
+        db.change_state(job_id, JSAProcState.RUNNING,
+                        'Job is about to be run on host {0}'.format(gethostname()),
+                        state_prev=JSAProcState.WAITING)
+
+    except NoRowsError:
+        # If the job was not in the WAITING state, it is likely that another
+        # process is also trying to run it.  Trap the error so that the
+        # ErrorDecorator does not put the job into the ERROR state as that
+        # will cause the other process to fail to set the job to PROCESSED.
+        logger.error('Job %i cannot be run because it is not waiting',
+                     job_id)
+        return
 
     # Input file_list -- this should be better? or in jsawrapdr?
     input_dir = get_input_dir(job_id)
