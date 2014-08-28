@@ -14,3 +14,22 @@
   </ul>
 </div>
 {% endmacro %}
+
+{% macro render_page_control(pagination) %}
+    {% if pagination is not none %}
+        <div>
+            {% if pagination.first is not none %}
+                <a href="{{ pagination.first }}">First page</a>
+            {% endif %}
+            {% if pagination.prev is not none %}
+                <a href="{{ pagination.prev }}">Previous page</a>
+            {% endif %}
+            {% if pagination.next is not none %}
+                <a href="{{ pagination.next }}">Next page</a>
+            {% endif %}
+            {% if pagination.last is not none %}
+                <a href="{{ pagination.last }}">Last page</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}

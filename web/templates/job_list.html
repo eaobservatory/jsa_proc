@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
-{% set active_page="job" %}
+{% from 'macros.html' import render_page_control %}
 
 {% block body %}
-{{render_navbar(active_page)}}
+
+{{ render_navbar('job') }}
+
 <form>
     <p>
         <select name="location">
@@ -18,14 +20,15 @@
             {% endfor %}
         </select>
         <select name="number">
-          <option value="" {{'selected="selected"' if selected_number is none}}>All</option>
-          {% for number in [25,50,75,100] %}
+          {% for number in [12, 24, 48, 100, 200, 500, 1000] %}
           <option value="{{ number }}" {{ 'selected="selected"' if number == selected_number }}>{{ number }}</option>
           {% endfor %}
         </select>
         <input type="submit" value="Filter" />
     </p>
 </form>
+
+{{ render_page_control(pagination) }}
 
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
@@ -49,14 +52,6 @@
 </div>
 {% endfor %}
 
-<div>
-{% if selected_number is not none %}
-{% if selected_page|int > 0 %}
-<a href="{{url_for('job_list', page=selected_page|int-1, number=selected_number)}}"> Page Prev</a>
-{% endif %}
-{% if jobs|length == selected_number|int %}
-<a href="{{url_for('job_list', page=selected_page|int+1, number=selected_number)}}"> Page Next</a>
-{% endif %}
-</div>
-{% endif %}
+{{ render_page_control(pagination) }}
+
 {% endblock %}
