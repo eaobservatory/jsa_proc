@@ -58,7 +58,7 @@ class JSAProcStateMachine:
                     validate_job(job.id, db=self.db)
 
                 elif job.state == JSAProcState.QUEUED:
-                    # Check if all data in jac:
+                    # Check if all data are at JAC:
                     try:
                         input_file_list = self.db.get_input_files(job.id)
                         inputs = get_jac_input_data(input_file_list)
@@ -69,12 +69,21 @@ class JSAProcStateMachine:
                         logger.debug('Job %i has been found data and '
                                      'moved to WAITING', job.id)
                     except NotAtJACError:
+                        # If the data are not present, change the state to
+                        # MISSING so that a fetching process will
+                        # initiate a download.
+                        self.db.change_state(job.id, JSAProcState.MISSING,
+                                             'Input files are not at JAC',
+                                             state_prev=JSAProcState.QUEUED)
                         logger.debug('Input files for %i are not at JAC',
                                      job.id)
-                        pass
 
                     # Fetching the data could take a long time, so leave
                     # this to a separate process.
+                    pass
+
+                elif job.state == JSAProcState.MISSING:
+                    # Wait for a separate process to fetch the input files.
                     pass
 
                 elif job.state == JSAProcState.FETCHING:

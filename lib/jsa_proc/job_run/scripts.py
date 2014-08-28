@@ -34,12 +34,12 @@ def fetch(job_id=None, db=None):
     Assemble the files required to process a job.
 
     If it is not given a job_id, it will take the next JAC job
-    with the highest priority and a state of QUEUED.
+    with the highest priority and a state of MISSING.
 
     Optionally allows a database object to be given for testing purposes.
     Otherwise uses usual database from config file.
 
-    This will raise an error if job is not in QUEUED state to start with.
+    This will raise an error if job is not in MISSING state to start with.
     This will advance the state of the job to WAITING on completion.
     Any error's raised in the process will be logged to the job log.
 
@@ -53,7 +53,7 @@ def fetch(job_id=None, db=None):
     if not job_id:
         logger.debug('Looking for a job for which to fetch data')
 
-        jobs = db.find_jobs(state=JSAProcState.QUEUED, location='JAC',
+        jobs = db.find_jobs(state=JSAProcState.MISSING, location='JAC',
                             prioritize=True, number=1, sort=True)
 
         if jobs:
@@ -76,7 +76,7 @@ def fetch_a_job(job_id, db=None):
     Optionally allows a db to be given, for testing purposes. Otherwise
     uses usual database from config file.
 
-    This will raise an error if job is not in QUEUED state to start with.
+    This will raise an error if job is not in MISSING state to start with.
     This will advance the state of the job to WAITING on completion.
     """
 
@@ -87,16 +87,16 @@ def fetch_a_job(job_id, db=None):
     logger.info('About to fetch data for job %i', job_id)
 
     try:
-        # Change status of job to 'Fetching', raise error if not in QUEUED
+        # Change status of job to 'Fetching', raise error if not in MISSING
         db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
-                        state_prev=JSAProcState.QUEUED)
+                        state_prev=JSAProcState.MISSING)
 
     except NoRowsError:
-        # If the job was not in the QUEUED state, it is likely that another
+        # If the job was not in the MISSING state, it is likely that another
         # process is also trying to fetch it.  Trap the error so that the
         # ErrorDecorator does not put the job into the ERROR state as that
         # will cause the other process to fail to set the job to WAITING.
-        logger.error('Job %i cannot be fetched because it is not queued',
+        logger.error('Job %i cannot be fetched because it is not missing',
                      job_id)
         return
 

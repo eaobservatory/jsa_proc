@@ -26,7 +26,7 @@ assembles the data for it, and then advances the job to the waiting state.
 
 If the --job_id command line argument is not used, this will run on
 the highest priority job labelled to be reduced at the JAC and in the
-state 'QUEUED'.  """
+state 'MISSING'.  """
 
 
 # Handle arguments
