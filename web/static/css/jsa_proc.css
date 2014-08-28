@@ -74,7 +74,9 @@ h1, h2, h3, h4 {
 div#content {
     max-width: 110ex;
     background: white;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0px;
     display: block;
     padding: 1ex;
     text-align: left;
@@ -85,23 +87,20 @@ h1  {
     font-size: 2em;
 }
 
-div#nav {
+ul#nav {
     display: block;
     margin: 0px;
     width: 100%;
     background: green;
     padding-top: 0.3ex;
     font-size: 130%;
-}
-
-div#nav ul {
     list-style: none;
     padding: 5px;
     border-bottom: 5px solid white;
     text-align: center;
 }
 
-div#nav li {
+ul#nav li {
     padding: 0.3ex 0 0 0;
     display: inline;
     background: green;
@@ -109,13 +108,13 @@ div#nav li {
     vertical-align: bottom;
 }
 
-div#nav li.active {
+ul#nav li.active {
     background: white;
     color: green;
     border-bottom: 5px solid white;
 }
 
-div#nav li a {
+ul#nav a {
     text-decoration: none;
     padding: 5px 5px 5px 5px;
     color: inherit;

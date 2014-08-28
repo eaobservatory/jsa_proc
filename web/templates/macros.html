@@ -1,18 +1,16 @@
 {% macro render_navbar(active_page) %}
+    {% set navigation_bar = [
+      ('/summary', 'summary', 'Summary'),
+      ('/error_summary', 'error_summary', 'Errors'),
+      ('/job', 'job', 'Full Job List')] -%}
 
-{% set navigation_bar = [
-  ('/summary', 'summary', 'Summary'),
-  ('/error_summary', 'error_summary', 'Errors'),
-  ('/job', 'job', 'Full Job List')] -%}
-
-<div id="nav">
-  <ul >
-    {% for href, id, caption in navigation_bar %}
-    <li {% if id== active_page %} class="active" {% endif %} >
-      <a href="{{ href |e }}"  > {{ caption |e}} </a></li>
-    {% endfor %}
-  </ul>
-</div>
+    <ul id="nav">
+        {% for href, id, caption in navigation_bar %}
+            <li {% if id == active_page %} class="active" {% endif %}>
+                <a href="{{ href }}">{{ caption }}</a>
+            </li>
+        {% endfor %}
+    </ul>
 {% endmacro %}
 
 {% macro render_page_control(pagination) %}
