@@ -20,6 +20,4 @@ from jsa_proc.files import get_size
 
 class FileInfo(TestCase):
     def test_get_size(self):
-        self.assertEqual(get_size('test/data/validhds.sdf'), 4.0/(1024**2))
-
-
+        self.assertEqual(get_size('test/data/validhds.sdf'), 4.0 / (1024**2))

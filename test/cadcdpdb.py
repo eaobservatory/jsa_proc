@@ -64,7 +64,8 @@ INSERT INTO dp_recipe_instance VALUES ("N",
 INSERT INTO dp_recipe_instance VALUES ("N",
     "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1004-850um", 1004, 2, -1);
 INSERT INTO dp_recipe_instance VALUES ("Y",
-    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1005-850um", 1005, 1, -1000);
+    "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1005-850um", 1005, 1,
+    -1000);
 INSERT INTO dp_recipe_instance VALUES ("Y",
     "-drparameters='REDUCE_SCAN_JSA_PUBLIC'", "hpx-1006-850um", 1006, 2, -750);
 INSERT INTO dp_recipe_instance VALUES ("E",

@@ -56,8 +56,8 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
 
         files = self.db.get_recipe_input_files(1004)
 
-        self.assertEqual(sorted(files),
-            ['s4a20140401_00051_0001', 's4a20140401_00052_0001'])
+        self.assertEqual(sorted(files), [
+            's4a20140401_00051_0001', 's4a20140401_00052_0001'])
 
     def test_recipe_output_files(self):
         """Test retrieval of recipe output file list.
@@ -65,10 +65,10 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
 
         files = self.db.get_recipe_output_files(1006)
         self.assertEqual(sorted(files), [
-                'reduced_1006_850.fits',
-                'reduced_1006_850_preview.png'])
+            'reduced_1006_850.fits',
+            'reduced_1006_850_preview.png'])
 
         files = self.db.get_recipe_output_files(1007)
         self.assertEqual(sorted(files), [
-                'reduced_1007_850.fits',
-                'reduced_1007_850_preview.png'])
+            'reduced_1007_850.fits',
+            'reduced_1007_850_preview.png'])

@@ -19,8 +19,8 @@ from jsa_proc.job_run.datafile_handling import valid_hds
 from jsa_proc.job_run.datafile_handling import assemble_input_data_for_job
 from jsa_proc.job_run.datafile_handling import get_output_files
 
+
 class ValidHDSTestCase(TestCase):
     def test_valid_hds(self):
         self.assertTrue(valid_hds('test/data/validhds.sdf'))
         self.assertFalse(valid_hds('test/data/invalidhds.sdf'))
-
