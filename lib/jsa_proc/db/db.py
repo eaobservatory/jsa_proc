@@ -15,6 +15,7 @@
 
 from collections import namedtuple, OrderedDict
 import logging
+import re
 from socket import gethostname
 
 from jsa_proc.error import *
@@ -110,7 +111,7 @@ class JSAProcDB:
 
     def add_job(self, tag, location, mode, parameters,
                 input_file_names, foreign_id=None, state='?',
-                priority=0):
+                priority=0, obsinfolist=None, tilelist=None):
         """
         Add a JSA data processing job to the database.
 
@@ -145,6 +146,14 @@ class JSAProcDB:
         priority: priority number (integer, default 0, higher number
         represents greater priority).
 
+        tilelist: optional, list of integers.
+        The list of tiles this job will produce.
+
+        obsinfolist: optional, list of dictionarys.
+        A list of observations dictionarys. Each item in list represents a single
+        observation which is included in this job. The dictionary should contain an entry
+        for each column in the 'obs' table.
+
         Returns the job identifier.
         """
 
@@ -174,6 +183,31 @@ class JSAProcDB:
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
                                 'Job added to the database')
+
+            # If present, insert the tile list.
+            if tilelist:
+                for tile in tilelist:
+                    c.execute('INSERT INTO tile (job_id, tile) '
+                              'VALUES (%s, %s)',
+                              (job_id, tile))
+            # Update the obs table.
+            if obsinfolist:
+
+                for obs in obsinfolist:
+                    columnnames, values  = zip(*obs.items())
+                    allowed = '^\w+$' # Only allow alphanumeric characters and  _ and -.
+                    if re.match(allowed, ''.join(columnnames)):
+                        column_query = '(`' + '`, `'.join(columnnames) + '`)'
+                        values_questions = '(' + ', '.join(['%s'] * len(values))+')'
+                        print column_query
+                        print values_questions
+                        print values
+                        c.execute('INSERT INTO obs ' + column_query + \
+                                  ' VALUES ' + values_questions,
+                                  values)
+                    else:
+                        raise JSAProcError('Could not insert into obs table: invalid characters in columnames. '
+                                           'Columns requested were: '+', '.join(columnnames))
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -455,6 +489,7 @@ class JSAProcDB:
 
         return edict
         # Now sort out error jobs in sensible option
+
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,

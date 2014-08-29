@@ -115,6 +115,7 @@ class InterfaceDBTest(DBTestCase):
         job2 = self.db.get_job(id_=id_2)
         self.assertEqual(job2.state, JSAProcState.TRANSFERRING)
 
+        # Check can't add job with invalid state.
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag3', 'CADC', 'night', 'REC', [], state='!')
 
@@ -122,6 +123,26 @@ class InterfaceDBTest(DBTestCase):
         # constraint).
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag4', 'JAC', 'obs', 'REC', ['file1', 'file1'])
+
+        # Check that we can update the obs table while adding a job.
+        obs1 = {'job_id':3, 'obsid':'asdfasd','obsidss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        obs2 = {'job_id':3, 'obsid':'asdfasd','obsidss':'asdfas',
+                'utdate':20140102, 'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+
+        self.db.add_job('tag5', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist=[obs1, obs2])
+
+        # Check that we can't update the obs table with the invalid stringss
+        obsbad = {'job_id':4, 'obsid*':'asdfasd','obsidss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag6', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
+
+        # Check that we can't update the obs table with the invalid columnnames
+        obsbad = {'job_id':5, 'obsid':'asdfasd','obsidsss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag7', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
 
     def test_change_state(self):
         """
