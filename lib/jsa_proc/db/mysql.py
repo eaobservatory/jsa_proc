@@ -51,6 +51,10 @@ class JSAProcMySQLLock():
         """Context manager block entry method."""
 
         self._lock.acquire(True)
+
+        # Make sure we still have an active connection to MySQL.
+        self._conn.ping(reconnect=True, attempts=3, delay=5)
+
         self._cursor = self._conn.cursor()
 
         if self._tables is not None:
