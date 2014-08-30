@@ -132,6 +132,7 @@ class JSAProcDB:
         ignored for now but included in this function's interface for
         future use.
 
+        print 'testing add jobs...'
         parameters: processing parameters to pass to jsawrapdr
         (typically the recipe name). (string)
 
