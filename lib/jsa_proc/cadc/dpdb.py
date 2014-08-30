@@ -18,7 +18,7 @@ import Sybase
 from threading import Lock
 
 from jsa_proc.error import JSAProcError
-from jsa_proc.omp.siteconfig import get_omp_siteconfig
+from omp.siteconfig import get_omp_siteconfig
 
 cadc_dp_server = 'CADC_ASE'
 cadc_dp_db = 'data_proc'
