@@ -64,7 +64,7 @@ CREATE TABLE obs (
        obsnum INTEGER NOT NULL,
        instrument VARCHAR(80) NOT NULL,
        backend VARCHAR(80) NOT NULL,
-       subsys INTEGER NOT NULL,
+       subsys VARCHAR(80) NOT NULL,
 
        project VARCHAR(80),
        survey VARCHAR(80),
@@ -78,6 +78,8 @@ CREATE TABLE obs (
            ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 CREATE INDEX obs_job_id ON obs (job_id);
+CREATE INDEX obs_utdate ON obs (utdate);
+CREATE INDEX obs_project ON obs (project);
 
 CREATE TABLE tile (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
