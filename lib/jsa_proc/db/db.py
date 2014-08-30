@@ -242,6 +242,14 @@ class JSAProcDB:
 
             # Go through each observation dictionary in the list.
             for obs in obsinfolist:
+                if 'id' in obs:
+                    raise JSAProcError('There is an id in observation '
+                                       'dictionary')
+
+                if 'job_id' in obs:
+                    raise JSAProcError('There is a job_id in observation '
+                                       'dictionary')
+
                 columnnames, values  = zip(*obs.items())
 
                 # Columnames can only use alphanumeric characters and  _ and -.
@@ -249,12 +257,12 @@ class JSAProcDB:
                 if re.match(allowed, ''.join(columnnames)):
 
                     # Escape column names with back ticks.
-                    column_query = '(`' + '`, `'.join(columnnames) + '`)'
-                    values_questions = '(' + ', '.join(['%s'] * len(values))+')'
+                    column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
+                    values_questions = '(%s, ' + ', '.join(['%s'] * len(values))+')'
 
                     c.execute('INSERT INTO obs ' + column_query + \
                               ' VALUES ' + values_questions,
-                              values)
+                              (job_id,) + values)
                 else:
                     raise JSAProcError('Could not insert into obs table: '
                                        'invalid characters in columnames. '

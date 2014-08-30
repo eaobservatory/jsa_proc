@@ -125,11 +125,10 @@ class InterfaceDBTest(DBTestCase):
             self.db.add_job('tag4', 'JAC', 'obs', 'REC', ['file1', 'file1'])
 
         # Check that we can update the obs table while adding a job.
-        print 'testing add jobs...'
-        obs1 = {'job_id':1, 'obsid':'asdfasd','obsidss':'asdfas',
-                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
-        obs2 = {'job_id':1, 'obsid':'asdfasd','obsidss':'asdfas',
-                'utdate':20140102, 'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        obs1 = {'obsid':'asdfasd','obsidss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
+        obs2 = {'obsid':'asdfasd','obsidss':'asdfas',
+                'utdate':20140102, 'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
 
 
         self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
@@ -137,15 +136,15 @@ class InterfaceDBTest(DBTestCase):
         self.db.add_job('tag5', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist=[obs1, obs2])
 
         # Check that we can't update the obs table with the invalid stringss
-        obsbad = {'job_id':4, 'obsid*':'asdfasd','obsidss':'asdfas',
-                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        obsbad = {'obsid*':'asdfasd','obsidss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
 
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag6', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
 
         # Check that we can't update the obs table with the invalid columnnames
-        obsbad = {'job_id':5, 'obsid':'asdfasd','obsidsss':'asdfas',
-                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
+        obsbad = {'obsid':'asdfasd','obsidsss':'asdfas',
+                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag7', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
 
