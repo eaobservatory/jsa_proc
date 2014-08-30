@@ -132,7 +132,7 @@ class InterfaceDBTest(DBTestCase):
                 'utdate':20140102, 'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':1}
 
 
-        self.db.update_obs_table(1, [obs1, obs2], replace_all=True)
+        self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
 
         self.db.add_job('tag5', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist=[obs1, obs2])
 

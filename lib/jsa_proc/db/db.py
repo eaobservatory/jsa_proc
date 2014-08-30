@@ -111,7 +111,7 @@ class JSAProcDB:
 
     def add_job(self, tag, location, mode, parameters,
                 input_file_names, foreign_id=None, state='?',
-                priority=0, obsinfolist=None, tilelist=None, obsreplace=True):
+                priority=0, obsinfolist=None, tilelist=None):
         """
         Add a JSA data processing job to the database.
 
@@ -154,10 +154,6 @@ class JSAProcDB:
         observation which is included in this job. The dictionary should contain an entry
         for each column in the 'obs' table.
 
-        obsreplace: optional, boolean, default=True
-        If true, then delete all existing obs table entrys for this job when updating.
-        (Does not do anything if no obsinfolist is provided).
-
         Returns the job identifier.
         """
 
@@ -197,7 +193,7 @@ class JSAProcDB:
 
         # If present, replace/update the observation list.
         if obsinfolist:
-            self.update_obs_table(job_id, obsinfolist, replace_all=obsreplace)
+            self.set_obs_info(job_id, obsinfolist)
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -219,7 +215,7 @@ class JSAProcDB:
                           (job_id, tile))
         return job_id
 
-    def update_obs_table(self, job_id, obsinfolist, replace_all=True):
+    def set_obs_info(self, job_id, obsinfolist, replace_all=True):
         """
         Update the obs table with additional observations for a given job.
 
