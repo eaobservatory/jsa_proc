@@ -111,7 +111,7 @@ class JSAProcDB:
 
     def add_job(self, tag, location, mode, parameters,
                 input_file_names, foreign_id=None, state='?',
-                priority=0, obsinfolist=None, tilelist=None):
+                priority=0, obsinfolist=None, tilelist=None, obsreplace=True):
         """
         Add a JSA data processing job to the database.
 
@@ -154,6 +154,10 @@ class JSAProcDB:
         observation which is included in this job. The dictionary should contain an entry
         for each column in the 'obs' table.
 
+        obsreplace: optional, boolean, default=True
+        If true, then delete all existing obs table entrys for this job when updating.
+        (Does not do anything if no obsinfolist is provided).
+
         Returns the job identifier.
         """
 
@@ -184,35 +188,85 @@ class JSAProcDB:
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
                                 'Job added to the database')
 
-            # If present, insert the tile list.
-            if tilelist:
-                for tile in tilelist:
-                    c.execute('INSERT INTO tile (job_id, tile) '
-                              'VALUES (%s, %s)',
-                              (job_id, tile))
-            # Update the obs table.
-            if obsinfolist:
+        # The following methods call self.db as c, so must be outside
+        # the with block.
 
-                for obs in obsinfolist:
-                    columnnames, values  = zip(*obs.items())
-                    allowed = '^\w+$' # Only allow alphanumeric characters and  _ and -.
-                    if re.match(allowed, ''.join(columnnames)):
-                        column_query = '(`' + '`, `'.join(columnnames) + '`)'
-                        values_questions = '(' + ', '.join(['%s'] * len(values))+')'
-                        print column_query
-                        print values_questions
-                        print values
-                        c.execute('INSERT INTO obs ' + column_query + \
-                                  ' VALUES ' + values_questions,
-                                  values)
-                    else:
-                        raise JSAProcError('Could not insert into obs table: invalid characters in columnames. '
-                                           'Columns requested were: '+', '.join(columnnames))
+        # If present, insert the tile list.
+        if tilelist:
+            self.set_tilelist(job_id, tilelist)
+
+        # If present, replace/update the observation list.
+        if obsinfolist:
+            self.update_obs_table(job_id, obsinfolist, replace_all=obsreplace)
 
         # job_id may not be necessary but sometimes useful.
         return job_id
 
+
+    def set_tilelist(self, job_id, tiles):
+        """
+        Delete and replace the entries for job_id in the tiles tables.
+
+        job_id: integer required.
+
+        tiles: list of integer, required
+        """
+        with self.db as c:
+            c.execute('DELETE FROM tile WHERE job_id = %s', (job_id))
+            for tile in tiles:
+                c.execute('INSERT INTO tile (job_id, tile) '
+                          'VALUES (%s, %s)',
+                          (job_id, tile))
+        return job_id
+
+    def update_obs_table(self, job_id, obsinfolist, replace_all=True):
+        """
+        Update the obs table with additional observations for a given job.
+
+        job_id: integer, required
+
+        obsinfolist: list of dictionaries.
+
+        Each dictionary is the key/values for the obs table headings
+        and values for 1 observation belonging to the job_id.
+
+        replace_all: Boolean, default True
+
+        If set True, delete all existing entries for the job_id before
+        updating the table with the obsinfo dictionaries.
+        """
+
+        # If replace_all is set, then delete the existing observations.
+        if replace_all:
+            with self.db as c:
+                c.execute(' DELETE FROM obs WHERE job_id = %s', (job_id,))
+
+        with self.db as c:
+
+            # Go through each observation dictionary in the list.
+            for obs in obsinfolist:
+                columnnames, values  = zip(*obs.items())
+
+                # Columnames can only use alphanumeric characters and  _ and -.
+                allowed = '^\w+$'
+                if re.match(allowed, ''.join(columnnames)):
+
+                    # Escape column names with back ticks.
+                    column_query = '(`' + '`, `'.join(columnnames) + '`)'
+                    values_questions = '(' + ', '.join(['%s'] * len(values))+')'
+
+                    c.execute('INSERT INTO obs ' + column_query + \
+                              ' VALUES ' + values_questions,
+                              values)
+                else:
+                    raise JSAProcError('Could not insert into obs table: '
+                                       'invalid characters in columnames. '
+                                       'Columns requested were: '+', '.join(columnnames))
+
+        return job_id
+
     def change_state(self, job_id, newstate, message, state_prev=None):
+
         """
         Change the state of a job in the JSA processing database.
 
