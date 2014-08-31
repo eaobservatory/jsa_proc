@@ -685,7 +685,7 @@ class JSAProcDB:
         # assumption that it was a one-to-many join.  If we ever
         # add any one-to-one joins, this step should be made more
         # conditional.
-        if join:
+        if join and not count:
             query += ' GROUP BY job.id '
 
         if prioritize:
