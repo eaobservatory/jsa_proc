@@ -216,6 +216,32 @@ class JSAProcDB:
                           (job_id, tile))
         return job_id
 
+
+    def get_obs_info(self, job_id):
+        """
+        Get all entries in the obs table for a given job_id.
+
+        job_id: integer, required
+
+        returns:
+
+        List of NamedTuples with entries from obs table.
+        """
+
+        with self.db as c:
+
+            # Get all observations with job_id
+            c.execute('SELECT * FROM obs WHERE job_id = %s', (job_id,))
+            results = c.fetchall()
+            columns = [i[0] for i in c.description]
+
+            # Create a named tuple with the correct column output
+            JSAProcObs = namedtuple('JSAProcObs', ', '.join(columns))
+
+        results = [JSAProcObs(*obs) for obs in results]
+
+        return results
+
     def set_obs_info(self, job_id, obsinfolist, replace_all=True):
         """
         Update the obs table with additional observations for a given job.
