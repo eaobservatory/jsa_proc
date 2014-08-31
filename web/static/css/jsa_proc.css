@@ -159,6 +159,10 @@ div.tile a {
     height: 100%;
 }
 
+div.jobinfo{
+    float:left;
+}
+
 table, td, th {
     border: 1px solid black;
     border-collapse: collapse;
