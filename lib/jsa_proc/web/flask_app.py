@@ -21,6 +21,7 @@ import os.path
 import jsa_proc.config
 from jsa_proc.state import JSAProcState
 
+from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.web.util import \
     url_for, templated, HTTPError, HTTPNotFound, HTTPRedirect
 
@@ -54,12 +55,16 @@ def create_web_app():
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
+        obsquerydict={}
+        for key in ObsQueryDict.keys():
+            obsquerydict[key] = request.args.get(key, None)
         return prepare_job_list(
             db,
             request.args.get('location', None),
             request.args.get('state', None),
             request.args.get('number', None),
-            request.args.get('page', None)
+            request.args.get('page', None),
+            obsquerydict=obsquerydict,
         )
 
     @app.route('/summary/')
