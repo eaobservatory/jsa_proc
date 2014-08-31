@@ -704,3 +704,104 @@ class JSAProcDB:
                 result.append(row)
 
         return result
+
+
+    def get_processing_time_obs_type(self, obsdict=None, jobdict=None,):
+        """
+        Get the processing time
+        """
+        from_query = "FROM job " + \
+                     " LEFT JOIN log on job.id = log.job_id " + \
+                     " LEFT JOIN obs on job.id = obs.job_id "
+        select_query = " SELECT job.id, obs.obstype, max(log.datetime), state_new," + \
+                       " obs.obstype, obs.scanmode, obs.survey, obs.instrument "
+        where_query = " WHERE state_new=%s AND job.location='JAC' and " + \
+                      "job.state != 'E' and job.state != 'S'"
+        param = [JSAProcState.RUNNING]
+        group_query = " GROUP BY job.id "
+
+        if obsdict:
+            obsquery, obsparam = _dict_query_where_clause(obsdict)
+            where_query += obsquery.format('obs.')
+            param += obsparam
+
+        if jobdict:
+            jobquery, jobparam = _dict_query_where_clause(jobdict)
+            where_query += jobquery.format('job.')
+            param += jobparam
+
+
+        query = select_query + from_query + where_query + group_query
+
+        with self.db as c:
+            c.execute(query, param)
+            startresults = c.fetchall()
+            columns = c.description
+
+        param[0] = JSAProcState.PROCESSED
+
+        with self.db as c:
+            c.execute(query, param)
+            endresults = c.fetchall()
+
+        return startresults, endresults, columns
+
+def _dict_query_where_clause(wheredict, logic = 'AND'):
+    """Semi-private function that takes in a dictionary of column names
+    and allowed options, and turns them into a string that can be added
+    to a where query to limit the options.
+
+    Currently only supports the = operator. Could be adjusted to allow for
+    other tests if needed.
+
+    parameters:
+
+    wheredict: dictionary, required.
+
+    A dictionary where the field names are columns in a table, and the
+    values are allowed values for those columns in a mysql WHERE query.
+
+    If the value for a single column is a list, then a row that matches any of the
+    values will be returned when the query is used.
+
+    logic: string, optional, default='AND'
+
+    Logic for combining  the different fields. Could be 'AND', 'OR' or 'NOT'
+
+    returns:
+
+    where_query: string,
+
+    This must be formatted to append a table name to all of the columns if required,
+    via: where_query.format('table_name.')
+    (or if no table name is needed: where_query.format('')
+
+    params: list
+
+    parameters for the query.
+    """
+    where = []
+    params = []
+
+    column_pattern = '^[a-zA-Z0-9_]+$'
+
+    for key, value in wheredict.items():
+
+        # Check key only contains a-z A-Z 0-9 and _
+        if not re.match(column_pattern, key):
+            raise JSAProcError('Non allowed column name %s for mysql matching' %
+                               (str(key)) )
+
+        # If string or non iterable object, force into list.
+        if isinstance(value, basestring) or not hasattr(value, '__iter__'):
+            value = [value]
+
+        where.append(' ( ' +\
+                       ' OR '.join(['{0}`'+key+'`=%s'] * len(value)) + \
+                       ' ) ')
+        params += value
+
+    logic = ' ' + logic + ' '
+    where = logic.join(where)
+    return where, params
+
