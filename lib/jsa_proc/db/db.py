@@ -589,7 +589,8 @@ class JSAProcDB:
 
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
-                  sort=False, sortdir='ASC', outputs=None, count=False):
+                  sort=False, sortdir='ASC', outputs=None, count=False,
+                  obsqueries=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -609,6 +610,15 @@ class JSAProcDB:
               get output_files that match the string. e.g. '%preview_1024.png'
               would include all 1024 size preview images with jobs.
               If this argument is None then no outputs will be fetched.)
+
+        In addition the jobs returned can be affected by an optional
+        obsqueries parameter. If given, this must be a ObsQuery
+        namedtuple, with a 'querylist' and a 'join' attribute. The
+        querylist is a list of separate strings to be added to the
+        where clauses. The join parameter gives the logic to be added
+        to the job_list.
+
+        **NOTE THAT THIS ALLOWS ARBITRARY STRINGS TO BE USED ON THE DATABASE**
 
 
         Returns a list (which may be empty) of namedtuples, each  of which have
@@ -646,7 +656,7 @@ class JSAProcDB:
             else:
                 query += ', NULL'
 
-        query += ' FROM job' + join
+
 
         if state is not None:
             where.append('job.state=%s')
@@ -658,6 +668,15 @@ class JSAProcDB:
         if location is not None:
             where.append('job.location=%s')
             param.append(location)
+
+        if obsqueries:
+            for q in obsqueries.querylist:
+                where.append(q)
+
+            join += ' ' + obsqueries.join + ' '
+
+
+        query += ' FROM job' + join
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
@@ -673,13 +692,14 @@ class JSAProcDB:
             order.append('job.priority DESC')
 
         if sort:
-            order.append('job.id '+sortdir)
+            order.append('job.id ' + sortdir)
 
         if order:
             query += ' ORDER BY ' + ', '.join(order)
 
         # Return [number] of results, starting at [offset]
         if number:
+
             query += ' LIMIT %s'
 
             if offset:
@@ -692,6 +712,7 @@ class JSAProcDB:
 
         with self.db as c:
 
+            logger.debug([query, param])
             c.execute(query, param)
 
             while True:
