@@ -15,24 +15,44 @@
 
 from __future__ import absolute_import, division
 
+from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsJoin, ObsQuery
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
-def prepare_job_list(db, location, state, number, page):
+def prepare_job_list(db, location, state, number, page, obsquerydict={}):
     if location == '':
         location = None
     if state == '':
         state = None
+    if obsquerydict == '':
+        obsquerydict= {}
+
+    # List of where querys to send to find jobs
+    obsquerylist = []
+
+    # Get the values based on the strings passed to this.
+    for key, value in obsquerydict.items():
+        if value:
+            obsquerylist.append(ObsQueryDict[key][value].where)
+
+    # Create the query object.
+    obsqueries = ObsQuery(join=ObsJoin, querylist = obsquerylist)
 
     job_query = {
         'location': location,
         'state': state,
+        'obsqueries': obsqueries,
     }
+    url_query = {
+        'location': location,
+        'state': state,
+        }
+    url_query.update(**obsquerydict)
 
     (number, page, pagination) = calculate_pagination(
-        db.find_jobs(count=True, **job_query),
-        number, 24, page, 'job_list', job_query)
+        db.find_jobs(count=True,  **job_query),
+        number, 24, page, 'job_list', url_query)
 
     jobs = []
 
@@ -62,4 +82,6 @@ def prepare_job_list(db, location, state, number, page):
         'selected_state': state,
         'selected_number': number,
         'pagination': pagination,
+        'selected_obsdict': obsquerydict,
+        'obsoptions': ObsQueryDict,
     }
