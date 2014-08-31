@@ -5,21 +5,21 @@
 <div id="wrapper">
 <div class="col">
 <table>
-<tr><th>State</th><td>{{ info.state | state_name }}</td></tr>
-<tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
-<tr><th>Tag</th><td>{{ info.tag }}</td></tr>
-<tr><th>Location</th><td>{{ info.location }}</td></tr>
-{% if info.foreign_id is not none %}
-    {% if info.foreign_url is none %}
-        <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+  {% for key, value in summary.items() %}
+  <tr>
+    <th > {{key}} </th>
+    {% if key  == 'State' %}
+    <td class="state_{{ value | state_phase}}"> {{ value |state_name }}</td>
+    {% elif key == "Foreign Url" %}
+    <td> <a href="{{value}}" >{{ info.foreign_id }}</a></td>
     {% else %}
-        <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">{{ info.foreign_id }}</a></td></tr>
+    <td> {{ value }}</td>
     {% endif %}
-{% endif %}
-<tr><th>Mode</th><td>{{ info.mode }}</td></tr>
-<tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
+  </tr>
+  {% endfor %}
 </table>
 </div>
+
 
 {% if previews %}
 <div class="col">
@@ -30,9 +30,11 @@
 <p> First preview: (click to embiggen).</p>
 {% endif %}
 </div>
-
 {% endif %}
+
 <div class="clear"></div>
+
+
 
 
 {% if log %}
@@ -78,6 +80,52 @@
 </form>
 {% endif %}
 
+
+
+<div class="jobinfo">
+<table>
+<caption> Full Job Info </caption>
+<tr><th>State</th><td>{{ info.state | state_name }}</td></tr>
+<tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
+<tr><th>Tag</th><td>{{ info.tag }}</td></tr>
+<tr><th>Location</th><td>{{ info.location }}</td></tr>
+{% if info.foreign_id is not none %}
+    {% if info.foreign_url is none %}
+        <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+    {% else %}
+        <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">{{ info.foreign_id }}</a></td></tr>
+    {% endif %}
+{% endif %}
+<tr><th>Mode</th><td>{{ info.mode }}</td></tr>
+<tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
+</table>
+</div>
+
+{% if obsinfo %}
+<div class="obsinfo">
+<table>
+  <caption> Full Observation Info </caption>
+  {% if obsinfo|length > 1 %}
+  <tr>
+    <th></th>
+    {% for obs in obsinfo %}
+    <th> Obs {{loop.index}} </th>
+    {% endfor %}
+  </tr>
+  {% endif %}
+
+  {% for key in obskeys %}
+  <tr>
+    <th> {{key}} </th>
+    {% for obs in obsinfo %}
+    <td> {{ obs.get(key, '') }} </td>
+    {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
+</div>
+{% endif %}
+<div class="clear"></div>
 
 {% if orac_logs %}
 <h2>ORAC-DR Logs</h2>
