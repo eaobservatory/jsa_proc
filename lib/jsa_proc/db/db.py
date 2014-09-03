@@ -707,12 +707,12 @@ class JSAProcDB:
         Get the processing time
         """
         from_query = "FROM job " + \
-                     " LEFT JOIN log on job.id = log.job_id " + \
-                     " LEFT JOIN obs on job.id = obs.job_id "
-        select_query = " SELECT job.id, obs.obstype, max(log.datetime), state_new," + \
+                     " LEFT JOIN log ON job.id = log.job_id " + \
+                     " LEFT JOIN obs ON job.id = obs.job_id "
+        select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), state_new," + \
                        " obs.obstype, obs.scanmode, obs.survey, obs.instrument "
-        where_query = " WHERE state_new=%s AND job.location='JAC' and " + \
-                      "job.state != 'E' and job.state != 'S'"
+        where_query = " WHERE state_new=%s AND job.location='JAC' AND " + \
+                      "job.state != 'E' AND job.state != 'S'"
         param = [JSAProcState.RUNNING]
         group_query = " GROUP BY job.id "
 
