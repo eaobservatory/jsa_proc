@@ -711,23 +711,25 @@ class JSAProcDB:
                      " LEFT JOIN obs ON job.id = obs.job_id "
         select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), state_new," + \
                        " obs.obstype, obs.scanmode, obs.survey, obs.instrument "
-        where_query = " WHERE state_new=%s AND job.location='JAC' AND " + \
-                      "job.state != %s AND job.state != %s"
+        where = ['state_new=%s AND job.location="JAC" AND '
+                 'job.state != %s AND job.state != %s']
         param = [JSAProcState.ERROR, JSAProcState.RUNNING]
         group_query = " GROUP BY job.id "
 
         if obsdict:
             obsquery, obsparam = _dict_query_where_clause(obsdict)
-            where_query += obsquery.format('obs.')
+            where.append('(' + obsquery.format('obs.') + ')')
             param += obsparam
 
         if jobdict:
             jobquery, jobparam = _dict_query_where_clause(jobdict)
-            where_query += jobquery.format('job.')
+            where.append('(' + jobquery.format('job.') + ')')
             param += jobparam
 
 
-        query = select_query + from_query + where_query + group_query
+        query = select_query + from_query + \
+            ' WHERE ' + ' AND '.join(where) + \
+            group_query
 
         with self.db as c:
             c.execute(query, [JSAProcState.RUNNING] + param)

@@ -460,3 +460,22 @@ class InterfaceDBTest(DBTestCase):
 
         self.db.change_state(job_id, JSAProcState.ERROR, 'failure')
         self.assertEqual(self.db.get_processing_time_obs_type()[0], [])
+
+        # Add some more jobs.
+        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', [])
+        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', [])
+        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', [])
+        self.db.change_state(job_2, JSAProcState.RUNNING, 'start')
+        self.db.change_state(job_3, JSAProcState.RUNNING, 'start')
+        self.db.change_state(job_4, JSAProcState.RUNNING, 'start')
+        self.db.change_state(job_2, JSAProcState.PROCESSED, 'end')
+        self.db.change_state(job_3, JSAProcState.PROCESSED, 'end')
+        self.db.change_state(job_4, JSAProcState.PROCESSED, 'end')
+
+        self.assertEqual(len(self.db.get_processing_time_obs_type(
+            jobdict={'tag': 'tag3'})[0]),
+            1)
+
+        self.assertEqual(len(self.db.get_processing_time_obs_type(
+            jobdict={'tag': ['tag3', 'tag4']})[0]),
+            2)
