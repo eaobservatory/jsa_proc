@@ -784,14 +784,17 @@ def _dict_query_where_clause(table, wheredict, logic = 'AND'):
             raise JSAProcError('Non allowed column name %s for mysql matching' %
                                (str(key)) )
 
-        # If string or non iterable object, force into list.
         if isinstance(value, basestring) or not hasattr(value, '__iter__'):
-            value = [value]
+            # If string or non iterable object, use simple comparison.
+            where.append(table + '.`' + key + '`=%s')
+            params.append(value)
 
-        where.append(' ( ' +\
-                       ' OR '.join([table + '.`'+key+'`=%s'] * len(value)) + \
-                       ' ) ')
-        params += value
+        else:
+            # Otherwise use an IN expression.
+            where.append(table + '.`' + key + '` IN (' +
+                ', '.join(('%s',) * len(value)) +
+                ')')
+            params.extend(value)
 
     logic = ' ' + logic + ' '
     where = logic.join(where)
