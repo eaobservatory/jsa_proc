@@ -19,13 +19,13 @@
         {% endif %}
     {% endif %}
     <tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
-
-  {% for key, value in summary.items() %}
-  <tr>
-    <th > {{key}} </th>
-    <td> {{ value }}</td>
-  </tr>
-  {% endfor %}
+    {% if obsinfo is not none %}
+    <tr><th>Sources</th><td>{{ obsinfo.pop('sourcename') | uniq | join(' ') }} </td></tr>
+    <tr><th>Instruments</th><td>{{ obsinfo.pop('instrument') | uniq | join(' ') }} </td></tr>
+    <tr><th>Obs types</th><td>{{ obsinfo.pop('obstype') | uniq | join(' ') }} </td></tr>
+    <tr><th>Projects</th><td>{{ obsinfo.pop('project') | uniq | join(' ') }} </td></tr>
+    <tr><th>Scan modes</th><td>{{ obsinfo.pop('scanmode') | uniq | join(' ') }} </td></tr>
+    {% endif %}
 </table>
 </div>
 

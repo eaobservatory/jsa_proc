@@ -139,6 +139,10 @@ def create_web_app():
             return 'error'
         raise HTTPError('Unknown phase {0}'.format(phase))
 
+    @app.template_filter('uniq')
+    def uniq_filter(xs):
+        return set(xs)
+
     # Return the Application.
 
     return app

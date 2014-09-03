@@ -47,9 +47,6 @@ def prepare_job_info(db, job_id):
     except NoRowsError:
         input_files = ['in', 'in']
 
-    # Create a summary of the most useful information
-    summary = OrderedDict()
-
     previews256 = []
     previews1024 = []
     try:
@@ -74,12 +71,6 @@ def prepare_job_info(db, job_id):
 
         del obs_info['job_id']
         del obs_info['id']
-
-        summary['Sources'] = ' '.join(set(obs_info.pop('sourcename')))
-        summary['Instruments'] = ' '.join(set(obs_info.pop('instrument')))
-        summary['Obs types'] = ' '.join(set(obs_info.pop('obstype')))
-        summary['Projects'] = ' '.join(set(obs_info.pop('project')))
-        summary['Scan modes'] = ' '.join(set(obs_info.pop('scanmode')))
 
     else:
         obs_info = None
@@ -118,5 +109,4 @@ def prepare_job_info(db, job_id):
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
-        'summary': summary,
     }
