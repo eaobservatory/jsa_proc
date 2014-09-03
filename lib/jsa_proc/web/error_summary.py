@@ -56,23 +56,23 @@ def prepare_error_summary(db, filtering=None):
         s = None
     elif filtering == 'Unauthorized':
         s = unauthorized_filter
-        condition = operator.eq
+        condition = operator.truth
     elif filtering == 'Network':
         s = network_filter
-        condition = operator.eq
+        condition = operator.truth
     elif filtering == 'Running':
         s = running_filter
-        condition = operator.eq
+        condition = operator.truth
     elif filtering == 'Uncategorized':
         s = unauthorized_filter + network_filter + running_filter
-        condition = operator.ne
+        condition = operator.not_
     else:
         raise JSAProcError('Unknown filtering option "{0}"'.format(filtering))
 
     if s is not None:
         for l in locations:
             for job, item in error_dict[l].items():
-                if condition(set([item[0].message.find(i) for i in s]), set([-1])):
+                if condition(all(item[0].message.find(i) == -1 for i in s)):
                     error_dict[l].pop(job)
 
     return {
