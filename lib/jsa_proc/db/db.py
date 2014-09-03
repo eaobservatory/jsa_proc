@@ -212,7 +212,7 @@ class JSAProcDB:
             self._set_tilelist(c, job_id, tiles)
 
     def _set_tilelist(self, c, job_id, tiles):
-        c.execute('DELETE FROM tile WHERE job_id = %s', (job_id))
+        c.execute('DELETE FROM tile WHERE job_id = %s', (job_id,))
         for tile in tiles:
             c.execute('INSERT INTO tile (job_id, tile) '
                       'VALUES (%s, %s)',
