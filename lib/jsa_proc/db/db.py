@@ -36,6 +36,10 @@ JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
     'id time message state location')
 
+# Regular expressions to be used to check pieces of SQL being generated
+# automatically.
+valid_column = re.compile('^[a-z0-9_]+$')
+
 
 class JSAProcDB:
     """
@@ -185,16 +189,13 @@ class JSAProcDB:
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
                                 'Job added to the database')
 
-        # The following methods call self.db as c, so must be outside
-        # the with block.
+            # If present, insert the tile list.
+            if tilelist:
+                self._set_tilelist(c, job_id, tilelist)
 
-        # If present, insert the tile list.
-        if tilelist:
-            self.set_tilelist(job_id, tilelist)
-
-        # If present, replace/update the observation list.
-        if obsinfolist:
-            self.set_obs_info(job_id, obsinfolist)
+            # If present, replace/update the observation list.
+            if obsinfolist:
+                self._set_obs_info(c, job_id, obsinfolist, False)
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -209,13 +210,14 @@ class JSAProcDB:
         tiles: list of integer, required
         """
         with self.db as c:
-            c.execute('DELETE FROM tile WHERE job_id = %s', (job_id))
-            for tile in tiles:
-                c.execute('INSERT INTO tile (job_id, tile) '
-                          'VALUES (%s, %s)',
-                          (job_id, tile))
-        return job_id
+            self._set_tilelist(c, job_id, tiles)
 
+    def _set_tilelist(self, c, job_id, tiles):
+        c.execute('DELETE FROM tile WHERE job_id = %s', (job_id))
+        for tile in tiles:
+            c.execute('INSERT INTO tile (job_id, tile) '
+                      'VALUES (%s, %s)',
+                      (job_id, tile))
 
     def get_obs_info(self, job_id):
         """
@@ -259,42 +261,37 @@ class JSAProcDB:
         updating the table with the obsinfo dictionaries.
         """
 
+        with self.db as c:
+            self._set_obs_info(c, job_id, obsinfolist, replace_all)
+
+    def _set_obs_info(self, c, job_id, obsinfolist, replace_all):
         # If replace_all is set, then delete the existing observations.
         if replace_all:
-            with self.db as c:
-                c.execute(' DELETE FROM obs WHERE job_id = %s', (job_id,))
+            c.execute(' DELETE FROM obs WHERE job_id = %s', (job_id,))
 
-        with self.db as c:
 
-            # Go through each observation dictionary in the list.
-            for obs in obsinfolist:
-                if 'id' in obs:
-                    raise JSAProcError('There is an id in observation '
-                                       'dictionary')
+        # Go through each observation dictionary in the list.
+        for obs in obsinfolist:
+            columnnames, values  = zip(*obs.items())
 
-                if 'job_id' in obs:
-                    raise JSAProcError('There is a job_id in observation '
-                                       'dictionary')
-
-                columnnames, values  = zip(*obs.items())
-
-                # Columnames can only use alphanumeric characters and  _ and -.
-                allowed = '^\w+$'
-                if re.match(allowed, ''.join(columnnames)):
-
-                    # Escape column names with back ticks.
-                    column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
-                    values_questions = '(%s, ' + ', '.join(['%s'] * len(values))+')'
-
-                    c.execute('INSERT INTO obs ' + column_query + \
-                              ' VALUES ' + values_questions,
-                              (job_id,) + values)
-                else:
+            # Column names can only use valid characters.
+            for column in columnnames:
+                if column in ('id', 'job_id'):
                     raise JSAProcError('Could not insert into obs table: '
-                                       'invalid characters in columnames. '
-                                       'Columns requested were: '+', '.join(columnnames))
+                                       'private column name: ' + column)
 
-        return job_id
+
+                if not valid_column.match(column):
+                    raise JSAProcError('Could not insert into obs table: '
+                                       'invalid column name: ' + column)
+
+            # Escape column names with back ticks.
+            column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
+            values_questions = '(%s, ' + ', '.join(['%s'] * len(values))+')'
+
+            c.execute('INSERT INTO obs ' + column_query + \
+                      ' VALUES ' + values_questions,
+                      (job_id,) + values)
 
     def change_state(self, job_id, newstate, message, state_prev=None):
 
@@ -783,12 +780,10 @@ def _dict_query_where_clause(wheredict, logic = 'AND'):
     where = []
     params = []
 
-    column_pattern = '^[a-zA-Z0-9_]+$'
-
     for key, value in wheredict.items():
 
-        # Check key only contains a-z A-Z 0-9 and _
-        if not re.match(column_pattern, key):
+        # Column names can only use valid characters.
+        if not valid_column.match(key):
             raise JSAProcError('Non allowed column name %s for mysql matching' %
                                (str(key)) )
 

@@ -135,18 +135,33 @@ class InterfaceDBTest(DBTestCase):
 
         self.db.add_job('tag5', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist=[obs1, obs2])
 
-        # Check that we can't update the obs table with the invalid stringss
-        obsbad = {'obsid*':'asdfasd','obsidss':'asdfas',
-                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
+        # Check that we can't update the obs table with the invalid
+        # or bad column names.
+        for (error, obsbad) in (
+                # Invalid characters:
+                ('invalid column name',
+                 {'obsid*': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
+                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
+                  'subsys': '1'}),
+                # Non-existant column names:
+                ('has no column',
+                 {'obsid': 'asdfasd', 'obsidsss': 'asdfas', 'utdate': 20140101,
+                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
+                  'subsys': '1'}),
+                # Forbidden column names:
+                ('private column name',
+                 {'obsid': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
+                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
+                  'subsys': '1', 'id': 42}),
+                ('private column name',
+                 {'obsid': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
+                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
+                  'subsys': '1', 'job_id': 42}),
+                ):
 
-        with self.assertRaises(JSAProcError):
-            self.db.add_job('tag6', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
-
-        # Check that we can't update the obs table with the invalid columnnames
-        obsbad = {'obsid':'asdfasd','obsidsss':'asdfas',
-                'utdate':20140101,'obsnum':3, 'instrument':'SCUBA-2', 'backend':'ACSIS', 'subsys':'1'}
-        with self.assertRaises(JSAProcError):
-            self.db.add_job('tag7', 'JAC', 'obs', 'RED', ['file1', 'file2'], obsinfolist = [obsbad])
+            with self.assertRaisesRegexp(JSAProcError, error):
+                self.db.add_job('tag6', 'JAC', 'obs', 'RED',
+                                ['file1', 'file2'], obsinfolist = [obsbad])
 
     def test_change_state(self):
         """
@@ -398,3 +413,28 @@ class InterfaceDBTest(DBTestCase):
 
         # test the count option
         self.assertEqual(self.db.find_jobs(count=True), 8)
+
+    def test_obs_info(self):
+        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [])
+
+        # Should start with no information.
+        self.assertEqual(self.db.get_obs_info(job_1), [])
+
+        info = {'obsid': 'x14_01_1T1','obsidss': 'x14_1_1T1_850',
+                'utdate': '2014-01-01', 'obsnum': 3, 'instrument': 'SCUBA-2',
+                'backend':'ACSIS', 'subsys': '1'}
+
+        self.db.set_obs_info(job_1, [info])
+
+        # Create another job with this information from the start.
+        job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', [],
+                                obsinfolist=[info])
+
+        for job_id in (job_1, job_2):
+            info_retrieved = self.db.get_obs_info(job_id)
+
+            self.assertEqual(len(info_retrieved), 1)
+
+            info_retrieved = info_retrieved[0]
+            for key, value in info.items():
+                self.assertEqual(getattr(info_retrieved, key), value)
