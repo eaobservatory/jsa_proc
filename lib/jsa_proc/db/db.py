@@ -105,8 +105,7 @@ class JSAProcDB:
         # full information about jobs (specific to this function),
         # define others at top of this file. (Can be defined
         # statically instead if wanted).
-        rows = ' '.join([i[0] for i in rows])
-        JSAProcJob = namedtuple('JSAProcJob', rows)
+        JSAProcJob = namedtuple('JSAProcJob', [x[0] for x in rows])
 
         # Turn job into namedtuple
         job = JSAProcJob(*job)
@@ -238,7 +237,7 @@ class JSAProcDB:
             columns = [i[0] for i in c.description]
 
             # Create a named tuple with the correct column output
-            JSAProcObs = namedtuple('JSAProcObs', ', '.join(columns))
+            JSAProcObs = namedtuple('JSAProcObs', columns)
 
         results = [JSAProcObs(*obs) for obs in results]
 
