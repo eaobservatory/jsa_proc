@@ -49,13 +49,6 @@ def prepare_job_info(db, job_id):
 
     # Create a summary of the most useful information
     summary = OrderedDict()
-    summary['State'] = info['state']#JSAProcState.get_name(info['state'])
-    summary['Location'] = info['location']
-    if info['location'] == 'CADC':
-        summary['Foreign Url'] = info['foreign_url']
-    summary['Recipe'] = info['parameters']
-
-
 
     previews256 = []
     previews1024 = []
@@ -72,22 +65,21 @@ def prepare_job_info(db, job_id):
 
     except NoRowsError:
         output_files = []
-    try:
-        obs_info = db.get_obs_info(job.id)
 
-        summary['Sources'] = ' '.join(set([obs.sourcename for obs in obs_info]))
-        summary['Instruments'] = ' '.join(set([obs.instrument for obs in obs_info]))
-        summary['Obs types'] = ' '.join(set([obs.obstype for obs in obs_info]))
-        summary['Projects'] = ' '.join(set([obs.project for obs in obs_info]))
-        summary['Scan modes'] = ' '.join(set([obs.scanmode for obs in obs_info]))
+    obs_info = db.get_obs_info(job.id)
 
-        obs_info = [o._asdict() for o in obs_info]
-        obs_keys_set = set([key for obs in obs_info for key in obs.keys()])
+    if obs_info:
+        obs_info = dict((f, [getattr(x, f) for x in obs_info])
+                        for f in obs_info[0]._fields)
 
+        summary['Sources'] = ' '.join(set(obs_info.pop('sourcename')))
+        summary['Instruments'] = ' '.join(set(obs_info.pop('instrument')))
+        summary['Obs types'] = ' '.join(set(obs_info.pop('obstype')))
+        summary['Projects'] = ' '.join(set(obs_info.pop('project')))
+        summary['Scan modes'] = ' '.join(set(obs_info.pop('scanmode')))
 
-    except NoRowsError:
-        obs_info = dict()
-
+    else:
+        obs_info = None
 
     if previews256:
         previews256 = [url_for('job_preview', job_id=job.id, preview=i)
@@ -123,6 +115,5 @@ def prepare_job_info(db, job_id):
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
-        'obskeys': obs_keys_set,
         'summary': summary,
     }

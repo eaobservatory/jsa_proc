@@ -5,16 +5,25 @@
 <div id="wrapper">
 <div class="col">
 <table>
+    <tr><th>State</th><td class="state_{{ info.state | state_phase}}">
+        {{ info.state | state_name }}
+    </td></tr>
+    <tr><th>Location</th><td>{{ info.location }}</td></tr>
+    {% if info.foreign_id is not none %}
+        {% if info.foreign_url is none %}
+            <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+        {% else %}
+            <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">
+                {{ info.foreign_id }}
+            </a></td></tr>
+        {% endif %}
+    {% endif %}
+    <tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
+
   {% for key, value in summary.items() %}
   <tr>
     <th > {{key}} </th>
-    {% if key  == 'State' %}
-    <td class="state_{{ value | state_phase}}"> {{ value |state_name }}</td>
-    {% elif key == "Foreign Url" %}
-    <td> <a href="{{value}}" >{{ info.foreign_id }}</a></td>
-    {% else %}
     <td> {{ value }}</td>
-    {% endif %}
   </tr>
   {% endfor %}
 </table>
@@ -84,41 +93,32 @@
 
 <div class="jobinfo">
 <table>
-<caption> Full Job Info </caption>
-<tr><th>State</th><td>{{ info.state | state_name }}</td></tr>
+<caption> Additional Job Info </caption>
 <tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
 <tr><th>Tag</th><td>{{ info.tag }}</td></tr>
-<tr><th>Location</th><td>{{ info.location }}</td></tr>
-{% if info.foreign_id is not none %}
-    {% if info.foreign_url is none %}
-        <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
-    {% else %}
-        <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">{{ info.foreign_id }}</a></td></tr>
-    {% endif %}
-{% endif %}
 <tr><th>Mode</th><td>{{ info.mode }}</td></tr>
-<tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
 </table>
 </div>
 
-{% if obsinfo %}
+{% if obsinfo is not none %}
 <div class="obsinfo">
 <table>
-  <caption> Full Observation Info </caption>
-  {% if obsinfo|length > 1 %}
+  <caption> Additional Observation Info </caption>
+  {% set n_obsinfo = obsinfo[obsinfo.keys()[0]] | length %}
+  {% if n_obsinfo > 1 %}
   <tr>
-    <th></th>
-    {% for obs in obsinfo %}
+    <th>&nbsp;</th>
+    {% for obs in range(0, n_obsinfo) %}
     <th> Obs {{loop.index}} </th>
     {% endfor %}
   </tr>
   {% endif %}
 
-  {% for key in obskeys %}
+  {% for key in obsinfo.keys() %}
   <tr>
     <th> {{key}} </th>
-    {% for obs in obsinfo %}
-    <td> {{ obs.get(key, '') }} </td>
+    {% for val in obsinfo[key] %}
+    <td> {{ val }} </td>
     {% endfor %}
     </tr>
   {% endfor %}
