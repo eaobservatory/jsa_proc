@@ -199,6 +199,24 @@ class JSAProcDB:
         # job_id may not be necessary but sometimes useful.
         return job_id
 
+    def get_tilelist(self, job_id):
+        """Retrieve the list of tiles for a given job.
+        """
+
+        tiles = []
+
+        with self.db as c:
+            c.execute('SELECT tile FROM tile WHERE job_id = %s',
+                      (job_id,))
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                tiles.append(row[0])
+
+        return tiles
 
     def set_tilelist(self, job_id, tiles):
         """

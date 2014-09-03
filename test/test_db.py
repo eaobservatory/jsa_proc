@@ -163,6 +163,11 @@ class InterfaceDBTest(DBTestCase):
                 self.db.add_job('tag6', 'JAC', 'obs', 'RED',
                                 ['file1', 'file2'], obsinfolist = [obsbad])
 
+        # Check that we can set the tile list when adding a job.
+        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RED', [], tilelist=[42])
+
+        self.assertEqual(self.db.get_tilelist(job_7), [42])
+
     def test_change_state(self):
         """
         Change the state of a job in the database using change_state.
@@ -479,3 +484,19 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(len(self.db.get_processing_time_obs_type(
             jobdict={'tag': ['tag3', 'tag4']})[0]),
             2)
+
+    def test_tilelist(self):
+        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [])
+
+        # Start with no tilelist.
+        self.assertEqual(self.db.get_tilelist(job_id), [])
+
+        # Add tiles
+        tiles = set((42, 43, 44))
+        self.db.set_tilelist(job_id, tiles)
+        self.assertEqual(set(self.db.get_tilelist(job_id)), tiles)
+
+        # Change tiles
+        newtiles = set((45, 46, 47))
+        self.db.set_tilelist(job_id, newtiles)
+        self.assertEqual(set(self.db.get_tilelist(job_id)), newtiles)
