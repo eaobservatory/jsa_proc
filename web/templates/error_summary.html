@@ -4,9 +4,9 @@
 
 <form>
   <select name="filtering">
-    <option value="" {{ 'selected="selected"' if filtering is none }}>Any Error type</option>
+    <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any Error type</option>
     {% for f in filtering_options %}
-    <option value="{{ f }}" {{ 'selected="selected"' if filtering == f }}> {{ f }} </option>
+    <option value="{{ f }}" {{ 'selected="selected"' | safe if filtering == f }}> {{ f }} </option>
     {% endfor %}
   </select>
   <input type="submit" value="Filter" />
@@ -17,34 +17,35 @@
 <form method="POST" action="{{ url_for('job_change_state') }}"> 
 <table style="border:none;font-size:9pt">
   <tr>
-    <th Select </th>
+    <th> Select </th>
     <th> Job ID </th>
     <th> State</th>
     <th>Time </th>
     <th> Message </th>
   </tr>
 {% for job_id in job_summary_dict[l] %}
-<tr>
-  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="job_id" </td>
-  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <a href="{{ url_for('job_info', job_id=job_id)}}">{{job_id}}</a> </td>
   {% for row in job_summary_dict[l][job_id] %}
+  <tr>
+  {% if loop.first %}
+  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="job_id" /></td>
+  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <a href="{{ url_for('job_info', job_id=job_id)}}">{{job_id}}</a> </td>
+  {% endif %}
     <td class="state_{{ row.state | state_phase }}"> {{row.state | state_name }} </td>
     <td> {{row.time}} </td>
     <td> {{row.message}} </td>
     </tr>
-  <tr>
   {% endfor %}
-<tr class="blankrow"><td columnspan="4" style="padding:1ex;border:none"></td></tr>
+<tr class="blankrow"><td colspan="5" style="padding:1ex;border:none">&nbsp;</td></tr>
 
 {% endfor %}
 
 </table>
-</br>
-</br>
+<br />
+<br />
 <select name="newstate">
-  <option value""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
+  <option value=""{{ 'selected="selected"' | safe if selected_new_state is none}}>New State</option>
   {% for state in states %}
-  <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
+  <option value="{{ state }}" {{'selected="selected"' | safe if state == selected_new_state }}>{{ state | state_name }}</option>
   {% endfor %}
 </select><br/>
 <p>
