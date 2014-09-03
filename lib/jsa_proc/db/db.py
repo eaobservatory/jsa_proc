@@ -154,9 +154,9 @@ class JSAProcDB:
         The list of tiles this job will produce.
 
         obsinfolist: optional, list of dictionarys.
-        A list of observations dictionarys. Each item in list represents a single
-        observation which is included in this job. The dictionary should contain an entry
-        for each column in the 'obs' table.
+        A list of observations dictionarys. Each item in list represents a
+        single observation which is included in this job. The dictionary
+        should contain an entry for each column in the 'obs' table.
 
         Returns the job identifier.
         """
@@ -286,17 +286,15 @@ class JSAProcDB:
         if replace_all:
             c.execute(' DELETE FROM obs WHERE job_id = %s', (job_id,))
 
-
         # Go through each observation dictionary in the list.
         for obs in obsinfolist:
-            columnnames, values  = zip(*obs.items())
+            columnnames, values = zip(*obs.items())
 
             # Column names can only use valid characters.
             for column in columnnames:
                 if column in ('id', 'job_id'):
                     raise JSAProcError('Could not insert into obs table: '
                                        'private column name: ' + column)
-
 
                 if not valid_column.match(column):
                     raise JSAProcError('Could not insert into obs table: '
@@ -306,7 +304,7 @@ class JSAProcDB:
             column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
             values_questions = '(%s, ' + ', '.join(['%s'] * len(values))+')'
 
-            c.execute('INSERT INTO obs ' + column_query + \
+            c.execute('INSERT INTO obs ' + column_query +
                       ' VALUES ' + values_questions,
                       (job_id,) + values)
 
@@ -589,7 +587,6 @@ class JSAProcDB:
         return edict
         # Now sort out error jobs in sensible option
 
-
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False):
@@ -719,7 +716,6 @@ class JSAProcDB:
 
         return result
 
-
     def get_processing_time_obs_type(self, obsdict=None, jobdict=None,):
         """
         Get the processing time
@@ -727,8 +723,9 @@ class JSAProcDB:
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
                      " LEFT JOIN obs ON job.id = obs.job_id "
-        select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), state_new," + \
-                       " obs.obstype, obs.scanmode, obs.survey, obs.instrument "
+        select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), " + \
+                       "state_new, obs.obstype, obs.scanmode, " + \
+                       "obs.survey, obs.instrument "
         where = ['state_new=%s AND job.location="JAC" AND '
                  'job.state != %s AND job.state != %s']
         param = [JSAProcState.ERROR, JSAProcState.RUNNING]
@@ -743,7 +740,6 @@ class JSAProcDB:
             jobquery, jobparam = _dict_query_where_clause('job', jobdict)
             where.append('(' + jobquery + ')')
             param += jobparam
-
 
         query = select_query + from_query + \
             ' WHERE ' + ' AND '.join(where) + \
@@ -760,7 +756,8 @@ class JSAProcDB:
 
         return startresults, endresults, columns
 
-def _dict_query_where_clause(table, wheredict, logic = 'AND'):
+
+def _dict_query_where_clause(table, wheredict, logic='AND'):
     """Semi-private function that takes in a dictionary of column names
     and allowed options, and turns them into a string that can be added
     to a where query to limit the options.
@@ -777,8 +774,8 @@ def _dict_query_where_clause(table, wheredict, logic = 'AND'):
     A dictionary where the field names are columns in a table, and the
     values are allowed values for those columns in a mysql WHERE query.
 
-    If the value for a single column is a list, then a row that matches any of the
-    values will be returned when the query is used.
+    If the value for a single column is a list, then a row that matches any of
+    the values will be returned when the query is used.
 
     logic: string, optional, default='AND'
 
@@ -799,8 +796,8 @@ def _dict_query_where_clause(table, wheredict, logic = 'AND'):
 
         # Column names can only use valid characters.
         if not valid_column.match(key):
-            raise JSAProcError('Non allowed column name %s for mysql matching' %
-                               (str(key)) )
+            raise JSAProcError('Non allowed column name %s for SQL matching' %
+                               (str(key)))
 
         if isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
@@ -810,11 +807,10 @@ def _dict_query_where_clause(table, wheredict, logic = 'AND'):
         else:
             # Otherwise use an IN expression.
             where.append(table + '.`' + key + '` IN (' +
-                ', '.join(('%s',) * len(value)) +
-                ')')
+                         ', '.join(('%s',) * len(value)) +
+                         ')')
             params.extend(value)
 
     logic = ' ' + logic + ' '
     where = logic.join(where)
     return where, params
-
