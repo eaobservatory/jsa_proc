@@ -438,3 +438,25 @@ class InterfaceDBTest(DBTestCase):
             info_retrieved = info_retrieved[0]
             for key, value in info.items():
                 self.assertEqual(getattr(info_retrieved, key), value)
+
+    def test_processing_time(self):
+        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [])
+
+        self.db.change_state(job_id, JSAProcState.RUNNING, 'start')
+        self.db.change_state(job_id, JSAProcState.PROCESSED, 'end')
+
+        # Check that we find this job:
+        (start, end, col) = self.db.get_processing_time_obs_type()
+
+        self.assertEqual(len(start), 1)
+        self.assertEqual(len(end), 1)
+
+        self.assertEqual(start[0][3], JSAProcState.RUNNING)
+        self.assertEqual(end[0][3], JSAProcState.PROCESSED)
+
+        # Check we don't find the job if it's running or in the error state:
+        self.db.change_state(job_id, JSAProcState.RUNNING, 'start again')
+        self.assertEqual(self.db.get_processing_time_obs_type()[0], [])
+
+        self.db.change_state(job_id, JSAProcState.ERROR, 'failure')
+        self.assertEqual(self.db.get_processing_time_obs_type()[0], [])
