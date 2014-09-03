@@ -4,16 +4,16 @@
 
 <form>
   <select name="filtering">
-    <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any Error type</option>
+    <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any error type</option>
     {% for f in filtering_options %}
-    <option value="{{ f }}" {{ 'selected="selected"' | safe if filtering == f }}> {{ f }} </option>
+    <option value="{{ f }}" {{ 'selected="selected"' | safe if filtering == f }}> {{ f | capitalize }} </option>
     {% endfor %}
   </select>
   <input type="submit" value="Filter" />
 </form>
 
 {% for l in job_summary_dict.keys() %}
-<h2> {{l}} {{filtering}} Error States</h2>
+<h2> {{l}} {{ filtering | default('', True) | capitalize }} Error States</h2>
 <form method="POST" action="{{ url_for('job_change_state') }}"> 
 <table style="border:none;font-size:9pt">
   <tr>
