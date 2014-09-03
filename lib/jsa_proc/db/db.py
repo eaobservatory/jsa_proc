@@ -717,13 +717,13 @@ class JSAProcDB:
         group_query = " GROUP BY job.id "
 
         if obsdict:
-            obsquery, obsparam = _dict_query_where_clause(obsdict)
-            where.append('(' + obsquery.format('obs.') + ')')
+            obsquery, obsparam = _dict_query_where_clause('obs', obsdict)
+            where.append('(' + obsquery + ')')
             param += obsparam
 
         if jobdict:
-            jobquery, jobparam = _dict_query_where_clause(jobdict)
-            where.append('(' + jobquery.format('job.') + ')')
+            jobquery, jobparam = _dict_query_where_clause('job', jobdict)
+            where.append('(' + jobquery + ')')
             param += jobparam
 
 
@@ -742,7 +742,7 @@ class JSAProcDB:
 
         return startresults, endresults, columns
 
-def _dict_query_where_clause(wheredict, logic = 'AND'):
+def _dict_query_where_clause(table, wheredict, logic = 'AND'):
     """Semi-private function that takes in a dictionary of column names
     and allowed options, and turns them into a string that can be added
     to a where query to limit the options.
@@ -751,6 +751,8 @@ def _dict_query_where_clause(wheredict, logic = 'AND'):
     other tests if needed.
 
     parameters:
+
+    table: name of the table in which the fields are to be found.
 
     wheredict: dictionary, required.
 
@@ -767,10 +769,6 @@ def _dict_query_where_clause(wheredict, logic = 'AND'):
     returns:
 
     where_query: string,
-
-    This must be formatted to append a table name to all of the columns if required,
-    via: where_query.format('table_name.')
-    (or if no table name is needed: where_query.format('')
 
     params: list
 
@@ -791,7 +789,7 @@ def _dict_query_where_clause(wheredict, logic = 'AND'):
             value = [value]
 
         where.append(' ( ' +\
-                       ' OR '.join(['{0}`'+key+'`=%s'] * len(value)) + \
+                       ' OR '.join([table + '.`'+key+'`=%s'] * len(value)) + \
                        ' ) ')
         params += value
 
