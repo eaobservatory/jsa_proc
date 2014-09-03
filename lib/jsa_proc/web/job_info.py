@@ -72,6 +72,9 @@ def prepare_job_info(db, job_id):
         obs_info = dict((f, [getattr(x, f) for x in obs_info])
                         for f in obs_info[0]._fields)
 
+        del obs_info['job_id']
+        del obs_info['id']
+
         summary['Sources'] = ' '.join(set(obs_info.pop('sourcename')))
         summary['Instruments'] = ' '.join(set(obs_info.pop('instrument')))
         summary['Obs types'] = ' '.join(set(obs_info.pop('obstype')))
