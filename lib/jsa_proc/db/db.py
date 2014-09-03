@@ -712,8 +712,8 @@ class JSAProcDB:
         select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), state_new," + \
                        " obs.obstype, obs.scanmode, obs.survey, obs.instrument "
         where_query = " WHERE state_new=%s AND job.location='JAC' AND " + \
-                      "job.state != 'E' AND job.state != 'S'"
-        param = [JSAProcState.RUNNING]
+                      "job.state != %s AND job.state != %s"
+        param = [JSAProcState.ERROR, JSAProcState.RUNNING]
         group_query = " GROUP BY job.id "
 
         if obsdict:
@@ -730,14 +730,12 @@ class JSAProcDB:
         query = select_query + from_query + where_query + group_query
 
         with self.db as c:
-            c.execute(query, param)
+            c.execute(query, [JSAProcState.RUNNING] + param)
             startresults = c.fetchall()
             columns = c.description
 
-        param[0] = JSAProcState.PROCESSED
-
         with self.db as c:
-            c.execute(query, param)
+            c.execute(query, [JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
 
         return startresults, endresults, columns
