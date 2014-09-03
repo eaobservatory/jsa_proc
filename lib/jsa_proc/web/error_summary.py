@@ -18,11 +18,12 @@ from __future__ import absolute_import, division
 from collections import OrderedDict
 import operator
 
+from jsa_proc.error import JSAProcError
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_error_summary(db, filtering=None, condition=None):
+def prepare_error_summary(db, filtering=None):
 
     """
     Prepare a summary of all jobs in error state.
@@ -51,7 +52,9 @@ def prepare_error_summary(db, filtering=None, condition=None):
         error_dict[l] = db.find_errors_logs(location=l)
 
     # filter based on last error messgae for each id
-    if filtering == 'Unauthorized':
+    if filtering is None or filtering == '':
+        s = None
+    elif filtering == 'Unauthorized':
         s = unauthorized_filter
         condition = operator.eq
     elif filtering == 'Network':
@@ -64,11 +67,9 @@ def prepare_error_summary(db, filtering=None, condition=None):
         s = unauthorized_filter + network_filter + running_filter
         condition = operator.ne
     else:
-        s = filtering
-        if not condition:
-            condition = operator.eq
+        raise JSAProcError('Unknown filtering option "{0}"'.format(filtering))
 
-    if filtering:
+    if s is not None:
         for l in locations:
             for job, item in error_dict[l].items():
                 if condition(set([item[0].message.find(i) for i in s]), set([-1])):
