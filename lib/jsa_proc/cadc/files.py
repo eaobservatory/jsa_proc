@@ -68,7 +68,6 @@ class CADCFiles():
         """
 
         result = []
-        patterns = {}
 
         for file in files:
             pattern = self._filename_pattern(file)
