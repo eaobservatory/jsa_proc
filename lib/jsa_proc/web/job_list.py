@@ -25,8 +25,6 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
         location = None
     if state == '':
         state = None
-    if obsquerydict == '':
-        obsquerydict = {}
 
     # List of where querys to send to find jobs
     obsquerylist = []
