@@ -22,6 +22,7 @@ import logging
 from pytz import UTC
 
 from jsa_proc.cadc.files import CADCFiles
+from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
 from jsa_proc.job_run.error_filter import JSAProcErrorFilter
@@ -46,6 +47,9 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
 
     logger.debug('Preparing CADC files object')
     ad = CADCFiles()
+
+    logger.debug('Preparing CADC TAP object')
+    caom2 = CADCTap()
 
     logger.debug('Fetching list of jobs in the error state')
     job_logs = db.find_errors_logs(location=location)
@@ -100,6 +104,18 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                         'missing',
                         'file {0} missing at CADC'.format(
                             files[found.index(False)]))
+
+            # Check whether all the observations are in CAOM-2.
+            if True:
+                logger.debug('Checking for observatons in CAOM-2')
+                obsid_list = list(obsids)
+                found = caom2.check_obsids(obsid_list)
+
+                if not all(found):
+                    raise IdentifiedProblem(
+                        'caom2',
+                        'observation {0} missing from CAOM-2'.format(
+                            obsid_list[found.index(False)]))
 
         except IdentifiedProblem as problem:
             logger.info('Job {0}: {1}'.format(job_id, problem.message))
