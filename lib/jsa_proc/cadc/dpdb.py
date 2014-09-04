@@ -76,11 +76,10 @@ class CADCDP:
                       'parameters, priority '
                       'FROM dp_recipe_instance '
                       'WHERE recipe_id IN (' +
-                          ', '.join((str(x) for x in self.recipe)) + ') '
-                      'AND (' +
-                          ' OR '.join((
-                              'parameters LIKE "%-drparameters=\'' + x +
-                              '\'%"' for x in jsa_tile_recipes)) + ')')
+                      ', '.join((str(x) for x in self.recipe)) + ') '
+                      'AND (' + ' OR '.join((
+                          'parameters LIKE "%-drparameters=\'' + x +
+                          '\'%"' for x in jsa_tile_recipes)) + ')')
 
             while True:
                 row = c.fetchone()

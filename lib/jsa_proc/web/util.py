@@ -109,19 +109,19 @@ def calculate_pagination(count, number_per_page, default_number,
     pagination = Pagination(
         url_for('job_list', page=0,
                 number=number_per_page, **url_args)
-            if page_number > 1 else None,
+        if page_number > 1 else None,
 
         url_for('job_list', page=(page_number - 1),
                 number=number_per_page, **url_args)
-            if page_number > 0 else None,
+        if page_number > 0 else None,
 
         url_for('job_list', page=(page_number + 1),
                 number=number_per_page, **url_args)
-            if page_number < page_max else None,
+        if page_number < page_max else None,
 
         url_for('job_list', page=page_max,
                 number=number_per_page, **url_args)
-            if page_number < (page_max - 1) else None
+        if page_number < (page_max - 1) else None
     )
 
     return (number_per_page, page_number, pagination)

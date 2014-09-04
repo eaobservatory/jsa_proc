@@ -26,7 +26,7 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
     if state == '':
         state = None
     if obsquerydict == '':
-        obsquerydict= {}
+        obsquerydict = {}
 
     # List of where querys to send to find jobs
     obsquerylist = []
@@ -37,7 +37,7 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
             obsquerylist.append(ObsQueryDict[key][value].where)
 
     # Create the query object.
-    obsqueries = ObsQuery(join=ObsJoin, querylist = obsquerylist)
+    obsqueries = ObsQuery(join=ObsJoin, querylist=obsquerylist)
 
     job_query = {
         'location': location,

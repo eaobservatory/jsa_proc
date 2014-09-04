@@ -656,8 +656,6 @@ class JSAProcDB:
             else:
                 query += ', NULL'
 
-
-
         if state is not None:
             where.append('job.state=%s')
             param.append(state)
@@ -674,7 +672,6 @@ class JSAProcDB:
                 where.append(q)
 
             join += ' ' + obsqueries.join + ' '
-
 
         query += ' FROM job' + join
 

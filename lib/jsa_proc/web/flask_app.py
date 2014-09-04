@@ -55,7 +55,7 @@ def create_web_app():
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
-        obsquerydict={}
+        obsquerydict = {}
         for key in ObsQueryDict.keys():
             obsquerydict[key] = request.args.get(key, None)
         return prepare_job_list(

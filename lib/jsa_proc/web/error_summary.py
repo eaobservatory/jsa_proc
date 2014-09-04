@@ -30,7 +30,7 @@ def prepare_error_summary(db, filtering=None):
 
     options:
 
-    filter parameter will be applied to the latest log 
+    filter parameter will be applied to the latest log
     message for each job, and will only return the job if
     it matches the filter
 
@@ -62,5 +62,3 @@ def prepare_error_summary(db, filtering=None):
         'filtering': filtering,
         'filtering_options': JSAProcErrorFilter.filter_names,
     }
-
-

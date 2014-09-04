@@ -88,7 +88,8 @@ def fetch_a_job(job_id, db=None):
 
     try:
         # Change status of job to 'Fetching', raise error if not in MISSING
-        db.change_state(job_id, JSAProcState.FETCHING, 'Data is being assembled',
+        db.change_state(job_id, JSAProcState.FETCHING,
+                        'Data is being assembled',
                         state_prev=JSAProcState.MISSING)
 
     except NoRowsError:
@@ -172,7 +173,8 @@ def run_a_job(job_id, db=None):
         # Change status of job to Running, raise an error if not currently in
         # WAITING state.
         db.change_state(job_id, JSAProcState.RUNNING,
-                        'Job is about to be run on host {0}'.format(gethostname()),
+                        'Job is about to be run on host {0}'.format(
+                            gethostname()),
                         state_prev=JSAProcState.WAITING)
 
     except NoRowsError:

@@ -32,45 +32,50 @@ ObsJoin = 'LEFT JOIN obs on job.id = obs.job_id'
 SurveyInfo = _where_maker('SurveyInfo')
 
 Surveys = dict(
-    GBS = SurveyInfo('GBS', 'Gould Belt Survey', 'obs.survey="GBS"'),
-    JPS = SurveyInfo('JPS','Galactic Plane Survey','obs.survey = "JPS"'),
-    NGS = SurveyInfo('NGS', 'Nearby Galaxies Survey', 'obs.survey = "NGS"'),
-    DDS = SurveyInfo('DDS', 'Survey of Nearby Stars', 'obs.survey = "DDS"'),
-    NoSurvey = SurveyInfo('NoSurvey', 'No Survey', 'obs.survey IS NULL'),
-    SASSY =  SurveyInfo('SASSY', 'SASSY', 'obs.survey = "SASSY"'),
-    CLS = SurveyInfo('CLS', 'Cosmology Legacy Survey', 'obs.survey = "CLS"'),
-    SLS = SurveyInfo('SLS', 'Spectral Legacy Survey', 'obs.survey = "SLS"'),
+    GBS=SurveyInfo('GBS', 'Gould Belt Survey', 'obs.survey="GBS"'),
+    JPS=SurveyInfo('JPS', 'Galactic Plane Survey', 'obs.survey = "JPS"'),
+    NGS=SurveyInfo('NGS', 'Nearby Galaxies Survey', 'obs.survey = "NGS"'),
+    DDS=SurveyInfo('DDS', 'Survey of Nearby Stars', 'obs.survey = "DDS"'),
+    NoSurvey=SurveyInfo('NoSurvey', 'No Survey', 'obs.survey IS NULL'),
+    SASSY=SurveyInfo('SASSY', 'SASSY', 'obs.survey = "SASSY"'),
+    CLS=SurveyInfo('CLS', 'Cosmology Legacy Survey', 'obs.survey = "CLS"'),
+    SLS=SurveyInfo('SLS', 'Spectral Legacy Survey', 'obs.survey = "SLS"'),
 )
 
 
 # ObsType.
 ObsTypeInfo = _where_maker('ObsType')
 ObsTypes = dict(
-    Pointing = ObsTypeInfo('Pointing', 'Pointing observations', 'obs.obstype = "pointing"'),
-    Science = ObsTypeInfo('Science', 'Science observations', 'obs.obstype = "science"'),
+    Pointing=ObsTypeInfo('Pointing', 'Pointing observations',
+                         'obs.obstype = "pointing"'),
+    Science=ObsTypeInfo('Science', 'Science observations',
+                        'obs.obstype = "science"'),
 )
 
 
 # Calibration.
 CalQuery = _where_maker('CalQuery')
 CalTypes = dict(
-    Calibrations = CalQuery('Calibrations', 'Observations marked as JCMTCAL and CAL',
-                     '(obs.project = "JCMTCAL"  OR obs.project = "CAL")'),
-    NoCalibrations = CalQuery('NoCalibrations', 'Observations not marked as calib',
-                     '(obs.project != "JCMTCAL" AND obs.project !="CAL")'),
+    Calibrations=CalQuery(
+        'Calibrations', 'Observations marked as JCMTCAL and CAL',
+        '(obs.project = "JCMTCAL"  OR obs.project = "CAL")'),
+    NoCalibrations=CalQuery(
+        'NoCalibrations', 'Observations not marked as calib',
+        '(obs.project != "JCMTCAL" AND obs.project !="CAL")'),
 )
 
 
 # ScanMode.
 ScanMode = _where_maker('ScanMode')
 ScanModes = dict(
-    Daisy = ScanMode('Daisy', 'Daisy scans', '(obs.scanmode = "DAISY" OR obs.scanmode = "CV_DAISY")'),
-    Pong = ScanMode('Pong', 'Pong scans', '(obs.scanmode = "CURVY_PONG")'),
+    Daisy=ScanMode('Daisy', 'Daisy scans',
+                   '(obs.scanmode = "DAISY" OR obs.scanmode = "CV_DAISY")'),
+    Pong=ScanMode('Pong', 'Pong scans', '(obs.scanmode = "CURVY_PONG")'),
 )
 
 
 ObsQueryDict = {
-    'Surveys':Surveys,
+    'Surveys': Surveys,
     'ObsTypes': ObsTypes,
     'CalTypes': CalTypes,
     'ScanModes': ScanModes,
