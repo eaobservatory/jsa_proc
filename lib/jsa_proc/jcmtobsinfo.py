@@ -34,10 +34,12 @@ SurveyInfo = _where_maker('SurveyInfo')
 Surveys = dict(
     GBS = SurveyInfo('GBS', 'Gould Belt Survey', 'obs.survey="GBS"'),
     JPS = SurveyInfo('JPS','Galactic Plane Survey','obs.survey = "JPS"'),
-    NGS = SurveyInfo('NGS', 'Nearby Galaxy Survey', 'obs.survey = "NGS"'),
-    DDS = SurveyInfo('DDS', 'Directors Discretionary Time', 'obs.survey = "DDS"'),
+    NGS = SurveyInfo('NGS', 'Nearby Galaxies Survey', 'obs.survey = "NGS"'),
+    DDS = SurveyInfo('DDS', 'Survey of Nearby Stars', 'obs.survey = "DDS"'),
     NoSurvey = SurveyInfo('NoSurvey', 'No Survey', 'obs.survey IS NULL'),
     SASSY =  SurveyInfo('SASSY', 'SASSY', 'obs.survey = "SASSY"'),
+    CLS = SurveyInfo('CLS', 'Cosmology Legacy Survey', 'obs.survey = "CLS"'),
+    SLS = SurveyInfo('SLS', 'Spectral Legacy Survey', 'obs.survey = "SLS"'),
 )
 
 
