@@ -751,12 +751,12 @@ class JSAProcDB:
 
         if obsdict:
             obsquery, obsparam = _dict_query_where_clause('obs', obsdict)
-            where.append('(' + obsquery + ')')
+            where.append(obsquery)
             param += obsparam
 
         if jobdict:
             jobquery, jobparam = _dict_query_where_clause('job', jobdict)
-            where.append('(' + jobquery + ')')
+            where.append(jobquery)
             param += jobparam
 
         query = select_query + from_query + \
@@ -831,4 +831,4 @@ def _dict_query_where_clause(table, wheredict, logic='AND'):
 
     logic = ' ' + logic + ' '
     where = logic.join(where)
-    return where, params
+    return ('({0})'.format(where), params)
