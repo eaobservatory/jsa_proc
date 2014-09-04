@@ -127,10 +127,10 @@ class InterfaceDBTest(DBTestCase):
             self.db.add_job('tag4', 'JAC', 'obs', 'REC', ['file1', 'file1'])
 
         # Check that we can update the obs table while adding a job.
-        obs1 = {'obsid': 'asdfasd', 'obsidss': 'asdfas',
+        obs1 = {'obsid': '01-asdfasd', 'obsidss': '01-asdfas-1',
                 'utdate': 20140101, 'obsnum': 3, 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1'}
-        obs2 = {'obsid': 'asdfasd', 'obsidss': 'asdfas',
+        obs2 = {'obsid': '02-asdfasd', 'obsidss': '02-asdfas-1',
                 'utdate': 20140102, 'obsnum': 3, 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1'}
 

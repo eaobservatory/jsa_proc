@@ -77,6 +77,7 @@ CREATE TABLE obs (
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
+CREATE UNIQUE INDEX obs_job_obsidss ON obs (job_id, obsidss);
 CREATE INDEX obs_job_id ON obs (job_id);
 CREATE INDEX obs_utdate ON obs (utdate);
 CREATE INDEX obs_project ON obs (project);
@@ -87,5 +88,6 @@ CREATE TABLE tile (
     tile INTEGER NOT NULL
 );
 
+CREATE UNIQUE INDEX tile_job_tile ON tile (job_id, tile);
 CREATE INDEX tile_job_id ON tile (job_id);
 CREATE INDEX tile_tile ON tile (tile);
