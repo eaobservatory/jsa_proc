@@ -18,12 +18,14 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
-    jsa_proc unauthorized [options]
+    jsa_proc unauthorized [options] [--check-at-cadc]
 
 Options:
-    --help, -h     Show usage information.
-    --verbose, -v  Print debugging information.
-    --quiet, -q    Omit informational messages.
+    --help, -h       Show usage information.
+    --verbose, -v    Print debugging information.
+    --quiet, -q      Omit informational messages.
+
+    --check-at-cadc  Test whether files are at CADC.
 
 """
 
@@ -95,7 +97,9 @@ def unauthorized(args):
     "unauthorized" errors.
     """
 
-    investigate_unauthorized_errors(location='JAC')
+    investigate_unauthorized_errors(
+        location='JAC',
+        check_at_cadc=args['--check-at-cadc'])
 
 
 if __name__ == '__main__':

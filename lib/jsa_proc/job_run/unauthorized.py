@@ -21,6 +21,7 @@ import logging
 
 from pytz import UTC
 
+from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
 from jsa_proc.job_run.error_filter import JSAProcErrorFilter
@@ -34,7 +35,7 @@ class IdentifiedProblem(Exception):
         self.category = category
 
 
-def investigate_unauthorized_errors(location):
+def investigate_unauthorized_errors(location, check_at_cadc=True):
     logger.debug('Starting to investigate unauthorized errors')
 
     logger.debug('Connecting to JSA processing database')
@@ -42,6 +43,9 @@ def investigate_unauthorized_errors(location):
 
     logger.debug('Connecting to OMP/JCMT database')
     ompdb = OMPDB()
+
+    logger.debug('Preparing CADC files object')
+    ad = CADCFiles()
 
     logger.debug('Fetching list of jobs in the error state')
     job_logs = db.find_errors_logs(location=location)
@@ -51,10 +55,7 @@ def investigate_unauthorized_errors(location):
     filter(job_logs)
 
     now = datetime.now(UTC)
-    category = {
-        'release': [],
-        'unknown': [],
-    }
+    category = {'unknown': []}
 
     for job_id in job_logs.keys():
         logger.debug('Checking job %i', job_id)
@@ -86,9 +87,26 @@ def investigate_unauthorized_errors(location):
                         'future release date ' +
                         release_date.strftime('%Y-%m-%d'))
 
+            # Check whether all of the files are at CADC.
+            if check_at_cadc:
+                logger.debug('Retrieving input file list')
+                files = db.get_input_files(job_id)
+
+                logger.debug('Checking for files at CADC')
+                found = ad.check_files(files)
+
+                if not all(found):
+                    raise IdentifiedProblem(
+                        'missing',
+                        'file {0} missing at CADC'.format(
+                            files[found.index(False)]))
+
         except IdentifiedProblem as problem:
             logger.info('Job {0}: {1}'.format(job_id, problem.message))
-            category[problem.category].append(job_id)
+            if problem.category in category:
+                category[problem.category].append(job_id)
+            else:
+                category[problem.category] = [job_id]
 
         else:
             logger.info('Job {0}: problem unknown'.format(job_id))
