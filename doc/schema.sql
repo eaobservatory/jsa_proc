@@ -53,38 +53,39 @@ CREATE TABLE log (
 
 CREATE INDEX log_job_id ON log (job_id);
 
-
 CREATE TABLE obs (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       job_id INTEGER NOT NULL,
-       obsid VARCHAR(80) NOT NULL,
-       obsidss VARCHAR(80) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL,
+    obsid VARCHAR(80) NOT NULL,
+    obsidss VARCHAR(80) NOT NULL,
 
-       utdate DATE NOT NULL,
-       obsnum INTEGER NOT NULL,
-       instrument VARCHAR(80) NOT NULL,
-       backend VARCHAR(80) NOT NULL,
-       subsys VARCHAR(80) NOT NULL,
+    utdate DATE NOT NULL,
+    obsnum INTEGER NOT NULL,
+    instrument VARCHAR(80) NOT NULL,
+    backend VARCHAR(80) NOT NULL,
+    subsys VARCHAR(80) NOT NULL,
 
-       project VARCHAR(80),
-       survey VARCHAR(80),
-       scanmode VARCHAR(80),
-       sourcename VARCHAR(80),
-       obstype VARCHAR(80),
+    project VARCHAR(80),
+    survey VARCHAR(80),
+    scanmode VARCHAR(80),
+    sourcename VARCHAR(80),
+    obstype VARCHAR(80),
 
-       association VARCHAR(80),
+    association VARCHAR(80),
 
-       FOREIGN KEY (job_id) REFERENCES job(id)
-           ON DELETE RESTRICT ON UPDATE RESTRICT
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
+
 CREATE INDEX obs_job_id ON obs (job_id);
 CREATE INDEX obs_utdate ON obs (utdate);
 CREATE INDEX obs_project ON obs (project);
 
 CREATE TABLE tile (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       job_id INTEGER NOT NULL,
-       tile INTEGER NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL,
+    tile INTEGER NOT NULL
 );
+
 CREATE INDEX tile_job_id ON tile (job_id);
 CREATE INDEX tile_tile ON tile (tile);
