@@ -22,6 +22,7 @@ import requests
 from requests.exceptions import HTTPError
 
 from jsa_proc.error import JSAProcError
+from jsa_proc.util import identifier_to_pattern
 
 
 class CADCFiles():
@@ -91,11 +92,4 @@ class CADCFiles():
         querying a large number of similar files individually.
         """
 
-        for (regexp, pattern) in self.patterns:
-            match = regexp.match(filename)
-
-            if match:
-                return pattern.format(*match.groups())
-
-        raise JSAProcError(
-            'Filename pattern for "{0}" not recognised'.format(filename))
+        return identifier_to_pattern(filename, self.patterns)
