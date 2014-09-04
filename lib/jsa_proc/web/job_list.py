@@ -82,6 +82,6 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
         'selected_state': state,
         'selected_number': number,
         'pagination': pagination,
-        'selected_obsdict': obsquerydict,
+        'selected_obsoptions': obsquerydict,
         'obsoptions': ObsQueryDict,
     }

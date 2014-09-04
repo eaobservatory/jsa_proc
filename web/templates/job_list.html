@@ -4,7 +4,7 @@
 {% from 'macros.html' import render_choices with context %}
 {% block body %}
 
-{{render_choices(locations, selected_location, states, selected_state, selected_number, obsoptions, selected_obsdict) }}
+{{render_choices(locations, selected_location, states, selected_state, selected_number, obsoptions, selected_obsoptions) }}
 
 {{ render_page_control(pagination) }}
 

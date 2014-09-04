@@ -32,7 +32,7 @@
     {% endif %}
 {% endmacro %}
 
-{% macro render_choices(locations, selected_location, states, selected_state, selected_number, obsoptions, selected_obsdict) %}
+{% macro render_choices(locations, selected_location, states, selected_state, selected_number, obsoptions, selected_obsoptions) %}
 <form>
     <p>
         <select name="location">
@@ -52,13 +52,15 @@
           <option value="{{ number }}" {{ 'selected="selected"' | safe if number == selected_number }}>{{ number }}</option>
           {% endfor %}
         </select>
-        {% for key in obsoptions.keys() %}
+        {% for key in obsoptions %}
+        {% with selected = selected_obsoptions.get(key, None) %}
         <select name="{{ key }}">
-          <option value="" {{ 'selected="selected"' | safe if selected_obsdict.get(key, None) is none }}>Any {{ key }}</option>
+          <option value="" {{ 'selected="selected"' | safe if selected is none }}>Any {{ key }}</option>
           {% for option  in  obsoptions[key].values() %}
-          <option value="{{ option.name }}" {{ 'selected="selected"' | safe if selected_obsdict.get(key, None) == option.name}}>{{ option.name }}</option>
+          <option value="{{ option.name }}" {{ 'selected="selected"' | safe if selected == option.name}}>{{ option.name }}</option>
           {% endfor %}
         </select>
+        {% endwith %}
         {% endfor %}
         <input type="submit" value="Filter" />
     </p>
