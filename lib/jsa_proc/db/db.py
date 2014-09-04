@@ -775,7 +775,7 @@ class JSAProcDB:
         return startresults, endresults, columns
 
 
-def _dict_query_where_clause(table, wheredict, logic='AND'):
+def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
     and allowed options, and turns them into a string that can be added
     to a where query to limit the options.
@@ -795,9 +795,12 @@ def _dict_query_where_clause(table, wheredict, logic='AND'):
     If the value for a single column is a list, then a row that matches any of
     the values will be returned when the query is used.
 
-    logic: string, optional, default='AND'
+    logic_or: boolean, optional, default=False
 
-    Logic for combining  the different fields. Could be 'AND', 'OR' or 'NOT'
+    Logic for combining  the different fields.  By default an "AND"
+    combination is used (all fields must match), but if this parameter
+    is set then an "OR" combination is used (only one field need
+    match).
 
     returns:
 
@@ -829,6 +832,5 @@ def _dict_query_where_clause(table, wheredict, logic='AND'):
                          ')')
             params.extend(value)
 
-    logic = ' ' + logic + ' '
-    where = logic.join(where)
+    where = (' OR ' if logic_or else ' AND ').join(where)
     return ('({0})'.format(where), params)
