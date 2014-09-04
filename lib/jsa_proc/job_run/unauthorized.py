@@ -60,6 +60,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
 
     now = datetime.now(UTC)
     category = {'unknown': []}
+    job_info = {}
 
     for job_id in job_logs.keys():
         logger.debug('Checking job %i', job_id)
@@ -72,6 +73,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
 
             logger.debug('Fetching observation info')
             obs_info = db.get_obs_info(job_id)
+            job_info[job_id] = {'obs': obs_info}
 
             if not obs_info:
                 logger.warning('No observation info available for this job')
@@ -84,6 +86,11 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
 
                 common = ompdb.get_common(obsid)
                 release_date = ompdb.parse_datetime(common.release_date)
+
+                # Keep the last release date inspected in the info dictionary
+                # so that if it's the one that causes a problem, we see
+                # it in the output.
+                job_info[job_id]['release'] = release_date
 
                 if release_date > now:
                     raise IdentifiedProblem(
@@ -132,3 +139,28 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
     for (cat, jobs) in category.items():
         if jobs:
             print('Category {0}: {1} job(s)'.format(cat, len(jobs)))
+
+            if yes_or_no_question('Show detail?', False):
+                for job in jobs:
+                    info = job_info[job]
+                    print(job,
+                          info['obs'][0].instrument,
+                          info['obs'][0].utdate,
+                          info['obs'][0].obsnum,
+                          info['obs'][0].project,
+                          info['obs'][0].obstype,
+                          info['obs'][0].scanmode,
+                          info['release'])
+
+
+def yes_or_no_question(question, default=False):
+    while True:
+        reply = raw_input('{0} ({1}): '.format(question,
+                                               'Y/n' if default else 'y/N'))
+
+        if reply == '':
+            return default
+        elif reply.lower() == 'y':
+            return True
+        elif reply.lower() == 'n':
+            return False
