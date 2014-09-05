@@ -14,7 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from socket import gethostname
+from unittest import TestCase
 
+from jsa_proc.db.db import _dict_query_where_clause
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.state import JSAProcState
 
@@ -523,3 +525,9 @@ class InterfaceDBTest(DBTestCase):
         newtiles = set((45, 46, 47))
         self.db.set_tilelist(job_id, newtiles)
         self.assertEqual(set(self.db.get_tilelist(job_id)), newtiles)
+
+
+class DBUtilityTestCase(TestCase):
+    def test_dict_query(self):
+        with self.assertRaises(JSAProcError):
+            _dict_query_where_clause('x;y', {'col': 'val'})

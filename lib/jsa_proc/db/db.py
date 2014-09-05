@@ -810,6 +810,10 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
 
     parameters for the query.
     """
+
+    if not valid_column.match(table):
+        raise JSAProcError('Invalid table name "{0}"'.format(table))
+
     where = []
     params = []
 
