@@ -101,11 +101,11 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Get config information.
     scratch_base_dir = get_scratch_dir(job_id)
     if not os.path.exists(scratch_base_dir):
-        os.mkdir(scratch_base_dir)
+        os.makedirs(scratch_base_dir)
 
     log_dir = get_log_dir(job_id)
     if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+        os.makedirs(log_dir)
 
     # Get scratchdir and logfile name using timestamp
     timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
@@ -121,7 +121,13 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # If output dir currently exists, delete the directory.
     if os.path.exists(out_dir):
+        # This will leave the parent directory, so dpCapture can re-create
+        # the "transfer" directory.
         shutil.rmtree(out_dir)
+    else:
+        # The parent directory may not exist, so we must make the "transfer"
+        # directory because dpCapture will not do so in that case.
+        os.makedirs(out_dir)
 
     # Find path to jsawrapdr and orac_dr
     config = get_config()

@@ -63,7 +63,7 @@ def write_input_list(job_id, input_file_list):
 
     input_directory = get_input_dir(job_id)
     if not os.path.exists(input_directory):
-        os.mkdir(input_directory)
+        os.makedirs(input_directory)
     fname = os.path.join(input_directory, input_list_name)
     f = open(fname, 'w')
     for i in input_file_list:
@@ -98,7 +98,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
     # Make the input directory if it doesn't exist. (Permissions?).
     if (not os.path.exists(input_directory)
             and not os.path.isdir(input_directory)):
-        os.mkdir(input_directory)
+        os.makedirs(input_directory)
 
     # For each file, check if its already in JAC data store, or input
     # directory. Download from CADC if its not. Check downloaded files
