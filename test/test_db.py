@@ -450,13 +450,13 @@ class InterfaceDBTest(DBTestCase):
 
         info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',
                   'obsnum': 1, 'instrument': 'F', 'backend': 'B',
-                  'subsys': '1', 'survey': 'GBS'}
+                  'subsys': '1', 'survey': 'GBS', 'project': 'G01'}
 
         info_2 = info_1.copy()
         info_2.update(obsidss='1-2', subsys=2)
 
         info_3 = info_1.copy()
-        info_3.update(survey='DDS')
+        info_3.update(survey='DDS', project='D01')
 
         job_1 = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [],
                                 obsinfolist=[info_1])
@@ -469,14 +469,68 @@ class InterfaceDBTest(DBTestCase):
         job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', [],
                                 obsinfolist=[info_2, info_3])
 
+        info_4 = info_1.copy()
+        info_4.update(survey=None, project='XX01')
+
+        info_5 = info_4.copy()
+        info_5.update(project='JCMTCAL')
+
+        info_6 = info_4.copy()
+        info_6.update(project='CAL')
+
+        job_6 = self.db.add_job('tag6', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_4])
+        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_5])
+        job_8 = self.db.add_job('tag8', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_6])
+
+        info_7 = info_1.copy()
+        info_7.update(project='JCMTCAL')
+
+        job_9 = self.db.add_job('tag9', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_7])
+
         queries = [
             (
                 ObsQuery([ObsQueryDict['Surveys']['GBS'].where]),
-                (job_1, job_2, job_3, job_5),
+                (job_1, job_2, job_3, job_5, job_9),
             ),
             (
                 ObsQuery([ObsQueryDict['Surveys']['DDS'].where]),
                 (job_4, job_5),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where]),
+                (job_6, job_7, job_8),
+            ),
+            (
+                ObsQuery([ObsQueryDict['CalTypes']['Calibrations'].where]),
+                (job_7, job_8, job_9),
+            ),
+            (
+                ObsQuery([ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                (job_1, job_2, job_3, job_4, job_5, job_6),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['GBS'].where,
+                          ObsQueryDict['CalTypes']['Calibrations'].where]),
+                (job_9,),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['GBS'].where,
+                          ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                (job_1, job_2, job_3, job_5),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where,
+                          ObsQueryDict['CalTypes']['Calibrations'].where]),
+                (job_7, job_8),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where,
+                          ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                (job_6,),
             ),
         ]
 
