@@ -604,7 +604,7 @@ class JSAProcDB:
     def find_jobs(self, state=None, location=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
-                  obsqueries=None):
+                  obsquery=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -626,14 +626,10 @@ class JSAProcDB:
               If this argument is None then no outputs will be fetched.)
 
         In addition the jobs returned can be affected by an optional
-        obsqueries parameter. If given, this must be a ObsQuery
-        namedtuple, with a 'querylist' attribute. The
-        querylist is a list of separate strings to be added to the
-        where clauses. The join parameter gives the logic to be added
-        to the job_list.
-
-        **NOTE THAT THIS ALLOWS ARBITRARY STRINGS TO BE USED ON THE DATABASE**
-
+        obsquery parameter. If given, this must be a dictionary of
+        columns from the obs table giving their required value.
+        This dictionary is processed by _dict_query_where_clause
+        and accepts any type of value permitted by that method.
 
         Returns a list (which may be empty) of namedtuples, each  of which have
         values:
@@ -684,11 +680,12 @@ class JSAProcDB:
             where.append('job.location=%s')
             param.append(location)
 
-        if obsqueries:
-            if obsqueries.querylist:
-                where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
-                             ' AND '.join(obsqueries.querylist) +
-                             ')')
+        if obsquery:
+            (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
+
+            where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
+                         obswhere + ')')
+            param.extend(obsparam)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)

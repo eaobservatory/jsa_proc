@@ -19,7 +19,7 @@ from unittest import TestCase
 
 from jsa_proc.db.db import _dict_query_where_clause, Not
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
-from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsQuery
+from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
@@ -493,54 +493,54 @@ class InterfaceDBTest(DBTestCase):
 
         queries = [
             (
-                ObsQuery([ObsQueryDict['Surveys']['GBS'].where]),
+                ObsQueryDict['Surveys']['GBS'].where,
                 (job_1, job_2, job_3, job_5, job_9),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['DDS'].where]),
+                ObsQueryDict['Surveys']['DDS'].where,
                 (job_4, job_5),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where]),
+                ObsQueryDict['Surveys']['NoSurvey'].where,
                 (job_6, job_7, job_8),
             ),
             (
-                ObsQuery([ObsQueryDict['CalTypes']['Calibrations'].where]),
+                ObsQueryDict['CalTypes']['Calibrations'].where,
                 (job_7, job_8, job_9),
             ),
             (
-                ObsQuery([ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                ObsQueryDict['CalTypes']['NoCalibrations'].where,
                 (job_1, job_2, job_3, job_4, job_5, job_6),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['GBS'].where,
-                          ObsQueryDict['CalTypes']['Calibrations'].where]),
+                d_add(ObsQueryDict['Surveys']['GBS'].where,
+                      ObsQueryDict['CalTypes']['Calibrations'].where),
                 (job_9,),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['GBS'].where,
-                          ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                d_add(ObsQueryDict['Surveys']['GBS'].where,
+                      ObsQueryDict['CalTypes']['NoCalibrations'].where),
                 (job_1, job_2, job_3, job_5),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where,
-                          ObsQueryDict['CalTypes']['Calibrations'].where]),
+                d_add(ObsQueryDict['Surveys']['NoSurvey'].where,
+                      ObsQueryDict['CalTypes']['Calibrations'].where),
                 (job_7, job_8),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['NoSurvey'].where,
-                          ObsQueryDict['CalTypes']['NoCalibrations'].where]),
+                d_add(ObsQueryDict['Surveys']['NoSurvey'].where,
+                      ObsQueryDict['CalTypes']['NoCalibrations'].where),
                 (job_6,),
             ),
         ]
 
         for (oq, expect) in queries:
             self.assertEqual(
-                set(x.id for x in self.db.find_jobs(obsqueries=oq)),
+                set(x.id for x in self.db.find_jobs(obsquery=oq)),
                 set(expect))
 
             self.assertEqual(
-                self.db.find_jobs(count=True, obsqueries=oq),
+                self.db.find_jobs(count=True, obsquery=oq),
                 len(expect))
 
     def test_obs_info(self):
@@ -671,3 +671,6 @@ class DBUtilityTestCase(TestCase):
 
         for (query, expect) in queries:
             self.assertEqual(_dict_query_where_clause(*query), expect)
+
+def d_add(*args):
+    return dict(sum((d.items() for d in args), []))

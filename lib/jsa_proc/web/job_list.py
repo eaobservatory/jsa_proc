@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsQuery
+from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, calculate_pagination
 
@@ -26,21 +26,18 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
     if state == '':
         state = None
 
-    # List of where querys to send to find jobs
-    obsquerylist = []
+    # Dictionary of obs table requirements to send to find jobs.
+    obsquery = {}
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():
         if value:
-            obsquerylist.append(ObsQueryDict[key][value].where)
-
-    # Create the query object.
-    obsqueries = ObsQuery(querylist=obsquerylist)
+            obsquery.update(ObsQueryDict[key][value].where)
 
     job_query = {
         'location': location,
         'state': state,
-        'obsqueries': obsqueries,
+        'obsquery': obsquery,
     }
     url_query = {
         'location': location,
