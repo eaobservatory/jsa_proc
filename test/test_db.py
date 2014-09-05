@@ -533,10 +533,25 @@ class DBUtilityTestCase(TestCase):
         with self.assertRaises(JSAProcError):
             _dict_query_where_clause('x;y', {'col': 'val'})
 
+        with self.assertRaises(JSAProcError):
+            _dict_query_where_clause('xyz', {'c;l': 'val'})
+
         queries = [
             (
                 ('tab', OrderedDict()),
                 ('', [])
+            ),
+            (
+                ('tab', OrderedDict([('a', 'x'), ('b', 'y')])),
+                ('(tab.`a`=%s AND tab.`b`=%s)', ['x', 'y'])
+            ),
+            (
+                ('tab', OrderedDict([('a', 'x'), ('b', 'y')]), True),
+                ('(tab.`a`=%s OR tab.`b`=%s)', ['x', 'y'])
+            ),
+            (
+                ('tab', OrderedDict([('q', ['i', 'j'])])),
+                ('(tab.`q` IN (%s, %s))', ['i', 'j'])
             ),
         ]
 
