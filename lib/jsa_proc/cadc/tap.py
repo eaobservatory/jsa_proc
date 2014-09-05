@@ -60,8 +60,10 @@ class CADCTap():
         table = self.tap.query(
             'SELECT lower(Observation.observationID) '
             'FROM caom2.Observation as Observation '
+            'JOIN caom2.Plane as Plane ON Observation.obsID = Plane.obsID '
             'WHERE ( Observation.collection = \'JCMT\' '
             'AND lower(Observation.observationID) LIKE \'{0}\' '
+            'AND Plane.calibrationLevel = 0 '
             ')'.format(pattern))
 
         if table is None:
