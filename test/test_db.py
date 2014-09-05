@@ -17,7 +17,7 @@ from collections import OrderedDict
 from socket import gethostname
 from unittest import TestCase
 
-from jsa_proc.db.db import _dict_query_where_clause
+from jsa_proc.db.db import _dict_query_where_clause, Not
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.state import JSAProcState
 
@@ -552,6 +552,14 @@ class DBUtilityTestCase(TestCase):
             (
                 ('tab', OrderedDict([('q', ['i', 'j'])])),
                 ('(tab.`q` IN (%s, %s))', ['i', 'j'])
+            ),
+            (
+                ('tab', OrderedDict([('q', Not(['i', 'j']))])),
+                ('(tab.`q` NOT IN (%s, %s))', ['i', 'j'])
+            ),
+            (
+                ('tab', OrderedDict([('z', Not('q'))])),
+                ('(tab.`z`<>%s)', ['q'])
             ),
         ]
 

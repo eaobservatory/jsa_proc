@@ -41,6 +41,20 @@ JSAProcErrorInfo = namedtuple(
 valid_column = re.compile('^[a-z0-9_]+$')
 
 
+class Not:
+    """Class representing negative conditions.
+
+    Instances contain a single attribute "value" which is the value
+    with which the object was constructed.
+    """
+
+    def __init__(self, value):
+        """Create new Not object containing the given value.
+        """
+
+        self.value = value
+
+
 class JSAProcDB:
     """
     JSA Processing database access class.
@@ -793,7 +807,10 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
     values are allowed values for those columns in a mysql WHERE query.
 
     If the value for a single column is a list, then a row that matches any of
-    the values will be returned when the query is used.
+    the values will be returned when the query is used.  If the value
+    or list is wrapped in a "Not" object, then the condition will
+    be inverted (the column does not match the given value, or the
+    column's value is not in the given list of values).
 
     logic_or: boolean, optional, default=False
 
@@ -824,16 +841,24 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
             raise JSAProcError('Non allowed column name %s for SQL matching' %
                                (str(key)))
 
+        if isinstance(value, Not):
+            value = value.value
+            logic_not = True
+        else:
+            logic_not = False
+
         if isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
-            where.append(table + '.`' + key + '`=%s')
+            where.append('{0}.`{1}`{2}%s'.format(table, key,
+                                                 '<>' if logic_not else '='))
             params.append(value)
 
         else:
             # Otherwise use an IN expression.
-            where.append(table + '.`' + key + '` IN (' +
-                         ', '.join(('%s',) * len(value)) +
-                         ')')
+            where.append(
+                '{0}.`{1}` {2} ('.format(table, key,
+                                         'NOT IN' if logic_not else 'IN') +
+                ', '.join(('%s',) * len(value)) + ')')
             params.extend(value)
 
     if not where:
