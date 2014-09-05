@@ -19,7 +19,7 @@ from unittest import TestCase
 
 from jsa_proc.db.db import _dict_query_where_clause, Not
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
-from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsJoin, ObsQuery
+from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsQuery
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
@@ -471,11 +471,11 @@ class InterfaceDBTest(DBTestCase):
 
         queries = [
             (
-                ObsQuery([ObsQueryDict['Surveys']['GBS'].where], ObsJoin),
+                ObsQuery([ObsQueryDict['Surveys']['GBS'].where]),
                 (job_1, job_2, job_3, job_5),
             ),
             (
-                ObsQuery([ObsQueryDict['Surveys']['DDS'].where], ObsJoin),
+                ObsQuery([ObsQueryDict['Surveys']['DDS'].where]),
                 (job_4, job_5),
             ),
         ]

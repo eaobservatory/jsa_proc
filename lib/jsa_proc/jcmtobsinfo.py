@@ -24,10 +24,6 @@ def _where_maker(name):
     return namedtuple(name, 'name fullname where')
 
 
-# Join for obstable
-ObsJoin = 'LEFT JOIN obs on job.id = obs.job_id'
-
-
 # Surveys.
 SurveyInfo = _where_maker('SurveyInfo')
 
@@ -82,4 +78,4 @@ ObsQueryDict = {
 }
 
 
-ObsQuery = namedtuple('ObsQuery', 'querylist join')
+ObsQuery = namedtuple('ObsQuery', 'querylist')

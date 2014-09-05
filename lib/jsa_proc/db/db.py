@@ -627,7 +627,7 @@ class JSAProcDB:
 
         In addition the jobs returned can be affected by an optional
         obsqueries parameter. If given, this must be a ObsQuery
-        namedtuple, with a 'querylist' and a 'join' attribute. The
+        namedtuple, with a 'querylist' attribute. The
         querylist is a list of separate strings to be added to the
         where clauses. The join parameter gives the logic to be added
         to the job_list.
@@ -670,6 +670,9 @@ class JSAProcDB:
             else:
                 query += ', NULL'
 
+        # Note: join and count cannot be used together.
+        query += ' FROM job' + join
+
         if state is not None:
             where.append('job.state=%s')
             param.append(state)
@@ -682,12 +685,10 @@ class JSAProcDB:
             param.append(location)
 
         if obsqueries:
-            for q in obsqueries.querylist:
-                where.append(q)
-
-            join += ' ' + obsqueries.join + ' '
-
-        query += ' FROM job' + join
+            if obsqueries.querylist:
+                where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
+                             ' AND '.join(obsqueries.querylist) +
+                             ')')
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
@@ -696,7 +697,7 @@ class JSAProcDB:
         # assumption that it was a one-to-many join.  If we ever
         # add any one-to-one joins, this step should be made more
         # conditional.
-        if join and not count:
+        if join:
             query += ' GROUP BY job.id '
 
         if prioritize:
