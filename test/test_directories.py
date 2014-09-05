@@ -22,17 +22,41 @@ from jsa_proc.job_run.directories \
 
 class DirectoryTestCase(TestCase):
     def test_directories(self):
-        self.assertEqual(get_input_dir(18),
-                         '/net/kamaka/export/data/jsa_proc/input/18')
+        # Test all the directory functions.
+        self.assertEqual(
+            get_input_dir(18),
+            '/net/kamaka/export/data/jsa_proc/input/000/000000/000000018')
 
-        self.assertEqual(get_output_dir(46),
-                         '/net/kamaka/export/data/jsa_proc/output/46')
+        self.assertEqual(
+            get_output_dir(46),
+            '/net/kamaka/export/data/jsa_proc/output/000/000000/000000046')
 
-        self.assertEqual(get_scratch_dir(92),
-                         '/export/data/jsa_proc/scratch/92')
+        self.assertEqual(
+            get_scratch_dir(92),
+            '/export/data/jsa_proc/scratch/000/000000/000000092')
 
-        self.assertEqual(get_log_dir(844),
-                         '/net/kamaka/export/data/jsa_proc/log/844')
+        self.assertEqual(
+            get_log_dir(844),
+            '/net/kamaka/export/data/jsa_proc/log/000/000000/000000844')
+
+        # Test longer job ID numbers (we know all the functions use the same
+        # private function to prepare the decimal number internally).
+        self.assertEqual(
+            get_log_dir(123456789),
+            '/net/kamaka/export/data/jsa_proc/log/123/123456/123456789')
+
+        self.assertEqual(
+            get_log_dir(22333),
+            '/net/kamaka/export/data/jsa_proc/log/000/000022/000022333')
+
+        self.assertEqual(
+            get_log_dir(22333999),
+            '/net/kamaka/export/data/jsa_proc/log/022/022333/022333999')
+
+        # Test what happens with a billion or more job IDs.
+        self.assertEqual(
+            get_log_dir(1999000999),
+            '/net/kamaka/export/data/jsa_proc/log/1999/1999000/1999000999')
 
         with self.assertRaises(JSAProcError):
             get_input_dir('not an integer')

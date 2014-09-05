@@ -51,4 +51,13 @@ def _get_dir(type_, job_id):
     config = get_config()
     basedir = config.get('directories', type_)
 
-    return os.path.join(basedir, str(job_id))
+    # Turn the job ID into a decimal string of at least 9
+    # digits, then create subdirectories by removing the last 6
+    # and then the last 3 digits.  This means that we retain the
+    # full length name in the final directory (unlike Git) to
+    # try to prevent accidental collisions if the directories are
+    # manipulated manually.  The digits are counted back from the
+    # end of the decimal string so that any digits in excess of
+    # the fixed 9 end up in the first component.
+    decimal = '{0:09d}'.format(job_id)
+    return os.path.join(basedir, decimal[:-6], decimal[:-3], decimal)
