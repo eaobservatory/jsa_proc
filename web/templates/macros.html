@@ -18,15 +18,23 @@
         <div>
             {% if pagination.first is not none %}
                 <a href="{{ pagination.first }}">First page</a>
+            {% else %}
+                <span class="greyedlink">First page</span>
             {% endif %}
             {% if pagination.prev is not none %}
                 <a href="{{ pagination.prev }}">Previous page</a>
+            {% else %}
+                <span class="greyedlink">Previous page</span>
             {% endif %}
             {% if pagination.next is not none %}
                 <a href="{{ pagination.next }}">Next page</a>
+            {% else %}
+                <span class="greyedlink">Next page</span>
             {% endif %}
             {% if pagination.last is not none %}
                 <a href="{{ pagination.last }}">Last page</a>
+            {% else %}
+                <span class="greyedlink">Last page</span>
             {% endif %}
         </div>
     {% endif %}

@@ -40,8 +40,14 @@ hr {
     height: 5px;
 }
 
-a {
+a:link, a:visited {
     background: transparent;
+    color: blue;
+}
+
+span.greyedlink {
+    opacity: 0.20;
+    cursor: not-allowed;
 }
 
 ul.multicol {
