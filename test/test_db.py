@@ -19,6 +19,7 @@ from unittest import TestCase
 
 from jsa_proc.db.db import _dict_query_where_clause, Not
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
+from jsa_proc.jcmtobsinfo import ObsQueryDict, ObsJoin, ObsQuery
 from jsa_proc.state import JSAProcState
 
 from .db import DBTestCase
@@ -444,6 +445,49 @@ class InterfaceDBTest(DBTestCase):
 
         # test the count option
         self.assertEqual(self.db.find_jobs(count=True), 8)
+
+    def test_find_jobs_obsquery(self):
+
+        info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',
+                  'obsnum': 1, 'instrument': 'F', 'backend': 'B',
+                  'subsys': '1', 'survey': 'GBS'}
+
+        info_2 = info_1.copy()
+        info_2.update(obsidss='1-2', subsys=2)
+
+        info_3 = info_1.copy()
+        info_3.update(survey='DDS')
+
+        job_1 = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_1])
+        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_2])
+        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_1, info_2])
+        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_3])
+        job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', [],
+                                obsinfolist=[info_2, info_3])
+
+        queries = [
+            (
+                ObsQuery([ObsQueryDict['Surveys']['GBS'].where], ObsJoin),
+                (job_1, job_2, job_3, job_5),
+            ),
+            (
+                ObsQuery([ObsQueryDict['Surveys']['DDS'].where], ObsJoin),
+                (job_4, job_5),
+            ),
+        ]
+
+        for (oq, expect) in queries:
+            self.assertEqual(
+                set(x.id for x in self.db.find_jobs(obsqueries=oq)),
+                set(expect))
+
+            self.assertEqual(
+                self.db.find_jobs(count=True, obsqueries=oq),
+                len(expect))
 
     def test_obs_info(self):
         job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [])
