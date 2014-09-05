@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import OrderedDict
 from socket import gethostname
 from unittest import TestCase
 
@@ -531,3 +532,13 @@ class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
         with self.assertRaises(JSAProcError):
             _dict_query_where_clause('x;y', {'col': 'val'})
+
+        queries = [
+            (
+                ('tab', OrderedDict()),
+                ('', [])
+            ),
+        ]
+
+        for (query, expect) in queries:
+            self.assertEqual(_dict_query_where_clause(*query), expect)

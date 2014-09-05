@@ -836,5 +836,8 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
                          ')')
             params.extend(value)
 
+    if not where:
+        return ('', [])
+
     where = (' OR ' if logic_or else ' AND ').join(where)
     return ('({0})'.format(where), params)
