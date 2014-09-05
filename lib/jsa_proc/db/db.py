@@ -811,7 +811,8 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
     the values will be returned when the query is used.  If the value
     or list is wrapped in a "Not" object, then the condition will
     be inverted (the column does not match the given value, or the
-    column's value is not in the given list of values).
+    column's value is not in the given list of values).  If the value
+    is None then the query will use "IS NULL" (or "IS NOT NULL").
 
     logic_or: boolean, optional, default=False
 
@@ -848,7 +849,12 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
         else:
             logic_not = False
 
-        if isinstance(value, basestring) or not hasattr(value, '__iter__'):
+        if value is None:
+            where.append(
+                '{0}.`{1}` IS {2}'.format(table, key,
+                                          'NOT NULL' if logic_not else 'NULL'))
+
+        elif isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
             where.append('{0}.`{1}`{2}%s'.format(table, key,
                                                  '<>' if logic_not else '='))

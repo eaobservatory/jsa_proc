@@ -659,6 +659,14 @@ class DBUtilityTestCase(TestCase):
                 ('tab', OrderedDict([('z', Not('q'))])),
                 ('(tab.`z`<>%s)', ['q'])
             ),
+            (
+                ('tab', OrderedDict([('n', None)])),
+                ('(tab.`n` IS NULL)', [])
+            ),
+            (
+                ('tab', OrderedDict([('nn', Not(None))])),
+                ('(tab.`nn` IS NOT NULL)', [])
+            ),
         ]
 
         for (query, expect) in queries:
