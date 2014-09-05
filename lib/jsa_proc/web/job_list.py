@@ -26,24 +26,24 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
     if state == '':
         state = None
 
-    # Dictionary of obs table requirements to send to find jobs.
-    obsquery = {}
+    job_query = {
+        'location': location,
+        'state': state,
+    }
+
+    # Add dictionary of obs table requirements to send to find jobs
+    # to the job query.
+    url_query = job_query.copy()
+    obsquery = job_query['obsquery'] = {}
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():
         if value:
+            # Add the filtering information to the obsquery dictionary.
             obsquery.update(ObsQueryDict[key][value].where)
 
-    job_query = {
-        'location': location,
-        'state': state,
-        'obsquery': obsquery,
-    }
-    url_query = {
-        'location': location,
-        'state': state,
-        }
-    url_query.update(**obsquerydict)
+            # Add the parameter to the URL (for pagination links).
+            url_query[key] = value
 
     (number, page, pagination) = calculate_pagination(
         db.find_jobs(count=True,  **job_query),
