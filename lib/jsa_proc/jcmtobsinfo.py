@@ -71,10 +71,16 @@ ScanModes = dict(
     Pong=ScanMode('Pong', 'Pong scans', {'scanmode': 'CURVY_PONG'}),
 )
 
+# Subsystem
+SubsystemInfo = _where_maker('SubsystemInfo')
 
 ObsQueryDict = {
     'Surveys': Surveys,
     'ObsTypes': ObsTypes,
     'CalTypes': CalTypes,
     'ScanModes': ScanModes,
+    'subsystem': {
+        '450': SubsystemInfo('450', '450um', {'subsys': '450'}),
+        '850': SubsystemInfo('850', '850um', {'subsys': '850'}),
+    },
 }
