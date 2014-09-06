@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-from jsa_proc.db.db import Range
+from jsa_proc.db.db import Fuzzy, Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, calculate_pagination
@@ -51,7 +51,7 @@ def prepare_job_list(db, location, state, number, page, date_min, date_max,
         obsquery['utdate'] = Range(date_min, date_max)
 
     if sourcename:
-        obsquery['sourcename'] = sourcename
+        obsquery['sourcename'] = Fuzzy(sourcename)
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():

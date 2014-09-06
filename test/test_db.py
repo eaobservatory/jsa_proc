@@ -17,7 +17,7 @@ from collections import OrderedDict
 from socket import gethostname
 from unittest import TestCase
 
-from jsa_proc.db.db import _dict_query_where_clause, Not, Range
+from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -666,6 +666,14 @@ class DBUtilityTestCase(TestCase):
             (
                 ('tab', OrderedDict([('nn', Not(None))])),
                 ('(tab.`nn` IS NOT NULL)', [])
+            ),
+            (
+                ('tab', {'f': Fuzzy('x')}),
+                ('(tab.`f` LIKE %s)', ['%x%'])
+            ),
+            (
+                ('tab', {'f': Not(Fuzzy('x'))}),
+                ('(tab.`f` NOT LIKE %s)', ['%x%'])
             ),
             (
                 ('tab', {'d': Range(28, 82)}),
