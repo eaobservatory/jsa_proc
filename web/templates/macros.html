@@ -70,6 +70,8 @@
         </select>
         {% endwith %}
         {% endfor %}
+        Date: <input type="text" name="date_min" value="{{ date_min | default('', True) }}" size="10" /> &ndash;
+              <input type="text" name="date_max" value="{{ date_max | default('', True) }}" size="10" />
         <input type="submit" value="Filter" />
     </p>
 </form>

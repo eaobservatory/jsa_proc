@@ -64,6 +64,8 @@ def create_web_app():
             request.args.get('state', None),
             request.args.get('number', None),
             request.args.get('page', None),
+            request.args.get('date_min', None),
+            request.args.get('date_max', None),
             obsquerydict=obsquerydict,
         )
 

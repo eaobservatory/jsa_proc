@@ -15,16 +15,22 @@
 
 from __future__ import absolute_import, division
 
+from jsa_proc.db.db import Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
-def prepare_job_list(db, location, state, number, page, obsquerydict={}):
+def prepare_job_list(db, location, state, number, page, date_min, date_max,
+                     obsquerydict={}):
     if location == '':
         location = None
     if state == '':
         state = None
+    if date_min == '':
+        date_min = None
+    if date_max == '':
+        date_max = None
 
     job_query = {
         'location': location,
@@ -35,6 +41,13 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
     # to the job query.
     url_query = job_query.copy()
     obsquery = job_query['obsquery'] = {}
+    url_query.update({
+        'date_min': date_min,
+        'date_max': date_max,
+    })
+
+    if (date_min is not None) or (date_max is not None):
+        obsquery['utdate'] = Range(date_min, date_max)
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():
@@ -79,4 +92,6 @@ def prepare_job_list(db, location, state, number, page, obsquerydict={}):
         'pagination': pagination,
         'selected_obsoptions': obsquerydict,
         'obsoptions': ObsQueryDict,
+        'date_min': date_min,
+        'date_max': date_max,
     }
