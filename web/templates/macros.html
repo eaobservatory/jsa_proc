@@ -70,9 +70,9 @@
         </select>
         {% endwith %}
         {% endfor %}
-        Date: <input type="text" name="date_min" value="{{ date_min | default('', True) }}" size="10" /> &ndash;
-              <input type="text" name="date_max" value="{{ date_max | default('', True) }}" size="10" />
-        Name: <input type="text" name="name" value="{{ name | default('', True) }}" />
+        <input type="text" name="date_min" value="{{ date_min | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
+        <input type="text" name="date_max" value="{{ date_max | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
+        <input type="text" name="name" value="{{ name | default('', True) }}" placeholder="Source name" />
 
         <input type="submit" value="Filter" />
     </p>
