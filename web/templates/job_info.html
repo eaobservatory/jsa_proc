@@ -25,6 +25,12 @@
     <tr><th>Obs types</th><td>{{ obsinfo.pop('obstype') | uniq | join(' ') }} </td></tr>
     <tr><th>Projects</th><td>{{ obsinfo.pop('project') | uniq | join(' ') }} </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo.pop('scanmode') | uniq | join(' ') }} </td></tr>
+    <tr><th>Date</th><td>
+        {% for utdate in obsinfo.pop('utdate') | uniq %}
+            <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': utdate}) }}">{{ utdate }}</a>
+        {% endfor %}
+    </td></tr>
+    </td></tr>
     {% endif %}
 </table>
 </div>

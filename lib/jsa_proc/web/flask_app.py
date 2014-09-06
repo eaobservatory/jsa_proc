@@ -23,7 +23,7 @@ from jsa_proc.state import JSAProcState
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.web.util import \
-    url_for, templated, HTTPError, HTTPNotFound, HTTPRedirect
+    url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect
 
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_change_state import prepare_change_state
@@ -150,6 +150,10 @@ def create_web_app():
     @app.template_filter('uniq')
     def uniq_filter(xs):
         return set(xs)
+
+    @app.context_processor
+    def add_to_context():
+        return {'url_for_omp': url_for_omp}
 
     # Return the Application.
 

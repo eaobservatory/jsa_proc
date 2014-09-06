@@ -22,10 +22,13 @@ import flask
 import functools
 import werkzeug.exceptions
 import werkzeug.routing
+import werkzeug.urls
 
 Pagination = namedtuple('Pagination', 'first prev next last')
 
 url_for = flask.url_for
+
+url_for_omp = werkzeug.urls.Href('http://omp.jach.hawaii.edu/cgi-bin')
 
 
 class HTTPError(werkzeug.exceptions.InternalServerError):
