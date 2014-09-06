@@ -17,7 +17,7 @@ from collections import OrderedDict
 from socket import gethostname
 from unittest import TestCase
 
-from jsa_proc.db.db import _dict_query_where_clause, Not
+from jsa_proc.db.db import _dict_query_where_clause, Not, Range
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -666,6 +666,30 @@ class DBUtilityTestCase(TestCase):
             (
                 ('tab', OrderedDict([('nn', Not(None))])),
                 ('(tab.`nn` IS NOT NULL)', [])
+            ),
+            (
+                ('tab', {'d': Range(28, 82)}),
+                ('(tab.`d` BETWEEN %s AND %s)', [28, 82])
+            ),
+            (
+                ('tab', {'d': Not(Range(28, 82))}),
+                ('(tab.`d` NOT BETWEEN %s AND %s)', [28, 82])
+            ),
+            (
+                ('tab', {'d': Range(28, None)}),
+                ('(tab.`d` >= %s)', [28])
+            ),
+            (
+                ('tab', {'d': Range(None, 82)}),
+                ('(tab.`d` <= %s)', [82])
+            ),
+            (
+                ('tab', {'d': Not(Range(28, None))}),
+                ('(tab.`d` < %s)', [28])
+            ),
+            (
+                ('tab', {'d': Not(Range(None, 82))}),
+                ('(tab.`d` > %s)', [82])
             ),
         ]
 

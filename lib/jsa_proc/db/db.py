@@ -55,6 +55,21 @@ class Not:
         self.value = value
 
 
+class Range:
+    """Class representing range conditions."""
+
+    def __init__(self, min, max):
+        """Create a new range object."""
+
+        self.min = min
+        self.max = max
+
+    def __iter__(self):
+        """Iterate over the min and max values."""
+        yield self.min
+        yield self.max
+
+
 class JSAProcDB:
     """
     JSA Processing database access class.
@@ -850,6 +865,27 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
             where.append(
                 '{0}.`{1}` IS {2}'.format(table, key,
                                           'NOT NULL' if logic_not else 'NULL'))
+
+        elif isinstance(value, Range):
+            if value.min is None and value.max is None:
+                pass
+
+            elif value.min is not None and value.max is not None:
+                where.append(
+                    '{0}.`{1}` {2} %s AND %s'.format(
+                        table, key, 'NOT BETWEEN' if logic_not else 'BETWEEN'))
+                params.extend(value)
+
+            else:
+                if value.min is not None:
+                    params.append(value.min)
+                    range_op = '<' if logic_not else '>='
+
+                elif value.max is not None:
+                    params.append(value.max)
+                    range_op = '>' if logic_not else '<='
+
+                where.append('{0}.`{1}` {2} %s'.format(table, key, range_op))
 
         elif isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
