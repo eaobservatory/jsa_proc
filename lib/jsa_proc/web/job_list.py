@@ -22,7 +22,7 @@ from jsa_proc.web.util import url_for, calculate_pagination
 
 
 def prepare_job_list(db, location, state, number, page, date_min, date_max,
-                     obsquerydict={}):
+                     sourcename, obsquerydict={}):
     if location == '':
         location = None
     if state == '':
@@ -44,10 +44,14 @@ def prepare_job_list(db, location, state, number, page, date_min, date_max,
     url_query.update({
         'date_min': date_min,
         'date_max': date_max,
+        'name': sourcename,
     })
 
     if (date_min is not None) or (date_max is not None):
         obsquery['utdate'] = Range(date_min, date_max)
+
+    if sourcename:
+        obsquery['sourcename'] = sourcename
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():
@@ -94,4 +98,5 @@ def prepare_job_list(db, location, state, number, page, date_min, date_max,
         'obsoptions': ObsQueryDict,
         'date_min': date_min,
         'date_max': date_max,
+        'name': sourcename,
     }
