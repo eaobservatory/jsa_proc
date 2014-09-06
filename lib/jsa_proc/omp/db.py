@@ -34,6 +34,8 @@ class OMPDB:
 
     CommonInfo = None
 
+    OBS_JUNK = 4
+
     def __init__(self):
         """Construct new OMP and JCMT database object.
 
@@ -80,6 +82,31 @@ class OMPDB:
                  for x in cols])
 
         return self.CommonInfo(*rows[0])
+
+    def get_status(self, obsid):
+        """Retrieve the last comment status for a given obsid.
+
+        Returns None if no status was found.
+        """
+
+        query = 'SELECT commentstatus FROM ompobslog ' \
+                'WHERE obslogid = ' \
+                '(SELECT MAX(obslogid) FROM ompobslog WHERE obsid=@o)'
+        args = {'@o': obsid}
+
+        with self.db as c:
+            c.execute('USE omp')
+            c.execute(query, args)
+
+            rows = c.fetchall()
+
+        if not rows:
+            return None
+
+        if len(rows) > 1:
+            raise ExcessRowsError('omp', query, args)
+
+        return rows[0][0]
 
     def parse_datetime(self, dt):
         """Parse a datetime value returned by Sybase and return a

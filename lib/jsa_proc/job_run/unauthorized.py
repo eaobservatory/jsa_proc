@@ -98,6 +98,15 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                         'future release date ' +
                         release_date.strftime('%Y-%m-%d'))
 
+                logger.debug('Fetching OMP obslog status for %s', obsid)
+                status = ompdb.get_status(obsid)
+
+                if status is not None:
+                    logger.debug('Got obslog status: %i', status)
+
+                    if status == ompdb.OBS_JUNK:
+                        raise IdentifiedProblem('junk', 'observation is junk')
+
             # Check whether all of the files are at CADC.
             if check_at_cadc:
                 logger.debug('Retrieving input file list')
