@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
-{% block content %}
+{% block body %}
 
 
-<div id="wrapper">
-<div class="col">
+<div id="pane-info">
+<div class="panel">
 <table>
     <tr><th>State</th><td class="state_{{ info.state | state_phase}}{% if info.state is state_active %} state_active{% endif %}">
         {{ info.state | state_name }}
@@ -29,71 +29,7 @@
 </table>
 </div>
 
-
-{% if previews %}
-<div class="col">
-<a href="{{ previews[0][1] }}"><img src="{{ previews[0][0] }}"></a>
-{% if previews|length == 1 %}
-<p> Preview image (click to embiggen).</p>
-{% elif previews|length > 1 %}
-<p> First preview: (click to embiggen).</p>
-{% endif %}
-</div>
-{% endif %}
-
-</div>
-
-<div class="clear"></div>
-
-
-
-
-{% if log %}
-<h2>Log</h2>
-
-<table>
-<tr>
-    <th>Time</th>
-    <th>State</th>
-    <th>Previous state</th>
-    <th>Host</th>
-    <th>Message</th>
-</tr>
-{% for entry in log %}
-<tr>
-    <td>{{ entry.datetime }}</td>
-    <td class="state_{{ entry.state_new | state_phase }}">
-        {{ entry.state_new | state_name }}</td>
-    <td>{{ entry.state_prev  | state_name }}</td>
-    <td>{{ entry.host }}</td>
-    <td>{{ entry.message }}</td>
-</tr>
-{% endfor %}
-</table>
-
-<!-- Allow users to change state of job. -->
-<h2> Change the state of this Job </h2>
-
-
-<form method="POST" action="{{ url_for('job_change_state')}}">
-  <input type="hidden" name="job_id" value="{{ info.id }}" >
-  <input type="hidden" name="url" value="{{url_for('job_info', job_id=info.id)}}">
-<ul class="statebar">
-<li>    <select name="newstate">
-      <option value=""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
-      {% for state in states %}
-      <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
-      {% endfor %}
-      </select></li>
-<li>    <textarea rows=3 COLS=40 name="message"></textarea></li>
-<li>    <input type="submit" value="Submit Change"/></li>
-</ul>
-</form>
-{% endif %}
-
-
-
-<div class="jobinfo">
+<div class="panel">
 <table>
 <caption> Additional Job Info </caption>
 <tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
@@ -104,7 +40,7 @@
 </div>
 
 {% if obsinfo is not none %}
-<div class="obsinfo">
+<div class="panel">
 <table>
   <caption> Additional Observation Info </caption>
   {% if obsinfo|length > 1 %}
@@ -133,9 +69,62 @@
 </table>
 </div>
 {% endif %}
-<div class="clear"></div>
+</div>
+
+{# Define the log pane but don't actually print it yet.  If there are
+   previews then we want to print it after the first preview so that
+   at least one preview is shown first. #}
+{% macro render_log_pane() %}
+<div id="pane-log">
+{% if log %}
+<div class="panel">
+<h2>Log</h2>
+
+<table>
+<tr>
+    <th>Time</th>
+    <th>State</th>
+    <th>Previous state</th>
+    <th>Host</th>
+    <th>Message</th>
+</tr>
+{% for entry in log %}
+<tr>
+    <td>{{ entry.datetime }}</td>
+    <td class="state_{{ entry.state_new | state_phase }}">
+        {{ entry.state_new | state_name }}</td>
+    <td>{{ entry.state_prev  | state_name }}</td>
+    <td>{{ entry.host }}</td>
+    <td>{{ entry.message }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
+<div class="panel">
+<!-- Allow users to change state of job. -->
+<h2> Change the state of this Job </h2>
+
+
+<form method="POST" action="{{ url_for('job_change_state')}}">
+  <input type="hidden" name="job_id" value="{{ info.id }}" >
+  <input type="hidden" name="url" value="{{url_for('job_info', job_id=info.id)}}">
+<ul class="statebar">
+<li>    <select name="newstate">
+      <option value=""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
+      {% for state in states %}
+      <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
+      {% endfor %}
+      </select></li>
+<li>    <textarea rows=3 COLS=40 name="message"></textarea></li>
+<li>    <input type="submit" value="Submit Change"/></li>
+</ul>
+</form>
+</div>
 
 {% if orac_logs %}
+<div class="panel">
 <h2>ORAC-DR Logs</h2>
 <p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
 <ul>
@@ -143,9 +132,11 @@
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
+</div>
 {% endif %}
 
 {% if wrapdr_logs %}
+<div class="panel">
 <h2>jsawrapdr Logs</h2>
 <p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
 <ul>
@@ -153,40 +144,47 @@
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
-{% endif %}
-
-
-{% if previews|length > 1 %}
-<h2>All Preview Images</h2>
-<div style="text-align:center">
-{{ previews|length }}
-{% for l in previews %}
-<a href="{{ l[1] }}"><img src="{{ l[0] }}"></a>
-{% endfor %}
 </div>
 {% endif %}
+</div>
+{% endmacro %}
 
+{% for l in previews %}
+    <div class="panel preview">
+        <a href="{{ l[1] }}"><img src="{{ l[0] }}" /></a>
+        <p>Preview (click to embiggen).</p>
+    </div>
+    {% if loop.first %}
+        {{ render_log_pane() }}
+    {% endif %}
+{% else %}
+    {{ render_log_pane() }}
+{% endfor %}
 
+{% if output_files or input_files %}
+<div id="pane-files">
 {% if output_files %}
-<hr/>
+<div class="panel">
 <h2>Output Files</h2>
 <ul>
 {% for file in output_files %}
     <li>{{ file }}</li>
 {% endfor %}
 </ul>
+</div>
 {% endif %}
 
 {% if input_files %}
-<hr/>
+<div class="panel">
 <h2>Input Files</h2>
   <ul class="multicol">
     {% for file in input_files %}
     <li>{{ file }}</li>
     {% endfor %}
   </ul>
-
+</div>
 {% endif %}
-
+</div>
+{% endif %}
 
 {% endblock %}

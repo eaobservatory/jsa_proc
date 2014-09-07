@@ -9,31 +9,6 @@ body {
     width: 100%;
 }
 
-
-#wrapper .col {
-    float:left;
-    text-align:center;
-    margin:0 2ex;
-}
-
-.col img {
-    text-align:center;
-}
-
-div#wrapper {
-    clear:both;
-}
-
-.clear:before,
-.clear:after {
-    content: " ";
-    display: table;
-}
-
-.clear:after {
-    clear:both;
-}
-
 hr {
     color: green;
     background-color: green;
@@ -51,9 +26,12 @@ span.greyedlink {
 }
 
 ul.multicol {
-    columns: 3;
-    -moz-columns: 3;
-    -webkit-columns: 3;
+    columns: auto;
+    -moz-columns: auto;
+    -webkit-columns: auto;
+    column-width: 30ex;
+    -moz-column-width: 30ex;
+    -webkit-column-width: 30ex;
 }
 
 ul.statebar {
@@ -86,6 +64,21 @@ div#content {
     display: block;
     padding: 1ex;
     text-align: left;
+}
+
+div#pane-info {
+    float: left;
+    width: 60ex;
+}
+
+div#pane-log {
+    float: right;
+    width: 80ex;
+}
+
+div#pane-files {
+    clear: left;
+    margin-right: 80ex;
 }
 
 h1 {
@@ -131,6 +124,20 @@ img {
     max-width: 100%;
 }
 
+div.panel {
+    margin: 2ex;
+    padding: 1ex;
+    background: white;
+    color: black;
+    text-align: left;
+}
+
+div.preview {
+    clear: none;
+    display: inline-block;
+    text-align: center;
+}
+
 div.tile {
     display: inline-block;
     width: 15ex;
@@ -163,10 +170,6 @@ div.tile a {
     color: inherit;
     text-decoration: none;
     height: 100%;
-}
-
-div.jobinfo{
-    float:left;
 }
 
 table, td, th {
