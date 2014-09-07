@@ -25,12 +25,6 @@
     <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
     <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
-    <tr><th>Date</th><td>
-        {% for utdate in obsinfo | map(attribute='utdate') | uniq %}
-            <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': utdate}) }}">{{ utdate }}</a>
-        {% endfor %}
-    </td></tr>
-    </td></tr>
     {% endif %}
 </table>
 </div>
@@ -128,7 +122,11 @@
   <tr>
     <th> {{key}} </th>
     {% for obs in obsinfo %}
-    <td> {{ obs.get(key, '') }} </td>
+    {% if key == 'utdate' %}
+        <td><a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': obs.utdate}) }}">{{ obs.utdate }}</a></td>
+    {% else %}
+        <td> {{ obs.get(key, '') }} </td>
+    {% endif %}
     {% endfor %}
     </tr>
   {% endfor %}
