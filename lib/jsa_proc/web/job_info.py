@@ -66,11 +66,7 @@ def prepare_job_info(db, job_id):
     obs_info = db.get_obs_info(job.id)
 
     if obs_info:
-        obs_info = dict((f, [getattr(x, f) for x in obs_info])
-                        for f in obs_info[0]._fields)
-
-        del obs_info['job_id']
-        del obs_info['id']
+        obs_info = [o._asdict() for o in obs_info]
 
     else:
         obs_info = None

@@ -20,13 +20,13 @@
     {% endif %}
     <tr><th>Parameters</th><td>{{ info.parameters }}</td></tr>
     {% if obsinfo is not none %}
-    <tr><th>Sources</th><td>{{ obsinfo.pop('sourcename') | uniq | join(' ') }} </td></tr>
-    <tr><th>Instruments</th><td>{{ obsinfo.pop('instrument') | uniq | join(' ') }} </td></tr>
-    <tr><th>Obs types</th><td>{{ obsinfo.pop('obstype') | uniq | join(' ') }} </td></tr>
-    <tr><th>Projects</th><td>{{ obsinfo.pop('project') | uniq | join(' ') }} </td></tr>
-    <tr><th>Scan modes</th><td>{{ obsinfo.pop('scanmode') | uniq | join(' ') }} </td></tr>
+    <tr><th>Sources</th><td>{{ obsinfo | map(attribute='sourcename') | uniq | join(' ') }} </td></tr>
+    <tr><th>Instruments</th><td>{{ obsinfo | map(attribute='instrument') | uniq | join(' ') }} </td></tr>
+    <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
+    <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
+    <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
     <tr><th>Date</th><td>
-        {% for utdate in obsinfo.pop('utdate') | uniq %}
+        {% for utdate in obsinfo | map(attribute='utdate') | uniq %}
             <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': utdate}) }}">{{ utdate }}</a>
         {% endfor %}
     </td></tr>
@@ -113,21 +113,22 @@
 <div class="obsinfo">
 <table>
   <caption> Additional Observation Info </caption>
-  {% set n_obsinfo = obsinfo[obsinfo.keys()[0]] | length %}
-  {% if n_obsinfo > 1 %}
+  {% if obsinfo|length > 1 %}
   <tr>
     <th>&nbsp;</th>
-    {% for obs in range(0, n_obsinfo) %}
+    {% for obs in obsinfo %}
     <th> Obs {{loop.index}} </th>
     {% endfor %}
   </tr>
   {% endif %}
 
-  {% for key in obsinfo.keys() %}
+  {% for key in obsinfo[0].keys()
+             if key not in ('id', 'job_id', 'sourcename', 'instrument',
+                            'obstype', 'project', 'scanmode') %}
   <tr>
     <th> {{key}} </th>
-    {% for val in obsinfo[key] %}
-    <td> {{ val }} </td>
+    {% for obs in obsinfo %}
+    <td> {{ obs.get(key, '') }} </td>
     {% endfor %}
     </tr>
   {% endfor %}
