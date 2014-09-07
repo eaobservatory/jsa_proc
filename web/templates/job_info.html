@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from 'macros.html' import break_underscore %}
 {% block body %}
 
 
@@ -95,7 +96,7 @@
         {{ entry.state_new | state_name }}</td>
     <td>{{ entry.state_prev  | state_name }}</td>
     <td>{{ entry.host }}</td>
-    <td>{{ entry.message }}</td>
+    <td>{{ break_underscore(entry.message) }}</td>
 </tr>
 {% endfor %}
 </table>

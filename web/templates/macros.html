@@ -79,3 +79,10 @@
 </form>
 
 {% endmacro %}
+
+{# Macro to allow a message to be broken at underscores.  This is to
+   avoid problems with log messages including long filenames with
+   underscore-separated components. #}
+{% macro break_underscore(message) %}
+  {{ message.split('_') | join('_<wbr />' | safe) }}
+{% endmacro %}
