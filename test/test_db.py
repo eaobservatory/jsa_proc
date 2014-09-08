@@ -653,11 +653,11 @@ class DBUtilityTestCase(TestCase):
             ),
             (
                 ('tab', OrderedDict([('q', Not(['i', 'j']))])),
-                ('(tab.`q` NOT IN (%s, %s))', ['i', 'j'])
+                ('((tab.`q` NOT IN (%s, %s) OR tab.`q` IS NULL))', ['i', 'j'])
             ),
             (
                 ('tab', OrderedDict([('z', Not('q'))])),
-                ('(tab.`z`<>%s)', ['q'])
+                ('((tab.`z`<>%s OR tab.`z` IS NULL))', ['q'])
             ),
             (
                 ('tab', OrderedDict([('n', None)])),
@@ -673,7 +673,7 @@ class DBUtilityTestCase(TestCase):
             ),
             (
                 ('tab', {'f': Not(Fuzzy('x'))}),
-                ('(tab.`f` NOT LIKE %s)', ['%x%'])
+                ('((tab.`f` NOT LIKE %s OR tab.`f` IS NULL))', ['%x%'])
             ),
             (
                 ('tab', {'d': Range(28, 82)}),

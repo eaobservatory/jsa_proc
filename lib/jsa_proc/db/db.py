@@ -901,23 +901,29 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
             # Not really very fuzzy, but for now implement this as a LIKE
             # expression with wildcards at both ends (LIKE is case
             # insensitive).
-            where.append(
-                '{0}.`{1}` {2} %s'.format(table, key,
-                                          'NOT LIKE' if logic_not else 'LIKE'))
+            where.append((
+                '({0}.`{1}` NOT LIKE %s OR {0}.`{1}` IS NULL)'
+                if logic_not else
+                '{0}.`{1}` LIKE %s'
+                ).format(table, key))
             params.append('%{0}%'.format(value.value))
 
         elif isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
-            where.append('{0}.`{1}`{2}%s'.format(table, key,
-                                                 '<>' if logic_not else '='))
+            where.append((
+                '({0}.`{1}`<>%s OR {0}.`{1}` IS NULL)'
+                if logic_not else
+                '{0}.`{1}`=%s'
+                ).format(table, key))
             params.append(value)
 
         else:
             # Otherwise use an IN expression.
-            where.append(
-                '{0}.`{1}` {2} ('.format(table, key,
-                                         'NOT IN' if logic_not else 'IN') +
-                ', '.join(('%s',) * len(value)) + ')')
+            where.append((
+                '({0}.`{1}` NOT IN ({2}) OR {0}.`{1}` IS NULL)'
+                if logic_not else
+                '{0}.`{1}` IN ({2})'
+                ).format(table, key, ', '.join(('%s',) * len(value))))
             params.extend(value)
 
     if not where:
