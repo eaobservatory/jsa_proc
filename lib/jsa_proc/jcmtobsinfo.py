@@ -37,6 +37,7 @@ Surveys = dict(
     NoSurvey=SurveyInfo('NoSurvey', 'No Survey', {'survey': None}),
     SASSY=SurveyInfo('SASSY', 'SASSY', {'survey': 'SASSY'}),
     CLS=SurveyInfo('CLS', 'Cosmology Legacy Survey', {'survey': 'CLS'}),
+    NotCLS=SurveyInfo('NotCLS', 'Cosmology Legacy Survey', {'survey': Not('CLS')}),
     SLS=SurveyInfo('SLS', 'Spectral Legacy Survey', {'survey': 'SLS'}),
 )
 
