@@ -24,7 +24,7 @@ from jsa_proc.error import JSAProcError
 logger = logging.getLogger(__name__)
 
 
-def import_from_cadcdp(dry_run=False, db=None, cadc=None):
+def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown'):
     """Perform an initial import of existing jobs from CADC.
 
     Returns true on success.
@@ -84,6 +84,7 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None):
                                     location='CADC',
                                     mode=info.mode,
                                     parameters=info.parameters,
+                                    task=task,
                                     input_file_names=input,
                                     foreign_id=recipe_instance,
                                     priority=job.priority,

@@ -61,8 +61,8 @@ class InterfaceDBTest(DBTestCase):
         input_file_names = ['testfile1', 'testfile2']
         priority = -321
 
-        self.db.add_job(tag, location, mode, parameters, input_file_names,
-                        priority=priority)
+        self.db.add_job(tag, location, mode, parameters, 'test',
+                        input_file_names, priority=priority)
 
         with self.assertRaises(JSAProcError):
             self.db.get_job()
@@ -96,15 +96,16 @@ class InterfaceDBTest(DBTestCase):
         priority = -321
 
         # Add a test job.
-        job_id = self.db.add_job(tag, location, mode, parameters,
+        job_id = self.db.add_job(tag, location, mode, parameters, 'test',
                                  input_file_names, priority=priority)
 
         # Check its added correctly to job database.
         job = self.db.get_job(id_=job_id)
         self.assertEqual(job.state, '?')
         self.assertEqual([job.id, job.tag, job.location, job.mode,
-                          job.parameters, job.priority],
-                         [job_id, tag, location, mode, parameters, priority])
+                          job.parameters, job.priority, job.task],
+                         [job_id, tag, location, mode, parameters, priority,
+                          'test'])
 
         # Check that file list is added correctly.
         files = self.db.get_input_files(job_id)
@@ -116,19 +117,21 @@ class InterfaceDBTest(DBTestCase):
         self.assertIn('added to the database', logs[0].message)
 
         # Try adding a job with a state specified
-        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', [],
+        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test', [],
                                state=JSAProcState.TRANSFERRING)
         job2 = self.db.get_job(id_=id_2)
         self.assertEqual(job2.state, JSAProcState.TRANSFERRING)
 
         # Check can't add job with invalid state.
         with self.assertRaises(JSAProcError):
-            self.db.add_job('tag3', 'CADC', 'night', 'REC', [], state='!')
+            self.db.add_job('tag3', 'CADC', 'night', 'REC', 'test', [],
+                            state='!')
 
         # Check we can't give the same file more than once (a database
         # constraint).
         with self.assertRaises(JSAProcError):
-            self.db.add_job('tag4', 'JAC', 'obs', 'REC', ['file1', 'file1'])
+            self.db.add_job('tag4', 'JAC', 'obs', 'REC', 'test',
+                            ['file1', 'file1'])
 
         # Check that we can update the obs table while adding a job.
         obs1 = {'obsid': '01-asdfasd', 'obsidss': '01-asdfas-1',
@@ -140,8 +143,8 @@ class InterfaceDBTest(DBTestCase):
 
         self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
 
-        self.db.add_job('tag5', 'JAC', 'obs', 'RED', ['file1', 'file2'],
-                        obsinfolist=[obs1, obs2])
+        self.db.add_job('tag5', 'JAC', 'obs', 'RED', 'test',
+                        ['file1', 'file2'], obsinfolist=[obs1, obs2])
 
         # Check that we can't update the obs table with the invalid
         # or bad column names.
@@ -168,11 +171,12 @@ class InterfaceDBTest(DBTestCase):
                 ):
 
             with self.assertRaisesRegexp(JSAProcError, error):
-                self.db.add_job('tag6', 'JAC', 'obs', 'RED',
+                self.db.add_job('tag6', 'JAC', 'obs', 'RED', 'test',
                                 ['file1', 'file2'], obsinfolist=[obsbad])
 
         # Check that we can set the tile list when adding a job.
-        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RED', [], tilelist=[42])
+        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RED', 'test',
+                                [], tilelist=[42])
 
         self.assertEqual(self.db.get_tilelist(job_7), [42])
 
@@ -190,7 +194,7 @@ class InterfaceDBTest(DBTestCase):
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names = ['testfile1', 'testfile2']
 
-        job_id = self.db.add_job(tag, location, mode, parameters,
+        job_id = self.db.add_job(tag, location, mode, parameters, 'test',
                                  input_file_names)
 
         # Values to change to.
@@ -257,7 +261,7 @@ class InterfaceDBTest(DBTestCase):
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names = ['testfile1', 'testfile2']
-        job_id = self.db.add_job(tag, location, mode, parameters,
+        job_id = self.db.add_job(tag, location, mode, parameters, 'test',
                                  input_file_names)
 
         # Values for testing
@@ -302,7 +306,7 @@ class InterfaceDBTest(DBTestCase):
         mode = 'obs'
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names = ['testfile1', 'testfile2']
-        job_id = self.db.add_job(tag, location, mode, parameters,
+        job_id = self.db.add_job(tag, location, mode, parameters, 'test',
                                  input_file_names)
 
         # Values used in updating.
@@ -332,7 +336,8 @@ class InterfaceDBTest(DBTestCase):
         """
 
         # Add a job
-        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [], priority=2)
+        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test',
+                               [], priority=2)
 
         # Add an output file
         outputfiles = ['test.sdf', 'test.png', 'longfilenametahtisrandom.log']
@@ -347,17 +352,17 @@ class InterfaceDBTest(DBTestCase):
         """Test the find_jobs method."""
 
         # Add some jobs.
-        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [],
+        job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=2)  # ?
-        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', [],
+        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=4)  # Q
-        job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', [],
+        job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=6)  # Q
-        job4 = self.db.add_job('tag4', 'CADC', 'obs', 'RECIPE', [],
+        job4 = self.db.add_job('tag4', 'CADC', 'obs', 'RECIPE', 'test', [],
                                priority=5)  # Q
-        job5 = self.db.add_job('tag5', 'CADC', 'obs', 'RECIPE', [],
+        job5 = self.db.add_job('tag5', 'CADC', 'obs', 'RECIPE', 'test', [],
                                priority=3)  # ?
-        jobx = self.db.add_job('tagx', 'JAC',  'obs', 'RECIPE', [],
+        jobx = self.db.add_job('tagx', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=3)  # X
 
         # Put some into another state.
@@ -413,11 +418,11 @@ class InterfaceDBTest(DBTestCase):
                                                            prioritize=True)],
                          ['tag4', 'tag2', 'tag5'])
 
-        job6 = self.db.add_job('tag6', 'FAKELOC', 'obs', 'RECIPE', [],
+        job6 = self.db.add_job('tag6', 'FAKELOC', 'obs', 'RECIPE', 'test', [],
                                priority=7)
-        job7 = self.db.add_job('tag7', 'FAKELOC', 'obs', 'RECIPE', [],
+        job7 = self.db.add_job('tag7', 'FAKELOC', 'obs', 'RECIPE', 'test', [],
                                priority=8)
-        job8 = self.db.add_job('tag8', 'FAKELOC', 'obs', 'RECIPE', [],
+        job8 = self.db.add_job('tag8', 'FAKELOC', 'obs', 'RECIPE', 'test', [],
                                priority=7)
 
         # Test sort option
@@ -458,15 +463,15 @@ class InterfaceDBTest(DBTestCase):
         info_3 = info_1.copy()
         info_3.update(survey='DDS', project='D01')
 
-        job_1 = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [],
+        job_1 = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_1])
-        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', [],
+        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_2])
-        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', [],
+        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_1, info_2])
-        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', [],
+        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_3])
-        job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', [],
+        job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_2, info_3])
 
         info_4 = info_1.copy()
@@ -478,17 +483,17 @@ class InterfaceDBTest(DBTestCase):
         info_6 = info_4.copy()
         info_6.update(project='CAL')
 
-        job_6 = self.db.add_job('tag6', 'JAC', 'obs', 'RECIPE', [],
+        job_6 = self.db.add_job('tag6', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_4])
-        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RECIPE', [],
+        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_5])
-        job_8 = self.db.add_job('tag8', 'JAC', 'obs', 'RECIPE', [],
+        job_8 = self.db.add_job('tag8', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_6])
 
         info_7 = info_1.copy()
         info_7.update(project='JCMTCAL')
 
-        job_9 = self.db.add_job('tag9', 'JAC', 'obs', 'RECIPE', [],
+        job_9 = self.db.add_job('tag9', 'JAC', 'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info_7])
 
         queries = [
@@ -544,7 +549,7 @@ class InterfaceDBTest(DBTestCase):
                 len(expect))
 
     def test_obs_info(self):
-        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', [])
+        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', [])
 
         # Should start with no information.
         self.assertEqual(self.db.get_obs_info(job_1), [])
@@ -556,7 +561,7 @@ class InterfaceDBTest(DBTestCase):
         self.db.set_obs_info(job_1, [info])
 
         # Create another job with this information from the start.
-        job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', [],
+        job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test', [],
                                 obsinfolist=[info])
 
         for job_id in (job_1, job_2):
@@ -569,7 +574,7 @@ class InterfaceDBTest(DBTestCase):
                 self.assertEqual(getattr(info_retrieved, key), value)
 
     def test_processing_time(self):
-        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [])
+        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', [])
 
         self.db.change_state(job_id, JSAProcState.RUNNING, 'start')
         self.db.change_state(job_id, JSAProcState.PROCESSED, 'end')
@@ -591,9 +596,9 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(self.db.get_processing_time_obs_type()[0], [])
 
         # Add some more jobs.
-        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', [])
-        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', [])
-        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', [])
+        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', 'test', [])
+        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', 'test', [])
+        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', 'test', [])
         self.db.change_state(job_2, JSAProcState.RUNNING, 'start')
         self.db.change_state(job_3, JSAProcState.RUNNING, 'start')
         self.db.change_state(job_4, JSAProcState.RUNNING, 'start')
@@ -610,7 +615,7 @@ class InterfaceDBTest(DBTestCase):
             2)
 
     def test_tilelist(self):
-        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', [])
+        job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', [])
 
         # Start with no tilelist.
         self.assertEqual(self.db.get_tilelist(job_id), [])

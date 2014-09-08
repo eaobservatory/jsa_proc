@@ -151,7 +151,7 @@ class JSAProcDB:
 
         return job
 
-    def add_job(self, tag, location, mode, parameters,
+    def add_job(self, tag, location, mode, parameters, task,
                 input_file_names, foreign_id=None, state='?',
                 priority=0, obsinfolist=None, tilelist=None):
         """
@@ -189,6 +189,8 @@ class JSAProcDB:
         priority: priority number (integer, default 0, higher number
         represents greater priority).
 
+        task: name of data processing project (string).
+
         tilelist: optional, list of integers.
         The list of tiles this job will produce.
 
@@ -209,9 +211,10 @@ class JSAProcDB:
             c.execute(
                 'INSERT INTO job '
                 '(tag, state, location, mode, parameters, '
-                'foreign_id, priority) '
-                'VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                (tag, state, location, mode, parameters, foreign_id, priority))
+                'foreign_id, priority, task) '
+                'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                (tag, state, location, mode, parameters, foreign_id,
+                    priority, task))
 
             # Get the autoincremented id from job table (job_id in all other
             # tables).

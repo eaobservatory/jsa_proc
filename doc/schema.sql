@@ -7,7 +7,8 @@ CREATE TABLE job (
     foreign_id VARCHAR(80) DEFAULT NULL,
     mode VARCHAR(10) NOT NULL,
     parameters TEXT DEFAULT "",
-    priority INTEGER NOT NULL DEFAULT 0
+    priority INTEGER NOT NULL DEFAULT 0,
+    task VARCHAR(80) NOT NULL
 );
 
 CREATE INDEX job_state ON job (state);

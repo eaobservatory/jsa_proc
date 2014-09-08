@@ -24,10 +24,10 @@ from .dummycadcdp import DummyCADCDP
 
 class PollCADCTestCase(DBTestCase):
     def test_poll_cadc(self):
-        job_id_11 = self.db.add_job('tag-11', 'CADC', 'obs', 'params...', [],
-                                    '11', JSAProcState.RUNNING)
-        job_id_12 = self.db.add_job('tag-12', 'CADC', 'obs', 'params...', [],
-                                    '12', JSAProcState.RUNNING)
+        job_id_11 = self.db.add_job('tag-11', 'CADC', 'obs', 'params...',
+                                    'test', [], '11', JSAProcState.RUNNING)
+        job_id_12 = self.db.add_job('tag-12', 'CADC', 'obs', 'params...',
+                                    'test', [], '12', JSAProcState.RUNNING)
 
         # Both jobs start in the running state.
         self.assertEqual(self.db.get_job(job_id_11).state,
