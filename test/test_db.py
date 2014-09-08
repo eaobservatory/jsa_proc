@@ -704,5 +704,6 @@ class DBUtilityTestCase(TestCase):
         for (query, expect) in queries:
             self.assertEqual(_dict_query_where_clause(*query), expect)
 
+
 def d_add(*args):
     return dict(sum((d.items() for d in args), []))
