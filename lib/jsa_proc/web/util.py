@@ -44,8 +44,9 @@ class HTTPNotFound(werkzeug.exceptions.NotFound):
 
 
 class HTTPRedirect(werkzeug.routing.RequestRedirect):
-    """Exception class requesting an HTTP redirect."""
+    """Exception class requesting a temporary ("See Other") HTTP redirect."""
 
+    code = 303
     pass
 
 
