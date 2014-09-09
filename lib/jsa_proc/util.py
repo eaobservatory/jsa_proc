@@ -30,5 +30,4 @@ def identifier_to_pattern(identifier, patterns):
         if match:
             return pattern.format(*match.groups())
 
-        raise JSAProcError(
-            'Pattern for "{0}" not recognised'.format(identifier))
+    raise JSAProcError('Pattern for "{0}" not recognised'.format(identifier))
