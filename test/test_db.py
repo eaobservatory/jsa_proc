@@ -354,7 +354,7 @@ class InterfaceDBTest(DBTestCase):
         # Add some jobs.
         job1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=2)  # ?
-        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test', [],
+        job2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test2', [],
                                priority=4)  # Q
         job3 = self.db.add_job('tag3', 'JAC',  'obs', 'RECIPE', 'test', [],
                                priority=6)  # Q
@@ -395,6 +395,10 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(
             set((x.tag for x in self.db.find_jobs(JSAProcState.DELETED))),
             set(('tagx',)))
+
+        self.assertEqual(
+            set((x.tag for x in self.db.find_jobs(task='test2'))),
+            set(('tag2',)))
 
         # Finally check a query which should get a single job and check the
         # info is good.

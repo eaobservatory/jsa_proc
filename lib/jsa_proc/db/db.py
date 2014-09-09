@@ -629,7 +629,7 @@ class JSAProcDB:
         return edict
         # Now sort out error jobs in sensible option
 
-    def find_jobs(self, state=None, location=None,
+    def find_jobs(self, state=None, location=None, task=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
                   obsquery=None):
@@ -707,6 +707,10 @@ class JSAProcDB:
         if location is not None:
             where.append('job.location=%s')
             param.append(location)
+
+        if task is not None:
+            where.append('job.task=%s')
+            param.append(task)
 
         if obsquery:
             (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
