@@ -814,6 +814,31 @@ class JSAProcDB:
 
         return startresults, endresults, columns
 
+    def get_tasks(self):
+        """Retrieve list of task names which have been assigned to jobs.
+
+        Results are returned in alphabetical order.
+        """
+
+        query = 'SELECT DISTINCT task FROM job ORDER BY task ASC'
+
+        result = []
+
+        with self.db as c:
+            c.execute(query)
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                result.append(row[0])
+
+        if not result:
+            raise NoRowsError('job', query)
+
+        return result
+
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names

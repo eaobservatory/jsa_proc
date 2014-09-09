@@ -630,6 +630,15 @@ class InterfaceDBTest(DBTestCase):
         self.db.set_tilelist(job_id, newtiles)
         self.assertEqual(set(self.db.get_tilelist(job_id)), newtiles)
 
+    def test_get_tasks(self):
+        with self.assertRaises(NoRowsError):
+            self.db.get_tasks()
+
+        self.db.add_job('tag1', 'JAC', 'obs', 'REC', 'test1', [])
+        self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test2', [])
+
+        self.assertEqual(self.db.get_tasks(), ['test1', 'test2'])
+
 
 class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
