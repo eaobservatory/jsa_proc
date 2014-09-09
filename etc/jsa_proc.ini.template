@@ -22,6 +22,7 @@ starpath=/net/kamaka/export/data/stardev-stable
 # partition so that files can be moved atomically
 # from one to the other.
 [etransfer]
+user=jcmtarch
 machine=kolea
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc/new

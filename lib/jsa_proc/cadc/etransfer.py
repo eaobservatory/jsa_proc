@@ -16,10 +16,13 @@
 from __future__ import print_function, division, absolute_import
 
 from codecs import latin_1_encode
+import os
+import pwd
+from socket import gethostname
 import logging
 
 from jsa_proc.cadc.files import CADCFiles
-from jsa_proc.config import get_database
+from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
 
 logger = logging.getLogger(__name__)
@@ -27,6 +30,25 @@ logger = logging.getLogger(__name__)
 
 def etransfer_send_output(dry_run, job_id):
     logger.debug('Preparing to e-transfer output for job {0}'.format(job_id))
+
+    config = get_config()
+    scratchdir = config.get('etransfer', 'scratchdir')
+    transdir = config.get('etransfer', 'scratchdir')
+
+    if not dry_run:
+        # When not in dry run mode, check that etransfer is being
+        # run on the correct machine by the correct user.
+        etransfermachine = config.get('etransfer', 'machine')
+        etransferuser = config.get('etransfer', 'user')
+
+        # Method of obtaining the user name as recommended in the "os"
+        # section of the Python standard library documentation.
+        if pwd.getpwuid(os.getuid())[0] != etransferuser:
+            raise CommandError('etransfer should only be run as {0}'.
+                               format(etransferuser))
+        if gethostname() != etransfermachine:
+            raise CommandError('etransfer should only be run on {0}'.
+                               format(etransfermachine))
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
