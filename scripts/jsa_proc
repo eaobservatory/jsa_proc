@@ -18,14 +18,18 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
-    jsa_proc unauthorized [options] [--check-at-cadc]
+    jsa_proc etransfer [-v | -q] [--dry-run] --job_id <id>
+    jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
-    --help, -h       Show usage information.
-    --verbose, -v    Print debugging information.
-    --quiet, -q      Omit informational messages.
+    --help, -h              Show usage information.
+    --verbose, -v           Print debugging information.
+    --quiet, -q             Omit informational messages.
+    --dry-run, -n           Do not actually peform the action.
 
-    --check-at-cadc  Test whether files are at CADC.
+    --job_id <id>, -j <id>  Identifier of job on which to work.
+
+    --check-at-cadc         Test whether files are at CADC.
 
 """
 
@@ -35,6 +39,7 @@ import functools
 import logging
 import sys
 
+from jsa_proc.cadc.etransfer import etransfer_send_output
 from jsa_proc.error import CommandError
 from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
 
@@ -87,6 +92,17 @@ def command(f):
     return f
 
 
+@command
+def etransfer(args):
+    """Sub-command to copy files into the e-transfer system.
+    """
+
+    try:
+        job_id = int(args['--job_id'])
+    except ValueError:
+        raise CommandError('Job ID must be an integer')
+
+    etransfer_send_output(dry_run=args['--dry-run'], job_id=job_id)
 
 
 @command
