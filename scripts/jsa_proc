@@ -19,6 +19,7 @@
 
 Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job_id <id>
+    jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
@@ -40,8 +41,11 @@ import logging
 import sys
 
 from jsa_proc.cadc.etransfer import etransfer_send_output
+from jsa_proc.cadc.files import CADCFiles
+from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.error import CommandError
 from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
+from jsa_proc.omp.db import OMPDB
 
 script_name = 'jsa_proc'
 commands = {}
@@ -104,6 +108,30 @@ def etransfer(args):
 
     etransfer_send_output(dry_run=args['--dry-run'], job_id=job_id)
 
+
+@command
+def query(args):
+    """Sub-command to test the various query methods.
+    """
+
+    search = args['<search>']
+
+    if args['caom2']:
+        caom2 = CADCTap()
+        for obsid in sorted(caom2.obsids_by_pattern(search.lower())):
+            print(obsid)
+
+    elif args['jcmtinfo']:
+        ad = CADCFiles()
+        for file in sorted(ad.files_by_pattern(search)):
+            print(file)
+
+    elif args['ompstatus']:
+        ompdb = OMPDB()
+        print('Status: ' + repr(ompdb.get_status(search)))
+
+    else:
+        raise CommandError('Did not recognise query type')
 
 @command
 def unauthorized(args):
