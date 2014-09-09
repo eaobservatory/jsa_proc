@@ -35,6 +35,7 @@ import functools
 import logging
 import sys
 
+from jsa_proc.error import CommandError
 from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
 
 script_name = 'jsa_proc'
@@ -86,9 +87,6 @@ def command(f):
     return f
 
 
-class CommandError(Exception):
-    """Class for errors detected running a command."""
-    pass
 
 
 @command

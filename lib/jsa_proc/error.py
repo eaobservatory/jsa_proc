@@ -87,3 +87,8 @@ class NotAtJACError(JSAProcError):
         """
         message = '%s was not found at the JAC' % (something)
         Exception.__init__(self, message, *args)
+
+
+class CommandError(Exception):
+    """Class for errors detected running a command."""
+    pass
