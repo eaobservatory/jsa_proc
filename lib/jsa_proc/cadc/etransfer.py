@@ -24,6 +24,7 @@ import logging
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
+from jsa_proc.job_run.directories import get_output_dir
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,14 @@ def etransfer_send_output(dry_run, job_id):
         message = 'No output files found for job {0}'.format(job_id)
         logger.error(message)
         raise CommandError(message)
+
+    logger.debug('Checking that all files are present')
+    outdir = get_output_dir(job_id)
+    for file in files:
+        if not os.path.exists(os.path.join(outdir, file)):
+            message = 'File {0} not in directory {1}'.format(file, outdir)
+            logger.error(message)
+            raise CommandError(message)
 
     logger.debug('Checking which files are already at CADC')
     present = ad.check_files(files)
