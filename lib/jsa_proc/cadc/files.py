@@ -33,8 +33,19 @@ class CADCFiles():
     jcmt_info_url = \
         'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/jcmtInfo'
 
+    # Each file pattern to be queried via the JCMT info service can sadly
+    # contain only one wildcard.
     patterns = [
+        # SCUBA-2 raw file.
         (re.compile('^(s[48][abcd][0-9]{8}_[0-9]{5}_)[0-9]{4}$'),
+         '{0}%'),
+        # SCUBA-2 reduced observation file.
+        (re.compile('^(jcmts[0-9]{8}_[0-9]{5}_[48]50_)[a-z0-9]+'
+                    '(_obs_[0-9]{3})\.fits$'),
+         '{0}%{1}'),
+        # CAOM-2 preview for SCUBA-2 reduced observation file.
+        (re.compile('^(jcmt_scuba2_[0-9]{5}_[0-9t]{15}_)'
+                    '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
          '{0}%'),
     ]
 
@@ -78,7 +89,9 @@ class CADCFiles():
             else:
                 found = self.found[pattern] = self.files_by_pattern(pattern)
 
-            result.append(file in found)
+            (base, dot, suffix) = file.partition('.')
+
+            result.append(base in found)
 
         return result
 
