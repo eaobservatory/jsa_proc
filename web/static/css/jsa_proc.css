@@ -187,31 +187,31 @@ td, th {
     padding: 5px;
 }
 
-.state_queue {
+.state_queue, .state_queue a {
     background: red;
     color: white;
 }
 
-.state_fetch {
+.state_fetch, .state_fetch a {
     background: yellow;
     color: black;
 }
 
-.state_run {
+.state_run, .state_run a {
     background: green;
     color: white;
 }
 
-.state_complete {
+.state_complete, .state_complete a {
     background: blue;
     color: white;
 }
 
-.state_error {
+.state_error, .state_error a {
     background: black;
     color: white;
 }
 
-.state_active {
+.state_active, .state_active a {
     box-shadow: 0px 0px 10px 5px white, 0px 0px 20px 10px yellow;
 }
