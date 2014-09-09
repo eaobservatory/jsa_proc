@@ -40,7 +40,7 @@
     {% endif %}
 {% endmacro %}
 
-{% macro render_choices(locations, selected_location, states, selected_state, selected_number, obsoptions, selected_obsoptions) %}
+{% macro render_choices(locations, selected_location, states, selected_state, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) %}
 <form>
     <p>
         <select name="location">
@@ -53,6 +53,12 @@
             <option value="" {{ 'selected="selected"' | safe if selected_state is none }}>Any state</option>
             {% for state in states %}
                 <option value="{{ state }}" {{ 'selected="selected"' if state == selected_state }}>{{ state | state_name }}</option>
+            {% endfor %}
+        </select>
+        <select name="task">
+            <option value="" {{ 'selected="selected"' | safe if selected_task is none }}>All tasks</option>
+            {% for task in tasks %}
+                <option value="{{ task }}" {{ 'selected="selected"' if task == selected_task }}>{{ task }}</option>
             {% endfor %}
         </select>
         <select name="number">

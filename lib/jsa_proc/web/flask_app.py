@@ -62,6 +62,7 @@ def create_web_app():
             db,
             request.args.get('location', None),
             request.args.get('state', None),
+            request.args.get('task', None),
             request.args.get('number', None),
             request.args.get('page', None),
             request.args.get('date_min', None),

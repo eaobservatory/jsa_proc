@@ -21,12 +21,15 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
-def prepare_job_list(db, location, state, number, page, date_min, date_max,
+def prepare_job_list(db, location, state, task, number, page,
+                     date_min, date_max,
                      sourcename, obsquerydict={}):
     if location == '':
         location = None
     if state == '':
         state = None
+    if task == '':
+        task = None
     if date_min == '':
         date_min = None
     if date_max == '':
@@ -35,6 +38,7 @@ def prepare_job_list(db, location, state, number, page, date_min, date_max,
     job_query = {
         'location': location,
         'state': state,
+        'task': task,
     }
 
     # Add dictionary of obs table requirements to send to find jobs
@@ -92,6 +96,8 @@ def prepare_job_list(db, location, state, number, page, date_min, date_max,
         'selected_location': location,
         'states': JSAProcState.STATE_ALL,
         'selected_state': state,
+        'tasks': db.get_tasks(),
+        'selected_task': task,
         'selected_number': number,
         'pagination': pagination,
         'selected_obsoptions': obsquerydict,
