@@ -26,3 +26,5 @@ user=jcmtarch
 machine=kolea
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc/new
+
+# vim: syn=dosini
