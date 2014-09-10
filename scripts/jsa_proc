@@ -141,6 +141,7 @@ def query(args):
     else:
         raise CommandError('Did not recognise query type')
 
+
 @command
 def unauthorized(args):
     """Sub-command to investigate jobs which failed to fetch due to
