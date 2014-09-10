@@ -111,11 +111,6 @@
 
 </div>
 
-
-{# Define the log pane but don't actually print it yet.  If there are
-   previews then we want to print it after the first preview so that
-   at least one preview is shown first. #}
-{% macro render_log_pane() %}
 <div id="pane-log">
 {% if log %}
 <div class="panel">
@@ -180,10 +175,6 @@
 
 {% endif %}
 
-
-{% endmacro %}
- 
-{{ render_log_pane() }}
 {% if previews|length > 1 %}
 <h3 id="previews"> Preview images  (Click image to embiggen)</h3>
 {% for l in previews %}
