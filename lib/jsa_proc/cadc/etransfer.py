@@ -93,17 +93,14 @@ def _etransfer_send(job_id, dry_run, db):
         files = db.get_output_files(job_id)
 
     except NoRowsError:
-        message = 'No output files found for job {0}'.format(job_id)
-        logger.error(message)
-        raise CommandError(message)
+        raise CommandError('No output files found for job {0}'.format(job_id))
 
     logger.debug('Checking that all files are present')
     outdir = get_output_dir(job_id)
     for file in files:
         if not os.path.exists(os.path.join(outdir, file)):
-            message = 'File {0} not in directory {1}'.format(file, outdir)
-            logger.error(message)
-            raise CommandError(message)
+            raise CommandError('File {0} not in directory {1}'.
+                               format(file, outdir))
 
     logger.debug('Checking that files are not in the scratch directory')
     scratchfiles = os.listdir(scratchdir)
