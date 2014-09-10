@@ -25,9 +25,10 @@ from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.web.util import \
     url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect
 
+
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_change_state import prepare_change_state
-from jsa_proc.web.job_summary import prepare_job_summary
+from jsa_proc.web.job_summary import prepare_job_summary, prepare_task_summary, prepare_summary_piechart
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
 from jsa_proc.web.job_log import prepare_job_log
@@ -71,10 +72,23 @@ def create_web_app():
             obsquerydict=obsquerydict,
         )
 
+    @app.route('/image/<task>/piechart')
+    def summary_piechart(task='None'):
+        if task == 'None':
+            task = None
+        return prepare_summary_piechart(db, task=task)
+
+
     @app.route('/summary/')
+    @templated('task_summary.html')
+    def task_summary():
+        return prepare_task_summary(db)
+
+    @app.route('/job_summary/')
     @templated('job_summary.html')
     def job_summary():
-        return prepare_job_summary(db)
+        task = request.args.get('task', None)
+        return prepare_job_summary(db, task=task)
 
     @app.route('/error_summary/')
     @templated('error_summary.html')

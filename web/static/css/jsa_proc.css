@@ -242,6 +242,12 @@ div.changestate select, .changestate input {
     text-align: center;
 }
 
+<<<<<<< HEAD
+=======
+div.col{
+    display: inline-block;
+}
+>>>>>>> Web: added a task summary page
 textarea {
     width: 60%;
 }

@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% set active_page='summary' %}
+
+{% block body %}
+
+
+<div id="content" style="max-width:150ex;">
+<h2>Summary table</h2>
+
+<div id="wrapper">
+<div class="col">
+<table>
+  <tr>
+    <th>Task name</th>
+    <th colspan="{{ results.values()[0].keys()|length }}">Number of Jobs</th>
+  </tr>
+  <tr>
+    <th>(Click for summary)</th>
+    <th> total </th>
+    {% for state in states %}
+    <th>{{state| state_name}}</th>
+    {% endfor %}
+    </tr>
+{% for taskname, jobs in results.items() %}
+  <tr>
+    <td><a href="{{ url_for('job_summary', task=taskname) }}">{{ taskname }}</a></td>
+    <td><a href="{{ url_for('job_list', task=taskname) }}">{{ jobs['total'] }}</a></td>
+    {% for state in states %}
+    <td class = "state_{{state | state_phase}}"><a href="{{ url_for('job_list', task=taskname, state=state) }} ">{{ jobs[state] }} </a></td>
+    {% endfor %}
+  </tr>
+{% endfor %}
+</table>
+</div>
+</div>
+{% endblock %}

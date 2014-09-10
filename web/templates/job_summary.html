@@ -1,5 +1,4 @@
 {% extends 'layout.html' %}
-{% set active_page='summary' %}
 
 {% block content %}
 
@@ -7,8 +6,10 @@
 
 <h2>Summary table</h2>
 
-<table>
 
+<div id="wrapper">
+<div class="col">
+<table>
 <tr>
     <th>State</th>
     {% for l in locations %}
@@ -17,13 +18,24 @@
 </tr>
 {% for s, value in job_summary_dict.items() %}
     <tr>
-        <td class="state_{{ s | state_phase}}"><a href="{{ url_for('job_list', state=s) }}">{{ s | state_name }}</a></td>
+        <td class="state_{{ s | state_phase}}"><a href="{{ url_for('job_list', state=s, task=task) }}">{{ s | state_name }}</a></td>
         {% for l, numb  in value.items() %}
-            <td><a href="{{ url_for('job_list', location=l, state=s) }}">{{ numb }}</a></td>
+            <td><a href="{{ url_for('job_list', location=l, state=s, task=task) }}">{{ numb }}</a></td>
         {% endfor %}
     </tr>
 {% endfor %}
-
 </table>
+</div>
+
+<div class="col">
+<figure>
+<img src="{{ url_for('summary_piechart', task=task, stamp=stamp)}}"></img>
+<figcaption> Summary of job state </figcaption>
+</figure>
+</div>
+
+</div>
+<div class="clear"></div>
+{# Descriptions of types of data #}
 
 {% endblock %}
