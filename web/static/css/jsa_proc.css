@@ -80,10 +80,6 @@ div#pane-log {
     vertical-align:top;
 }
 
-div#pane-files {
-    columns:2;
-}
-
 h1 {
     margin: .67em 0;
     font-size: 2em;
