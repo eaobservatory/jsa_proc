@@ -105,6 +105,13 @@ def _etransfer_send(job_id, dry_run, db):
             logger.error(message)
             raise CommandError(message)
 
+    logger.debug('Checking that files are not in the scratch directory')
+    scratchfiles = os.listdir(scratchdir)
+    for file in files:
+        if file in scratchfiles:
+            raise CommandError('File {0} is in e-transfer scratch directory'.
+                               format(file))
+
     logger.debug('Checking whether the files are already in e-transfer')
     etransfer_status = etransfer_file_status(files)
     if any(etransfer_status):
