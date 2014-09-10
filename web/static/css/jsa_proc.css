@@ -156,7 +156,7 @@ div.preview {
     clear: none;
     display: inline-block;
     text-align: center;
-    vertical-align:top
+    vertical-align:top;
     margin:auto;
 }
 div.preview figure {
