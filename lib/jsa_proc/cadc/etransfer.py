@@ -52,9 +52,7 @@ def etransfer_send_output(job_id, dry_run):
         etransfermachine = config.get('etransfer', 'machine')
         etransferuser = config.get('etransfer', 'user')
 
-        # Method of obtaining the user name as recommended in the "os"
-        # section of the Python standard library documentation.
-        if pwd.getpwuid(os.getuid())[0] != etransferuser:
+        if pwd.getpwuid(os.getuid()).pw_name != etransferuser:
             raise CommandError('etransfer should only be run as {0}'.
                                format(etransferuser))
         if gethostname() != etransfermachine:
