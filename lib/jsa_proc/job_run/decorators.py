@@ -39,6 +39,9 @@ class ErrorDecorator(object):
     Will connect to the database in config, unless the function
     called has a keyword argument db, in which case it will assume
     that is a db instance it can uses instead.
+
+    Does not write to the database if the function is being called
+    with a "dry_run" keyword argument set to a true value.
     """
 
     def __init__(self, function):
@@ -51,11 +54,17 @@ class ErrorDecorator(object):
             logger.exception('Error caught running function %s',
                              self.function.__name__)
 
-            if 'db' in kwargs and kwargs['db'] is not None:
-                db = kwargs['db']
+            if kwargs.get('dry_run', False):
+                logger.info('Skipping inserting error into database (DRY RUN)')
+
             else:
-                db = get_database()
-            db.change_state(job_id, JSAProcState.ERROR,
-                            'Error message and args: ' +
-                            ' '.join([str(i) for i in theexception.args]))
+                if 'db' in kwargs and kwargs['db'] is not None:
+                    db = kwargs['db']
+                else:
+                    db = get_database()
+
+                db.change_state(job_id, JSAProcState.ERROR,
+                                'Error message and args: ' +
+                                ' '.join([str(i) for i in theexception.args]))
+
             raise
