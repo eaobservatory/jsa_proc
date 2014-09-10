@@ -33,6 +33,44 @@ from jsa_proc.state import JSAProcState
 logger = logging.getLogger(__name__)
 
 
+def etransfer_poll_output(dry_run):
+    """High level polling function to use from scripts."""
+
+    logger.debug('Preparing to poll the e-transfer system for job output')
+
+    # When not in dry run mode, check that etransfer is being
+    # run on the correct machine by the correct user.
+    if not dry_run:
+        _etransfer_check_config()
+
+    logger.debug('Connecting to JSA processing database')
+    db = get_database()
+
+    logger.debug('Preparing CADC files object')
+    ad = CADCFiles()
+
+    n_err = 0
+
+    for job in self.db.find_jobs(location='JAC',
+                                 state=JSAProcState.TRANSFERRING):
+        job_id = job.id
+        logger.debug('Checking state of job %i', job_id)
+
+        logger.debug('Retrieving list of output files')
+        try:
+            files = db.get_output_files(job_id)
+
+        except NoRowsError:
+            logger.error('Did not find output files for job %i', job_id)
+            n_err += 1
+            continue
+
+    logger.debug('Done polling the e-transfer system')
+
+    if n_err:
+        raise CommandError('Errors were encountered polling e-transfer')
+
+
 def etransfer_send_output(job_id, dry_run):
     """High level e-transfer function for use from scripts.
 
@@ -44,20 +82,10 @@ def etransfer_send_output(job_id, dry_run):
 
     logger.debug('Preparing to e-transfer output for job {0}'.format(job_id))
 
-    config = get_config()
-
+    # When not in dry run mode, check that etransfer is being
+    # run on the correct machine by the correct user.
     if not dry_run:
-        # When not in dry run mode, check that etransfer is being
-        # run on the correct machine by the correct user.
-        etransfermachine = config.get('etransfer', 'machine')
-        etransferuser = config.get('etransfer', 'user')
-
-        if pwd.getpwuid(os.getuid()).pw_name != etransferuser:
-            raise CommandError('etransfer should only be run as {0}'.
-                               format(etransferuser))
-        if gethostname() != etransfermachine:
-            raise CommandError('etransfer should only be run on {0}'.
-                               format(etransfermachine))
+        _etransfer_check_config()
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
@@ -196,3 +224,21 @@ def etransfer_file_status(files):
                else (True, 'new') if file in new
                else (True, 'replace') if file in replace
                else None), files)
+
+
+def _etransfer_check_config():
+    """Check the configuration is good for for e-transfer.
+
+    Raises a CommandError if a problem is detected.
+    """
+
+    config = get_config()
+    etransfermachine = config.get('etransfer', 'machine')
+    etransferuser = config.get('etransfer', 'user')
+
+    if pwd.getpwuid(os.getuid()).pw_name != etransferuser:
+        raise CommandError('etransfer should only be run as {0}'.
+                           format(etransferuser))
+    if gethostname() != etransfermachine:
+        raise CommandError('etransfer should only be run on {0}'.
+                           format(etransfermachine))

@@ -19,6 +19,7 @@
 
 Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job_id <id>
+    jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
@@ -31,6 +32,7 @@ Options:
     --job_id <id>, -j <id>  Identifier of job on which to work.
 
     --check-at-cadc         Test whether files are at CADC.
+    --poll                  Poll a system for state updates.
 
 """
 
@@ -40,7 +42,8 @@ import functools
 import logging
 import sys
 
-from jsa_proc.cadc.etransfer import etransfer_send_output
+from jsa_proc.cadc.etransfer import etransfer_poll_output, \
+    etransfer_send_output
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.error import CommandError
@@ -98,15 +101,20 @@ def command(f):
 
 @command
 def etransfer(args):
-    """Sub-command to copy files into the e-transfer system.
+    """Sub-command to copy files into the e-transfer system,
+    or to poll the e-transfer system for status updates.
     """
 
-    try:
-        job_id = int(args['--job_id'])
-    except ValueError:
-        raise CommandError('Job ID must be an integer')
+    if args['--poll']:
+        etransfer_poll_output(dry_run=args['--dry-run'])
 
-    etransfer_send_output(job_id, dry_run=args['--dry-run'])
+    else:
+        try:
+            job_id = int(args['--job_id'])
+        except ValueError:
+            raise CommandError('Job ID must be an integer')
+
+        etransfer_send_output(job_id, dry_run=args['--dry-run'])
 
 
 @command
