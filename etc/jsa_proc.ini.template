@@ -25,6 +25,6 @@ starpath=/net/kamaka/export/data/stardev-stable
 user=jcmtarch
 machine=kolea
 scratchdir=/export/jcmtdata/scratch/jsa_proc
-transdir=/export/jcmtdata/cadc/new
+transdir=/export/jcmtdata/cadc
 
 # vim: syn=dosini

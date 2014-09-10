@@ -74,6 +74,16 @@ def etransfer_send_output(dry_run, job_id):
             logger.error(message)
             raise CommandError(message)
 
+    logger.debug('Checking whether the files are already in e-transfer')
+    etransfer_status = etransfer_file_status(files)
+    if any(etransfer_status):
+        for (file, status) in zip(files, etransfer_status):
+            if status:
+                (ok, dir) = status
+                logger.error('File {0} already in e-transfer directory {1}'.
+                             format(file, dir))
+        raise CommandError('Some files are already in e-transfer directories')
+
     logger.debug('Checking which files are already at CADC')
     present = ad.check_files(files)
 
@@ -82,3 +92,41 @@ def etransfer_send_output(dry_run, job_id):
             logger.info('Placing file %s in "replace" directory', file)
         else:
             logger.info('Placing file %s in "new" directory', file)
+
+
+def etransfer_file_status(files):
+    """Determine the current e-transfer status of a given file.
+
+    Essentially this looks for the files in the e-transfer directory
+    structure and tells you which directory it is in.
+
+    Parameters:
+        files: list of file names to check.
+
+    Return:
+        List with entries corresponding to those in the input file list.
+        the value will be None if the file is not found in the
+        e-transfer directories, or a tuple which is one of:
+
+            (True, 'new')
+            (True, 'replace')
+            (False, rejection_reason)
+
+        i.e. None means the file is not found, (True, ...) means that it is
+        in progress and (False, ...) indicates an error.
+    """
+
+    config = get_config()
+    transdir = config.get('etransfer', 'transdir')
+
+    new = set(os.listdir(os.path.join(transdir, 'new')))
+    replace = set(os.listdir(os.path.join(transdir, 'replace')))
+    reject = dict((
+        (file, reason)
+        for reason in os.listdir(os.path.join(transdir, 'reject'))
+        for file in os.listdir(os.path.join(transdir, 'reject', reason))))
+
+    return map((lambda file: (False, reject[file]) if file in reject
+               else (True, 'new') if file in new
+               else (True, 'replace') if file in replace
+               else None), files)
