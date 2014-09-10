@@ -15,13 +15,16 @@
 
 from __future__ import absolute_import, division
 
-from flask import Flask, flash, request, send_file
+
+from flask import Flask, flash, request, send_file, Response, render_template
+from functools import wraps
 import os.path
 
 import jsa_proc.config
 from jsa_proc.state import JSAProcState
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
+from jsa_proc.omp.auth import check_staff_password
 from jsa_proc.web.util import \
     url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect, HTTPUnauthorized
 
@@ -35,6 +38,8 @@ from jsa_proc.web.job_log import prepare_job_log
 from jsa_proc.web.error_summary import prepare_error_summary
 
 
+loginstring = 'Basic realm="Login Required: use your username and the staff password, or hit cancel to log out"'
+
 def create_web_app():
     """Function to prepare the Flask web application."""
 
@@ -46,6 +51,48 @@ def create_web_app():
         static_folder=os.path.join(home, 'web', 'static'),
         template_folder=os.path.join(home, 'web', 'templates'),
     )
+
+    # Web authorization -- mostly take from flask docs snippets 8
+    # http://flask.pocoo.org/snippets/8
+    def check_auth(password):
+        """
+        Check that the staff pasword has been used.
+
+        (Note that we don't care what the username is).
+        """
+        return check_staff_password(password)
+
+    def authenticate():
+        """
+        Send a 401 response so that we can log in.
+        """
+        flash('You are not logged in (despite what it may say in the top right corner).')
+        return Response(render_template('logout.html'), 401, {'WWW-Authenticate': loginstring})
+
+
+    def requires_auth(f):
+        """
+        A decorator to wrap functions that require authorization.
+        """
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            auth = request.authorization
+            if not auth or not check_auth(auth.password):
+                return authenticate()
+            return f(*args, **kwargs)
+        return decorated
+
+    def requires_deauth(f):
+        """
+        A decorator to wrap functions that require authorization.
+        """
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            auth = False
+            if not auth or not check_auth(auth.password):
+                return authenticate()
+            return f(*args, **kwargs)
+        return decorated
 
     # Route Handlers.
 
@@ -119,7 +166,7 @@ def create_web_app():
                              message)
 
         # Redirect the page to correct info.
-        # flash('You have successfully mangled the job status!')
+        flash('You have successfully mangled the job status!')
         raise HTTPRedirect(url)
 
 
@@ -129,16 +176,18 @@ def create_web_app():
     def qa_summary():
         return {}
 
+
     @app.route('/login', methods=['GET', 'POST'])
+    @requires_auth
     def login():
-        raise HTTPUnauthorized('login not yet implemented')
+        return qa_summary()
+
 
     @app.route('/logout')
+    @requires_deauth
     def logout():
         # Dummy logout method
-        flash('You have successfully logged out!')
-        raise HTTPRedirect(url_for('qa_summary'))
-
+        return qa_summary()
 
 
     # Image handling.
@@ -156,6 +205,7 @@ def create_web_app():
     def job_log_text(job_id, log):
         path = prepare_job_log(job_id, log)
         return send_file(path, mimetype='text/plain')
+
 
     # Filters and Tests.
 
@@ -189,6 +239,10 @@ def create_web_app():
     @app.context_processor
     def add_to_context():
         return {'url_for_omp': url_for_omp}
+
+
+    # secret key?
+    app.secret_key = 'werwserA0Zr98j/3yX R~XHH!jmN]LWX/,?RTasdfasasdfdfasdfs1234'
 
     # Return the Application.
 

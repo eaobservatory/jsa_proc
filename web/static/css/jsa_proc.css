@@ -250,3 +250,8 @@ div.col{
 textarea {
     width: 60%;
 }
+
+ul#nav li.login {
+    float:right;
+    padding-right: 10px;
+}

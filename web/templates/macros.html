@@ -1,4 +1,4 @@
-{% macro render_navbar(active_page) %}
+{% macro render_navbar(active_page, onlogout=False) %}
     {% set navigation_bar = [
       ('/summary', 'summary', 'Summary'),
       ('/error_summary', 'error_summary', 'Errors'),
@@ -11,9 +11,9 @@
                 <a href="{{ href }}">{{ caption }}</a>
             </li>
         {% endfor %}
-            <li class="login" > {{ session.get('username', '') }}
-              {% if 'username' in session %}
-              <a href={{ url_for('logout') }} > logout!! </a>
+            <li class="login" >
+              {% if request.authorization and 'username' in request.authorization %}
+              <a href={{ url_for('logout') }} > {{ request.authorization.username }} (logout) </a>
               {% else %}
               <a href= {{ url_for('login') }}>login </a>
               {% endif %}
