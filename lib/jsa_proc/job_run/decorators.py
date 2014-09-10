@@ -44,9 +44,9 @@ class ErrorDecorator(object):
     def __init__(self, function):
         self.function = function
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, job_id, *args, **kwargs):
         try:
-            return self.function(*args, **kwargs)
+            return self.function(job_id, *args, **kwargs)
         except Exception as theexception:
             logger.exception('Error caught running function %s',
                              self.function.__name__)
@@ -55,7 +55,7 @@ class ErrorDecorator(object):
                 db = kwargs['db']
             else:
                 db = get_database()
-            db.change_state(args[0], JSAProcState.ERROR,
+            db.change_state(job_id, JSAProcState.ERROR,
                             'Error message and args: ' +
                             ' '.join([str(i) for i in theexception.args]))
             raise
