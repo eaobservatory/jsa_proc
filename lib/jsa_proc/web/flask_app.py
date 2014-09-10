@@ -51,7 +51,7 @@ def create_web_app():
 
     @app.route('/')
     def home_page():
-        raise HTTPRedirect(url_for('job_summary'))
+        raise HTTPRedirect(url_for('task_summary'))
 
     @app.route('/job/')
     @templated('job_list.html')
