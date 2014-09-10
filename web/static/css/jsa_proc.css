@@ -67,18 +67,21 @@ div#content {
 }
 
 div#pane-info {
-    float: left;
-    width: 60ex;
+    display:inline-block;
+    max-width: 48%;
+    min-width:100ex;
+    vertical-align:top;
 }
 
 div#pane-log {
-    float: right;
-    width: 80ex;
+    display:inline-block;
+    max-width:48%;
+    min-width: 100ex;
+    vertical-align:top;
 }
 
 div#pane-files {
-    clear: left;
-    margin-right: 80ex;
+    columns:2;
 }
 
 h1 {
@@ -124,20 +127,41 @@ img {
     max-width: 100%;
 }
 
+
+div.jobsummary {
+    display:inline-block;
+    vertical-align:top;
+    margin:auto;
+}
+div.jobsummary table td{
+    width:12ex;
+}
+figure{ display:table}
+figcaption{ display:table-caption; caption-side:bottom; font-size: small}
 div.panel {
     margin: 2ex;
     padding: 1ex;
     background: white;
     color: black;
     text-align: left;
+    border-radius: 8px;
 }
 
+div.panel-small{
+    display:inline-block;
+    vertical-align:top;
+    background:white;
+}
 div.preview {
     clear: none;
     display: inline-block;
     text-align: center;
+    vertical-align:top
+    margin:auto;
 }
-
+div.preview figure {
+    margin:auto;
+}
 div.tile {
     display: inline-block;
     width: 15ex;
@@ -214,4 +238,15 @@ td, th {
 
 .state_active, .state_active a {
     box-shadow: 0px 0px 10px 5px white, 0px 0px 20px 10px yellow;
+}
+
+div.changestate{
+    text-align:center;
+}
+div.changestate select, .changestate input{
+    vertical-align:top;
+    text-align:center;
+}
+textarea {
+    width:60%;
 }

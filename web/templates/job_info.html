@@ -3,9 +3,13 @@
 {% block body %}
 
 
+<h1>  {{ title }} </h1>
+
 <div id="pane-info">
-<div class="panel">
-<table>
+
+<div class="panel panel-small">
+<div class="jobsummary">
+<table class="summary">
     <tr><th>State</th><td class="state_{{ info.state | state_phase}}{% if info.state is state_active %} state_active{% endif %}">
         {{ info.state | state_name }}
     </td></tr>
@@ -26,51 +30,87 @@
     <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
     <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
+    <tr><th>Priority</th><td>{{ info.priority }} </td></tr>
+    <tr><th>Task</th><td>{{ info.task }} </td></tr>
+    <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
+    <tr><th>Tag</th><td>{{ break_underscore(info.tag) }} </td></tr>
     {% endif %}
 </table>
 </div>
-
-<div class="panel">
-<table>
-<caption> Additional Job Info </caption>
-<tr><th>Previous state</th><td>{{ info.state_prev | state_name }}</td></tr>
-<tr><th>Tag</th><td>{{ info.tag }}</td></tr>
-<tr><th>Mode</th><td>{{ info.mode }}</td></tr>
-<tr><th>Priority</th><td>{{ info.priority }}</td></tr>
-</table>
 </div>
+{% if previews %}
+<div class="panel panel-small">
+<div class="preview">
+  <figure>
+    <a href="{{ previews[0][1] }}"><img src="{{ previews[0][0] }}" /></a>
+    <figcaption> {% if previews|length >1 %}
+      First  Preview (click to embiggen) <br> <a href="#previews">link to others</a>
+      {% else %}
+      Preview (click to embiggen).
+      {% endif %}
+    </figcaption>
+  </figure>
+</div>
+</div>
+
+{% endif %}
+
+
+
+
+
+
 
 {% if obsinfo is not none %}
 <div class="panel">
 <table>
   <caption> Additional Observation Info </caption>
-  {% if obsinfo|length > 1 %}
   <tr>
-    <th>&nbsp;</th>
-    {% for obs in obsinfo %}
-    <th> Obs {{loop.index}} </th>
-    {% endfor %}
-  </tr>
-  {% endif %}
-
   {% for key in obsinfo[0].keys()
              if key not in ('id', 'job_id', 'sourcename', 'instrument',
-                            'obstype', 'project', 'scanmode') %}
+                            'obstype', 'project', 'scanmode', ) %}
+  {% if key == 'obsnum' %}
+  <th> scan </th>
+  {% elif key == 'association' %}
+  <th> asscn </th>
+  {% else %}
+  <th> {{ key }} </th>
+  {% endif %}
+  {% endfor %}
+  </tr>
+  {% for o in obsinfo %}
   <tr>
-    <th> {{key}} </th>
-    {% for obs in obsinfo %}
+    {% for key in o.keys()
+               if key not in ('id', 'job_id', 'sourcename', 'instrument',
+                            'obstype', 'project', 'scanmode', ) %}
     {% if key == 'utdate' %}
-        <td><a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': obs.utdate}) }}">{{ obs.utdate }}</a></td>
+    <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
+    {% elif key == 'obsid' or key == 'obsidss' %}
+    <td> {{ break_underscore(o.get(key, '')) }} </td>
     {% else %}
-        <td> {{ obs.get(key, '') }} </td>
+    <td> {{ o.get(key, '') }} </td>
     {% endif %}
     {% endfor %}
-    </tr>
+  </tr>
   {% endfor %}
-</table>
+  </table>
+            
 </div>
 {% endif %}
+{% if output_files %}
+<div class="panel">
+<h2>Output Files</h2>
+<ul>
+{% for file in output_files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
 </div>
+{% endif %}
+
+
+</div>
+
 
 {# Define the log pane but don't actually print it yet.  If there are
    previews then we want to print it after the first preview so that
@@ -79,7 +119,7 @@
 <div id="pane-log">
 {% if log %}
 <div class="panel">
-<h2>Log</h2>
+<h2>Logs</h2>
 
 <table>
 <tr>
@@ -100,81 +140,64 @@
 </tr>
 {% endfor %}
 </table>
-</div>
-{% endif %}
 
-<div class="panel">
 <!-- Allow users to change state of job. -->
-<h2> Change the state of this Job </h2>
+<h3> Change the state of this Job </h3>
 
-
+<div class="changestate">
 <form method="POST" action="{{ url_for('job_change_state')}}">
   <input type="hidden" name="job_id" value="{{ info.id }}" >
   <input type="hidden" name="url" value="{{url_for('job_info', job_id=info.id)}}">
-<ul class="statebar">
-<li>    <select name="newstate">
-      <option value=""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
-      {% for state in states %}
-      <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
-      {% endfor %}
-      </select></li>
-<li>    <textarea rows=3 COLS=40 name="message"></textarea></li>
-<li>    <input type="submit" value="Submit Change"/></li>
-</ul>
+  <select name="newstate">
+    <option value=""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
+    {% for state in states %}
+    <option value="{{ state }}" {{'selected="selected"' if state == selected_new_state }}>{{ state | state_name }}</option>
+    {% endfor %}
+  </select>
+  <textarea rows="2" name="message" placeholder="Insert log message here."></textarea>
+  <input type="submit" value="Submit Change"/>
+
 </form>
 </div>
-
-{% if orac_logs %}
+</div>
 <div class="panel">
-<h2>ORAC-DR Logs</h2>
-<p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
+<h3>ORAC-DR Logs</h3>
 <ul>
 {% for l in orac_logs %}
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
-</div>
-{% endif %}
 
-{% if wrapdr_logs %}
-<div class="panel">
-<h2>jsawrapdr Logs</h2>
-<p>The time stamp may not match with the databse log comments: different time zones in different systems </p>
+<h3>jsawrapdr Logs</h3>
 <ul>
 {% for l in wrapdr_logs %}
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
+<p>The time stamp may not match with the database log comments: different time zones in different systems </p>
 </div>
-{% endif %}
 </div>
-{% endmacro %}
 
+{% endif %}
+
+
+{% endmacro %}
+ 
+{{ render_log_pane() }}
+{% if previews|length > 1 %}
+<h3 id="previews"> Preview images  (Click image to embiggen)</h3>
 {% for l in previews %}
     <div class="panel preview">
+      <figure>
         <a href="{{ l[1] }}"><img src="{{ l[0] }}" /></a>
-        <p>Preview (click to embiggen).</p>
+        <figcaption>{{ break_underscore(l[0].split('_preview_')[0].split('jcmt_')[1]) }}</figcaption>
+      </figure>
     </div>
-    {% if loop.first %}
-        {{ render_log_pane() }}
-    {% endif %}
-{% else %}
-    {{ render_log_pane() }}
 {% endfor %}
-
-{% if output_files or input_files %}
-<div id="pane-files">
-{% if output_files %}
-<div class="panel">
-<h2>Output Files</h2>
-<ul>
-{% for file in output_files %}
-    <li>{{ file }}</li>
-{% endfor %}
-</ul>
-</div>
 {% endif %}
 
+
+<div id="pane-files">
 {% if input_files %}
 <div class="panel">
 <h2>Input Files</h2>
@@ -186,6 +209,5 @@
 </div>
 {% endif %}
 </div>
-{% endif %}
 
 {% endblock %}
