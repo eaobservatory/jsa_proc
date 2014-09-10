@@ -67,17 +67,17 @@ div#content {
 }
 
 div#pane-info {
-    display:inline-block;
+    display: inline-block;
     max-width: 48%;
-    min-width:100ex;
-    vertical-align:top;
+    min-width: 100ex;
+    vertical-align: top;
 }
 
 div#pane-log {
-    display:inline-block;
-    max-width:48%;
+    display: inline-block;
+    max-width: 48%;
     min-width: 100ex;
-    vertical-align:top;
+    vertical-align: top;
 }
 
 h1 {
@@ -123,17 +123,26 @@ img {
     max-width: 100%;
 }
 
-
 div.jobsummary {
-    display:inline-block;
-    vertical-align:top;
-    margin:auto;
+    display: inline-block;
+    vertical-align: top;
+    margin: auto;
 }
-div.jobsummary table td{
-    width:12ex;
+
+div.jobsummary table td {
+    width: 12ex;
 }
-figure{ display:table}
-figcaption{ display:table-caption; caption-side:bottom; font-size: small}
+
+figure {
+    display: table;
+}
+
+figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    font-size: small;
+}
+
 div.panel {
     margin: 2ex;
     padding: 1ex;
@@ -143,21 +152,24 @@ div.panel {
     border-radius: 8px;
 }
 
-div.panel-small{
-    display:inline-block;
-    vertical-align:top;
-    background:white;
+div.panel-small {
+    display: inline-block;
+    vertical-align: top;
+    background: white;
 }
+
 div.preview {
     clear: none;
     display: inline-block;
     text-align: center;
-    vertical-align:top;
-    margin:auto;
+    vertical-align: top;
+    margin: auto;
 }
+
 div.preview figure {
-    margin:auto;
+    margin: auto;
 }
+
 div.tile {
     display: inline-block;
     width: 15ex;
@@ -236,13 +248,15 @@ td, th {
     box-shadow: 0px 0px 10px 5px white, 0px 0px 20px 10px yellow;
 }
 
-div.changestate{
-    text-align:center;
+div.changestate {
+    text-align: center;
 }
-div.changestate select, .changestate input{
-    vertical-align:top;
-    text-align:center;
+
+div.changestate select, .changestate input {
+    vertical-align: top;
+    text-align: center;
 }
+
 textarea {
-    width:60%;
+    width: 60%;
 }
