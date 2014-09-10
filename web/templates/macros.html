@@ -2,7 +2,8 @@
     {% set navigation_bar = [
       ('/summary', 'summary', 'Summary'),
       ('/error_summary', 'error_summary', 'Errors'),
-      ('/job', 'job', 'Full Job List')] -%}
+      ('/job', 'job', 'Full Job List'),
+      ('/qa', 'qa', 'QA Summary'),     ] -%}
 
     <ul id="nav">
         {% for href, id, caption in navigation_bar %}
@@ -10,6 +11,13 @@
                 <a href="{{ href }}">{{ caption }}</a>
             </li>
         {% endfor %}
+            <li class="login" > {{ session.get('username', '') }}
+              {% if 'username' in session %}
+              <a href={{ url_for('logout') }} > logout!! </a>
+              {% else %}
+              <a href= {{ url_for('login') }}>login </a>
+              {% endif %}
+            </li>
     </ul>
 {% endmacro %}
 
