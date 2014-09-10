@@ -46,12 +46,14 @@ def prepare_error_summary(db, filtering=None, chosentask=None):
         error_filter = None
     else:
         error_filter = JSAProcErrorFilter(filtering)
+    if chosentask is None or chosentask == '':
+        chosentask = None
     tasks = db.get_tasks()
 
     # Dictionary to hold output. Keys are location, items are ordered dict
     error_dict = OrderedDict()
     for l in locations:
-        error_dict[l] = db.find_errors_logs(location=l)
+        error_dict[l] = db.find_errors_logs(location=l, task=chosentask)
 
         if error_filter is not None:
             error_filter(error_dict[l])
