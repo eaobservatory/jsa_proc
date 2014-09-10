@@ -26,6 +26,7 @@ from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
 from jsa_proc.job_run.directories import get_output_dir
 from jsa_proc.job_run.decorators import ErrorDecorator
+from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
@@ -58,11 +59,22 @@ def etransfer_send_output(job_id, dry_run):
             raise CommandError('etransfer should only be run on {0}'.
                                format(etransfermachine))
 
-    _etransfer_send(job_id, dry_run=dry_run)
+    logger.debug('Connecting to JSA processing database')
+    db = get_database()
+
+    job = db.get_job(id_=job_id)
+
+    if job.state != JSAProcState.PROCESSED:
+        message = 'Job {0} cannot be e-transferred as it is in ' \
+                  'state {1}'.format(job_id, JSAProcState.get_name(job.state))
+        logger.error(message)
+        raise CommandError(message)
+
+    _etransfer_send(job_id, dry_run=dry_run, db=db)
 
 
 @ErrorDecorator
-def _etransfer_send(job_id, dry_run):
+def _etransfer_send(job_id, dry_run, db):
     """Private function to copy job output into the e-transfer
     directories.
 
@@ -72,9 +84,6 @@ def _etransfer_send(job_id, dry_run):
     config = get_config()
     scratchdir = config.get('etransfer', 'scratchdir')
     transdir = config.get('etransfer', 'transdir')
-
-    logger.debug('Connecting to JSA processing database')
-    db = get_database()
 
     logger.debug('Preparing CADC files object')
     ad = CADCFiles()
