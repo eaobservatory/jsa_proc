@@ -82,6 +82,7 @@ def create_web_app():
         return prepare_error_summary(
             db,
             filtering=request.args.get('filtering', None),
+            chosentask = request.args.get('chosentask', None),
         )
 
     @app.route('/job/<int:job_id>', methods=['GET'])
