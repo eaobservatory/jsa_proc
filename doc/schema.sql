@@ -93,3 +93,16 @@ CREATE TABLE tile (
 CREATE UNIQUE INDEX tile_job_tile ON tile (job_id, tile);
 CREATE INDEX tile_job_id ON tile (job_id);
 CREATE INDEX tile_tile ON tile (tile);
+
+CREATE TABLE qa (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       job_id INTEGER NOT NULL,
+
+       datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       status CHAR(1) NOT NULL DEFAULT "U",
+       message TEXT NOT NULL DEFAULT "",
+
+       FOREIGN KEY (job_id) REFERENCES job(id)
+           ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+CREATE INDEX qa_job_id ON qa (job_id);
