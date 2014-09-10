@@ -23,7 +23,7 @@ from jsa_proc.state import JSAProcState
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.web.util import \
-    url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect
+    url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect, HTTPUnauthorized
 
 
 from jsa_proc.web.job_list import prepare_job_list
@@ -121,6 +121,25 @@ def create_web_app():
         # Redirect the page to correct info.
         # flash('You have successfully mangled the job status!')
         raise HTTPRedirect(url)
+
+
+    # QA Summary pages
+    @app.route('/qa')
+    @templated('qa_summary.html')
+    def qa_summary():
+        return {}
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        raise HTTPUnauthorized('login not yet implemented')
+
+    @app.route('/logout')
+    def logout():
+        # Dummy logout method
+        flash('You have successfully logged out!')
+        raise HTTPRedirect(url_for('qa_summary'))
+
+
 
     # Image handling.
     @app.route('/job/<int:job_id>/preview/<preview>')

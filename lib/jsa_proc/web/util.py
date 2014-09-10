@@ -36,6 +36,10 @@ class HTTPError(werkzeug.exceptions.InternalServerError):
 
     pass
 
+class HTTPUnauthorized(werkzeug.exceptions.Unauthorized):
+    """Exception class raising an HTTP unauthorized 401 error"""
+
+    pass
 
 class HTTPNotFound(werkzeug.exceptions.NotFound):
     """Exception class for HTTP not found errors."""
