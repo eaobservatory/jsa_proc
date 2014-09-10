@@ -597,12 +597,13 @@ class JSAProcDB:
                           'VALUES (%s, %s)',
                           (job_id, f))
 
-    def find_errors_logs(self, location=None):
+    def find_errors_logs(self, location=None, task=None):
         """
         Retrieve list of all jobs in an error state, together with their logs.
 
         Search is limited by:
              * location (default None, can be 'JAC' or 'CADC')
+             * task (default None)
         """
 
         param = []
@@ -611,8 +612,11 @@ class JSAProcDB:
         query += ' WHERE job.state="E"'
 
         if location is not None:
-            query += 'AND job.location=%s'
+            query += ' AND job.location=%s '
             param.append(location)
+        if task is not None:
+            query += ' AND job.task=%s '
+            param.append(task)
 
         query += ' ORDER BY job.location DESC, job.id DESC, log.id DESC'
 
