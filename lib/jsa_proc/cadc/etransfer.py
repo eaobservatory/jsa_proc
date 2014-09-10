@@ -16,8 +16,10 @@
 from __future__ import print_function, division, absolute_import
 
 from codecs import latin_1_encode
+import grp
 import os
 import pwd
+import shutil
 from socket import gethostname
 import logging
 
@@ -72,6 +74,8 @@ def etransfer_send_output(job_id, dry_run):
 
     _etransfer_send(job_id, dry_run=dry_run, db=db)
 
+    logger.debug('Done adding output for job {0} to e-transfer'.format(job_id))
+
 
 @ErrorDecorator
 def _etransfer_send(job_id, dry_run, db):
@@ -84,6 +88,7 @@ def _etransfer_send(job_id, dry_run, db):
     config = get_config()
     scratchdir = config.get('etransfer', 'scratchdir')
     transdir = config.get('etransfer', 'transdir')
+    group_id = grp.getgrnam(config.get('etransfer', 'group')).gr_gid
 
     logger.debug('Preparing CADC files object')
     ad = CADCFiles()
@@ -124,9 +129,37 @@ def _etransfer_send(job_id, dry_run, db):
 
     for (file, replace) in zip(files, present):
         if replace:
-            logger.info('Placing file %s in "replace" directory', file)
+            target_type = 'replace'
         else:
-            logger.info('Placing file %s in "new" directory', file)
+            target_type = 'new'
+
+        logger.info('Placing file %s in "%s" directory', file, target_type)
+
+        source_file = os.path.join(outdir, file)
+        scratch_file = os.path.join(scratchdir, file)
+        target_file = os.path.join(transdir, target_type, file)
+
+        if not dry_run:
+            # Copy the file into the scratch directory and prepare its
+            # file permissions.
+            shutil.copyfile(source_file, scratch_file)
+            os.chown(scratch_file, -1, group_id)
+            os.chmod(scratch_file, 0o664)
+
+            # Move the file to the target directory.  This is done so that
+            # the file appears atomically in the target directory in order
+            # to prevent the e-transfer system seeing only part of the file.
+            os.rename(scratch_file, target_file)
+
+        else:
+            logger.debug('Skipping e-transfer (DRY RUN)')
+
+    # Finally set the state of the job to TRANSFERRING
+    if not dry_run:
+        db.change_state(
+            job_id, JSAProcState.TRANSFERRING,
+            'Output files have been copied into the e-transfer directories',
+            state_prev=JSAProcState.PROCESSED)
 
 
 def etransfer_file_status(files):

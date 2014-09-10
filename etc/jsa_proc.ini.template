@@ -23,6 +23,7 @@ starpath=/net/kamaka/export/data/stardev-stable
 # from one to the other.
 [etransfer]
 user=jcmtarch
+group=jcmt
 machine=kolea
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc
