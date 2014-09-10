@@ -22,6 +22,14 @@ from jsa_proc.job_run.decorators import ErrorDecorator
 valid_modes = ('obs', 'mode', 'project', 'public')
 valid_file = re.compile('^[_a-z0-9]+$')
 
+valid_preview_sizes = set([64, 256, 1024])
+valid_preview_file = re.compile('^jcmt_[-_a-z0-9]+_preview_([0-9]{2,4})\.png$')
+valid_product_file = re.compile('^jcmt[hs][-_a-z0-9]+\.fits$')
+
+
+class ValidationError(Exception):
+    pass
+
 
 @ErrorDecorator
 def validate_job(job_id, db):
@@ -69,3 +77,53 @@ def validate_job(job_id, db):
                         JSAProcState.QUEUED,
                         'Job passed validation',
                         state_prev=JSAProcState.UNKNOWN)
+
+
+def validate_output(job_id, db):
+    """Attempt to validate a job's output file list.
+
+    On failure: set the job to the ERROR state and returns
+    False.  Otherwise returns True.
+    """
+
+    try:
+        try:
+            files = db.get_output_files(job_id)
+
+        except NoRowsError:
+            raise ValidationError('no output files')
+
+        products = []
+        preview_sizes = set()
+
+        for file in files:
+            if valid_product_file.match(file):
+                products.append(file)
+                continue
+
+            match = valid_preview_file.match(file)
+            if match:
+                preview_sizes.add(int(match.group(1)))
+                continue
+
+            raise ValidationError('invalid file output file name: {0}'.
+                                  format(file))
+
+        if not products:
+            raise ValidationError('no product files captured')
+
+        if not preview_sizes:
+            raise ValidationError('no preview files captured')
+
+        if preview_sizes != valid_preview_sizes:
+            raise ValidationError('wrong preview sizes: ' +
+                                  repr(preview_sizes))
+
+    except ValidationError as e:
+        db.change_state(job_id,
+                        JSAProcState.ERROR,
+                        'Job failed output: ' + e.message)
+
+        return False
+
+    return True
