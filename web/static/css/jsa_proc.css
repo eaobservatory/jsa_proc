@@ -34,21 +34,6 @@ ul.multicol {
     -webkit-column-width: 30ex;
 }
 
-ul.statebar {
-    width: 100%;
-    margin: auto;
-    padding: 0;
-    text-align: center;
-}
-
-ul.statebar li {
-    vertical-align: middle;
-    display: inline-block;
-    list-style-type: none;
-    margin: 0;
-    padding: 2ex;
-}
-
 h1, h2, h3, h4 {
     padding-top: 1ex;
     margin-bottom: 1ex;
