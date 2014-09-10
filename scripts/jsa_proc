@@ -106,7 +106,7 @@ def etransfer(args):
     except ValueError:
         raise CommandError('Job ID must be an integer')
 
-    etransfer_send_output(dry_run=args['--dry-run'], job_id=job_id)
+    etransfer_send_output(job_id, dry_run=args['--dry-run'])
 
 
 @command

@@ -25,16 +25,23 @@ from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
 from jsa_proc.job_run.directories import get_output_dir
+from jsa_proc.job_run.decorators import ErrorDecorator
 
 logger = logging.getLogger(__name__)
 
 
-def etransfer_send_output(dry_run, job_id):
+def etransfer_send_output(job_id, dry_run):
+    """High level e-transfer function for use from scripts.
+
+    This function makes some basic checks and then launches
+    the private function _etransfer_send under the control
+    of the ErrorDecorator so that any subsequent errors
+    are captured.
+    """
+
     logger.debug('Preparing to e-transfer output for job {0}'.format(job_id))
 
     config = get_config()
-    scratchdir = config.get('etransfer', 'scratchdir')
-    transdir = config.get('etransfer', 'scratchdir')
 
     if not dry_run:
         # When not in dry run mode, check that etransfer is being
@@ -50,6 +57,21 @@ def etransfer_send_output(dry_run, job_id):
         if gethostname() != etransfermachine:
             raise CommandError('etransfer should only be run on {0}'.
                                format(etransfermachine))
+
+    _etransfer_send(job_id, dry_run=dry_run)
+
+
+@ErrorDecorator
+def _etransfer_send(job_id, dry_run):
+    """Private function to copy job output into the e-transfer
+    directories.
+
+    Runs under the ErrorDecorator so that errors are captured.
+    """
+
+    config = get_config()
+    scratchdir = config.get('etransfer', 'scratchdir')
+    transdir = config.get('etransfer', 'transdir')
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
