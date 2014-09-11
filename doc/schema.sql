@@ -8,7 +8,8 @@ CREATE TABLE job (
     mode VARCHAR(10) NOT NULL,
     parameters TEXT DEFAULT "",
     priority INTEGER NOT NULL DEFAULT 0,
-    task VARCHAR(80) NOT NULL
+    task VARCHAR(80) NOT NULL,
+    qa_state CHAR(1) NOT NULL DEFAULT "U"
 );
 
 CREATE INDEX job_state ON job (state);
@@ -18,6 +19,7 @@ CREATE INDEX job_foreign_id ON job (foreign_id);
 CREATE UNIQUE INDEX job_location_id ON job (location, foreign_id);
 CREATE INDEX job_priority ON job (priority);
 CREATE INDEX job_task ON job (task);
+CREATE INDEX job_qa_state ON job (qastate);
 
 CREATE TABLE input_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
