@@ -24,6 +24,10 @@ class JACFileTestCase(TestCase):
         self.assertEqual(
             get_jac_data_dir('s4a20140401_00001_0001'),
             '/jcmtdata/raw/scuba2/s4a/20140401/00001')
-
+        self.assertEqual(
+            get_jac_data_dir('a20140910_00001_01_0001'),
+            '/jcmtdata/raw/acsis/acsis09/20140910/00001')
         with self.assertRaises(JSAProcError):
             get_jac_data_dir('s7q20140401_00001_0001')
+        with self.assertRaises(JSAProcError):
+            get_jac_data_dir('ab20140910_00001_01_0001')

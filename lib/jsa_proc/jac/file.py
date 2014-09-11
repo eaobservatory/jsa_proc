@@ -19,7 +19,7 @@ import os.path
 from jsa_proc.error import JSAProcError
 
 scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_[0-9]{4}$')
-
+acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}$')
 
 def get_jac_data_dir(filename):
     """Guess directory name for a given filename.
@@ -33,6 +33,12 @@ def get_jac_data_dir(filename):
         (subarray, date, obsnum) = m.groups()
 
         return os.path.join('/jcmtdata/raw/scuba2', subarray, date, obsnum)
+
+    m = acsis_file.match(filename)
+    if m:
+        (date, obsnum) = m.groups()
+
+        return os.path.join('/jcmtdata/raw/acsis/acsis09', date, obsnum)
 
     raise JSAProcError('Filename {0} does not match '
                        'an expected pattern'.format(filename))
