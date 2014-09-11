@@ -101,6 +101,7 @@ CREATE TABLE qa (
        datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        status CHAR(1) NOT NULL DEFAULT "U",
        message TEXT NOT NULL DEFAULT "",
+       username VARCHAR(80) NOT NULL DEFAULT "unknown",
 
        FOREIGN KEY (job_id) REFERENCES job(id)
            ON DELETE RESTRICT ON UPDATE RESTRICT
