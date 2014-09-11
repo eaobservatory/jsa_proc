@@ -13,11 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import re
 
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.job_run.decorators import ErrorDecorator
+
+logger = logging.getLogger(__name__)
 
 valid_modes = ('obs', 'night', 'project', 'public')
 valid_file = re.compile('^[_a-z0-9]+$')
@@ -43,36 +46,37 @@ def validate_job(job_id, db):
     job = db.get_job(id_=job_id)
 
     try:
-        input = db.get_input_files(job_id)
+        # Ensure we can retrieve the list of input files.
+        try:
+            input = db.get_input_files(job_id)
 
-    except NoRowsError:
-        db.change_state(job_id,
-                        JSAProcState.ERROR,
-                        'Job failed validation: no input files found',
-                        state_prev=JSAProcState.UNKNOWN)
+        except NoRowsError:
+            raise ValidationError('input file list could not be retrieved')
 
-        return
-
-    try:
         # Check that the job has a mode string which jsawrapdr will
         # acccept.
-        assert job.mode in valid_modes
+        if job.mode not in valid_modes:
+            raise ValidationError('invalid mode: {0}'.format(job.mode))
 
         # Check that we have some input files.
-        assert input
+        if not input:
+            raise ValidationError('input file list is empty')
 
         # Ensure input filenames are plain names without path or
         # extension.
         for file in input:
-            assert valid_file.match(file)
+            if not valid_file.match(file):
+                raise ValidationError('invalid input file: {0}'.format(file))
 
-    except AssertionError:
+    except ValidationError as e:
+        logger.error('Job %i failed validation: %s', job_id, e.message)
         db.change_state(job_id,
                         JSAProcState.ERROR,
-                        'Job failed validation',
+                        'Job failed validation: ' + e.message,
                         state_prev=JSAProcState.UNKNOWN)
 
     else:
+        logger.debug('Job %i passed validation', job_id)
         db.change_state(job_id,
                         JSAProcState.QUEUED,
                         'Job passed validation',
