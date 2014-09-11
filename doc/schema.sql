@@ -19,7 +19,7 @@ CREATE INDEX job_foreign_id ON job (foreign_id);
 CREATE UNIQUE INDEX job_location_id ON job (location, foreign_id);
 CREATE INDEX job_priority ON job (priority);
 CREATE INDEX job_task ON job (task);
-CREATE INDEX job_qa_state ON job (qastate);
+CREATE INDEX job_qa_state ON job (qa_state);
 
 CREATE TABLE input_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
