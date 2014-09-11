@@ -21,7 +21,8 @@ from jsa_proc.error import JSAProcError, NotAtJACError
 from jsa_proc.job_run.datafile_handling \
     import get_jac_input_data, write_input_list
 from jsa_proc.job_run.directories import get_output_dir
-from jsa_proc.job_run.validate import validate_job
+from jsa_proc.job_run.etransfer_ssh import ssh_etransfer_send_output
+from jsa_proc.job_run.validate import validate_job, validate_output
 from jsa_proc.state import JSAProcState
 
 
@@ -102,8 +103,9 @@ class JSAProcStateMachine:
 
                 elif job.state == JSAProcState.PROCESSED:
                     # Add to e-transfer and move to TRANSFERRING.
-                    # TODO: implement addition of output to e-transfer
-                    pass
+
+                    if validate_output(job.id, self.db):
+                        ssh_etransfer_send_output(job.id)
 
                 elif job.state == JSAProcState.TRANSFERRING:
                     # Check e-transfer status and move to INGESTION if done.
