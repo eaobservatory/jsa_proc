@@ -35,7 +35,7 @@ CREATE UNIQUE INDEX input_file_job_file ON input_file (job_id, filename);
 CREATE TABLE output_file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     job_id INTEGER NOT NULL,
-    filename VARCHAR(80) NOT NULL,
+    filename VARCHAR(120) NOT NULL,
     FOREIGN KEY (job_id) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );
