@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# jsa_proc_backup - jsa_proc database backup script
+#
+# This script takes a backup of the "jsa_proc" database using mysqldump
+# as the "staff" user.  The password is obtained from a file beside
+# this one with the same name but a .cnf extension.  This should not
+# be world readable.  It should look like:
+#
+# [client]
+# password="********"
+
+# Exit on error.
+set -e
+
+# Select backup directory.
+BACKUP_DIR=/home/jsaproc/backup/mysql_jsa_proc
+
+# Create time and date-based backup filename.
+BACKUP_FILE=${BACKUP_DIR}/`date +'%Y%m%d_%H%M%S.sql'`
+
+# Perform the backup.
+echo Running mysqldump...
+mysqldump \
+	--defaults-file=${0}.cnf \
+	-v -q \
+	jsa_proc \
+	-u staff \
+	--single-transaction \
+	--extended-insert=FALSE \
+	-r $BACKUP_FILE
+
+echo '[DONE]'
+echo
+
+# Compress the backup file.
+echo Compressing backup file...
+gzip -v $BACKUP_FILE
+
+echo '[DONE]'
+echo
+
+# Clear old backups.
+echo Removing old backup files...
+find /home/jsaproc/backup/mysql_jsa_proc -name '*.sql.gz' -mtime +7 -exec rm -v {} \;
+
+echo '[DONE]'

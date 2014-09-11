@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# jsa_proc_etransfer - SSH wrapper script for jsa_proc e-transfers
+#
+# This script should be set as the "command" for the SSH key with
+# which the jsa_proc system will log in to the e-transfer host.
+# It checks that the SSH command is a number and then passes it to
+# the "jsa_proc etransfer" script.
+
+export JSA_PROC_DIR=/net/kamaka/export/data/jsa_proc/src/jsa_proc
+export PYTHONPATH=$JSA_PROC_DIR/lib:/jac_sw/omp/python/lib
+export PATH=$JSA_PROC_DIR/scripts:/local/python/bin:/bin:/usr/bin
+export SYBASE=/local/progs/sybase
+
+number='^[0-9]+$'
+
+if [[ -z "$SSH_ORIGINAL_COMMAND" ]]
+then
+    echo "jsa_proc_etransfer: SSH command missing"
+    exit 1
+fi
+
+
+if ! [[ "$SSH_ORIGINAL_COMMAND" =~ $number ]]
+then
+    echo "jsa_proc_etransfer: SSH command must be a number"
+    exit 1
+fi
+
+jsa_proc etransfer -v -j "$SSH_ORIGINAL_COMMAND"
