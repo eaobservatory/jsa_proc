@@ -32,6 +32,8 @@ from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
+status_cache = None
+
 
 def etransfer_poll_output(dry_run):
     """High level polling function to use from scripts."""
@@ -210,20 +212,12 @@ def etransfer_file_status(files):
         in progress and (False, ...) indicates an error.
     """
 
-    config = get_config()
-    transdir = config.get('etransfer', 'transdir')
+    global status_cache
 
-    new = set(os.listdir(os.path.join(transdir, 'new')))
-    replace = set(os.listdir(os.path.join(transdir, 'replace')))
-    reject = dict((
-        (file, reason)
-        for reason in os.listdir(os.path.join(transdir, 'reject'))
-        for file in os.listdir(os.path.join(transdir, 'reject', reason))))
+    if status_cache is None:
+        status_cache = _etransfer_find_files()
 
-    return map((lambda file: (False, reject[file]) if file in reject
-               else (True, 'new') if file in new
-               else (True, 'replace') if file in replace
-               else None), files)
+    return [status_cache.get(file, None) for file in files]
 
 
 def _etransfer_check_config():
@@ -242,3 +236,30 @@ def _etransfer_check_config():
     if gethostname() != etransfermachine:
         raise CommandError('etransfer should only be run on {0}'.
                            format(etransfermachine))
+
+
+def _etransfer_find_files():
+    """Find files in the e-transfer directories."""
+
+    config = get_config()
+    transdir = config.get('etransfer', 'transdir')
+
+    filestatus = {}
+
+    for (dirpath, dirnames, filenames) in os.walk(transdir):
+        if not dirpath.startswith(transdir):
+            raise Exception('os.walk returned dirpath outside transdir')
+
+        dirs = dirpath[len(transdir) + 1:].split(os.path.sep)
+
+        if not (filenames and dirs):
+            continue
+
+        if dirs[0] == 'reject':
+            for file in filenames:
+                filestatus[file] = (False, dirs[1])
+        else:
+            for file in filenames:
+                filestatus[file] = (True, dirs[0])
+
+    return filestatus
