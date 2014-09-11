@@ -17,10 +17,11 @@ from collections import namedtuple, OrderedDict
 import logging
 import re
 from socket import gethostname
+from getpass import getuser
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
-
+from jsa_proc.qastate import JSAQAState
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +30,13 @@ logger = logging.getLogger(__name__)
 JSAProcLog = namedtuple(
     'JSAProcLog',
     'id job_id datetime state_prev state_new message host')
+JSAProcQa = namedtuple(
+    'JSAProcQa',
+    'id job_id datetime status  message username')
+
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
-    'id tag state location foreign_id outputs')
+    'id tag state location foreign_id task qa_state outputs')
 JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
     'id time message state location')
@@ -123,22 +128,38 @@ class JSAProcDB:
             name = 'tag'
             value = tag
 
-        # Get the values form the database
         with self.db as c:
-            c.execute('SELECT * FROM job WHERE '+name+'=%s', (value,))
-            job = c.fetchall()
-            if len(job) == 0:
-                raise NoRowsError(
-                    'job',
-                    'SELECT * FROM job WHERE ' + name + '=' + str(value))
-            if len(job) > 1:
-                raise ExcessRowsError(
-                    'job',
-                    'SELECT * FROM job WHERE ' + name + '=' + str(value))
+            job = self._get_job(c, name, value)
 
-            # Turn list into single item
-            job = job[0]
-            rows = c.description
+        return job
+
+    def _get_job(self, c, name, value):
+        """
+        Private function to get a job from the database.
+
+        name must be 'id' or 'tag'
+        value is either the integer job_id or the string tag for
+        the job you want to get.
+
+        Takes in a cursor instance "c" (assumes you already have a cursor lock).
+
+        Returns JSAProcJob named tuple.
+        """
+        # Get the values form the database
+        c.execute('SELECT * FROM job WHERE '+name+'=%s', (value,))
+        job = c.fetchall()
+        if len(job) == 0:
+            raise NoRowsError(
+                'job',
+                'SELECT * FROM job WHERE ' + name + '=' + str(value))
+        if len(job) > 1:
+            raise ExcessRowsError(
+                'job',
+                'SELECT * FROM job WHERE ' + name + '=' + str(value))
+
+        # Turn list into single item
+        job = job[0]
+        rows = c.description
 
         # Define namedtuple dynamically, to ensure we always return
         # full information about jobs (specific to this function),
@@ -416,6 +437,21 @@ class JSAProcDB:
             # Update log table.
             self._add_log_entry(c, job_id, state_prev, newstate, message)
 
+            # Update QA table if appropriate
+            if newstate in JSAProcState.STATE_PRE_QA:
+                # Check the current QA state:
+                job = self._get_job(c, 'id', job_id)
+
+                # If a non-unknown QA state has been set, change it to unknown
+                # and update the qa table.
+                if job.qa_state != JSAQAState.UNKNOWN:
+                    c.execute('UPDATE job SET qa_state = %s WHERE id= %s',
+                              (JSAQAState.UNKNOWN, job_id))
+                    self._add_qa_entry(c, job_id, JSAQAState.UNKNOWN,
+                                       'This job is being reprocessed; QA state reset automatically.',
+                                       getuser())
+
+
         return job_id
 
     def get_input_files(self, job_id):
@@ -458,6 +494,36 @@ class JSAProcDB:
                   'VALUES (%s, %s, %s, %s, %s)',
                   (job_id, state_prev, state_new, message, gethostname()))
 
+    def _add_qa_entry(self, c, job_id, status, message, username):
+        """
+        Private method to add an entry to the qa table for a job of the given ID.
+
+        Assumes the database is already locked and takes a cursor
+        object as argument "c"
+        """
+
+        # Check status is allowed
+        c.execute('INSERT INTO qa '
+                  '(job_id, status, message, username) '
+                  'VALUES (%s, %s, %s, %s)',
+                  (job_id, status, message, username))
+
+
+    def add_qa_entry(self, job_id, status, message, username):
+        """
+        Add an entry to the QA table for a job of given job_id, and
+        update the qa_state in the jobtable for the given job_id.
+
+        Status must be in JSAQAState.STATE_ALL
+        """
+        if status in  JSAQAState.STATE_ALL:
+            with self.db as c:
+                self._add_qa_entry(c, job_id, status, message, username)
+                c.execute('UPDATE job SET qa_state = %s WHERE id = %s',
+                          (status, job_id))
+        else:
+            raise JSAProcError('QA status can only be changed to allowed values.')
+
     def get_logs(self, job_id):
         """
         Get the full log of states of a given job from the log table.
@@ -469,14 +535,76 @@ class JSAProcDB:
         list of JSAProcLog nametuples, 1 entry per row in log table for that
         job_id.
         """
-        with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id = %s', (job_id,))
-            logs = c.fetchall()
-
+        # Get all log entries
+        logs = self._get_all_entries(job_id, 'log')
         # Create JSAProcLog namedtuple object to hold values.
         logs = [JSAProcLog(*i) for i in logs]
 
         return logs
+
+    def get_qas(self, job_id):
+        """
+        Get the full history of qa states of a given job from the qa table.
+
+        Parameters:
+        job_id : integer (id from job table)
+
+        Returns:
+        list of JSAProcQa nametuples, 1 entry per row in qa table for that
+        job_id.
+        """
+        # Get all qa entries
+        qas = self._get_all_entries(job_id, 'qa')
+
+        # Create JSAProcLog namedtuple object to hold values.
+        qas = [JSAProcQa(*i) for i in qas]
+
+        return qas
+
+    def _get_all_entries(self, job_id, tablename):
+        """
+        Private method to get all entries in a table with a
+        given job_id.
+        """
+        with self.db as c:
+            c.execute('SELECT * FROM ' + tablename + ' WHERE job_id = %s', (job_id,))
+            entries = c.fetchall()
+
+        return entries
+
+
+    def _get_last_entry(self, job_id, tablename):
+        """
+        Private method to get the last entry from a table which has a
+        timestamp and multiple entries per job_id.
+        """
+
+        with self.db as c:
+            c.execute('SELECT * FROM ' + tablename + ' WHERE job_id = %s '
+                      'ORDER BY id DESC LIMIT 1',
+                      (job_id,))
+            entry = c.fetchall()
+        if len(entry) < 1:
+            raise NoRowsError(
+                'job',
+                'SELECT * FROM ' + tablename + ' WHERE job_id = %i '
+                'ORDER BY id DESC LIMIT 1' % (job_id))
+        return entry[0]
+
+    def get_last_qa(self, job_id):
+        """
+        Return the lastqa entry for a given job.
+
+        Parameters:
+        job_id: integer (id from job tale)
+
+        Returns:
+        qa: namedtuple JSAProcQa
+        """
+
+        qa = self._get_last_entry(job_id, 'qa')
+        qa = JSAProcQa(*qa)
+        return qa
 
     def get_last_log(self, job_id):
         """
@@ -486,21 +614,11 @@ class JSAProcDB:
         job_id: integer (id from job tale)
 
         Returns:
-        logentry: namedtuple JSAProcLog
+        log: namedtuple JSAProcLog
         """
 
-        with self.db as c:
-            c.execute('SELECT * FROM log WHERE job_id = %s '
-                      'ORDER BY id DESC LIMIT 1',
-                      (job_id,))
-            log = c.fetchall()
-        if len(log) < 1:
-            raise NoRowsError(
-                'job',
-                'SELECT * FROM log WHERE job_id = %i '
-                'ORDER BY id DESC LIMIT 1' % (job_id))
-
-        log = JSAProcLog(*log[0])
+        log = self._get_last_entry(job_id, 'log')
+        log = JSAProcLog(*log)
         return log
 
     def set_location(self, job_id, location, foreign_id=()):
@@ -687,7 +805,7 @@ class JSAProcDB:
             query = 'SELECT COUNT(*)'
         else:
             query = 'SELECT job.id, job.tag, job.state, job.location, ' \
-                    'job.foreign_id'
+                    'job.foreign_id, job.task, job.qa_state'
 
             if outputs:
                 query += ', GROUP_CONCAT(output_file.filename) '

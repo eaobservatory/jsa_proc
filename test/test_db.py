@@ -39,7 +39,7 @@ class BasicDBTest(DBTestCase):
                     tables.add(name)
 
         self.assertEqual(tables, set((
-            'job', 'input_file', 'output_file', 'log', 'obs', 'tile',
+            'job', 'input_file', 'output_file', 'log', 'obs', 'tile', 'qa',
         )))
 
 
@@ -643,6 +643,21 @@ class InterfaceDBTest(DBTestCase):
 
         self.assertEqual(self.db.get_tasks(), ['test1', 'test2'])
 
+    def test_qa(self):
+        self.db.add_job('tag1', 'JAC', 'obs', 'REC', 'test1', [])
+        self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test2', [])
+        self.db.add_qa_entry(1, 'B', 'Testing qa entry', 'testUser')
+        self.db.add_qa_entry(1, 'G', 'Testing qa entry', 'testUser')
+        self.db.add_qa_entry(1, 'Q', 'Testing qa entry', 'testUser')
+        self.assertEqual(self.db.get_last_qa(1).status, 'Q')
+        self.assertEqual(self.db.get_last_qa(1).message, 'Testing qa entry')
+        self.assertEqual(self.db.get_last_qa(1).username, 'testUser')
+
+        # Test changing the state of job to one in running updates the QA state
+        self.db.change_state(1, newstate=JSAProcState.RUNNING, message='Testing changing state')
+        self.assertEqual(self.db.get_job(1).qa_state, 'U')
+        self.assertEqual(len(self.db.get_qas(1)), 4)
+        self.assertEqual(len(self.db.get_qas(2)), 0)
 
 class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
