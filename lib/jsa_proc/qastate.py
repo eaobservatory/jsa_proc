@@ -23,7 +23,7 @@ class JSAQAState:
     """Class for handling job QA states.
     """
 
-    UNKNOWN = 'U'
+    UNKNOWN = '?'
     BAD = 'B'
     QUESTIONABLE = 'Q'
     GOOD = 'G'

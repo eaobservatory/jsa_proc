@@ -9,7 +9,7 @@ CREATE TABLE job (
     parameters TEXT DEFAULT "",
     priority INTEGER NOT NULL DEFAULT 0,
     task VARCHAR(80) NOT NULL,
-    qa_state CHAR(1) NOT NULL DEFAULT "U"
+    qa_state CHAR(1) NOT NULL DEFAULT "?"
 );
 
 CREATE INDEX job_state ON job (state);
@@ -101,7 +101,7 @@ CREATE TABLE qa (
        job_id INTEGER NOT NULL,
 
        datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-       status CHAR(1) NOT NULL DEFAULT "U",
+       status CHAR(1) NOT NULL DEFAULT "?",
        message TEXT NOT NULL DEFAULT "",
        username VARCHAR(80) NOT NULL DEFAULT "unknown",
 

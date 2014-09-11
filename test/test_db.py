@@ -21,6 +21,7 @@ from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
+from jsa_proc.qastate import JSAQAState
 
 from .db import DBTestCase
 
@@ -655,7 +656,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Test changing the state of job to one in running updates the QA state
         self.db.change_state(1, newstate=JSAProcState.RUNNING, message='Testing changing state')
-        self.assertEqual(self.db.get_job(1).qa_state, 'U')
+        self.assertEqual(self.db.get_job(1).qa_state, JSAQAState.UNKNOWN)
         self.assertEqual(len(self.db.get_qas(1)), 4)
         self.assertEqual(len(self.db.get_qas(2)), 0)
 
