@@ -751,7 +751,7 @@ class JSAProcDB:
         return edict
         # Now sort out error jobs in sensible option
 
-    def find_jobs(self, state=None, location=None, task=None,
+    def find_jobs(self, state=None, location=None, task=None, qa_state=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
                   obsquery=None):
@@ -762,6 +762,8 @@ class JSAProcDB:
             * state (jobs in the deleted state are not returned unless
               specifically asked for)
             * location
+            * task
+            * qa_state
 
         Results can be affected by the following optional parameters:
 
@@ -788,6 +790,8 @@ class JSAProcDB:
             * tag
             * state
             * location
+            * task
+            * qa_state
             * outputs (list)
 
         """
@@ -833,6 +837,10 @@ class JSAProcDB:
         if task is not None:
             where.append('job.task=%s')
             param.append(task)
+
+        if qa_state is not None:
+            where.append('job.qa_state=%s')
+            param.append(qa_state)
 
         if obsquery:
             (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
@@ -889,6 +897,7 @@ class JSAProcDB:
                     break
 
                 # Turn the row into a namedtuple.
+
                 row = JSAProcJobInfo(*row)
 
                 # If output files were returned, split them into a list.
