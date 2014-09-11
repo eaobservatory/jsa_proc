@@ -63,6 +63,7 @@ class JSAProcState:
     ))
 
     STATE_ALL = tuple(_info.keys())
+    STATE_PRE_QA = tuple([UNKNOWN, QUEUED, MISSING, FETCHING, WAITING, RUNNING, PROCESSED])
 
     @classmethod
     def get_name(cls, state):
