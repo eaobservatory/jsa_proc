@@ -124,10 +124,12 @@ def validate_output(job_id, db):
                                   repr(preview_sizes))
 
     except ValidationError as e:
+        logger.error('Job %i failed output validation: %s', job_id, e.message)
         db.change_state(job_id,
                         JSAProcState.ERROR,
                         'Job failed output: ' + e.message)
 
         return False
 
+    logger.debug('Job %i passed output validation', job_id)
     return True

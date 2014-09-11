@@ -15,9 +15,12 @@
 
 from __future__ import print_function, division, absolute_import
 
+import logging
 import subprocess
 
 from jsa_proc.config import get_config
+
+logger = logging.getLogger(__name__)
 
 
 def ssh_etransfer_send_output(job_id):
@@ -25,6 +28,8 @@ def ssh_etransfer_send_output(job_id):
     a job's output files."""
 
     config = get_config()
+
+    logger.debug('Attempting e-transfer of job %i output', job_id)
 
     subprocess.check_call([
         '/usr/bin/ssh', '-x',  '-i',
