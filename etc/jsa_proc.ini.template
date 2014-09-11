@@ -25,6 +25,7 @@ starpath=/net/kamaka/export/data/stardev-stable
 user=jcmtarch
 group=jcmt
 machine=kolea
+key=/home/jsaproc/.ssh/etransfer
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc
 
