@@ -30,6 +30,11 @@ url_for = flask.url_for
 
 url_for_omp = werkzeug.urls.Href('http://omp.jach.hawaii.edu/cgi-bin')
 
+def url_for_omp_comment(obsid, instrument, obsnum):
+    stime = obsid.split('_')[2]
+    uttime = '-'.join([stime[0:4],stime[4:6],stime[6:8],stime[9:11],stime[11:13], str(int(stime[13:15]))])
+    return url_for_omp('staffobscomment.pl', {'oid':obsid, 'inst':instrument, 'runnr':obsnum, 'ut':uttime})
+
 
 class HTTPError(werkzeug.exceptions.InternalServerError):
     """Exception class for raising HTTP errors."""
