@@ -32,7 +32,8 @@ from jsa_proc.web.util import \
 
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_change_state import prepare_change_state, prepare_change_qa
-from jsa_proc.web.job_summary import prepare_job_summary, prepare_task_summary, prepare_summary_piechart
+from jsa_proc.web.job_summary import prepare_job_summary, prepare_task_summary, prepare_summary_piechart, \
+    prepare_task_qa_summary
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
 from jsa_proc.web.job_qa_info import prepare_job_qa_info
@@ -135,6 +136,11 @@ def create_web_app():
     @templated('task_summary.html')
     def task_summary():
         return prepare_task_summary(db)
+
+    @app.route('/qa-summary/')
+    @templated('task_qa_summary.html')
+    def task_qa_summary():
+        return prepare_task_qa_summary(db)
 
     @app.route('/job_summary/')
     @templated('job_summary.html')

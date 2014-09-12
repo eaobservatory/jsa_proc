@@ -28,6 +28,7 @@ from flask import send_file
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
+from jsa_proc.qastate import JSAQAState
 from jsa_proc.web.util import url_for
 
 
@@ -114,6 +115,21 @@ def prepare_task_summary(db):
             results[t][s] = db.find_jobs(task=t, state=s, count=True)
 
     return {'results':results, 'states':JSAProcState.STATE_ALL}
+
+def prepare_task_qa_summary(db):
+    """
+    Prepare a summary of tasks in the database based on QA state.
+
+    """
+
+    tasks = db.get_tasks()
+    results = {}
+    for t in tasks:
+        results[t] = {'total':db.find_jobs(task=t, count=True)}
+        for s in JSAQAState.STATE_ALL:
+            results[t][s] = db.find_jobs(task=t, qa_state=s, count=True)
+
+    return {'results':results, 'qastates':JSAQAState.STATE_ALL}
 
 def prepare_job_summary(db, task=None):
 
