@@ -125,7 +125,10 @@ def create_web_app():
     def summary_piechart(task='None'):
         if task == 'None':
             task = None
-        return prepare_summary_piechart(db, task=task)
+        obsquerydict = {}
+        for key in ObsQueryDict.keys():
+            obsquerydict[key] = request.args.get(key, None)
+        return prepare_summary_piechart(db, task=task, obsquerydict=obsquerydict)
 
 
     @app.route('/summary/')

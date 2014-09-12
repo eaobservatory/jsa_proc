@@ -26,24 +26,47 @@ import time
 
 from flask import send_file
 
+from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_summary_piechart(db, task=None):
+def prepare_summary_piechart(db, task=None, obsquerydict = None):
     """
-    Create a piechart of jobs for a given task.
-    """
-    job_summary_dict = OrderedDict()
-    for s in JSAProcState.STATE_ALL:
-        if JSAProcState.get_name(s) != 'Deleted':
-            job_summary_dict[s] = db.find_jobs(state=s,
-                                               count=True, task=task)
+    Create a piechart of number of jobs in each state for a given task
+    and obsquery.
 
-    # Plot of total results
+    *task*: name of task in database
+    *obsquerydict*: dictionary of values that match the jcmtobsinfo.ObsQueryDict.
+
+    Returns a sendfile object of mime-type image/png.
+
+    """
+
+    # Dictionaries for the result
+    job_summary_dict = OrderedDict()
+
+    # Fix up the obsquery to the right format for find jobs
+    obsquery = {}
+    for key, value in obsquerydict.items():
+        if value:
+            obsquery.update(ObsQueryDict[key][value].where)
+
+    # Perform the find_jobs task for the given constraints in each JSAProcState.
+    for s in JSAProcState.STATE_ALL:
+
+        # Don't include deleted jobs in pie chart
+        if JSAProcState.get_name(s) != 'Deleted':
+            job_summary_dict[s] = db.find_jobs(state=s, task=task, obsquery=obsquery,
+                                               count=True)
+
+    # Get numbers, names and colors for the pie chart.
     values = job_summary_dict.values()
     names = [JSAProcState.get_name(i) for i in JSAProcState.STATE_ALL[:-1]]
+    # This should probably be done better...
     phases = ['red'] *3 + [ 'yellow'] *2 + ['green'] * 4 + ['blue'] + ['black'] * 1
+
+    # Remove any states that don't have any jobs in them
     i=0
     while i < len(values):
         if values[i] == 0:
@@ -51,8 +74,9 @@ def prepare_summary_piechart(db, task=None):
             names.pop(i)
             phases.pop(i)
         else:
-            i +=1
+            i += 1
 
+    # Create pie chart
     fig = Figure(figsize=(6,5))
     ax = fig.add_subplot(111)
     ax.set_aspect(1)
@@ -66,11 +90,13 @@ def prepare_summary_piechart(db, task=None):
 
     ax.patch.set_visible(False)
     fig.patch.set_visible(False)
-    fig.tight_layout()
+
+    # Put figure into a send_file object
     canvas = FigureCanvas(fig)
     img = StringIO.StringIO()
     canvas.print_png(img)
     img.seek(0)
+
     return send_file(img, mimetype='image/png')
 
 
