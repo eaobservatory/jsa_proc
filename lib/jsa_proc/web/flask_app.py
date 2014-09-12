@@ -22,18 +22,20 @@ import os.path
 
 import jsa_proc.config
 from jsa_proc.state import JSAProcState
+from jsa_proc.qastate import JSAQAState
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.omp.auth import check_staff_password
 from jsa_proc.web.util import \
-    url_for, url_for_omp, templated, HTTPError, HTTPNotFound, HTTPRedirect, HTTPUnauthorized
+    url_for, url_for_omp, url_for_omp_comment, templated, HTTPError, HTTPNotFound, HTTPRedirect, HTTPUnauthorized
 
 
 from jsa_proc.web.job_list import prepare_job_list
-from jsa_proc.web.job_change_state import prepare_change_state
+from jsa_proc.web.job_change_state import prepare_change_state, prepare_change_qa
 from jsa_proc.web.job_summary import prepare_job_summary, prepare_task_summary, prepare_summary_piechart
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
+from jsa_proc.web.job_qa_info import prepare_job_qa_info
 from jsa_proc.web.job_log import prepare_job_log
 from jsa_proc.web.error_summary import prepare_error_summary
 
@@ -151,6 +153,11 @@ def create_web_app():
     def job_info(job_id):
         return prepare_job_info(db, job_id)
 
+    @app.route('/job-qa/<int:job_id>', methods=['GET'])
+    @templated('job_qa.html')
+    def job_qa(job_id):
+        return prepare_job_qa_info(db, job_id)
+
     @app.route('/job_change_state', methods=['POST'])
     def job_change_state():
 
@@ -167,6 +174,32 @@ def create_web_app():
 
         # Redirect the page to correct info.
         flash('You have successfully mangled the job status!')
+        raise HTTPRedirect(url)
+
+    @app.route('/job_change_qa', methods=['POST'])
+    def job_change_qa():
+
+        # Get the variables from POST
+        qastate = request.form['qastate']
+        message = request.form['message']
+        job_ids = request.form.getlist('job_id')
+        url = request.form['url']
+        username = request.authorization['username']
+
+        # Change the state.
+        if message == '' and (qastate == 'B' or qastate == 'Q'):
+            flash('You must provide a message to change QA state to Bad or Questionable')
+        else:
+            try:
+                prepare_change_qa(db, job_ids,
+                                  qastate,
+                                  message,
+                                  username,
+                              )
+                # Redirect the page to correct info.
+                flash('You have successfully mangled the qa status!')
+            except:
+                flash('UNSUCCESSFUL attempt to mangle qa status!')
         raise HTTPRedirect(url)
 
 
@@ -186,7 +219,6 @@ def create_web_app():
     @app.route('/logout')
     @requires_deauth
     def logout():
-        # Dummy logout method
         return qa_summary()
 
 
@@ -232,13 +264,17 @@ def create_web_app():
             return 'error'
         raise HTTPError('Unknown phase {0}'.format(phase))
 
+    @app.template_filter('qastate_name')
+    def qastate_name(qastate):
+        return JSAQAState.get_name(qastate)
+
     @app.template_filter('uniq')
     def uniq_filter(xs):
         return set(xs)
 
     @app.context_processor
     def add_to_context():
-        return {'url_for_omp': url_for_omp}
+        return {'url_for_omp': url_for_omp, 'url_for_omp_comment': url_for_omp_comment}
 
 
     # secret key?

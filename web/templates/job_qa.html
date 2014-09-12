@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+{% from 'macros.html' import break_underscore %}
+{% block body %}
+
+{% if info.task == 'jcmt-nightly' %}
+<h1> {{ info.task }} : {{obsinfo |map (attribute='utdate') | uniq | join(' ')}} : {{ title }} </h1>
+{% else %}
+<h1>  {{ info.task }} : {{ title }} </h1>
+{% endif %}
+
+
+<div class="column-left">
+  <div class="panel panel-small">
+    <div class="jobsummary">
+      <table class="summary">
+        <caption> Job Info </caption>
+        <tr><th> Job QA State </th>
+          <td class="qastate_{{ info.qa_state | qastate_name }}">
+            {{info.qa_state | qastate_name }} </td></tr>
+        <tr><th>State</th><td class="state_{{ info.state | state_phase}}{% if info.state is state_active %} state_active{% endif %}">
+            {{ info.state | state_name }}
+        </td></tr>
+        <tr><th>Location</th><td>{{ info.location }}</td></tr>
+        {% if info.foreign_id is not none %}
+        {% if info.foreign_url is none %}
+        <tr><th>Foreign ID</th><td>{{ info.foreign_id }}</td></tr>
+        {% else %}
+        <tr><th>Foreign ID</th><td><a href="{{ info.foreign_url }}">
+              {{ info.foreign_id }}
+        </a></td></tr>
+        {% endif %}
+        {% endif %}
+        <tr><th>Parameters</th><td class="recpar">{{ info.parameters }}</td></tr>
+        {% if obsinfo is not none %}
+        <tr><th>Task</th><td>{{ info.task }} </td></tr>
+        <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
+        <tr><th>ORAC-DR log </th><td><a href="{{orac_logs[0]}}">ORAC</a></td></tr>
+        <tr><th>WRAP DR log </th><td><a href="{{wrapdr_logs[0]}}">WRAPDR</a></td></tr>
+        <tr><th>Job Info Page</th><td><a href="{{url_for('job_info', job_id=info.id)}}">JobINFO</a></td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+
+
+  <div class="panel panel-small jobqa">
+    {% if request.authorization and request.authorization.username %}
+    <h4> QA for reduction of this job</h4>
+    <form method="POST" action="{{ url_for('job_change_qa')}}">
+    <p>
+      <input type="hidden" name="job_id" value="{{ info.id }}" >
+      <input type="hidden" name="url" value="{{url_for('job_qa', job_id=info.id)}}">
+      {% for q in qastates %}
+      <input class="qastate_{{ q|qastate_name }}" type="radio" name="qastate" value="{{q}}" {% if q == info.qa_state %} checked="checked" {% endif %}>{{q|qastate_name}}</br>
+      {% endfor %}
+    </p>
+    <textarea placeholder="List any problems seen" rows="3" name="message"></textarea></br>
+    <input type="submit" value="Submit QA Status">
+    </form>
+    {% else %}
+    <h4> You must be logged in to change QA </h4>
+    {% endif %}
+  </div>
+
+
+  {% if obsinfo is not none %}
+  <div class="panel panel-small">
+    <table class="obsinfo">
+      <caption> Observation Info </caption>
+      <tr>
+        {% for key in obsinfo[0].keys()
+                if key not in ('id', 'job_id', 'backend',
+                'association', 'obsid', 'obsidss' ) %}
+        {% if key == 'obsnum' %}
+        <th> scan </th>
+        {% elif key == 'instrument' %}
+        <th> Inst. </th>
+        {% else %}
+        <th> {{ key }} </th>
+        {% endif %}
+        {% endfor %}
+        <th> Change OMP Observation Status </th>
+      </tr>
+      {% for o in obsinfo %}
+      <tr>
+        {% for key in o.keys()
+             if key not in ('id', 'job_id', 'backend',
+             'association', 'obsidss', 'obsid' ) %}
+        {% if key == 'utdate' %}
+        {% set starttime = o.get('obsid', '').split('_')[2] %}
+        <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate':o.utdate }) }}">{{ o.utdate }}</a></td>
+        {% elif key == 'obsid' or key == 'obsidss' or key=='scanmode' %}
+        <td> {{ break_underscore(o.get(key, '')) }} </td>
+        {% else %}
+        <td> {{ o.get(key, '') }} </td>
+        {% endif %}
+        {% endfor %}
+        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum) }}"> OMP STATUS </a></td>  
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+</div>
+
+<div class="column-left">
+{% if output_files %}
+
+<div class="panel">
+<h2>Output Files</h2>
+<ul>
+{% for file in output_files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+</div>
+
+
+{% if previews %}
+<div class="column-right">
+  {% for l in previews %}
+  <div class="panel preview">
+    <h4>{{ break_underscore(l[0].split('_preview_')[0].split('jcmt_')[1]) }}</h4>
+    <img src="{{ l[0] }}" />
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

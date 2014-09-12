@@ -78,7 +78,7 @@ ul#nav {
     padding-top: 0.3ex;
     font-size: 130%;
     list-style: none;
-    padding: 5px;
+    padding: 5px 0px;
     border-bottom: 5px solid white;
     text-align: center;
 }
@@ -115,7 +115,7 @@ div.jobsummary {
 }
 
 div.jobsummary table td {
-    width: 12ex;
+    width: 30ex;
 }
 
 figure {
@@ -204,6 +204,22 @@ td, th {
     padding: 5px;
 }
 
+.qastate_Unknown {
+    background: black;
+    color: white;
+}
+.qastate_Questionable {
+    background: yellow;
+    color: black;
+}
+.qastate_Good {
+    background: green;
+    color: white;
+}
+.qastate_Bad {
+    background: red;
+    color: white;
+}
 .state_queue, .state_queue a {
     background: red;
     color: white;
@@ -251,7 +267,45 @@ textarea {
     width: 60%;
 }
 
+div.jobqa textarea{
+    width:90%;
+}
 ul#nav li.login {
     float:right;
-    padding-right: 10px;
+}
+div.column-left{
+    display:inline-block;
+    width:30%;
+    min-width:100ex;
+    vertical-align:top;
+    text-align:left;
+    float:left;
+}
+div.column-right{
+    display:inline-block;
+    width:45%;
+    vertical-align:top;
+    text-align:left;
+    min-width:530px;
+}
+div.column-right img{
+    width:100%;
+}
+
+div.column-right div.panel{
+    margin:0px;
+}
+table.obsinfo{
+    font-size:small;
+}
+td.recpar{
+    width:5ex;
+}
+div.jobqa{
+    text-align:center;
+    min-width:40ex;
+}
+
+form p{
+    text-align:left;
 }
