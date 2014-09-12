@@ -35,6 +35,10 @@ logger = logging.getLogger(__name__)
 status_cache = None
 
 
+class ETransferError(Exception):
+    pass
+
+
 def etransfer_poll_output(dry_run):
     """High level polling function to use from scripts."""
 
@@ -43,7 +47,7 @@ def etransfer_poll_output(dry_run):
     # When not in dry run mode, check that etransfer is being
     # run on the correct machine by the correct user.
     if not dry_run:
-        _etransfer_check_config()
+        _etransfer_check_config(any_user=True)
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
@@ -53,8 +57,7 @@ def etransfer_poll_output(dry_run):
 
     n_err = 0
 
-    for job in self.db.find_jobs(location='JAC',
-                                 state=JSAProcState.TRANSFERRING):
+    for job in db.find_jobs(location='JAC', state=JSAProcState.TRANSFERRING):
         job_id = job.id
         logger.debug('Checking state of job %i', job_id)
 
@@ -66,6 +69,45 @@ def etransfer_poll_output(dry_run):
             logger.error('Did not find output files for job %i', job_id)
             n_err += 1
             continue
+
+        try:
+            logger.debug('Checking if files are in the e-transfer directories')
+            etransfer_status = etransfer_file_status(files)
+            if any(etransfer_status):
+                rejection = []
+                for (file, status) in zip(files, etransfer_status):
+                    if status is not None:
+                        (ok, dir) = status
+                        if not ok:
+                            logger.error('File {0} was rejected, reason: {1}'.
+                                         format(file, dir))
+                            rejection.append(file)
+
+                if rejection:
+                    raise ETransferError('files rejected: {0}'.format(
+                                         ', '.join(rejection)))
+
+                # Otherwise we found files in the "in progress" directories
+                # so proceed to the next job.
+                continue
+
+            logger.debug('Checking if all files are at CADC')
+            if all(ad.check_files(files)):
+                # All files reported as present by JCMT info.
+                logger.info('Job %i appears to have all files at CADC',
+                            job_id)
+                if not dry_run:
+                    db.change_state(job_id, JSAProcState.INGESTION,
+                                    'Output files finished e-transfer',
+                                    state_prev=JSAProcState.TRANSFERRING)
+
+        except ETransferError as e:
+            logger.error('Job %i failed e-transfer: %s', job_id, e.message)
+            if not dry_run:
+                db.change_state(
+                    job_id, JSAProcState.ERROR,
+                    'Job failed e-transfer: {0}'.format(e.message),
+                    state_prev=JSAProcState.TRANSFERRING)
 
     logger.debug('Done polling the e-transfer system')
 
@@ -146,7 +188,7 @@ def _etransfer_send(job_id, dry_run, db):
     etransfer_status = etransfer_file_status(files)
     if any(etransfer_status):
         for (file, status) in zip(files, etransfer_status):
-            if status:
+            if status is not None:
                 (ok, dir) = status
                 logger.error('File {0} already in e-transfer directory {1}'.
                              format(file, dir))
@@ -220,7 +262,7 @@ def etransfer_file_status(files):
     return [status_cache.get(file, None) for file in files]
 
 
-def _etransfer_check_config():
+def _etransfer_check_config(any_user=False):
     """Check the configuration is good for for e-transfer.
 
     Raises a CommandError if a problem is detected.
@@ -230,7 +272,7 @@ def _etransfer_check_config():
     etransfermachine = config.get('etransfer', 'machine')
     etransferuser = config.get('etransfer', 'user')
 
-    if pwd.getpwuid(os.getuid()).pw_name != etransferuser:
+    if pwd.getpwuid(os.getuid()).pw_name != etransferuser and not any_user:
         raise CommandError('etransfer should only be run as {0}'.
                            format(etransferuser))
     if gethostname() != etransfermachine:
