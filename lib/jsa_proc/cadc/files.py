@@ -39,12 +39,24 @@ class CADCFiles():
         # SCUBA-2 raw file.
         (re.compile('^(s[48][abcd][0-9]{8}_[0-9]{5}_)[0-9]{4}$'),
          '{0}%'),
-        # SCUBA-2 reduced observation file.
-        (re.compile('^(jcmts[0-9]{8}_[0-9]{5}_[48]50_)[a-z0-9]+'
-                    '(_obs_[0-9]{3})\.fits$'),
+        # SCUBA-2 reduced file.
+        (re.compile('^(jcmts[0-9]{8}_[0-9]{5}_[48]50_)[-_a-z0-9]+'
+                    '(_[0-9]{3})\.fits$'),
          '{0}%{1}'),
         # CAOM-2 preview for SCUBA-2 reduced observation file.
         (re.compile('^(jcmt_scuba2_[0-9]{5}_[0-9t]{15}_)'
+                    '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
+         '{0}%'),
+        # ACSIS reduced file.
+        (re.compile('^(jcmth[0-9]{8}_[0-9]{5}_[0-9]{2}_)[-_a-z0-9]+'
+                    '(_[0-9]{3})\.fits$'),
+         '{0}%{1}'),
+        # CAOM-2 preview for ACSIS reduced observation file.
+        (re.compile('^(jcmt_acsis_[0-9]{5}_[0-9t]{15}_)'
+                    '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
+         '{0}%'),
+        # CAOM-2 preview for nightly group file.
+        (re.compile('^(jcmt_[0-9]{8}-[0-9a-f]{32}_)'
                     '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
          '{0}%'),
     ]
