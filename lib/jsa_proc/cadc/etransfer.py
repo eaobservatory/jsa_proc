@@ -101,6 +101,10 @@ def etransfer_poll_output(dry_run):
                                     'Output files finished e-transfer',
                                     state_prev=JSAProcState.TRANSFERRING)
 
+            else:
+                logger.warning('Job %i files gone from e-transfer '
+                               'but not at CADC', job_id)
+
         except ETransferError as e:
             logger.error('Job %i failed e-transfer: %s', job_id, e.message)
             if not dry_run:
