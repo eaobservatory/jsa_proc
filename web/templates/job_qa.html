@@ -8,7 +8,6 @@
 <h1>  {{ info.task }} : {{ title }} </h1>
 {% endif %}
 
-
 <div class="column-left">
   <div class="panel panel-small">
     <div class="jobsummary">
@@ -42,7 +41,6 @@
     </div>
   </div>
 
-
   <div class="panel panel-small jobqa">
     {% if request.authorization and request.authorization.username %}
     <h4> QA for reduction of this job</h4>
@@ -61,7 +59,6 @@
     <h4> You must be logged in to change QA </h4>
     {% endif %}
   </div>
-
 
   {% if obsinfo is not none %}
   <div class="panel panel-small">
@@ -95,57 +92,23 @@
         <td> {{ o.get(key, '') }} </td>
         {% endif %}
         {% endfor %}
-        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum) }}"> OMP STATUS </a></td>  
+        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum) }}"> OMP STATUS </a></td>
       </tr>
       {% endfor %}
     </table>
   </div>
   {% endif %}
 </div>
-</div>
-
-<div class="column-left">
-{% if output_files %}
-
-<div class="panel">
-<h2>Output Files</h2>
-<ul>
-{% for file in output_files %}
-    <li>{{ file }}</li>
-{% endfor %}
-</ul>
-</div>
-{% endif %}
-</div>
-
 
 {% if previews %}
 <div class="column-right">
   {% for l in previews %}
   <div class="panel preview">
     <h4>{{ break_underscore(l[0].split('_preview_')[0].split('jcmt_')[1]) }}</h4>
-    <img src="{{ l[0] }}" />
+    <a href="{{ l[0] }}"><img src="{{ l[0] }}" /></a>
   </div>
   {% endfor %}
 </div>
 {% endif %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 {% endblock %}

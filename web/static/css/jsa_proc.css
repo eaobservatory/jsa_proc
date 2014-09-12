@@ -267,6 +267,9 @@ textarea {
     width: 60%;
 }
 
+div.jobqa {
+    min-width:30ex;
+}
 div.jobqa textarea{
     width:90%;
 }
@@ -276,7 +279,7 @@ ul#nav li.login {
 div.column-left{
     display:inline-block;
     width:30%;
-    min-width:100ex;
+    min-width:95ex;
     vertical-align:top;
     text-align:left;
     float:left;
@@ -286,7 +289,7 @@ div.column-right{
     width:45%;
     vertical-align:top;
     text-align:left;
-    min-width:530px;
+    min-width:95ex;
 }
 div.column-right img{
     width:100%;
@@ -299,11 +302,11 @@ table.obsinfo{
     font-size:small;
 }
 td.recpar{
-    width:5ex;
+    width:4ex;
 }
 div.jobqa{
     text-align:center;
-    min-width:40ex;
+    min-width:30ex;
 }
 
 form p{
