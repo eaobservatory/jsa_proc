@@ -44,7 +44,7 @@ class JSAQAState:
         """
 
         try:
-            return cls._info[state].name
+            return cls._info[state]
         except KeyError:
             raise JSAProcError('Unknown state code {0}'.format(state))
 
