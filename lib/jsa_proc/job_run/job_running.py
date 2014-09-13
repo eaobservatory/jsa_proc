@@ -141,6 +141,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # jsawrapdr arguments.
     jsawrapdrcom = [jsawrapdr,
+                    '--debugxfer',
                     '--outdir='+scratch_dir,
                     '--inputs='+input_file_list,
                     '--id='+jacid,
