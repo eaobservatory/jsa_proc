@@ -35,8 +35,7 @@ from jsa_proc.error import JSAProcError
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
                   jsawrapdr=None,
-                  debug=False,
-                  logscreen=False):
+                  debug=False):
     """Routine to execute jsawrapdr from python.
 
     Takes in a job_id, input_file_list, mode and drparameters..
@@ -86,11 +85,6 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     debug, boolean, optional (default False)
     turn on jsawrapdr debugging if true
-
-    logscreen, boolean, optional (default False)
-
-    log *only* to screen, useful for interactive use. jsawrapdr
-    stdout/stderr output will not be in logfile.
 
     Returns: logfilename, string
 
@@ -178,20 +172,11 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         log = open(logfile, 'w')
 
     # Run jsawrapdr
-    p = subprocess.Popen(jsawrapdrcom, env=jsa_env, bufsize=1,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         preexec_fn=restore_signals)
-
-    for line in iter(p.stdout.readline, ''):
-        if logscreen:
-            sys.stdout.write(line)
-        log.write(line)
-        p.wait()
+    retcode = subprocess.call(jsawrapdrcom, env=jsa_env, bufsize=1,
+                              stdout=log, stderr=subprocess.STDOUT,
+                              preexec_fn=restore_signals)
 
     log.close()
-    p.stdout.close()
-
-    retcode = p.returncode
 
     if retcode != 0:
         raise JSAProcError('jsawrapdr exited with non zero status. '

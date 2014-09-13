@@ -208,8 +208,7 @@ def run_a_job(job_id, db=None, force=False):
     log = jsawrapdr_run(
         job_id, input_file_list, mode,
         drparameters,
-        cleanup='cadc', location='JAC', persist=True,
-        logscreen=False)
+        cleanup='cadc', location='JAC', persist=True)
 
     # Create list of output files.
     logger.debug('Preparing list of output files')
