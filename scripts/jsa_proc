@@ -18,7 +18,7 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
-    jsa_proc etransfer [-v | -q] [--dry-run] --job_id <id>
+    jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
@@ -30,7 +30,7 @@ Options:
     --quiet, -q             Omit informational messages.
     --dry-run, -n           Do not actually peform the action.
 
-    --job_id <id>, -j <id>  Identifier of job on which to work.
+    --job-id <id>, -j <id>  Identifier of job on which to work.
 
     --check-at-cadc         Test whether files are at CADC.
     --no-etransfer          Skip e-transfer steps.
@@ -118,7 +118,7 @@ def etransfer(args):
 
     else:
         try:
-            job_id = int(args['--job_id'])
+            job_id = int(args['--job-id'])
         except ValueError:
             raise CommandError('Job ID must be an integer')
 
