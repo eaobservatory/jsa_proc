@@ -67,16 +67,8 @@ import sys
 
 from docopt import docopt
 
-from jsa_proc.cadc.etransfer import etransfer_poll_output, \
-    etransfer_send_output
 from jsa_proc.config import get_database
-from jsa_proc.cadc.files import CADCFiles
-from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.error import CommandError
-from jsa_proc.job_run.scripts import fetch, run_job
-from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
-from jsa_proc.omp.db import OMPDB
-from jsa_proc.statemachine import JSAProcStateMachine
 
 script_name = 'jsa_proc'
 commands = {}
@@ -141,6 +133,9 @@ def etransfer(args):
     or to poll the e-transfer system for status updates.
     """
 
+    from jsa_proc.cadc.etransfer import etransfer_poll_output, \
+        etransfer_send_output
+
     if args['--poll']:
         etransfer_poll_output(dry_run=args['--dry-run'])
 
@@ -151,6 +146,8 @@ def etransfer(args):
 @command
 def fetch_(args):
     """Sub-command to fetch data for a job."""
+
+    from jsa_proc.job_run.scripts import fetch
 
     fetch(job_id=args['--job-id'])
 
@@ -172,6 +169,8 @@ def import_(args):
 @command
 def poll(args):
     """Sub-command to run the state machine."""
+
+    from jsa_proc.statemachine import JSAProcStateMachine
 
     # Get the database specified in the config file.
     db = get_database()
@@ -195,16 +194,19 @@ def query(args):
     search = args['<search>']
 
     if args['caom2']:
+        from jsa_proc.cadc.tap import CADCTap
         caom2 = CADCTap()
         for obsid in sorted(caom2.obsids_by_pattern(search.lower())):
             print(obsid)
 
     elif args['jcmtinfo']:
+        from jsa_proc.cadc.files import CADCFiles
         ad = CADCFiles()
         for file in sorted(ad.files_by_pattern(search)):
             print(file)
 
     elif args['ompstatus']:
+        from jsa_proc.omp.db import OMPDB
         ompdb = OMPDB()
         print('Status: ' + repr(ompdb.get_status(search)))
 
@@ -216,6 +218,8 @@ def query(args):
 def run(args):
     """Sub-command to run a job."""
 
+    from jsa_proc.job_run.scripts import run_job
+
     run_job(job_id=args['--job-id'])
 
 
@@ -224,6 +228,8 @@ def unauthorized(args):
     """Sub-command to investigate jobs which failed to fetch due to
     "unauthorized" errors.
     """
+
+    from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
 
     investigate_unauthorized_errors(
         location='JAC',
