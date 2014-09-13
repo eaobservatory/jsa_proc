@@ -21,6 +21,7 @@ Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>]
+    jsa_proc import [-v | -q] [--dry-run] --location <location>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc run [-v | -q] [--job-id <id>]
@@ -33,6 +34,7 @@ Options:
     --dry-run, -n           Do not actually peform the action.
 
     --job-id <id>, -j <id>  Identifier of job on which to work.
+    --location <location>   Job location, e.g. JAC, CADC.
 
     --check-at-cadc         Test whether files are at CADC.
     --no-etransfer          Skip e-transfer steps.
@@ -129,7 +131,7 @@ def main():
 def command(f):
     """Decorator which adds a function to the commands dictionary."""
 
-    commands[f.__name__] = f
+    commands[f.__name__[:-1] if f.__name__.endswith('_') else f.__name__] = f
     return f
 
 
@@ -151,6 +153,20 @@ def fetch(args):
     """Sub-command to fetch data for a job."""
 
     fetch(job_id=args['--job-id'])
+
+
+@command
+def import_(args):
+    """Sub-command to do an initial import of jobs from another location."""
+
+    if args['--location'] == 'CADC':
+        from jsa_proc.cadc.initial_import import import_from_cadcdp
+
+        if not import_from_cadcdp(dry_run=args['--dry-run']):
+            raise CommandErrorr('errors encountered during import')
+
+    else:
+        raise CommandError('unknown location: {0}'.format(args['--location']))
 
 
 @command
