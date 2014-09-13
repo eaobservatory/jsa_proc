@@ -29,7 +29,7 @@ from jsa_proc.job_run.directories import get_input_dir
 logger = logging.getLogger(__name__)
 
 
-def fetch(job_id=None, db=None):
+def fetch(job_id=None, db=None, force=False):
     """
     Assemble the files required to process a job.
 
@@ -51,6 +51,8 @@ def fetch(job_id=None, db=None):
 
     # Get next job if a job_id is not specified.
     if not job_id:
+        force = False
+
         logger.debug('Looking for a job for which to fetch data')
 
         jobs = db.find_jobs(state=JSAProcState.MISSING, location='JAC',
@@ -63,11 +65,11 @@ def fetch(job_id=None, db=None):
             logger.warning('Did not find a job to fetch!')
             return
 
-    fetch_a_job(job_id, db=db)
+    fetch_a_job(job_id, db=db, force=force)
 
 
 @ErrorDecorator
-def fetch_a_job(job_id, db=None):
+def fetch_a_job(job_id, db=None, force=False):
     """
     Assemble the files required to process a job.
 
@@ -90,7 +92,7 @@ def fetch_a_job(job_id, db=None):
         # Change status of job to 'Fetching', raise error if not in MISSING
         db.change_state(job_id, JSAProcState.FETCHING,
                         'Data is being assembled',
-                        state_prev=JSAProcState.MISSING)
+                        state_prev=(None if force else JSAProcState.MISSING))
 
     except NoRowsError:
         # If the job was not in the MISSING state, it is likely that another
@@ -118,7 +120,7 @@ def fetch_a_job(job_id, db=None):
     return job_id
 
 
-def run_job(job_id=None, db=None):
+def run_job(job_id=None, db=None, force=False):
     """
     Run the JSA processing of the next job. This will select the highest
     priority job in state 'WAITING' with location 'JAC'.
@@ -137,6 +139,8 @@ def run_job(job_id=None, db=None):
 
     # Get next job if a job id is not specified
     if not job_id:
+        force = False
+
         logger.debug('Looking for a job to run')
 
         jobs = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
@@ -149,11 +153,11 @@ def run_job(job_id=None, db=None):
             logger.warning('Did not find a job to run!')
             return
 
-    run_a_job(job_id, db=db)
+    run_a_job(job_id, db=db, force=force)
 
 
 @ErrorDecorator
-def run_a_job(job_id, db=None):
+def run_a_job(job_id, db=None, force=False):
     """
     Run the JSA processing of the given job_id (integer).
 
@@ -175,7 +179,7 @@ def run_a_job(job_id, db=None):
         db.change_state(job_id, JSAProcState.RUNNING,
                         'Job is about to be run on host {0}'.format(
                             gethostname()),
-                        state_prev=JSAProcState.WAITING)
+                        state_prev=(None if force else JSAProcState.WAITING))
 
     except NoRowsError:
         # If the job was not in the WAITING state, it is likely that another

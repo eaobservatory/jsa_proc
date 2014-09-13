@@ -20,11 +20,11 @@
 Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
-    jsa_proc fetch [-v | -q] [--job-id <id>]
+    jsa_proc fetch [-v | -q] [--job-id <id>] [--force]
     jsa_proc import [-v | -q] [--dry-run] --location <location>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
-    jsa_proc run [-v | -q] [--job-id <id>]
+    jsa_proc run [-v | -q] [--job-id <id>] [--force]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
@@ -37,6 +37,7 @@ Options:
     --location <location>   Job location, e.g. JAC, CADC.
 
     --check-at-cadc         Test whether files are at CADC.
+    --force, -f             Skip initial state check.
     --no-etransfer          Skip e-transfer steps.
     --poll                  Poll a system for state updates.
 
@@ -149,7 +150,7 @@ def fetch_(args):
 
     from jsa_proc.job_run.scripts import fetch
 
-    fetch(job_id=args['--job-id'])
+    fetch(job_id=args['--job-id'], force=args['--force'])
 
 
 @command
@@ -220,7 +221,7 @@ def run(args):
 
     from jsa_proc.job_run.scripts import run_job
 
-    run_job(job_id=args['--job-id'])
+    run_job(job_id=args['--job-id'], force=args['--force'])
 
 
 @command
