@@ -149,7 +149,7 @@ def etransfer(args):
 
 
 @command
-def fetch(args):
+def fetch_(args):
     """Sub-command to fetch data for a job."""
 
     fetch(job_id=args['--job-id'])
