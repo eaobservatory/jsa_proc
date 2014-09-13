@@ -2,7 +2,11 @@
 
 {% block content %}
 
-<h2>There are {{ total_count }} jobs in the database</h2>
+<h2>There are {{ total_count }} jobs in the database
+{% if date_min is not none or date_max is not none %}
+from {{date_min}} to {{date_max}}
+{% endif %}
+</h2>
 
 <h2>Summary table</h2>
 
@@ -28,7 +32,7 @@
 
   <div class="col">
     <h4> All jobs </h4>
-    <img src="{{ url_for('summary_piechart', task=task, stamp=stamp)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, stamp=stamp,date_min=date_min, date_max=date_max)}}"></img>
   </div>
 
 </div>
@@ -38,11 +42,11 @@
 <div id="wrapper">
   <div class="col">
     <h4>Without pointings </h4>
-    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science',stamp=stamp)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science',stamp=stamp,date_min=date_min, date_max=date_max)}}"></img>
   </div>
   <div class="col">
     <h4>Without pointings and calibrations </h4>
-    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science', CalTypes='NoCalibrations',stamp=stamp)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science', CalTypes='NoCalibrations',stamp=stamp, date_min=date_min, date_max=date_max)}}"></img>
   </div>
 </div>
 

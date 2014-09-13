@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, division
 
-
+import datetime
 from flask import Flask, flash, request, send_file, Response, render_template
 from functools import wraps
 import os.path
@@ -118,8 +118,10 @@ def create_web_app():
             request.args.get('page', None),
             request.args.get('date_min', None),
             request.args.get('date_max', None),
+            request.args.get('qastate', None),
             request.args.get('name', None),
             obsquerydict=obsquerydict,
+            state_choice=request.args.get('state_choice', 'JSAProc')
         )
 
     @app.route('/image/<task>/piechart')
@@ -129,7 +131,9 @@ def create_web_app():
         obsquerydict = {}
         for key in ObsQueryDict.keys():
             obsquerydict[key] = request.args.get(key, None)
-        return prepare_summary_piechart(db, task=task, obsquerydict=obsquerydict)
+        date_min = request.args.get('date_min', None)
+        date_max = request.args.get('date_max', None)
+        return prepare_summary_piechart(db, task=task, obsquerydict=obsquerydict, date_min=date_min, date_max=date_max)
 
 
     @app.route('/summary/')
@@ -137,7 +141,7 @@ def create_web_app():
     def task_summary():
         return prepare_task_summary(db)
 
-    @app.route('/qa-summary/')
+    @app.route('/qa')
     @templated('task_qa_summary.html')
     def task_qa_summary():
         return prepare_task_qa_summary(db)
@@ -146,7 +150,9 @@ def create_web_app():
     @templated('job_summary.html')
     def job_summary():
         task = request.args.get('task', None)
-        return prepare_job_summary(db, task=task)
+        date_min = request.args.get('date_min', None)
+        date_max = request.args.get('date_max', None)
+        return prepare_job_summary(db, task=task, date_min=date_min, date_max=date_max)
 
     @app.route('/error_summary/')
     @templated('error_summary.html')
@@ -212,23 +218,24 @@ def create_web_app():
         raise HTTPRedirect(url)
 
 
-    # QA Summary pages
-    @app.route('/qa')
-    @templated('qa_summary.html')
-    def qa_summary():
-        return {}
-
+    # QA Nightly Summary pages
+    @app.route('/qa-nightly')
+    @templated('task_qa_summary_nightly.html')
+    def qa_night_page():
+        date = request.args.get('date', datetime.date.today().strftime('%Y-%m-%d'))
+        task = request.args.get('task', 'jcmt-nightly')
+        return prepare_task_qa_summary(db, date_min=date, date_max=date, task=task)
 
     @app.route('/login', methods=['GET', 'POST'])
     @requires_auth
     def login():
-        return qa_summary()
+        return task_qa_summary()
 
 
     @app.route('/logout')
     @requires_deauth
     def logout():
-        return qa_summary()
+        return task_qa_summary()
 
 
     # Image handling.

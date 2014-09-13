@@ -18,12 +18,13 @@ from __future__ import absolute_import, division
 from jsa_proc.db.db import Fuzzy, Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
+from jsa_proc.qastate import JSAQAState
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
 def prepare_job_list(db, location, state, task, number, page,
-                     date_min, date_max,
-                     sourcename, obsquerydict={}):
+                     date_min, date_max, qastate,
+                     sourcename, obsquerydict={}, state_choice='JSAProc'):
     if location == '':
         location = None
     if state == '':
@@ -34,11 +35,14 @@ def prepare_job_list(db, location, state, task, number, page,
         date_min = None
     if date_max == '':
         date_max = None
+    if qastate == '':
+        qastate = None
 
     job_query = {
         'location': location,
         'state': state,
         'task': task,
+        'qa_state': qastate,
     }
 
     # Add dictionary of obs table requirements to send to find jobs
@@ -82,11 +86,13 @@ def prepare_job_list(db, location, state, task, number, page,
             preview = None
         jobs.append({
             'url': url_for('job_info', job_id=job.id),
+            'qaurl': url_for('job_qa', job_id=job.id),
             'id': job.id,
             'state': job.state,
             'tag': job.tag,
             'location': job.location,
-            'preview': preview
+            'preview': preview,
+            'qastate': job.qa_state
         })
 
     return {
@@ -96,6 +102,8 @@ def prepare_job_list(db, location, state, task, number, page,
         'selected_location': location,
         'states': JSAProcState.STATE_ALL,
         'selected_state': state,
+        'qastates': JSAQAState.STATE_ALL,
+        'selected_qastate': qastate,
         'tasks': db.get_tasks(),
         'selected_task': task,
         'selected_number': number,
@@ -105,4 +113,5 @@ def prepare_job_list(db, location, state, task, number, page,
         'date_min': date_min,
         'date_max': date_max,
         'name': sourcename,
+        'state_choice': state_choice,
     }

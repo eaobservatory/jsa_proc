@@ -5,7 +5,11 @@
 
 
 <div id="content" style="max-width:150ex;">
-<h2>QA Summary table</h2>
+<h2>QA Summary table for: {{ date }}</h2>
+<form>
+  <input type="text" name="date" value="{{ date | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
+  <input type="submit" value="Filter" />
+</form>
 
 <div id="wrapper">
 <div class="col">
@@ -23,10 +27,10 @@
     </tr>
   {% for taskname, jobs in results.items() %}
   <tr>
-    <td><a href="{{ url_for('job_summary', task=taskname) }}">{{ taskname }}</a></td>
-    <td><a href="{{ url_for('job_list', task=taskname) }}">{{ jobs['total'] }}</a></td>
+    <td>{{ taskname }}</td>
+    <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, state_choice='JSAQA') }}">{{ jobs['total'] }}</a></td>
     {% for qastate in qastates %}
-    <td class = "qastate_{{qastate | qastate_name}}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA')}} ">{{ jobs[qastate] }} </a></td>
+    <td class = "qastate_{{qastate | qastate_name}}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date)}} ">{{ jobs[qastate] }} </a></td>
     {% endfor %}
   </tr>
 {% endfor %}

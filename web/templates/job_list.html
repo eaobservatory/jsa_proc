@@ -4,19 +4,35 @@
 {% from 'macros.html' import render_choices with context %}
 {% block body %}
 
-{{render_choices(locations, selected_location, states, selected_state, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) }}
+{{render_choices(locations, selected_location, states, selected_state, qastates, selected_qastate, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) }}
 
 {{ render_page_control(pagination) }}
-
+<h1>
+{% if state_choice == 'JSAQA' %}
+QA Summary
+{% else %}
+Job State Summary
+{% endif %}
+</h1>
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
-    <div class="tile_title state_{{ job.state | state_phase }}">
-        <a href="{{ job.url }}" title="{{ job.tag }}">
-            {{ job.state | state_name }}
-        </a>
+  {% if state_choice == 'JSAProc' %}
+  {% set url = job.url %}
+  <div class="tile_title state_{{ job.state | state_phase }}">
+    <a href="{{ job.url }}" title="{{ job.tag }}">
+      {{ job.state | state_name }}
+    </a>
+  </div>
+  {% elif state_choice == 'JSAQA' %}
+  {% set url = job.qaurl %}
+    <div class="tile_title qastate_{{ job.qastate | qastate_name }}">
+      <a href="{{ job.qaurl }}" title="{{ job.tag }}">
+            {{ job.qastate | qastate_name }}
+      </a>
     </div>
+    {% endif %}
     <p>
-        <a href="{{ job.url }}" title="{{ job.tag }}">
+        <a href="{{ url }}" title="{{ job.tag }}">
             {{ job.id }}
             <br />
             {{ job.location }}
