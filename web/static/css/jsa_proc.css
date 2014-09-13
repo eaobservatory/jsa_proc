@@ -204,19 +204,19 @@ td, th {
     padding: 5px;
 }
 
-.qastate_Unknown {
+.qastate_Unknown, .qastate_Unknown a {
     background: black;
     color: white;
 }
-.qastate_Questionable {
+.qastate_Questionable, .qastate_Questionable a{
     background: yellow;
     color: black;
 }
-.qastate_Good {
+.qastate_Good,.qastate_Good a{
     background: green;
     color: white;
 }
-.qastate_Bad {
+.qastate_Bad, .qastate_Bad a{
     background: red;
     color: white;
 }

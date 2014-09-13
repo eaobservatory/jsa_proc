@@ -3,7 +3,9 @@
       ('/summary', 'summary', 'Summary'),
       ('/error_summary', 'error_summary', 'Errors'),
       ('/job', 'job', 'Full Job List'),
-      ('/qa', 'qa', 'QA Summary'),     ] -%}
+      ('/qa', 'qa', 'QA Summary'),
+      ('/qa-nightly', 'qa-nightly', 'Nightly QA'),
+      ] -%}
 
     <ul id="nav">
         {% for href, id, caption in navigation_bar %}
@@ -48,9 +50,10 @@
     {% endif %}
 {% endmacro %}
 
-{% macro render_choices(locations, selected_location, states, selected_state, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) %}
+{% macro render_choices(locations, selected_location, states, selected_state, qastates, selected_qastate, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) %}
 <form>
     <p>
+      <input type="hidden" name="state_choice" value="{{state_choice}}"></input>
         <select name="location">
             <option value="" {{ 'selected="selected"' | safe if selected_location is none }}>Any location</option>
             {% for location in locations %}
@@ -61,6 +64,12 @@
             <option value="" {{ 'selected="selected"' | safe if selected_state is none }}>Any state</option>
             {% for state in states %}
                 <option value="{{ state }}" {{ 'selected="selected"' if state == selected_state }}>{{ state | state_name }}</option>
+            {% endfor %}
+        </select>
+        <select name="qastate">
+          <option value="" {{ 'selected="selected"' | safe if selected_qastate is none }}> Any qastate</option>
+            {% for qastate in qastates %}
+                <option value="{{ qastate }}" {{ 'selected="selected"' if qastate == selected_qastate }}>{{ qastate | qastate_name }}</option>
             {% endfor %}
         </select>
         <select name="task">
