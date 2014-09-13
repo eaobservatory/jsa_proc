@@ -26,13 +26,14 @@ import time
 
 from flask import send_file
 
+from jsa_proc.db.db import Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.qastate import JSAQAState
 from jsa_proc.web.util import url_for
 
 
-def prepare_summary_piechart(db, task=None, obsquerydict = None):
+def prepare_summary_piechart(db, task=None, obsquerydict = None, date_min=None, date_max=None):
     """
     Create a piechart of number of jobs in each state for a given task
     and obsquery.
@@ -52,6 +53,9 @@ def prepare_summary_piechart(db, task=None, obsquerydict = None):
     for key, value in obsquerydict.items():
         if value:
             obsquery.update(ObsQueryDict[key][value].where)
+    # Sort out dates
+    if date_min is not None or date_max is not None:
+        obsquery['utdate'] = Range(date_min, date_max)
 
     # Perform the find_jobs task for the given constraints in each JSAProcState.
     for s in JSAProcState.STATE_ALL:
@@ -116,25 +120,32 @@ def prepare_task_summary(db):
 
     return {'results':results, 'states':JSAProcState.STATE_ALL}
 
-def prepare_task_qa_summary(db):
+def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None):
     """
     Prepare a summary of tasks in the database based on QA state.
 
     """
+    # Sort out dates.
+    obsquery = {}
+    if date_min is not None or date_max is not None:
+        obsquery['utdate'] = Range(date_min, date_max)
 
-    tasks = db.get_tasks()
+    if task:
+        tasks = [task]
+    else:
+        tasks = db.get_tasks()
     results = {}
     for t in tasks:
-        results[t] = {'total':db.find_jobs(task=t, count=True)}
+        results[t] = {'total':db.find_jobs(task=t, count=True, obsquery=obsquery)}
         for s in JSAQAState.STATE_ALL:
-            results[t][s] = db.find_jobs(task=t, qa_state=s, count=True)
+            results[t][s] = db.find_jobs(task=t, qa_state=s, count=True, obsquery=obsquery)
 
-    return {'results':results, 'qastates':JSAQAState.STATE_ALL}
+    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'date': date_min}
 
-def prepare_job_summary(db, task=None):
+def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 
     """
-    Prepare a summary of jobs.
+    Prepare a summary of jobs, for a specific task and date.
 
     Needs to get:
 
@@ -147,12 +158,18 @@ def prepare_job_summary(db, task=None):
     states = JSAProcState.STATE_ALL
     locations = ['JAC', 'CADC']
 
+    # Sort out dates.
+    obsquery = {}
+    if date_min is not None or date_max is not None:
+        obsquery['utdate'] = Range(date_min, date_max)
+
+
     job_summary_dict = OrderedDict()
     for s in states:
         job_summary_dict[s] = OrderedDict()
         for l in locations:
             job_summary_dict[s][l] = db.find_jobs(location=l, state=s,
-                                                  count=True, task=task)
+                                                  count=True, task=task, obsquery=obsquery)
 
     total_count = sum([int(c) for j in job_summary_dict.values()
                        for c in j.values()])
@@ -176,5 +193,7 @@ def prepare_job_summary(db, task=None):
         'job_summary_dict': job_summary_dict,
         'locations': locations,
         'task': task,
-        'stamp': time.time()
+        'stamp': time.time(),
+        'date_min': date_min,
+        'date_max': date_max,
     }
