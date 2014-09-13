@@ -63,6 +63,8 @@ import functools
 import logging
 import sys
 
+from docopt import docopt
+
 from jsa_proc.cadc.etransfer import etransfer_poll_output, \
     etransfer_send_output
 from jsa_proc.config import get_database
@@ -82,7 +84,6 @@ logger = logging.getLogger(script_name)
 def main():
     """Main routine for the jsa_proc tool."""
 
-    from docopt import docopt
     args = docopt(__doc__)
 
     # Determine logging level from the --quiet and --verbose options.
