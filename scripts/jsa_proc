@@ -20,8 +20,10 @@
 Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
+    jsa_proc fetch [-v | -q] [--job-id <id>]
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
+    jsa_proc run [-v | -q] [--job-id <id>]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
@@ -37,9 +39,22 @@ Options:
     --poll                  Poll a system for state updates.
 
 Commands:
+    fetch:
+        Looks at a job in the queued state, assembles the data for it,
+        and then advances the job to the waiting state.
+
+        If the --job-id command line argument is not used, this will run on
+        the highest priority job labelled to be reduced at the JAC and in the
+        missing state.
+
     poll:
         This command will carry out simple state changes for JAC jobs in the
         database configured in the JSAProc configuration file.
+
+    run:
+        Run a job locally and mark the state appropriately. If the
+        option --job-id is not given, it will run the highest priority job
+        marked to be performed at the JAC and already in the waiting state.
 """
 
 from __future__ import print_function, division, absolute_import
@@ -54,6 +69,7 @@ from jsa_proc.config import get_database
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.error import CommandError
+from jsa_proc.job_run.scripts import fetch, run_job
 from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
 from jsa_proc.omp.db import OMPDB
 from jsa_proc.statemachine import JSAProcStateMachine
@@ -79,8 +95,17 @@ def main():
 
     logging.basicConfig(level=loglevel)
 
-    # Determine which sub-command to perform.
     try:
+        # Process integer arguments.
+        for integer_argument in ('--job-id',):
+            if args[integer_argument] is not None:
+                try:
+                    args[integer_argument] = int(args[integer_argument])
+                except ValueError:
+                    raise CommandError('Option {0} must be an integer'.
+                                       format(integer_argument))
+
+        # Determine which sub-command to perform.
         for (command, func) in commands.items():
             if args.get(command):
                 logger.debug('Running %s subcommand', command)
@@ -117,12 +142,14 @@ def etransfer(args):
         etransfer_poll_output(dry_run=args['--dry-run'])
 
     else:
-        try:
-            job_id = int(args['--job-id'])
-        except ValueError:
-            raise CommandError('Job ID must be an integer')
+        etransfer_send_output(args['--job-id'], dry_run=args['--dry-run'])
 
-        etransfer_send_output(job_id, dry_run=args['--dry-run'])
+
+@command
+def fetch(args):
+    """Sub-command to fetch data for a job."""
+
+    fetch(job_id=args['--job-id'])
 
 
 @command
@@ -166,6 +193,13 @@ def query(args):
 
     else:
         raise CommandError('Did not recognise query type')
+
+
+@command
+def run(args):
+    """Sub-command to run a job."""
+
+    run_job(job_id=args['--job-id'])
 
 
 @command
