@@ -38,11 +38,14 @@ class JSAProcStateMachine:
         self.poll_jac_jobs(self)
         self.poll_cadc_jobs(self)
 
-    def poll_jac_jobs(self):
+    def poll_jac_jobs(self, etransfer=True):
         """Try to update status of all JAC jobs.
 
         For all jobs to be run at JAC, look at the current status
         and move on to the next status if possible.
+
+        Arguments:
+            etransfer: True to enable e-transfer steps.
 
         Returns true if there were no errors.
         """
@@ -103,8 +106,9 @@ class JSAProcStateMachine:
 
                 elif job.state == JSAProcState.PROCESSED:
                     # Add to e-transfer and move to TRANSFERRING.
+                    # (Only done if etransfer argument is True.)
 
-                    if validate_output(job.id, self.db):
+                    if etransfer and validate_output(job.id, self.db):
                         ssh_etransfer_send_output(job.id)
 
                 elif job.state == JSAProcState.TRANSFERRING:
