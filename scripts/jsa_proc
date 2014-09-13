@@ -20,6 +20,7 @@
 Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job_id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
+    jsa_proc poll [-v | -q]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
@@ -34,6 +35,10 @@ Options:
     --check-at-cadc         Test whether files are at CADC.
     --poll                  Poll a system for state updates.
 
+Commands:
+    poll:
+        This command will carry out simple state changes for JAC jobs in the
+        database configured in the JSAProc configuration file.
 """
 
 from __future__ import print_function, division, absolute_import
@@ -44,11 +49,13 @@ import sys
 
 from jsa_proc.cadc.etransfer import etransfer_poll_output, \
     etransfer_send_output
+from jsa_proc.config import get_database
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.error import CommandError
 from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
 from jsa_proc.omp.db import OMPDB
+from jsa_proc.statemachine import JSAProcStateMachine
 
 script_name = 'jsa_proc'
 commands = {}
@@ -115,6 +122,24 @@ def etransfer(args):
             raise CommandError('Job ID must be an integer')
 
         etransfer_send_output(job_id, dry_run=args['--dry-run'])
+
+
+@command
+def poll(args):
+    """Sub-command to run the state machine."""
+
+    # Get the database specified in the config file.
+    db = get_database()
+
+    # Get the state machine.
+    sm = JSAProcStateMachine(db, None)
+
+    # Poll the JAC jobs.
+    status = sm.poll_jac_jobs()
+
+    # Return a status of 1 if status is not True.
+    if not status:
+        raise CommandError('Errors were encountered during state poll')
 
 
 @command
