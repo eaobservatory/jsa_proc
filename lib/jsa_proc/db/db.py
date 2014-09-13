@@ -823,24 +823,25 @@ class JSAProcDB:
         # Note: join and count cannot be used together.
         query += ' FROM job' + join
 
+        jobquery = {}
+
         if state is not None:
-            where.append('job.state=%s')
-            param.append(state)
+            jobquery['state'] = state
         else:
-            where.append('job.state<>%s')
-            param.append(JSAProcState.DELETED)
+            jobquery['state'] = Not(JSAProcState.DELETED)
 
         if location is not None:
-            where.append('job.location=%s')
-            param.append(location)
+            jobquery['location'] = location
 
         if task is not None:
-            where.append('job.task=%s')
-            param.append(task)
+            jobquery['task'] = task
 
         if qa_state is not None:
-            where.append('job.qa_state=%s')
-            param.append(qa_state)
+            jobquery['qa_state'] = qa_state
+
+        (jobwhere, jobparam) = _dict_query_where_clause('job', jobquery)
+        where.append(jobwhere)
+        param.extend(jobparam)
 
         if obsquery:
             (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
