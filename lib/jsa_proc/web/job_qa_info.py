@@ -20,8 +20,8 @@ import glob
 import os
 import re
 
+from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.error import NoRowsError
-from jsa_proc.job_run.directories import get_log_dir
 from jsa_proc.state import JSAProcState
 from jsa_proc.qastate import JSAQAState
 from jsa_proc.web.util import url_for, HTTPNotFound

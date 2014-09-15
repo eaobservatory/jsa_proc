@@ -15,12 +15,5 @@
 
 from unittest import TestCase
 
-from jsa_proc.action.datafile_handling import valid_hds
-from jsa_proc.action.datafile_handling import assemble_input_data_for_job
-from jsa_proc.action.datafile_handling import get_output_files
-
-
-class ValidHDSTestCase(TestCase):
-    def test_valid_hds(self):
-        self.assertTrue(valid_hds('test/data/validhds.sdf'))
-        self.assertFalse(valid_hds('test/data/invalidhds.sdf'))
+from jsa_proc.action.fetch import fetch
+from jsa_proc.action.fetch import fetch_a_job

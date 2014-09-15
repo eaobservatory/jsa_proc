@@ -16,9 +16,9 @@
 import logging
 import re
 
+from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.job_run.decorators import ErrorDecorator
 
 logger = logging.getLogger(__name__)
 

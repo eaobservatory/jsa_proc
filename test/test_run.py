@@ -15,7 +15,5 @@
 
 from unittest import TestCase
 
-from jsa_proc.job_run.scripts import fetch
-from jsa_proc.job_run.scripts import fetch_a_job
-from jsa_proc.job_run.scripts import run_job
-from jsa_proc.job_run.scripts import run_a_job
+from jsa_proc.action.run import run_job
+from jsa_proc.action.run import run_a_job

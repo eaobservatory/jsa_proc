@@ -17,7 +17,7 @@ from __future__ import absolute_import, division
 
 from collections import OrderedDict
 
-from jsa_proc.job_run.error_filter import JSAProcErrorFilter
+from jsa_proc.action.error_filter import JSAProcErrorFilter
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 

@@ -23,11 +23,11 @@ import shutil
 from socket import gethostname
 import logging
 
+from jsa_proc.action.decorators import ErrorDecorator
+from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
-from jsa_proc.job_run.directories import get_output_dir
-from jsa_proc.job_run.decorators import ErrorDecorator
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)

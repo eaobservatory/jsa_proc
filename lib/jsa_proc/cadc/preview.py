@@ -21,7 +21,7 @@ import re
 
 from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.error import JSAProcError
-from jsa_proc.job_run.preview import scale_preview
+from jsa_proc.action.preview import scale_preview
 
 logger = logging.getLogger(__name__)
 

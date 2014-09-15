@@ -148,7 +148,7 @@ def etransfer(args):
 def fetch_(args):
     """Sub-command to fetch data for a job."""
 
-    from jsa_proc.job_run.scripts import fetch
+    from jsa_proc.action.fetch import fetch
 
     fetch(job_id=args['--job-id'], force=args['--force'])
 
@@ -171,7 +171,7 @@ def import_(args):
 def poll(args):
     """Sub-command to run the state machine."""
 
-    from jsa_proc.statemachine import JSAProcStateMachine
+    from jsa_proc.admin.statemachine import JSAProcStateMachine
 
     # Get the database specified in the config file.
     db = get_database()
@@ -219,7 +219,7 @@ def query(args):
 def run(args):
     """Sub-command to run a job."""
 
-    from jsa_proc.job_run.scripts import run_job
+    from jsa_proc.action.run import run_job
 
     run_job(job_id=args['--job-id'], force=args['--force'])
 
@@ -230,7 +230,7 @@ def unauthorized(args):
     "unauthorized" errors.
     """
 
-    from jsa_proc.job_run.unauthorized import investigate_unauthorized_errors
+    from jsa_proc.action.unauthorized import investigate_unauthorized_errors
 
     investigate_unauthorized_errors(
         location='JAC',

@@ -21,11 +21,11 @@ import logging
 
 from pytz import UTC
 
+from jsa_proc.action.error_filter import JSAProcErrorFilter
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
-from jsa_proc.job_run.error_filter import JSAProcErrorFilter
 
 logger = logging.getLogger(__name__)
 

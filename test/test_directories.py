@@ -15,9 +15,9 @@
 
 from unittest import TestCase
 
-from jsa_proc.error import JSAProcError
-from jsa_proc.job_run.directories \
+from jsa_proc.admin.directories \
     import get_input_dir, get_output_dir, get_scratch_dir, get_log_dir
+from jsa_proc.error import JSAProcError
 
 
 class DirectoryTestCase(TestCase):

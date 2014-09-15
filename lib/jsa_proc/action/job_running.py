@@ -26,9 +26,9 @@ import tempfile
 import os
 import sys
 
-from jsa_proc.config import get_config
-from jsa_proc.job_run.directories \
+from jsa_proc.admin.directories \
     import get_scratch_dir, get_log_dir, get_output_dir
+from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
 
 
@@ -73,7 +73,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     If persist is turned on, then dpCapture will copy acceptable
     products to the default output directory. Otherwise it won't (used
     for debugging purposes). The output directory is determined by
-    jsa_proc.job_run.directories 'get_output_dir' for the given job_id.
+    jsa_proc.admin.directories 'get_output_dir' for the given job_id.
 
     # Location is not currently implemented!
     location, string |'cadc'|'JAC'|

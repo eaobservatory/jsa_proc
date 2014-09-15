@@ -17,7 +17,7 @@
 import os.path
 import re
 
-from jsa_proc.job_run.directories import get_output_dir
+from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.web.util import HTTPError, HTTPNotFound
 
 valid_preview = re.compile('^[-_a-z0-9]+_preview_\d+\.png$')

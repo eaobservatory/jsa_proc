@@ -16,7 +16,7 @@
 
 import os
 
-from jsa_proc.job_run.directories import get_log_dir
+from jsa_proc.admin.directories import get_log_dir
 
 
 def prepare_job_log(job_id, log):

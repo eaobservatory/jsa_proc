@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from jsa_proc.admin.statemachine import JSAProcStateMachine
 from jsa_proc.cadc.dpdb import CADCDPInfo
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.statemachine import JSAProcStateMachine
 
 from .db import DBTestCase
 from .dummycadcdp import DummyCADCDP

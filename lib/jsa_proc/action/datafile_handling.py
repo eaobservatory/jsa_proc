@@ -18,9 +18,9 @@ import os.path
 import subprocess
 import shutil
 
+from jsa_proc.admin.directories import get_input_dir, get_output_dir
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
-from jsa_proc.job_run.directories import get_input_dir, get_output_dir
 from jsa_proc.error import JSAProcError, NotAtJACError
 from jsa_proc.config import get_config
 
