@@ -130,14 +130,16 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
     obsquery = {}
     if date_min is not None or date_max is not None:
         obsquery['utdate'] = Range(date_min, date_max)
-    daylist = None
+    daylist = []
 
     # Create list of days if requested.
     if byDate is True:
         d1 = datetime.date(*[int(i) for i in date_min.split('-')])
         d2 = datetime.date(*[int(i) for i in date_max.split('-')])
         delta = d2 - d1
-        daylist = [(d1 + datetime.timedelta(days=i)).strftime('%Y-%m-%d') for i in range(delta.days)]
+        direction = delta.days/abs(delta.days)
+        daylist = [(d1 + datetime.timedelta(days=i*direction)).strftime('%Y-%m-%d') for i in range(abs(delta.days))]
+
 
     if task:
         tasks = [task]
@@ -149,36 +151,44 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
     qa_error_state = ['E']
     qa_deleted_state = ['X']
     results = {}
-
+    statedict = OrderedDict(zip(['Reduced', 'Error', 'Deleted', 'Raw'],
+                                      [qa_reduced_state, qa_error_state, qa_deleted_state, qa_raw_state]))
     if byDate is True:
 
         # Go through each task
         for t in tasks:
-            results[t] = {}
+            results[t] = OrderedDict()
 
             # Within each task go through each day
             for d in daylist:
-
                 # Create the Range object
                 obsquery['utdate'] = Range(d, d)
 
                 # Find the total number of jobsf or that dat, put it in the dayresults dictionary
-                dayresults = {'total': db.find_jobs(task=t, count=True, obsquery=obsquery)}
+                dayresults = OrderedDict(total=db.find_jobs(task=t, count=True, obsquery=obsquery))
 
-                # go through each QA State
-                for q in JSAQAState.STATE_ALL:
-                    dayresults[q] = {}
-                    for name,state_options in zip(['Reduced', 'Raw', 'Error', 'Deleted'],
-                                      [qa_reduced_state, qa_raw_state, qa_error_state, qa_deleted_state]):
-                        state = {'state': state_options}
-                        dayresults[q][name] = db.find_jobs(task=t, qa_state=q, state=state,count=True, obsquery=obsquery)
-                results[d] = dayresults
+                # go through each state option
+                for name,state_options in statedict.items():
+                    dayresults[name] = OrderedDict()
+                    # Go through each  qa state
+                    for q in JSAQAState.STATE_ALL:
+                        dayresults[name][q] = db.find_jobs(task=t, qa_state=q, state=state_options,count=True,
+                                                       obsquery=obsquery)
+
+                    dayresults[name]['total'] = sum(dayresults[name].values())
+
+                # Update the results object
+                results[t][d] = dayresults
+
+    # If not separating by date
     else:
-        results[t] = {'total':db.find_jobs(task=t, count=True, obsquery=obsquery)}
-        for s in JSAQAState.STATE_ALL:
-            results[t][s] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
+        for t in tasks:
+            # Results dict for each task
+            results[t] = {'total':db.find_jobs(task=t, count=True, obsquery=obsquery)}
+            for q in JSAQAState.STATE_ALL:
+                results[t][q] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
 
-    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'daylist': daylist}
+    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'daylist': daylist, 'statedict' : statedict}
 
 def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 

@@ -7,49 +7,55 @@
 <div id="content" style="max-width:150ex;">
 <h2>QA Summary table for: {{ daylist[0] }} &ndash; {{ daylist[-1] }}</h2>
 <form>
-  <input type="text" name="date_min" value="{{ daylist[0] | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> 
+  <input type="text" name="date_min" value="{{ daylist[0] | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
   &mdash;
   <input type="text" name="date_max" value="{{ daylist[-1] | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
   <input type="submit" value="Filter" />
 </form>
 
+
 {% set results = results['jcmt-nightly'] %}
 <div id="wrapper">
 <div class="col">
-<table>
+<table class="qasummary">
   <tr>
-    <th> Date </th>
+    <th class="date"> Date </th>
     <th></th>
-    <th colspan="{{ results.values()[0].keys()|length  }}">Reduced Jobs</th>
-    <th colspan="{{ results.values()[0].keys()|length  }}">Raw Jobs</th>
-    <th colspan="{{ results.values()[0].keys()|length  }}">Error Jobs</th>
+
+    {% for i in statedict.keys() %}
+    <th colspan="{{ results[results.keys()[0]][i].values()|length }}  ">{{ i }}</th><th></th>
+    {% endfor %}
   </tr>
+
   <tr>
-    <th>(Click for summary)</th>
-    <th> total </th>
-    {% for qastate in qastates %}
-    <th>{{qastate }}</th>
+    <th></th>
+    <th> Total </th>
+    {% for i in statedict.keys() %}
+    {% for qastate in results[results.keys()[0]]['Deleted'].keys() %}
+    <th class="qa">{{qastate | qastate_name }}</th>
     {% endfor %}
-    {% for qastate in qastates %}
-    <th>{{qastate }}</th>
-    {% endfor %}
-    {% for qastate in qastates %}
-    <th>{{qastate }}</th>
-    {% endfor %}
-        {% for qastate in qastates %}
-    <th>{{qastate }}</th>
+    <th></th>
     {% endfor %}
   </tr>
-  {% print results %}
+
   {% for date in results.keys() %}
   <tr>
     <td>{{ date }} </td>
-    <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, state_choice='JSAQA') }}">{{ results[date]['total'] }}</a></td>
-    {% for s in ['Reduced', 'Raw', 'Error', 'Deleted'] %}
-    {% for qastate in qastates %}
-    <td class = "qastate_{{qastate | qastate_name}}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date)}} ">{{ results[date][qastate][s] }} </a></td>
+    <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, state_choice='JSAQA') }}">{{ results[date].pop('total') }}</a></td>
+
+    {% for s in statedict.keys() %}
+        {% for qastate in results[date][s].keys() %}
+
+        {% if qastate != 'total' %}
+        <td class = "qastate_{{qastate | qastate_name}}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }} </a></td>
+        {% else %}
+        <td><a href="{{ url_for('job_list', task=taskname, state_choice='JSAQA', date_min=date, date_max=date)}} ">{{ results[date][s][qastate] }} </a></td>
+        {% endif %}
+
+        {% endfor %}
+        <td></td>
     {% endfor %}
-    {% endfor %}
+
   </tr>
   {% endfor %}
 

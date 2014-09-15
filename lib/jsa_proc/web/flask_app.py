@@ -112,7 +112,7 @@ def create_web_app():
         return prepare_job_list(
             db,
             request.args.get('location', None),
-            request.args.get('state', None),
+            request.args.getlist('state', None),
             request.args.get('task', None),
             request.args.get('number', None),
             request.args.get('page', None),
@@ -222,11 +222,13 @@ def create_web_app():
     @app.route('/qa-nightly')
     @templated('task_qa_summary_nightly.html')
     def qa_night_page():
-        date_min = request.args.get('date_max', datetime.date.today().strftime('%Y-%m-%d'))
-        date_max = request.args.get('date_min',
-                                (datetime.date.today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
-        task = request.args.get('task', 'jcmt-nightly')
-        return prepare_task_qa_summary(db, date_min=date_min, date_max=date_max, task=task, byDate=True)
+        date_min = request.args.get('date_max', None)
+        if date_min is None or date_min == '':
+            date_min = datetime.date.today().strftime('%Y-%m-%d')
+        date_max = request.args.get('date_min', None)
+        if date_max is None or date_max == '':
+            date_max = (datetime.date.today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')
+        return prepare_task_qa_summary(db, date_min=date_min, date_max=date_max, task='jcmt-nightly', byDate=True)
 
     @app.route('/login', methods=['GET', 'POST'])
     @requires_auth

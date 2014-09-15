@@ -27,7 +27,7 @@ def prepare_job_list(db, location, state, task, number, page,
                      sourcename, obsquerydict={}, state_choice='JSAProc'):
     if location == '':
         location = None
-    if state == '':
+    if state == '' or state == []:
         state = None
     if task == '':
         task = None
@@ -95,6 +95,9 @@ def prepare_job_list(db, location, state, task, number, page,
             'qastate': job.qa_state
         })
 
+    # If state is None, ensure we return a list like object.
+    if state is None:
+        state = []
     return {
         'title': 'Job List',
         'jobs': jobs,

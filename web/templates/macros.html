@@ -57,25 +57,25 @@
         <select name="location">
             <option value="" {{ 'selected="selected"' | safe if selected_location is none }}>Any location</option>
             {% for location in locations %}
-                <option value="{{ location }}" {{ 'selected="selected"' if location == selected_location }}>{{ location }}</option>
+                <option value="{{ location }}" {{ 'selected="selected"' | safe if location == selected_location }}>{{ location }}</option>
             {% endfor %}
         </select>
-        <select name="state">
+        <select multiple="multiple" name="state" size="{{ states |length + 1}}">
             <option value="" {{ 'selected="selected"' | safe if selected_state is none }}>Any state</option>
             {% for state in states %}
-                <option value="{{ state }}" {{ 'selected="selected"' if state == selected_state }}>{{ state | state_name }}</option>
+                <option value="{{ state }}" {{ 'selected="selected"' | safe if state in selected_state }}>{{ state | state_name }}</option>
             {% endfor %}
         </select>
         <select name="qastate">
           <option value="" {{ 'selected="selected"' | safe if selected_qastate is none }}> Any qastate</option>
             {% for qastate in qastates %}
-                <option value="{{ qastate }}" {{ 'selected="selected"' if qastate == selected_qastate }}>{{ qastate | qastate_name }}</option>
+                <option value="{{ qastate }}" {{ 'selected="selected"' | safe if qastate == selected_qastate }}>{{ qastate | qastate_name }}</option>
             {% endfor %}
         </select>
         <select name="task">
             <option value="" {{ 'selected="selected"' | safe if selected_task is none }}>All tasks</option>
             {% for task in tasks %}
-                <option value="{{ task }}" {{ 'selected="selected"' if task == selected_task }}>{{ task }}</option>
+                <option value="{{ task }}" {{ 'selected="selected"' | safe if task == selected_task }}>{{ task }}</option>
             {% endfor %}
         </select>
         <select name="number">
