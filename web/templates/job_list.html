@@ -16,21 +16,22 @@ Job State Summary
 </h1>
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
-  {% if state_choice == 'JSAProc' %}
+  {% if state_choice == 'JSAQA' %}
+  {% set url = job.qaurl %}
+  <div class="tile_title qastate_{{ job.qastate | qastate_name }}">
+    <a href="{{ url }}" title="{{ job.tag }}">
+      QA:{{ job.qastate | qastate_name }}
+    </a>
+  </div>
+  {% elif state_choice == 'JSAProc' %}
   {% set url = job.url %}
+  {% endif %}
   <div class="tile_title state_{{ job.state | state_phase }}">
-    <a href="{{ job.url }}" title="{{ job.tag }}">
+    <a href="{{ url }}" title="{{ job.tag }}">
       {{ job.state | state_name }}
     </a>
   </div>
-  {% elif state_choice == 'JSAQA' %}
-  {% set url = job.qaurl %}
-    <div class="tile_title qastate_{{ job.qastate | qastate_name }}">
-      <a href="{{ job.qaurl }}" title="{{ job.tag }}">
-            {{ job.qastate | qastate_name }}
-      </a>
-    </div>
-    {% endif %}
+
     <p>
         <a href="{{ url }}" title="{{ job.tag }}">
             {{ job.id }}
