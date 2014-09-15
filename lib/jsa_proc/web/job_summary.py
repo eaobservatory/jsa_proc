@@ -17,6 +17,7 @@ from __future__ import absolute_import, division
 
 from collections import OrderedDict
 
+import datetime
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -120,7 +121,7 @@ def prepare_task_summary(db):
 
     return {'results':results, 'states':JSAProcState.STATE_ALL}
 
-def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None):
+def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=None):
     """
     Prepare a summary of tasks in the database based on QA state.
 
@@ -129,18 +130,55 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None):
     obsquery = {}
     if date_min is not None or date_max is not None:
         obsquery['utdate'] = Range(date_min, date_max)
+    daylist = None
+
+    # Create list of days if requested.
+    if byDate is True:
+        d1 = datetime.date(*[int(i) for i in date_min.split('-')])
+        d2 = datetime.date(*[int(i) for i in date_max.split('-')])
+        delta = d2 - d1
+        daylist = [(d1 + datetime.timedelta(days=i)).strftime('%Y-%m-%d') for i in range(delta.days)]
 
     if task:
         tasks = [task]
     else:
         tasks = db.get_tasks()
+
+    qa_reduced_state = ['P', 'T', 'I', 'Y']
+    qa_raw_state = ['?', 'Q', 'M', 'F', 'W', 'S']
+    qa_error_state = ['E']
+    qa_deleted_state = ['X']
     results = {}
-    for t in tasks:
+
+    if byDate is True:
+
+        # Go through each task
+        for t in tasks:
+            results[t] = {}
+
+            # Within each task go through each day
+            for d in daylist:
+
+                # Create the Range object
+                obsquery['utdate'] = Range(d, d)
+
+                # Find the total number of jobsf or that dat, put it in the dayresults dictionary
+                dayresults = {'total': db.find_jobs(task=t, count=True, obsquery=obsquery)}
+
+                # go through each QA State
+                for q in JSAQAState.STATE_ALL:
+                    dayresults[q] = {}
+                    for name,state_options in zip(['Reduced', 'Raw', 'Error', 'Deleted'],
+                                      [qa_reduced_state, qa_raw_state, qa_error_state, qa_deleted_state]):
+                        state = {'state': state_options}
+                        dayresults[q][name] = db.find_jobs(task=t, qa_state=q, state=state,count=True, obsquery=obsquery)
+                results[d] = dayresults
+    else:
         results[t] = {'total':db.find_jobs(task=t, count=True, obsquery=obsquery)}
         for s in JSAQAState.STATE_ALL:
-            results[t][s] = db.find_jobs(task=t, qa_state=s, count=True, obsquery=obsquery)
+            results[t][s] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
 
-    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'date': date_min}
+    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'daylist': daylist}
 
 def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 

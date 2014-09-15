@@ -222,9 +222,11 @@ def create_web_app():
     @app.route('/qa-nightly')
     @templated('task_qa_summary_nightly.html')
     def qa_night_page():
-        date = request.args.get('date', datetime.date.today().strftime('%Y-%m-%d'))
+        date_min = request.args.get('date_max', datetime.date.today().strftime('%Y-%m-%d'))
+        date_max = request.args.get('date_min',
+                                (datetime.date.today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
         task = request.args.get('task', 'jcmt-nightly')
-        return prepare_task_qa_summary(db, date_min=date, date_max=date, task=task)
+        return prepare_task_qa_summary(db, date_min=date_min, date_max=date_max, task=task, byDate=True)
 
     @app.route('/login', methods=['GET', 'POST'])
     @requires_auth
