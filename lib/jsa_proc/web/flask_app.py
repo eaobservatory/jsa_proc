@@ -286,7 +286,11 @@ def create_web_app():
 
     @app.template_filter('qastate_name')
     def qastate_name(qastate):
-        return JSAQAState.get_name(qastate)
+        if qastate.lower() != 'total':
+            name = JSAQAState.get_name(qastate)
+        else:
+            name = 'Total'
+        return name
 
     @app.template_filter('uniq')
     def uniq_filter(xs):
