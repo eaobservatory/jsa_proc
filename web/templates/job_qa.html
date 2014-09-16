@@ -67,8 +67,11 @@
       <tr>
         {% for key in obsinfo[0].keys()
                 if key not in ('id', 'job_id', 'backend',
-                'association', 'obsid', 'obsidss' ) %}
-        {% if key == 'obsnum' %}
+                'association',  'obsidss', 'obsid' ) %}
+        {% if key == 'utdate' %}
+        <th> UT date</th>
+        <th> UT time </th>
+        {% elif key == 'obsnum' %}
         <th> scan </th>
         {% elif key == 'instrument' %}
         <th> Inst. </th>
@@ -82,10 +85,12 @@
       <tr>
         {% for key in o.keys()
              if key not in ('id', 'job_id', 'backend',
-             'association', 'obsidss', 'obsid' ) %}
+             'association', 'obsidss', 'obsid') %}
         {% if key == 'utdate' %}
-        {% set starttime = o.get('obsid', '').split('_')[2] %}
+        {% set starttime = o.get('obsid', '').split('_')[2].split('T')[1] %}
+        {% set uttime = ':'.join([starttime[0:2].lstrip('0'), starttime[2:4], starttime[4:6]]) %}
         <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate':o.utdate }) }}">{{ o.utdate }}</a></td>
+        <td> {{uttime}} </td>
         {% elif key == 'obsid' or key == 'obsidss' or key=='scanmode' %}
         <td> {{ break_underscore(o.get(key, '')) }} </td>
         {% else %}
