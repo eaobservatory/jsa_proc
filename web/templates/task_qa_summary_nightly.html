@@ -21,7 +21,7 @@
   <tr>
     <th class="date"> Date </th>
     <th></th>
-
+    <th class="empty"> &nbsp;</th>
     {% for i in statedict.keys() %}
     <th colspan="{{ results[results.keys()[0]][i].values()|length }}  ">{{ i }}</th><th class="empty">&nbsp</th>
     {% endfor %}
@@ -30,6 +30,7 @@
   <tr>
     <th></th>
     <th> Total </th>
+    <th class="empty"> &nbsp; </th>
     {% for i in statedict.keys() %}
     {% for qastate in results[results.keys()[0]][i].keys() %}
     <th>{{qastate | qastate_name }}</th>
@@ -42,7 +43,7 @@
   <tr>
     <td>{{ date }} </td>
     <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, state_choice='JSAQA') }}">{{ results[date].pop('total') }}</a></td>
-
+    <td class="empty"> &nbsp;</td>
     {% for s in statedict.keys() %}
         {% for qastate in results[date][s].keys() %}
 
