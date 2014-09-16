@@ -91,7 +91,8 @@ class OMPDB:
 
         query = 'SELECT commentstatus FROM ompobslog ' \
                 'WHERE obslogid = ' \
-                '(SELECT MAX(obslogid) FROM ompobslog WHERE obsid=@o)'
+                '(SELECT MAX(obslogid) FROM ompobslog ' \
+                'WHERE obsid=@o AND obsactive=1)'
         args = {'@o': obsid}
 
         with self.db as c:
