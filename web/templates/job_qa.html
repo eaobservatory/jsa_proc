@@ -103,6 +103,27 @@
     </table>
   </div>
   {% endif %}
+
+  <div class="panel panel-small">
+    <table class="qalog">
+      <caption> QA Log </caption>
+      <tr>
+        <th> QA State </th>
+        <th> User </th>
+        <th> Message </th>
+        <th> Time </th>
+      </tr>
+      {% for entry in qalog %}
+      <tr>
+        <td class="qastate_{{ entry.status | qastate_name}}"> {{ entry.status | qastate_name }} </td>
+        <td> {{ entry.username }} </td>
+        <td> {{ entry.message }} </td>
+        <td> {{ entry.datetime | datetimeformat | safe }} </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
 </div>
 
 {% if previews %}

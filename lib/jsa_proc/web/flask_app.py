@@ -296,6 +296,12 @@ def create_web_app():
     def uniq_filter(xs):
         return set(xs)
 
+    @app.template_filter('datetimeformat')
+    def datetimeformat(value, format='%Y-%m-%d<br>%H:%M'):
+        return value.strftime(format)
+
+
+
     @app.context_processor
     def add_to_context():
         return {'url_for_omp': url_for_omp, 'url_for_omp_comment': url_for_omp_comment}
