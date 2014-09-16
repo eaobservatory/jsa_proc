@@ -337,11 +337,6 @@ select[multiple="multiple"]{
     vertical-align:top;
 }
 
-option[selected="selected"]{
-    background-color:black;
-    color:white;
-}
-
 table.qasummary th.qa {
     max-width:5ex;
     overflow: hidden;
