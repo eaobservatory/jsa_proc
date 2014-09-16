@@ -217,15 +217,15 @@ td, th {
     color: black;
 }
 .qastate_Questionable, .qastate_Questionable a{
-    background: rgba(255,215,0,0.51);
+    background: #FFEB7D;
     color: black;
 }
 .qastate_Good,.qastate_Good a{
-    background: rgba(46, 139, 87, 0.61);
+    background: #C9DEF6;
     color: black;
 }
 .qastate_Bad, .qastate_Bad a{
-    background: rgba(255,99,71,0.63);
+    background: #FF9D8B;
     color: black;
 }
 .state_queue, .state_queue a {
