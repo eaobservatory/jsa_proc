@@ -291,18 +291,17 @@ ul#nav li.login {
 }
 div.column-left{
     display:inline-block;
-    width:30%;
-    min-width:95ex;
+    width:45%;
+    min-width:110ex;
     vertical-align:top;
     text-align:left;
-    float:left;
 }
 div.column-right{
     display:inline-block;
-    width:45%;
+    width:40%;
     vertical-align:top;
     text-align:left;
-    min-width:95ex;
+    min-width:80ex;
 }
 div.column-right img{
     width:100%;
@@ -313,6 +312,14 @@ div.column-right div.panel{
 }
 table.obsinfo{
     font-size:small;
+}
+
+table.obsinfo td{
+    max-width:18ex;
+}
+
+td.asscn {
+    word-wrap:break-word;
 }
 td.recpar{
     width:4ex;

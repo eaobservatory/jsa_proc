@@ -63,7 +63,7 @@
 
 {% if obsinfo is not none %}
 <div class="panel">
-<table>
+<table class="obsinfo">
   <caption> Additional Observation Info </caption>
   <tr>
   {% for key in obsinfo[0].keys()
@@ -72,7 +72,7 @@
   {% if key == 'obsnum' %}
   <th> scan </th>
   {% elif key == 'association' %}
-  <th> asscn </th>
+  <th class="asscn"> asscn </th>
   {% else %}
   <th> {{ key }} </th>
   {% endif %}
@@ -87,6 +87,8 @@
     <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
     {% elif key == 'obsid' or key == 'obsidss' %}
     <td> {{ break_underscore(o.get(key, '')) }} </td>
+    {% elif key == 'association' %}
+    <td class="asscn"> {{o.get(key, '') }} </td>
     {% else %}
     <td> {{ o.get(key, '') }} </td>
     {% endif %}
