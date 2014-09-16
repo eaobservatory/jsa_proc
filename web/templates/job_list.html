@@ -20,7 +20,7 @@ Job State Summary
   {% set url = job.qaurl %}
   <div class="tile_title qastate_{{ job.qastate | qastate_name }}">
     <a href="{{ url }}" title="{{ job.tag }}">
-      QA:{{ job.qastate | qastate_name }}
+      {{ job.qastate | qastate_name }}
     </a>
   </div>
   {% elif state_choice == 'JSAProc' %}
