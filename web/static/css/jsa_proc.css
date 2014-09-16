@@ -243,10 +243,6 @@ td, th {
     color: white;
 }
 
-table tr{
-    border:none;
-}
-
 .state_complete, .state_complete a {
     background: blue;
     color: white;
