@@ -190,7 +190,6 @@ div.tile a {
 }
 
 table, td, th {
-    border: 1px solid black;
     border-collapse: collapse;
 }
 
@@ -200,11 +199,12 @@ table {
     border: none;
 }
 
-table tr {
+tr {
     border: none;
 }
 
 td, th {
+    border: 1px solid black;
     margin: 0px;
     padding: 5px;
 }
