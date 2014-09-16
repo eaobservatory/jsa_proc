@@ -197,28 +197,36 @@ table, td, th {
 table {
     margin-left: auto;
     margin-right: auto;
+    border: none;
 }
 
+table tr{
+    border:none;
+}
 td, th {
     margin: 0px;
     padding: 5px;
 }
 
+.empty{
+    border:none;
+}
+
 .qastate_Unknown, .qastate_Unknown a {
-    background: black;
-    color: white;
+    background: #ddd;
+    color: black;
 }
 .qastate_Questionable, .qastate_Questionable a{
-    background: yellow;
+    background: rgba(255,215,0,0.51);
     color: black;
 }
 .qastate_Good,.qastate_Good a{
-    background: green;
-    color: white;
+    background: rgba(46, 139, 87, 0.61);
+    color: black;
 }
 .qastate_Bad, .qastate_Bad a{
-    background: red;
-    color: white;
+    background: rgba(255,99,71,0.63);
+    color: black;
 }
 .state_queue, .state_queue a {
     background: red;
@@ -233,6 +241,10 @@ td, th {
 .state_run, .state_run a {
     background: green;
     color: white;
+}
+
+table tr{
+    border:none;
 }
 
 .state_complete, .state_complete a {

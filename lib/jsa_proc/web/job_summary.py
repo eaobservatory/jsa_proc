@@ -167,8 +167,8 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
                 # Find the total number of jobsf or that dat, put it in the dayresults dictionary
                 dayresults = OrderedDict(total=db.find_jobs(task=t, count=True, obsquery=obsquery))
 
-                # go through each state option
-                for name,state_options in statedict.items():
+                # Go through each Reduced and Error states.
+                for name,state_options in zip(['Reduced','Error'],[qa_reduced_state, qa_error_state]):
                     dayresults[name] = OrderedDict()
                     # Go through each  qa state
                     for q in JSAQAState.STATE_ALL:
@@ -176,6 +176,11 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
                                                        obsquery=obsquery)
 
                     dayresults[name]['total'] = sum(dayresults[name].values())
+
+                # Add on the totals for Raw and Deleted jobs to the dayresults
+                dayresults['Deleted'] = {'total': db.find_jobs(task=t, state='X', count=True, obsquery=obsquery)}
+                dayresults['Raw'] = {'total': db.find_jobs(task=t, state=qa_raw_state,
+                                                           count=True, obsquery=obsquery)}
 
                 # Update the results object
                 results[t][d] = dayresults
