@@ -92,7 +92,7 @@
         <td> {{ o.get(key, '') }} </td>
         {% endif %}
         {% endfor %}
-        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum) }}"> OMP STATUS </a></td>
+        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}"> OMP STATUS </a></td>
       </tr>
       {% endfor %}
     </table>
