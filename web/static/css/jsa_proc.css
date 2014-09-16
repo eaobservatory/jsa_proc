@@ -200,34 +200,39 @@ table {
     border: none;
 }
 
-table tr{
-    border:none;
+table tr {
+    border: none;
 }
+
 td, th {
     margin: 0px;
     padding: 5px;
 }
 
-.empty{
-    border:none;
+.empty {
+    border: none;
 }
 
 .qastate_Unknown, .qastate_Unknown a {
     background: #ddd;
     color: black;
 }
-.qastate_Questionable, .qastate_Questionable a{
+
+.qastate_Questionable, .qastate_Questionable a {
     background: #FFEB7D;
     color: black;
 }
-.qastate_Good,.qastate_Good a{
+
+.qastate_Good,.qastate_Good a {
     background: #C9DEF6;
     color: black;
 }
-.qastate_Bad, .qastate_Bad a{
+
+.qastate_Bad, .qastate_Bad a {
     background: #FF9D8B;
     color: black;
 }
+
 .state_queue, .state_queue a {
     background: red;
     color: white;
@@ -266,9 +271,7 @@ div.changestate select, .changestate input {
     text-align: center;
 }
 
-
-
-div.col{
+div.col {
     display: inline-block;
 }
 
@@ -277,63 +280,71 @@ textarea {
 }
 
 div.jobqa {
-    min-width:30ex;
+    min-width: 30ex;
 }
-div.jobqa textarea{
-    width:90%;
+
+div.jobqa textarea {
+    width: 90%;
 }
+
 ul#nav li.login {
-    float:right;
-}
-div.column-left{
-    display:inline-block;
-    width:45%;
-    min-width:110ex;
-    vertical-align:top;
-    text-align:left;
-}
-div.column-right{
-    display:inline-block;
-    width:40%;
-    vertical-align:top;
-    text-align:left;
-    min-width:80ex;
-}
-div.column-right img{
-    width:100%;
+    float: right;
 }
 
-div.column-right div.panel{
-    margin:0px;
-}
-table.obsinfo{
-    font-size:small;
+div.column-left {
+    display: inline-block;
+    width: 45%;
+    min-width: 110ex;
+    vertical-align: top;
+    text-align: left;
 }
 
-table.obsinfo td{
-    max-width:18ex;
+div.column-right {
+    display: inline-block;
+    width: 40%;
+    vertical-align: top;
+    text-align: left;
+    min-width: 80ex;
+}
+
+div.column-right img {
+    width: 100%;
+}
+
+div.column-right div.panel {
+    margin: 0px;
+}
+
+table.obsinfo {
+    font-size: small;
+}
+
+table.obsinfo td {
+    max-width: 18ex;
 }
 
 td.asscn {
-    word-wrap:break-word;
-}
-td.recpar{
-    width:4ex;
-}
-div.jobqa{
-    text-align:center;
-    min-width:30ex;
+    word-wrap: break-word;
 }
 
-form p{
-    text-align:left;
+td.recpar {
+    width: 4ex;
 }
 
-select[multiple="multiple"]{
-    vertical-align:top;
+div.jobqa {
+    text-align: center;
+    min-width: 30ex;
+}
+
+form p {
+    text-align: left;
+}
+
+select[multiple="multiple"] {
+    vertical-align: top;
 }
 
 table.qasummary th.qa {
-    max-width:5ex;
+    max-width: 5ex;
     overflow: hidden;
 }
