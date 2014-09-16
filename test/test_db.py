@@ -137,10 +137,12 @@ class InterfaceDBTest(DBTestCase):
         # Check that we can update the obs table while adding a job.
         obs1 = {'obsid': '01-asdfasd', 'obsidss': '01-asdfas-1',
                 'utdate': 20140101, 'obsnum': 3, 'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1'}
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2014-01-01 10:00:00'}
         obs2 = {'obsid': '02-asdfasd', 'obsidss': '02-asdfas-1',
                 'utdate': 20140102, 'obsnum': 3, 'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1'}
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2014-01-02 11:00:00'}
 
         self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
 
@@ -460,7 +462,8 @@ class InterfaceDBTest(DBTestCase):
 
         info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',
                   'obsnum': 1, 'instrument': 'F', 'backend': 'B',
-                  'subsys': '1', 'survey': 'GBS', 'project': 'G01'}
+                  'subsys': '1', 'survey': 'GBS', 'project': 'G01',
+                  'date_obs': '2014-01-01 10:00:00'}
 
         info_2 = info_1.copy()
         info_2.update(obsidss='1-2', subsys=2)
@@ -561,7 +564,8 @@ class InterfaceDBTest(DBTestCase):
 
         info = {'obsid': 'x14_01_1T1', 'obsidss': 'x14_1_1T1_850',
                 'utdate': '2014-01-01', 'obsnum': 3, 'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1'}
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2014-01-01 09:00:00'}
 
         self.db.set_obs_info(job_1, [info])
 
