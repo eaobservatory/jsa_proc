@@ -147,10 +147,10 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
     else:
         tasks = db.get_tasks()
 
-    qa_reduced_state = ['P', 'T', 'I', 'Y']
-    qa_raw_state = ['?', 'Q', 'M', 'F', 'W', 'S']
-    qa_error_state = ['E']
-    qa_deleted_state = ['X']
+    qa_reduced_state = list(JSAProcState.STATE_POST_RUN)
+    qa_raw_state = list(JSAProcState.STATE_PRE_RUN | set((JSAProcState.RUNNING,)))
+    qa_error_state = [JSAProcState.ERROR]
+    qa_deleted_state = [JSAProcState.DELETED]
     results = {}
     statedict = OrderedDict(zip(['Reduced', 'Error', 'Deleted', 'Raw'],
                                       [qa_reduced_state, qa_error_state, qa_deleted_state, qa_raw_state]))

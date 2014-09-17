@@ -21,7 +21,7 @@ from jsa_proc.error import JSAProcError
 #     name: Human-readable name of the state.
 #     phase: General phase of processing (for display purposes).
 #     active: True if the state represents a long-running process.
-StateInfo = namedtuple('StateInfo', 'name phase active')
+StateInfo = namedtuple('StateInfo', 'name phase active pre_run')
 
 
 class JSAProcState:
@@ -48,22 +48,26 @@ class JSAProcState:
     PHASE_ERROR = 'E'
 
     _info = OrderedDict((
-        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False)),
-        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False)),
-        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,    False)),
-        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True)),
-        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False)),
-        (RUNNING,      StateInfo('Running',      PHASE_RUN,      True)),
-        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False)),
-        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False)),
-        (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False)),
-        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False)),
-        (ERROR,        StateInfo('Error',        PHASE_ERROR,    False)),
-        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False)),
+        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False, True)),
+        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False, True)),
+        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,    False, True)),
+        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True,  True)),
+        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False, True)),
+        (RUNNING,      StateInfo('Running',      PHASE_RUN,      True,  None)),
+        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False, False)),
+        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False, False)),
+        (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False, False)),
+        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False)),
+        (ERROR,        StateInfo('Error',        PHASE_ERROR,    False, None)),
+        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False, None)),
     ))
 
     STATE_ALL = tuple(_info.keys())
-    STATE_PRE_QA = tuple([UNKNOWN, QUEUED, MISSING, FETCHING, WAITING, RUNNING, PROCESSED])
+
+    STATE_PRE_RUN = set((s for (s, i) in _info.items() if i.pre_run is True))
+    STATE_POST_RUN = set((s for (s, i) in _info.items() if i.pre_run is False))
+
+    STATE_PRE_QA = STATE_PRE_RUN | set((RUNNING, PROCESSED))
 
     @classmethod
     def get_name(cls, state):
