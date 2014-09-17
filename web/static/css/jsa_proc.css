@@ -51,6 +51,10 @@ div#content {
     text-align: left;
 }
 
+.page {
+    max-width: 150ex;
+}
+
 div#pane-info {
     display: inline-block;
     max-width: 48%;
