@@ -19,11 +19,13 @@ processing system.
 """
 
 from datetime import datetime
+
 import shutil
 import signal
 import subprocess
 import tempfile
 import os
+import re
 import sys
 
 from jsa_proc.admin.directories \
@@ -179,11 +181,21 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     log.close()
 
     if retcode != 0:
-        raise JSAProcError('jsawrapdr exited with non zero status. '
-                           'Retcode was %i; job_id is %i.'
-                           'stdin/stderr are written in %s' %
-                           (retcode, job_id, log.name),
-                           retcode, job_id, log.name)
+        errormessage = 'jsawrapdr exited with Retcode %i ' % ( retcode)
+
+        # Find the first ORAC error message in the jsawrapdr log
+        jsalogfile = open(log.name, 'r')
+        lines = jsalogfile.read()
+        jsalogfile.close()
+        result = re.search(r'.*(STDERR:\s*.*)$', lines, re.DOTALL)
+        firsterror = result.group(1).split('\n')[1]
+
+        # Insert the ORAC error at the start of the error message
+        if firsterror:
+            errormessage = 'ORAC ERROR: ' + firsterror + '.\n' + errormessage
+
+        # Raise the error.
+        raise JSAProcError(errormessage, retcode)
     # Need to return list of produced files in output directory?
 
     return log.name
