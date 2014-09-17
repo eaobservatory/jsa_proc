@@ -71,8 +71,10 @@ def create_web_app():
         """
         Send a 401 response so that we can log in.
         """
-        flash('You are not logged in (despite what it may say in the top right corner).')
-        return Response(render_template('logout.html'), 401, {'WWW-Authenticate': loginstring})
+
+        return Response(render_template('logout.html',
+                                        redirect=request.referrer),
+                        401, {'WWW-Authenticate': loginstring})
 
 
     def requires_auth(f):
@@ -82,18 +84,6 @@ def create_web_app():
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = request.authorization
-            if not auth or not check_auth(auth.password):
-                return authenticate()
-            return f(*args, **kwargs)
-        return decorated
-
-    def requires_deauth(f):
-        """
-        A decorator to wrap functions that require authorization.
-        """
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            auth = False
             if not auth or not check_auth(auth.password):
                 return authenticate()
             return f(*args, **kwargs)
@@ -232,17 +222,14 @@ def create_web_app():
             date_max = (datetime.date.today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')
         return prepare_task_qa_summary(db, date_min=date_min, date_max=date_max, task='jcmt-nightly', byDate=True)
 
-    @app.route('/login', methods=['GET', 'POST'])
+    @app.route('/login')
     @requires_auth
     def login():
-        return task_qa_summary()
-
+        raise HTTPRedirect(request.referrer)
 
     @app.route('/logout')
-    @requires_deauth
     def logout():
-        return task_qa_summary()
-
+        return authenticate()
 
     # Image handling.
     @app.route('/job/<int:job_id>/preview/<preview>')
