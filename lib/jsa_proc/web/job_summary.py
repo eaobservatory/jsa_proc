@@ -119,7 +119,8 @@ def prepare_task_summary(db):
         for s in JSAProcState.STATE_ALL:
             results[t][s] = db.find_jobs(task=t, state=s, count=True)
 
-    return {'results':results, 'states':JSAProcState.STATE_ALL}
+    return {'results': results, 'states': JSAProcState.STATE_ALL,
+            'title': 'Summary'}
 
 def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=None):
     """

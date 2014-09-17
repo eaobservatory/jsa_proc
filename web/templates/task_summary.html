@@ -1,14 +1,8 @@
 {% extends 'layout.html' %}
 {% set active_page='summary' %}
 
-{% block body %}
+{% block content %}
 
-
-<div id="content" style="max-width:150ex;">
-<h2>Summary table</h2>
-
-<div id="wrapper">
-<div class="col">
 <table>
   <tr>
     <th>Task name</th>
@@ -31,6 +25,5 @@
   </tr>
 {% endfor %}
 </table>
-</div>
-</div>
+
 {% endblock %}

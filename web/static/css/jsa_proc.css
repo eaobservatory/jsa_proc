@@ -41,12 +41,12 @@ h1, h2, h3, h4 {
 }
 
 div#content {
-    max-width: 110ex;
+    min-width: 110ex;
     background: white;
     margin-left: auto;
     margin-right: auto;
     margin-top: 0px;
-    display: block;
+    display: inline-block;
     padding: 1ex;
     text-align: left;
 }
