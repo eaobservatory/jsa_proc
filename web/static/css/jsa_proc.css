@@ -347,8 +347,3 @@ form p {
 select[multiple="multiple"] {
     vertical-align: top;
 }
-
-table.qasummary th.qa {
-    max-width: 5ex;
-    overflow: hidden;
-}
