@@ -451,9 +451,6 @@ class JSAProcDB:
                                        'This job is being reprocessed; QA state reset automatically.',
                                        getuser())
 
-
-        return job_id
-
     def get_input_files(self, job_id):
         """
         Get the list of input files for specific job from the
