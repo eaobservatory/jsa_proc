@@ -213,22 +213,22 @@ td, th {
     border: none;
 }
 
-.qastate_Unknown, .qastate_Unknown a {
+.qastate_unknown, .qastate_unknown a {
     background: #ddd;
     color: black;
 }
 
-.qastate_Questionable, .qastate_Questionable a {
+.qastate_questionable, .qastate_questionable a {
     background: #FFEB7D;
     color: black;
 }
 
-.qastate_Good,.qastate_Good a {
+.qastate_good,.qastate_good a {
     background: #C9DEF6;
     color: black;
 }
 
-.qastate_Bad, .qastate_Bad a {
+.qastate_bad, .qastate_bad a {
     background: #FF9D8B;
     color: black;
 }

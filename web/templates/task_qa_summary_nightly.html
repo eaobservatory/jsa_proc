@@ -48,7 +48,7 @@
         {% for qastate in results[date][s].keys() %}
 
         {% if qastate != 'total' %}
-        <td class="qastate_{{ qastate | qastate_name }}">{% if results[date][s][qastate] != 0 %}<a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>{% else %} &ndash; {% endif %}</td>
+        <td class="qastate_{{ qastate | qastate_name | lower }}">{% if results[date][s][qastate] != 0 %}<a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>{% else %} &ndash; {% endif %}</td>
         {% else %}
         <td><a href="{{ url_for('job_list', task=taskname, state_choice='JSAQA', date_min=date, date_max=date)}} ">{% if results[date][s][qastate] != 0 %}{{ results[date][s][qastate] }} {% endif %}</a></td>
         {% endif %}

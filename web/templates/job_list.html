@@ -18,7 +18,7 @@ Job State Summary
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
   {% if state_choice == 'JSAQA' %}
   {% set url = job.qaurl %}
-  <div class="tile_title qastate_{{ job.qastate | qastate_name }}">
+  <div class="tile_title qastate_{{ job.qastate | qastate_name | lower }}">
     <a href="{{ url }}" title="{{ job.tag }}">
       {{ job.qastate | qastate_name }}
     </a>
