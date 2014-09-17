@@ -109,3 +109,59 @@
 {% macro break_underscore(message) %}
   {{ message.split('_') | join('_<wbr />' | safe) }}
 {% endmacro %}
+
+{# Macro to print the log out #}
+{% macro log_table(log, headings=True,
+                                columns=[("Time","datetime"), ("State","state_new"),
+                                     ("Previous state","state_prev"), ("Host","host"),
+                                     ("Message", "message")],
+                                checkbox = None) %}
+
+  {% if headings == true %}
+  <tr>
+    {% if checkbox != none %}
+    <th></th>
+    <th></th>
+    {% endif %}
+    {% for c in columns %}
+    <th> {{ c[0] }} </th>
+    {% endfor %}
+  </tr>
+  {% endif %}
+
+<tr>
+  {% if checkbox !=  none %}
+  <td class="checkbox" rowspan="{{ log|length }}"> <input type="checkbox" values="{{checkbox[1]}}"
+                                         name="{{checkbox[0]}}" /></td>
+  <td class="checkboxid" rowspan="{{ log|length }}"> <a href="{{ url_for('job_info', job_id=checkbox[1]) }}"> {{checkbox[1]}}</a> </td>
+    {% endif %}
+  {% for entry in log %}
+  {% set entry = entry._asdict() %}
+    {% for c in columns %}
+
+    {% if c[1] == "host" %}
+    <td class="{{c[1]}}"> {{ entry[c[1]] |replace(".jach.hawaii.edu", "") }} </td>
+
+    {% elif c[1] == "message" %}
+    <td class="{{c[1]}}"> {{ entry[c[1]] |replace("\n", "<br>") | safe }} </td>
+
+    {% elif c[1] == "state_new" or c[1] == "state" %}
+    <td class="state_{{ entry[c[1]] | state_phase }}">
+      {{ entry[c[1]] | state_name }}</td>
+
+    {% elif c[1] == "state_prev" %}
+    <td class="{{c[1]}}"> {{ entry[c[1]] | state_name }}</td>
+
+    {% elif c[1] == "time" or c[1] == "datetime" %}
+    <td class="{{c[1]}}"> {{ entry[c[1]] | datetimeformat |safe }} </td>
+    {% else %}
+    <td class="{{c[1]}}"> {{ entry[c[1]] }} </td>
+
+    {% endif %}
+
+    {% endfor %}
+  </tr> <tr>
+  {% endfor %}
+
+{% endmacro %}
+
