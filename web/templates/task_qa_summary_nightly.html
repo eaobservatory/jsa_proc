@@ -15,7 +15,6 @@
 
 
 {% set results = results['jcmt-nightly'] %}
-<div id="wrapper">
 <div class="col">
 <table class="qasummary">
   <tr>
@@ -23,7 +22,7 @@
     <th></th>
     <th class="empty"> &nbsp;</th>
     {% for i in statedict.keys() %}
-    <th colspan="{{ results[results.keys()[0]][i].values()|length }}  ">{{ i }}</th><th class="empty">&nbsp</th>
+    <th colspan="{{ results[results.keys()[0]][i].values()|length }}">{{ i }}</th><th class="empty">&nbsp;</th>
     {% endfor %}
   </tr>
 
@@ -35,7 +34,7 @@
     {% for qastate in results[results.keys()[0]][i].keys() %}
     <th>{{qastate | qastate_name }}</th>
     {% endfor %}
-    <th class="empty">&nbsp</th>
+    <th class="empty">&nbsp;</th>
     {% endfor %}
   </tr>
 
