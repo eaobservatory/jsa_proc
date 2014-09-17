@@ -7,13 +7,7 @@
 {{render_choices(locations, selected_location, states, selected_state, qastates, selected_qastate, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) }}
 
 {{ render_page_control(pagination) }}
-<h1>
-{% if state_choice == 'JSAQA' %}
-QA Summary
-{% else %}
-Job State Summary
-{% endif %}
-</h1>
+
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
   {% if state_choice == 'JSAQA' %}
