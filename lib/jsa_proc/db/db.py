@@ -399,57 +399,60 @@ class JSAProcDB:
 
         """
 
+        with self.db as c:
+            self._change_state(c, job_id, newstate, message, state_prev)
+
+    def _change_state(self, c, job_id, newstate, message, state_prev):
         # Validate input.
         if not JSAProcState.is_valid(newstate):
             raise JSAProcError('State {0} is not recognised'.format(newstate))
 
-        with self.db as c:
 
-            # Change the state to new state and update the state_prev
-            query = ('UPDATE job SET state_prev = state, state = %s '
-                     'WHERE id = %s')
-            param = [newstate, job_id]
+        # Change the state to new state and update the state_prev
+        query = ('UPDATE job SET state_prev = state, state = %s '
+                 'WHERE id = %s')
+        param = [newstate, job_id]
 
-            if state_prev is not None:
-                query += ' AND state=%s'
-                param.append(state_prev)
+        if state_prev is not None:
+            query += ' AND state=%s'
+            param.append(state_prev)
 
-            c.execute(query, param)
+        c.execute(query, param)
 
-            if c.rowcount == 0:
-                raise NoRowsError('job', query % tuple(param))
-            elif c.rowcount > 1:
-                raise ExcessRowsError('job', query % tuple(param))
+        if c.rowcount == 0:
+            raise NoRowsError('job', query % tuple(param))
+        elif c.rowcount > 1:
+            raise ExcessRowsError('job', query % tuple(param))
 
-            # Get state_prev value if we were not given it.
-            if state_prev is None:
-                c.execute('SELECT state_prev FROM job WHERE id=%s',
-                          (job_id,))
-                state_prev = c.fetchall()
+        # Get state_prev value if we were not given it.
+        if state_prev is None:
+            c.execute('SELECT state_prev FROM job WHERE id=%s',
+                      (job_id,))
+            state_prev = c.fetchall()
 
-                if len(state_prev) > 1:
-                    raise ExcessRowsError(
-                        'job',
-                        'SELECT state_prev FROM job WHERE id=%s' % (job_id))
+            if len(state_prev) > 1:
+                raise ExcessRowsError(
+                    'job',
+                    'SELECT state_prev FROM job WHERE id=%s' % (job_id))
 
-                state_prev = state_prev[0][0]
+            state_prev = state_prev[0][0]
 
-            # Update log table.
-            self._add_log_entry(c, job_id, state_prev, newstate, message)
+        # Update log table.
+        self._add_log_entry(c, job_id, state_prev, newstate, message)
 
-            # Update QA table if appropriate
-            if newstate in JSAProcState.STATE_PRE_QA:
-                # Check the current QA state:
-                job = self._get_job(c, 'id', job_id)
+        # Update QA table if appropriate
+        if newstate in JSAProcState.STATE_PRE_QA:
+            # Check the current QA state:
+            job = self._get_job(c, 'id', job_id)
 
-                # If a non-unknown QA state has been set, change it to unknown
-                # and update the qa table.
-                if job.qa_state != JSAQAState.UNKNOWN:
-                    c.execute('UPDATE job SET qa_state = %s WHERE id= %s',
-                              (JSAQAState.UNKNOWN, job_id))
-                    self._add_qa_entry(c, job_id, JSAQAState.UNKNOWN,
-                                       'This job is being reprocessed; QA state reset automatically.',
-                                       getuser())
+            # If a non-unknown QA state has been set, change it to unknown
+            # and update the qa table.
+            if job.qa_state != JSAQAState.UNKNOWN:
+                c.execute('UPDATE job SET qa_state = %s WHERE id= %s',
+                          (JSAQAState.UNKNOWN, job_id))
+                self._add_qa_entry(c, job_id, JSAQAState.UNKNOWN,
+                                   'This job is being reprocessed; QA state reset automatically.',
+                                   getuser())
 
     def get_input_files(self, job_id):
         """
