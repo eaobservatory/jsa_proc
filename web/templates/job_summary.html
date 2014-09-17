@@ -10,7 +10,7 @@ from {{date_min}} to {{date_max}}
 
 <h2>Summary table</h2>
 
-<div id="wrapper">
+<div>
   <div class="col">
     <table>
       <tr>
@@ -32,21 +32,21 @@ from {{date_min}} to {{date_max}}
 
   <div class="col">
     <h4> All jobs </h4>
-    <img src="{{ url_for('summary_piechart', task=task, stamp=stamp,date_min=date_min, date_max=date_max)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, stamp=stamp,date_min=date_min, date_max=date_max)}}" alt="pie chart" />
   </div>
 
 </div>
 
 <div class="clear"></div>
 
-<div id="wrapper">
+<div>
   <div class="col">
     <h4>Without pointings </h4>
-    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science',stamp=stamp,date_min=date_min, date_max=date_max)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science',stamp=stamp,date_min=date_min, date_max=date_max)}}" alt="pie chart" />
   </div>
   <div class="col">
     <h4>Without pointings and calibrations </h4>
-    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science', CalTypes='NoCalibrations',stamp=stamp, date_min=date_min, date_max=date_max)}}"></img>
+    <img src="{{ url_for('summary_piechart', task=task, ObsTypes='Science', CalTypes='NoCalibrations',stamp=stamp, date_min=date_min, date_max=date_max)}}" alt="pie chart" />
   </div>
 </div>
 
