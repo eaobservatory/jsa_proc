@@ -193,7 +193,9 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
             for q in JSAQAState.STATE_ALL:
                 results[t][q] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
 
-    return {'results':results, 'qastates':JSAQAState.STATE_ALL, 'daylist': daylist, 'statedict' : statedict}
+    return {'results':results, 'qastates':JSAQAState.STATE_ALL,
+            'daylist': daylist, 'statedict' : statedict,
+            'title': 'QA Summary'}
 
 def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 
