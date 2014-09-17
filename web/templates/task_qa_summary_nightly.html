@@ -38,15 +38,17 @@
   {% for date in results.keys() %}
   <tr>
     <td>{{ date }} </td>
-    <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, state_choice='JSAQA') }}">{{ results[date].pop('total') }}</a></td>
+    <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, mode='JSAQA') }}">{{ results[date].pop('total') }}</a></td>
     <td class="empty"> &nbsp;</td>
     {% for s in statedict.keys() %}
         {% for qastate in results[date][s].keys() %}
 
         {% if qastate != 'total' %}
-        <td class="qastate_{{ qastate | qastate_name | lower }}">{% if results[date][s][qastate] != 0 %}<a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>{% else %} &ndash; {% endif %}</td>
+
+        <td class="qastate_{{ qastate | qastate_name | lower }}">{% if results[date][s][qastate] != 0 %}<a href="{{ url_for('job_list', task=taskname, qastate=qastate, mode='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>{% else %} &ndash; {% endif %}</td>
+
         {% else %}
-        <td><a href="{{ url_for('job_list', task=taskname, state_choice='JSAQA', date_min=date, date_max=date)}} ">{% if results[date][s][qastate] != 0 %}{{ results[date][s][qastate] }} {% endif %}</a></td>
+        <td><a href="{{ url_for('job_list', task=taskname, mode='JSAQA', date_min=date, date_max=date)}} ">{% if results[date][s][qastate] != 0 %}{{ results[date][s][qastate] }} {% endif %}</a></td>
         {% endif %}
 
         {% endfor %}

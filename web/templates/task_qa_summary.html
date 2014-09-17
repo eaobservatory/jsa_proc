@@ -18,9 +18,9 @@
   {% for taskname, jobs in results.items() %}
   <tr>
     <td><a href="{{ url_for('job_summary', task=taskname) }}">{{ taskname }}</a></td>
-    <td><a href="{{ url_for('job_list', task=taskname, state_choice='JSAQA') }}">{{ jobs['total'] }}</a></td>
+    <td><a href="{{ url_for('job_list', task=taskname, mode='JSAQA') }}">{{ jobs['total'] }}</a></td>
     {% for qastate in qastates %}
-    <td class = "qastate_{{qastate | qastate_name | lower }}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, state_choice='JSAQA')}} ">{{ jobs[qastate] }} </a></td>
+    <td class = "qastate_{{qastate | qastate_name | lower }}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, mode='JSAQA')}} ">{{ jobs[qastate] }} </a></td>
     {% endfor %}
   </tr>
 {% endfor %}

@@ -121,7 +121,7 @@ def create_web_app():
             request.args.get('qastate', None),
             request.args.get('name', None),
             obsquerydict=obsquerydict,
-            state_choice=request.args.get('state_choice', 'JSAProc')
+            mode=request.args.get('mode', 'JSAProc')
         )
 
     @app.route('/image/<task>/piechart')

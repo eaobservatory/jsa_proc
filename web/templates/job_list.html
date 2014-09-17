@@ -10,14 +10,14 @@
 
 {% for job in jobs %}
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
-  {% if state_choice == 'JSAQA' %}
+  {% if mode == 'JSAQA' %}
   {% set url = job.qaurl %}
   <div class="tile_title qastate_{{ job.qastate | qastate_name | lower }}">
     <a href="{{ url }}" title="{{ job.tag }}">
       {{ job.qastate | qastate_name }}
     </a>
   </div>
-  {% elif state_choice == 'JSAProc' %}
+  {% elif mode == 'JSAProc' %}
   {% set url = job.url %}
   {% endif %}
   <div class="tile_title state_{{ job.state | state_phase }}">

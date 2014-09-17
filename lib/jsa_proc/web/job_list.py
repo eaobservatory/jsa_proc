@@ -24,7 +24,7 @@ from jsa_proc.web.util import url_for, calculate_pagination
 
 def prepare_job_list(db, location, state, task, number, page,
                      date_min, date_max, qastate,
-                     sourcename, obsquerydict={}, state_choice='JSAProc'):
+                     sourcename, obsquerydict={}, mode='JSAProc'):
     if location == '':
         location = None
     if state == '' or state == []:
@@ -53,6 +53,7 @@ def prepare_job_list(db, location, state, task, number, page,
         'date_min': date_min,
         'date_max': date_max,
         'name': sourcename,
+        'mode': mode,
     })
 
     if (date_min is not None) or (date_max is not None):
@@ -116,5 +117,5 @@ def prepare_job_list(db, location, state, task, number, page,
         'date_min': date_min,
         'date_max': date_max,
         'name': sourcename,
-        'state_choice': state_choice,
+        'mode': mode,
     }
