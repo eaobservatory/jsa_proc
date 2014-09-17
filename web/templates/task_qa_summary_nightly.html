@@ -1,11 +1,9 @@
 {% extends 'layout.html' %}
 {% set active_page='qa-nightly' %}
 
-{% block body %}
+{% block content %}
 
-
-<div id="content" style="max-width:150ex;">
-<h2>QA Summary table for: {{ daylist[0] }} &ndash; {{ daylist[-1] }}</h2>
+<h2>{{ daylist[0] }} &ndash; {{ daylist[-1] }}</h2>
 <form>
   <input type="text" name="date_min" value="{{ daylist[0] | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
   &mdash;
@@ -60,6 +58,5 @@
   {% endfor %}
 
 </table>
-</div>
 </div>
 {% endblock %}
