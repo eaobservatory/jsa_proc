@@ -19,6 +19,8 @@ from crypt import crypt
 
 from omp.siteconfig import get_omp_siteconfig
 
+crypted = None
+
 
 def check_staff_password(password):
     """Check whether the given password is the correct staff password.
@@ -26,9 +28,13 @@ def check_staff_password(password):
     Returns True on success or False if the given password is wrong.
     """
 
-    config = get_omp_siteconfig()
+    global crypted
 
-    crypted = config.get('password', 'staff')
+    if crypted is None:
+        config = get_omp_siteconfig()
+
+        crypted = config.get('password', 'staff')
+
     salt = crypted[0:2]
 
     return crypt(password, salt) == crypted
