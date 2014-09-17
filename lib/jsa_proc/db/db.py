@@ -621,7 +621,8 @@ class JSAProcDB:
         log = JSAProcLog(*log)
         return log
 
-    def set_location(self, job_id, location, foreign_id=()):
+    def set_location(self, job_id, location, foreign_id=(),
+                     state_new='?', message=None):
         """
         Update the location, and optionally the foreign_id of a job.
 
@@ -633,6 +634,12 @@ class JSAProcDB:
         foregin_id (option), string, None to set to NULL or empty
         tuple (default) to not alter the current value.
 
+        state_new: new state to change the job to after moving it.
+        (default: UNKNOWN, None to not change the state)
+
+        message: log message to use when changing the state.
+        (string, default None to generate a message automatically).
+        Not used if state_new is set to None.
         """
 
         with self.db as c:
@@ -643,6 +650,12 @@ class JSAProcDB:
                 c.execute('UPDATE job SET location = %s, foreign_id = %s '
                           'WHERE id = %s',
                           (location, foreign_id, job_id))
+
+            if state_new is not None:
+                if message is None:
+                    message = 'Location changed to {0}'.format(location)
+
+                self._change_state(c, job_id, state_new, message, None)
 
     def set_foreign_id(self, job_id, foreign_id):
         """

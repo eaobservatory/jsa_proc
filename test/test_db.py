@@ -265,7 +265,7 @@ class InterfaceDBTest(DBTestCase):
         parameters = 'REDUCE_SCAN_JSA_PUBLIC'
         input_file_names = ['testfile1', 'testfile2']
         job_id = self.db.add_job(tag, location, mode, parameters, 'test',
-                                 input_file_names)
+                                 input_file_names, state=JSAProcState.COMPLETE)
 
         # Values for testing
         location = 'CADC'
@@ -273,14 +273,16 @@ class InterfaceDBTest(DBTestCase):
         foreign_id = 'DummyCADCId'
         foreign_id2 = 'DummyCADCId2'
 
-        # Change the location and foreign_id
-        self.db.set_location(job_id, location, foreign_id=foreign_id)
+        # Change the location and foreign_id without changing the state.
+        self.db.set_location(job_id, location, foreign_id=foreign_id,
+                             state_new=None)
 
         # Check its changed correctly.
         job = self.db.get_job(id_=job_id)
 
         self.assertEqual(job.location, location)
         self.assertEqual(job.foreign_id, foreign_id)
+        self.assertEqual(job.state, JSAProcState.COMPLETE)
 
         # Change the foreign_id on its own
         self.db.set_foreign_id(job_id, foreign_id2)
@@ -298,6 +300,9 @@ class InterfaceDBTest(DBTestCase):
         job = self.db.get_job(id_=job_id)
         self.assertEqual(job.location, location2)
         self.assertEqual(job.foreign_id, foreign_id2)
+
+        # Check that the state was reset to UNKNOWN.
+        self.assertEqual(job.state, JSAProcState.UNKNOWN)
 
     def test_set_output_files(self):
         """
