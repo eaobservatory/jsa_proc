@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% set active_page='error_summary' %}
+{% from 'macros.html' import log_table %}
 {% block content%}
 
 <form>
@@ -21,44 +22,28 @@
 {% for l in job_summary_dict.keys() %}
 <h2> {{job_summary_dict[l]|length}} Jobs at {{l}} in {{ filtering | default('', True) | capitalize }} Error States {% if chosentask is not none %} in task {{chosentask}} {% endif %}</h2>
 <form method="POST" action="{{ url_for('job_change_state') }}"> 
-<table class="page" style="font-size:9pt">
-  <tr>
-    <th> Select </th>
-    <th> Job ID </th>
-    <th> State</th>
-    <th>Time </th>
-    <th> Message </th>
-  </tr>
-{% for job_id in job_summary_dict[l] %}
-  {% for row in job_summary_dict[l][job_id] %}
-  <tr>
-  {% if loop.first %}
-  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <input type="checkbox" value="{{job_id}}" name="job_id" /></td>
-  <td rowspan="{{job_summary_dict[l][job_id]|length }}"> <a href="{{ url_for('job_info', job_id=job_id)}}">{{job_id}}</a> </td>
-  {% endif %}
-    <td class="state_{{ row.state | state_phase }}"> {{row.state | state_name }} </td>
-    <td> {{row.time}} </td>
-    <td> {{row.message}} </td>
+
+  <table>
+    <tr>
+      <th/>
+      <th/>
+      <th> Time </th>
+      <th> State </th>
+      <th> Message </th>
     </tr>
-  {% endfor %}
-<tr class="blankrow"><td colspan="5" style="padding:1ex;border:none">&nbsp;</td></tr>
+  {% for job_id in job_summary_dict[l] %}
 
-{% endfor %}
+  {{ log_table(job_summary_dict[l][job_id],
+                  headings=False, columns=[("Time", "time"),
+                             ("State", "state"), ("Message", "message")],
+                  checkbox=["job_id", job_id])}}
 
-</table>
-<br />
-<br />
-<select name="newstate">
-  <option value=""{{ 'selected="selected"' | safe if selected_new_state is none}}>New State</option>
-  {% for state in states %}
-  <option value="{{ state }}" {{'selected="selected"' | safe if state == selected_new_state }}>{{ state | state_name }}</option>
+  <tr class="blankrow"><td colspan="5" style="padding:1ex;border:none">&nbsp;</td></tr>
+
   {% endfor %}
-</select><br/>
-<p>
-  <textarea rows=2 COLS=100 name="message"></textarea>
-</p>
+  </table>
 <input type="hidden" name="url" value="{{url_for('error_summary')}}">
-<input type="submit" value="submit">
+<input type="submit" value="submit"> 
 </form>
 {% endfor %}
 {% endblock %}

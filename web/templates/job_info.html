@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from 'macros.html' import break_underscore %}
+{% from 'macros.html' import break_underscore, log_table %}
 {% block body %}
 
 
@@ -96,7 +96,7 @@
   </tr>
   {% endfor %}
   </table>
-            
+
 </div>
 {% endif %}
 {% if output_files %}
@@ -117,25 +117,8 @@
 {% if log %}
 <div class="panel">
 <h2>Logs</h2>
-
 <table>
-<tr>
-    <th>Time</th>
-    <th>State</th>
-    <th>Previous state</th>
-    <th>Host</th>
-    <th>Message</th>
-</tr>
-{% for entry in log %}
-<tr>
-    <td>{{ entry.datetime }}</td>
-    <td class="state_{{ entry.state_new | state_phase }}">
-        {{ entry.state_new | state_name }}</td>
-    <td>{{ entry.state_prev  | state_name }}</td>
-    <td>{{ entry.host }}</td>
-    <td>{{ break_underscore(entry.message) }}</td>
-</tr>
-{% endfor %}
+{{ log_table(log) }}
 </table>
 
 <!-- Allow users to change state of job. -->
