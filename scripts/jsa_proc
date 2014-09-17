@@ -18,6 +18,7 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
+    jsa_proc clean [-v | -q] [--dry-run] (input) [--count <number>]
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force]
@@ -36,6 +37,7 @@ Options:
     --job-id <id>, -j <id>  Identifier of job on which to work.
     --location <location>   Job location, e.g. JAC, CADC.
 
+    --count, -c <number>    Number of jobs to process.
     --check-at-cadc         Test whether files are at CADC.
     --force, -f             Skip initial state check.
     --no-etransfer          Skip e-transfer steps.
@@ -93,7 +95,7 @@ def main():
 
     try:
         # Process integer arguments.
-        for integer_argument in ('--job-id',):
+        for integer_argument in ('--job-id', '--count'):
             if args[integer_argument] is not None:
                 try:
                     args[integer_argument] = int(args[integer_argument])
@@ -126,6 +128,18 @@ def command(f):
 
     commands[f.__name__[:-1] if f.__name__.endswith('_') else f.__name__] = f
     return f
+
+
+@command
+def clean(args):
+    """Sub-command to clean up old directories."""
+
+    if args['input']:
+        from jsa_proc.action.clean import clean_input
+        clean_input(count=args['--count'], dry_run=args['--dry-run'])
+
+    else:
+        raise CommandError('Did not recognise clean type')
 
 
 @command
