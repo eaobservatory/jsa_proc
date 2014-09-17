@@ -20,7 +20,7 @@ from flask import Flask, flash, request, send_file, Response, render_template
 from functools import wraps
 import os.path
 
-import jsa_proc.config
+from jsa_proc.config import get_config, get_database, get_home
 from jsa_proc.state import JSAProcState
 from jsa_proc.qastate import JSAQAState
 
@@ -46,14 +46,16 @@ loginstring = 'Basic realm="Login Required: use your username and the staff pass
 def create_web_app():
     """Function to prepare the Flask web application."""
 
-    home = jsa_proc.config.get_home()
-    db = jsa_proc.config.get_database()
+    home = get_home()
+    db = get_database()
 
     app = Flask(
         'jsa_proc',
         static_folder=os.path.join(home, 'web', 'static'),
         template_folder=os.path.join(home, 'web', 'templates'),
     )
+
+    app.secret_key = get_config().get('web', 'key')
 
     # Web authorization -- mostly take from flask docs snippets 8
     # http://flask.pocoo.org/snippets/8
@@ -305,10 +307,6 @@ def create_web_app():
     @app.context_processor
     def add_to_context():
         return {'url_for_omp': url_for_omp, 'url_for_omp_comment': url_for_omp_comment}
-
-
-    # secret key?
-    app.secret_key = 'werwserA0Zr98j/3yX R~XHH!jmN]LWX/,?RTasdfasasdfdfasdfs1234'
 
     # Return the Application.
 
