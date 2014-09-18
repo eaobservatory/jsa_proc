@@ -33,8 +33,14 @@ class JSAProcErrorFilter():
             '503 Server Error',
             'fails hds validation',
             ],
-        'running': [
+        'jsawrapdr': [
             'jsawrapdr exited with non zero status',
+            ],
+        'oracdr': [
+            'ORAC ERROR:',
+            ],
+        'e-transfer': [
+            'e-transfer',
             ],
     }
 
