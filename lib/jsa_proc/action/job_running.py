@@ -195,7 +195,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
             errormessage = 'ORAC ERROR: ' + firsterror + '.\n' + errormessage
 
         # Raise the error.
-        raise JSAProcError(errormessage, retcode)
+        raise JSAProcError(errormessage)
     # Need to return list of produced files in output directory?
 
     return log.name
