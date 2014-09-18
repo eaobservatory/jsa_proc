@@ -27,6 +27,10 @@ class JACFileTestCase(TestCase):
         self.assertEqual(
             get_jac_data_dir('a20140910_00001_01_0001'),
             '/jcmtdata/raw/acsis/spectra/20140910/00001')
+        self.assertEqual(
+            get_jac_data_dir('a19970424_00017_04_0001'),
+            '/jcmtdata/raw/acsis-das/converted/1997/19970424/00017')
+
         with self.assertRaises(JSAProcError):
             get_jac_data_dir('s7q20140401_00001_0001')
         with self.assertRaises(JSAProcError):

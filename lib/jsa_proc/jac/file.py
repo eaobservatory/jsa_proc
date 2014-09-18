@@ -39,7 +39,13 @@ def get_jac_data_dir(filename):
     if m:
         (date, obsnum) = m.groups()
 
-        return os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
+        if date > '20061000':
+            return os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
+
+        else:
+            year = date[0:4]
+            return os.path.join('/jcmtdata/raw/acsis-das/converted',
+                                year, date, obsnum)
 
     raise JSAProcError('Filename {0} does not match '
                        'an expected pattern'.format(filename))
