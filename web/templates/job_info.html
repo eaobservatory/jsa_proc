@@ -30,11 +30,11 @@
     <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
     <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
+    {% endif %}
     <tr><th>Priority</th><td>{{ info.priority }} </td></tr>
     <tr><th>Task</th><td>{{ info.task }} </td></tr>
     <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
     <tr><th>Tag</th><td>{{ break_underscore(info.tag) }} </td></tr>
-    {% endif %}
 </table>
 </div>
 </div>
