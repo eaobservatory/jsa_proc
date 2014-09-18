@@ -42,8 +42,26 @@
 
   {% endfor %}
   </table>
-<input type="hidden" name="url" value="{{url_for('error_summary')}}">
-<input type="submit" value="submit"> 
+
+  <br />
+  <br />
+  <select name="newstate">
+  <option value=""{{ 'selected="selected"' | safe if selected_new_state is none}}>New State</option>
+  {% for state in states %}
+  <option value="{{ state }}" {{'selected="selected"' | safe if state == selected_new_state }}>
+    {{ state | state_name }}
+  </option>
+  {% endfor %}
+
+  </select>
+  <br/>
+  <p>
+    <textarea rows=2 COLS=100 name="message"></textarea>
+  </p>
+
+  <input type="hidden" name="url" value="{{url_for('error_summary')}}">
+  <input type="submit" value="submit">
 </form>
+
 {% endfor %}
 {% endblock %}
