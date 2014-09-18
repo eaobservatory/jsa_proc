@@ -143,7 +143,7 @@
     <td class="{{c[1]}}"> {{ entry[c[1]] |replace(".jach.hawaii.edu", "") }} </td>
 
     {% elif c[1] == "message" %}
-    <td class="{{c[1]}}"> {{ entry[c[1]] |replace("\n", "<br/>") |replace("_","_<wbr />")| safe }} </td>
+    <td class="{{c[1]}}"> {{ entry[c[1]] |replace("\n", "<br/>" | safe) |replace("_","_<wbr />" | safe) }} </td>
 
     {% elif c[1] == "state_new" or c[1] == "state" %}
     <td class="state_{{ entry[c[1]] | state_phase }}">
