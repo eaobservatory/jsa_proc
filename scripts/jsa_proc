@@ -34,7 +34,7 @@ Options:
     --quiet, -q             Omit informational messages.
     --dry-run, -n           Do not actually peform the action.
 
-    --job-id <id>, -j <id>  Identifier of job on which to work.
+    --job-id, -j <id>       Identifier of job on which to work.
     --location <location>   Job location, e.g. JAC, CADC.
 
     --count, -c <number>    Number of jobs to process.
