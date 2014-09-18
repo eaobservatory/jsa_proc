@@ -23,7 +23,7 @@
 <h2> {{job_summary_dict[l]|length}} Jobs at {{l}} in {{ filtering | default('', True) | capitalize }} Error States {% if chosentask is not none %} in task {{chosentask}} {% endif %}</h2>
 <form method="POST" action="{{ url_for('job_change_state') }}"> 
 
-  <table>
+  <table class="page" style="font-size:9pt">
     <tr>
       <th/>
       <th/>
