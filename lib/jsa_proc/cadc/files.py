@@ -47,12 +47,12 @@ class CADCFiles():
         (re.compile('^(jcmt_scuba2_[0-9]{5}_[0-9t]{15}_)'
                     '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
          '{0}%'),
-        # ACSIS reduced file.
+        # ACSIS/DAS reduced file.
         (re.compile('^(jcmth[0-9]{8}_[0-9]{5}_[0-9]{2}_)[-_a-z0-9]+'
                     '(_[0-9]{3})\.fits$'),
          '{0}%{1}'),
-        # CAOM-2 preview for ACSIS reduced observation file.
-        (re.compile('^(jcmt_acsis_[0-9]{5}_[0-9t]{15}_)'
+        # CAOM-2 preview for ACSIS/DAS reduced observation file.
+        (re.compile('^(jcmt_(acsis|das)_[0-9]{5}_[0-9t]{15}_)'
                     '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
          '{0}%'),
         # CAOM-2 preview for nightly group file.
