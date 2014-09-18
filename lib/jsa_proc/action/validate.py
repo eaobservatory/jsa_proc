@@ -121,7 +121,7 @@ def validate_output(job_id, db):
 
         if preview_sizes != valid_preview_sizes:
             raise ValidationError('wrong preview sizes: ' +
-                                  repr(preview_sizes))
+                                  ', '.join(str(i) for i in preview_sizes))
 
     except ValidationError as e:
         logger.error('Job %i failed output validation: %s', job_id, e.message)
