@@ -83,11 +83,14 @@ def validate_job(job_id, db):
                         state_prev=JSAProcState.UNKNOWN)
 
 
-def validate_output(job_id, db):
+def validate_output(job_id, db, dry_run=False):
     """Attempt to validate a job's output file list.
 
     On failure: set the job to the ERROR state and returns
     False.  Otherwise returns True.
+
+    If dry_run is set then the database status is not
+    updated.
     """
 
     try:
@@ -125,9 +128,11 @@ def validate_output(job_id, db):
 
     except ValidationError as e:
         logger.error('Job %i failed output validation: %s', job_id, e.message)
-        db.change_state(job_id,
-                        JSAProcState.ERROR,
-                        'Job failed output: ' + e.message)
+
+        if not dry_run:
+            db.change_state(job_id,
+                            JSAProcState.ERROR,
+                            'Job failed output: ' + e.message)
 
         return False
 
