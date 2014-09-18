@@ -131,7 +131,7 @@
 
 <tr>
   {% if checkbox !=  none %}
-  <td class="checkbox" rowspan="{{ log|length }}"> <input type="checkbox" values="{{checkbox[1]}}"
+  <td class="checkbox" rowspan="{{ log|length }}"> <input type="checkbox" value="{{checkbox[1]}}"
                                          name="{{checkbox[0]}}" /></td>
   <td class="checkboxid" rowspan="{{ log|length }}"> <a href="{{ url_for('job_info', job_id=checkbox[1]) }}"> {{checkbox[1]}}</a> </td>
     {% endif %}
