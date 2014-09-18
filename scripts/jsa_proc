@@ -25,23 +25,26 @@ Usage:
     jsa_proc import [-v | -q] [--dry-run] --location <location>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
+    jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
+    jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
-    --help, -h              Show usage information.
-    --verbose, -v           Print debugging information.
-    --quiet, -q             Omit informational messages.
-    --dry-run, -n           Do not actually peform the action.
+    --help, -h                 Show usage information.
+    --verbose, -v              Print debugging information.
+    --quiet, -q                Omit informational messages.
+    --dry-run, -n              Do not actually peform the action.
 
-    --job-id, -j <id>       Identifier of job on which to work.
-    --location <location>   Job location, e.g. JAC, CADC.
+    --job-id, -j <id>          Identifier of job on which to work.
+    --location, -l <location>  Job location, e.g. JAC, CADC.
 
-    --count, -c <number>    Number of jobs to process.
-    --check-at-cadc         Test whether files are at CADC.
-    --force, -f             Skip initial state check.
-    --no-etransfer          Skip e-transfer steps.
-    --poll                  Poll a system for state updates.
+    --count, -c <number>       Number of jobs to process.
+    --check-at-cadc            Test whether files are at CADC.
+    --force, -f                Skip initial state check.
+    --no-etransfer             Skip e-transfer steps.
+    --poll                     Poll a system for state updates.
+    --task, -t <task>          Select jobs for a particular task.
 
 Commands:
     fetch:
@@ -72,6 +75,7 @@ from docopt import docopt
 
 from jsa_proc.config import get_database
 from jsa_proc.error import CommandError
+from jsa_proc.state import JSAProcState
 
 script_name = 'jsa_proc'
 commands = {}
@@ -227,6 +231,28 @@ def query(args):
 
     else:
         raise CommandError('Did not recognise query type')
+
+
+@command
+def revalidate(args):
+    """Sub-command to re-validate jobs."""
+
+    if args['output']:
+        from jsa_proc.action.validate import validate_output
+
+        db = get_database()
+
+        if args['--job-id'] is not None:
+            validate_output(args['--job-id'], db, dry_run=args['--dry-run'])
+
+        else:
+            for job in db.find_jobs(task=args['--task'],
+                                    location=args['--location'],
+                                    state=JSAProcState.STATE_POST_RUN):
+                validate_output(job.id, db, dry_run=args['--dry-run'])
+
+    else:
+        raise CommandError('Did not recognise re-validation type')
 
 
 @command
