@@ -214,9 +214,16 @@ def create_web_app():
     @app.route('/qa-nightly')
     @templated('task_qa_summary_nightly.html')
     def qa_night_page():
+        """
+        By default, show the previous week.
+
+        Note that prepare_task_qa_summary interprets dates as
+        inclusive, so use 6 days for the time delta to get a week
+
+        """
         date_min = request.args.get('date_min', None)
         if date_min is None or date_min == '':
-            date_min = (datetime.date.today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')
+            date_min = (datetime.date.today() - datetime.timedelta(days=6)).strftime('%Y-%m-%d')
 
         date_max = request.args.get('date_max', None)
         if date_max is None or date_max == '':

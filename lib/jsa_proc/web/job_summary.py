@@ -137,8 +137,14 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
     if byDate is True:
         d1 = datetime.date(*[int(i) for i in date_min.split('-')])
         d2 = datetime.date(*[int(i) for i in date_max.split('-')])
-        delta = d2 - d1
-        direction = delta.days/abs(delta.days)
+        larger = max(d2, d1)
+        smaller = min(d2, d1)
+        delta = larger + datetime.timedelta(1) - smaller
+        if larger == d2:
+            direction =  1
+        else:
+            direction = -1
+
         daylist = [(d1 + datetime.timedelta(days=i*direction)).strftime('%Y-%m-%d') for i in range(abs(delta.days))]
 
 
