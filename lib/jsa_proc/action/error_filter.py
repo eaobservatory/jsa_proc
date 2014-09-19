@@ -26,22 +26,25 @@ class JSAProcErrorFilter():
     """
 
     filters = {
-        'unauthorized': [
-            '401 Client Error',
-            ],
-        'network': [
-            '503 Server Error',
-            'fails hds validation',
-            ],
-        'jsawrapdr': [
-            'jsawrapdr exited with non zero status',
-            ],
-        'oracdr': [
-            'ORAC ERROR:',
-            ],
-        'e-transfer': [
-            'e-transfer',
-            ],
+        'unauthorized': {
+            'include':['401 Client Error'],
+            },
+        'network': {
+            'include': ['503 Server Error','fails hds validation']
+            },
+        'jsawrapdr': {
+            'include': ['jsawrapdr exited'],
+            'exclude': ['ORAC ERROR']
+            },
+        'oracdr': {
+            'include': ['ORAC ERROR:'],
+            },
+        'e-transfer': {
+            'include': ['e-transfer'],
+            },
+        'No output files': {
+            'include': ['Job failed output: no output files'],
+            },
     }
 
     filter_names = sorted(filters.keys()) + ['uncategorized']
@@ -55,15 +58,14 @@ class JSAProcErrorFilter():
         """
 
         if filter_name == 'uncategorized':
-            self.search = sum(self.filters.values(), [])
-            self.condition = operator.not_
+            exclude = []
+            for f in self.filters:
+                exclude += self.filters[f].get('include', [])
+            self.exclude = exclude
+            self.include = []
         else:
-            try:
-                self.search = self.filters[filter_name]
-                self.condition = operator.truth
-            except KeyError:
-                raise JSAProcError(
-                    'Unknown filtering option "{0}"'.format(filter_name))
+            self.include = self.filters[filter_name].get('include', [])
+            self.exclude = self.filters[filter_name].get('exclude', [])
 
     def __call__(self, job_logs):
         """Apply filter to a dictionary of jobs and their errors.
@@ -76,6 +78,8 @@ class JSAProcErrorFilter():
         # is an iterator, which we can't use while popping entries out of
         # the dictionary.
         for (job, log) in list(job_logs.items()):
-            if self.condition(all(log[0].message.find(i) == -1
-                                  for i in self.search)):
+            if self.include == []:
+                self.include = log[0].message
+            if not (any([i in log[0].message for i in self.include]) and not any(
+                    [i in log[0].message for i in self.exclude])):
                 job_logs.pop(job)
