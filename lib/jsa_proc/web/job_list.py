@@ -54,6 +54,7 @@ def prepare_job_list(db, location, state, task, number, page,
         'date_max': date_max,
         'name': sourcename,
         'mode': mode,
+        'qa_state': qastate,
     })
 
     if (date_min is not None) or (date_max is not None):
