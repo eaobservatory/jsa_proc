@@ -188,11 +188,13 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         lines = jsalogfile.read()
         jsalogfile.close()
         result = re.search(r'.*(STDERR:\s*.*)$', lines, re.DOTALL)
-        firsterror = result.group(1).split('\n')[1]
+        if result:
+            firsterror = result.group(1).split('\n')[1]
 
-        # Insert the ORAC error at the start of the error message
-        if firsterror:
-            errormessage = 'ORAC ERROR: ' + firsterror + '.\n' + errormessage
+            # Insert the ORAC error at the start of the error message
+            if firsterror:
+                errormessage = 'ORAC ERROR: ' + firsterror + '.\n' + \
+                               errormessage
 
         # Raise the error.
         raise JSAProcError(errormessage)
