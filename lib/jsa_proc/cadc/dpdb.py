@@ -60,10 +60,15 @@ class CADCDP:
 
         self.db.close()
 
-    def get_recipe_info(self):
+    def get_recipe_info(self, tag_pattern=None):
         """Fetch info for all JSA recipes in the CADC DP database.
 
         Returns a list of CADCDPInfo named tuples.
+
+        By default, fetch JSA HEALPix tile generation recipe
+        instances, based on the recipe name in the parameters
+        column.  Otherwise, if a tag pattern is specified,
+        fetch recipes matching that pattern.
         """
 
         if self.recipe is None:
@@ -71,15 +76,26 @@ class CADCDP:
 
         result = []
 
+        if tag_pattern is None:
+            # By default, import the HEALPix tile generation
+            # recipe instances.
+            where = '(' + ' OR '.join((
+                'parameters LIKE "%-drparameters=\'' + x +
+                '\'%"' for x in jsa_tile_recipes)) + ')'
+
+        else:
+            # Otherwise use the specified pattern.  Sybase does not
+            # appear to allow use to use a placeholder for the LIKE
+            # expression!
+            where = 'tag LIKE "{0}"'.format(tag_pattern)
+
         with self.db as c:
             c.execute('SELECT identity_instance_id, state, tag, '
                       'parameters, priority '
                       'FROM dp_recipe_instance '
                       'WHERE recipe_id IN (' +
                       ', '.join((str(x) for x in self.recipe)) + ') '
-                      'AND (' + ' OR '.join((
-                          'parameters LIKE "%-drparameters=\'' + x +
-                          '\'%"' for x in jsa_tile_recipes)) + ')')
+                      'AND ' + where)
 
             while True:
                 row = c.fetchone()

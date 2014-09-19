@@ -25,7 +25,7 @@ class DummyCADCDP:
             self.input_file[info.id] = input
             self.output_file[info.id] = output
 
-    def get_recipe_info(self):
+    def get_recipe_info(self, tag_pattern=None):
         return self.info
 
     def get_recipe_input_files(self, id_):

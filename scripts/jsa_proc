@@ -22,7 +22,7 @@ Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force]
-    jsa_proc import [-v | -q] [--dry-run] --location <location>
+    jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
@@ -44,6 +44,7 @@ Options:
     --force, -f                Skip initial state check.
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
+    --tag <tag>                Select jobs by tag.
     --task, -t <task>          Select jobs for a particular task.
 
 Commands:
@@ -178,8 +179,10 @@ def import_(args):
     if args['--location'] == 'CADC':
         from jsa_proc.cadc.initial_import import import_from_cadcdp
 
-        if not import_from_cadcdp(dry_run=args['--dry-run']):
-            raise CommandErrorr('errors encountered during import')
+        if not import_from_cadcdp(dry_run=args['--dry-run'],
+                                  task=args['--task'],
+                                  tag_pattern=args['--tag']):
+            raise CommandError('errors encountered during import')
 
     else:
         raise CommandError('unknown location: {0}'.format(args['--location']))

@@ -50,6 +50,14 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
             self.assertRegexpMatches(job.parameters,
                                      "-drparameters='[A-Z_]*'")
 
+    def test_recipe_instance_tag(self):
+        """Test retrieval of recipe information by tag pattern."""
+
+        info = self.db.get_recipe_info(tag_pattern='%-1004-%')
+
+        self.assertEqual(set((x.id for x in info)),
+                         set((1004,)))
+
     def test_recipe_input_files(self):
         """Test retrieval of recipe file list.
         """

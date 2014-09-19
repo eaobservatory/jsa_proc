@@ -36,7 +36,7 @@ def parse_cadc_param(param):
 
     parser = SafeArgumentParser()
     parser.add_argument('-mode', required=True)
-    parser.add_argument('-drparameters', required=True)
+    parser.add_argument('-drparameters', required=False, default='')
 
     args = parser.parse_args(shlex.split(param))
 
