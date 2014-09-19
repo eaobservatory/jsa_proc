@@ -82,12 +82,12 @@ class CADCDP:
             where = '(' + ' OR '.join((
                 'parameters LIKE "%-drparameters=\'' + x +
                 '\'%"' for x in jsa_tile_recipes)) + ')'
+            param = {}
 
         else:
-            # Otherwise use the specified pattern.  Sybase does not
-            # appear to allow use to use a placeholder for the LIKE
-            # expression!
-            where = 'tag LIKE "{0}"'.format(tag_pattern)
+            # Otherwise use the specified pattern.
+            where = 'tag LIKE @t'
+            param = {'@t': tag_pattern}
 
         with self.db as c:
             c.execute('SELECT identity_instance_id, state, tag, '
@@ -95,7 +95,8 @@ class CADCDP:
                       'FROM dp_recipe_instance '
                       'WHERE recipe_id IN (' +
                       ', '.join((str(x) for x in self.recipe)) + ') '
-                      'AND ' + where)
+                      'AND ' + where,
+                      param)
 
             while True:
                 row = c.fetchone()
