@@ -26,6 +26,7 @@ from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
+from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,13 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                           info['obs'][0].obstype,
                           info['obs'][0].scanmode,
                           info['release'])
+
+                if yes_or_no_question('Resubmit jobs?', False):
+                    for job in jobs:
+                        db.change_state(
+                            job, JSAProcState.QUEUED,
+                            'Resubmitting job after unauthorized error',
+                            state_prev=JSAProcState.ERROR)
 
 
 def yes_or_no_question(question, default=False):
