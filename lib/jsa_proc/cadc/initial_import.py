@@ -15,16 +15,19 @@
 
 import logging
 
+from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.dpdb import CADCDP
 from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.param import parse_cadc_param
+from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.config import get_database
 from jsa_proc.error import JSAProcError
 
 logger = logging.getLogger(__name__)
 
 
-def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown'):
+def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
+                       fetch_previews=True):
     """Perform an initial import of existing jobs from CADC.
 
     Returns true on success.
@@ -96,6 +99,10 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown'):
                 if output is not None:
                     logger.debug('Storing output file list.')
                     db.set_output_files(job_id, [f.lower() for f in output])
+
+                    if fetch_previews:
+                        logger.debug('Attempting to download preview files.')
+                        fetch_cadc_previews(output, get_output_dir(job_id))
 
             else:
                 logger.debug('Skipping job insert due to dry run mode')
