@@ -26,7 +26,7 @@ valid_modes = ('obs', 'night', 'project', 'public')
 valid_file = re.compile('^[_a-z0-9]+$')
 
 valid_preview_sizes = set([64, 256, 1024])
-valid_preview_file = re.compile('^jcmt_[-_a-z0-9]+_preview_([0-9]{2,4})\.png$')
+valid_preview_file = re.compile('^(jcmt_[-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
 valid_product_file = re.compile('^jcmt[hs][-_a-z0-9]+\.fits$')
 
 
@@ -101,7 +101,7 @@ def validate_output(job_id, db, dry_run=False):
             raise ValidationError('no output files')
 
         products = []
-        preview_sizes = set()
+        previews = {}
 
         for file in files:
             if valid_product_file.match(file):
@@ -110,7 +110,15 @@ def validate_output(job_id, db, dry_run=False):
 
             match = valid_preview_file.match(file)
             if match:
-                preview_sizes.add(int(match.group(1)))
+                preview = match.group(1)
+                size = int(match.group(2))
+
+                if preview in previews:
+                    previews[preview].add(size)
+
+                else:
+                    previews[preview] = set((size,))
+
                 continue
 
             raise ValidationError('invalid file output file name: {0}'.
@@ -119,12 +127,15 @@ def validate_output(job_id, db, dry_run=False):
         if not products:
             raise ValidationError('no product files captured')
 
-        if not preview_sizes:
+        if not previews:
             raise ValidationError('no preview files captured')
 
-        if preview_sizes != valid_preview_sizes:
-            raise ValidationError('wrong preview sizes: ' +
-                                  ', '.join(str(i) for i in preview_sizes))
+        for (preview, sizes) in previews.items():
+            if sizes != valid_preview_sizes:
+                raise ValidationError(
+                    'wrong preview sizes: {0}: {1}'.format(
+                        preview,
+                        ', '.join(str(i) for i in sizes)))
 
     except ValidationError as e:
         logger.error('Job %i failed output validation: %s', job_id, e.message)
