@@ -15,7 +15,7 @@
     <th>{{state| state_name}}</th>
     {% endfor %}
     </tr>
-{% for taskname, jobs in results.items() %}
+{% for taskname, jobs in results | dictsort %}
   <tr>
     <td><a href="{{ url_for('job_summary', task=taskname) }}">{{ taskname }}</a></td>
     <td><a href="{{ url_for('job_list', task=taskname) }}">{{ jobs['total'] }}</a></td>
