@@ -15,6 +15,7 @@
 
 import logging
 import os
+import re
 from socket import gethostname
 
 from jsa_proc.admin.directories import get_input_dir
@@ -24,9 +25,12 @@ from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.datafile_handling import get_output_files
 from jsa_proc.action.job_running import jsawrapdr_run
+from jsa_proc.jac.file import hpx_tiles_from_filenames
 
 logger = logging.getLogger(__name__)
 
+# Regular expression to match tasks that produce hpx output
+hpx_task = re.compile('^hpx-')
 
 def run_job(job_id=None, db=None, force=False):
     """
@@ -126,7 +130,16 @@ def run_a_job(job_id, db=None, force=False):
     logger.debug('Storing list of output files')
     db.set_output_files(job_id, output_files)
 
-    # Change state.
+    # If task begins with hpx, get tiles from list of output_files
+    # and write to tile table in db.
+    if hpx_task.search(job.task):
+        logger.debug('Storing list of output tiles for HPX job ' + str(job_id))
+        tiles = hpx_tiles_from_filenames(output_files)
+        db.set_tilelist(job_id, tiles)
+        logger.debug('Job ' + str(job_id) + ' produced output on tiles ' + \
+                     ', '.join(str(i) for i in tiles))
+
+    # Change stateof job.
     db.change_state(
         job_id, JSAProcState.PROCESSED,
         'Job has been sucessfully processed',

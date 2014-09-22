@@ -21,6 +21,10 @@ from jsa_proc.error import JSAProcError
 scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_[0-9]{4}$')
 acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}$')
 
+# Find a 6 digit healpix tile number of form 'healpixXXXXXX' ending
+# in .fits or .sdf.
+hpx_tile = re.compile('_healpix([0-9]{6})_.*\.(sdf|fits)$')
+
 
 def get_jac_data_dir(filename):
     """Guess directory name for a given filename.
@@ -90,3 +94,21 @@ def file_in_jac_data_dir(filename):
     dir = get_jac_data_dir(filename)
 
     return file_in_dir(filename, dir)
+
+
+def hpx_tiles_from_filenames(filenames):
+    """
+    Returns a set of tile number from a list of
+    output file names.
+
+    Uses the reuglar expression 'hpx_tile' defined
+    at the top of this file.
+    """
+
+    tiles = []
+    for f in filenames:
+        result = hpx_tile.search(f)
+        if result:
+            tiles.append(int(result.groups()[0]))
+
+    return set(tiles)
