@@ -42,6 +42,13 @@ def prepare_job_info(db, job_id):
         else:
             info['foreign_url'] = None
 
+    # Try to get tiles.
+    try:
+        tiles = db.get_tilelist(job_id)
+    except NoRowsError:
+        tiles = None
+    if tiles == []:
+        tiles = None
     try:
         input_files = db.get_input_files(job_id)
     except NoRowsError:
@@ -99,6 +106,7 @@ def prepare_job_info(db, job_id):
     return {
         'title': 'Job {}'.format(job_id),
         'info': info,
+        'tiles': tiles,
         'log': log,
         'input_files': input_files,
         'output_files': output_files,

@@ -31,6 +31,9 @@
     <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
     {% endif %}
+    {% if tiles is not none %}
+    <tr><th>Tiles</th><td>{{ tiles | uniq | join(' ') }}</td></tr>
+    {% endif %}
     <tr><th>Priority</th><td>{{ info.priority }} </td></tr>
     <tr><th>Task</th><td>{{ info.task }} </td></tr>
     <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
