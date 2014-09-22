@@ -37,7 +37,7 @@ class JSAProcErrorFilter():
             'exclude': ['ORAC ERROR']
             },
         'oracdr': {
-            'include': ['ORAC ERROR:'],
+            'include': ['ORAC ERROR'],
             },
         'e-transfer': {
             'include': ['e-transfer'],
