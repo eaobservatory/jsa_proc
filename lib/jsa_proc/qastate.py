@@ -24,11 +24,13 @@ class JSAQAState:
     """
 
     UNKNOWN = '?'
+    INVALID = 'I'
     BAD = 'B'
     QUESTIONABLE = 'Q'
     GOOD = 'G'
 
     _info = OrderedDict()
+    _info[INVALID] = 'Invalid'
     _info[UNKNOWN] =   'Unknown'
     _info[BAD] = 'Bad'
     _info[QUESTIONABLE] = 'Questionable'
