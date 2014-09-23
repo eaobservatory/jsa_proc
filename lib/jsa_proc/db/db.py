@@ -18,6 +18,7 @@ import logging
 import re
 from socket import gethostname
 from getpass import getuser
+import numpy as np
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
@@ -959,18 +960,40 @@ class JSAProcDB:
         return result
 
     def get_processing_time_obs_type(self, obsdict=None, jobdict=None,):
-        """
-        Get the processing time
+        """Get the processing times.
+
+        By default looks for all types of observations in location JAC
+        and in states corresponding to JSAProcState.STATE_POST_RUN.
+
+        It can be limited by the usual job and obs column querys.
+
+        This function will get the difference in time between the
+        movement into the PROCESSING state and the movement into the PROCESSED
+        state. (It will look for the last occurence of each in the log)
+
+        Returns job_ids, duration_seconds, obs_info
+
+        job_ids is a numpy array of the job_ids that the processing
+        times were calculated for.
+        duration_seconds is a numpy array of the processing time in
+        seconds for each job.
+        obs_info is a numpy array of the obs.obstype, obs.scanmode,
+        obs.project, obs.survey and obs.instrument for each job.
+
+        For tasks where multiple observations are in the same job
+        this could produce odd results. Careful filtering of the
+        output will be required (it will return one result for each observation,
+        so multiple identical times for a single job).
         """
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
                      " LEFT JOIN obs ON job.id = obs.job_id "
-        select_query = " SELECT job.id, obs.obstype, MAX(log.datetime), " + \
-                       "state_new, obs.obstype, obs.scanmode, " + \
-                       "obs.survey, obs.instrument "
-        where = ['state_new=%s AND job.location="JAC" AND '
-                 'job.state != %s AND job.state != %s']
-        param = [JSAProcState.ERROR, JSAProcState.RUNNING]
+        select_query = " SELECT job.id, MAX(log.datetime), " + \
+                       "obs.obstype, obs.scanmode, obs.project, obs.survey, obs.instrument "
+
+        where = ['state_new=%s' ]
+
+        param = []
         group_query = " GROUP BY job.id "
 
         if obsdict:
@@ -978,10 +1001,16 @@ class JSAProcDB:
             where.append(obsquery)
             param += obsparam
 
-        if jobdict:
-            jobquery, jobparam = _dict_query_where_clause('job', jobdict)
-            where.append(jobquery)
-            param += jobparam
+        if not jobdict:
+            jobdict={}
+        if not jobdict.has_key('location'):
+            jobdict['location'] = "JAC"
+        if not jobdict.has_key('state'):
+            jobdict['state'] = JSAProcState.STATE_POST_RUN
+
+        jobquery, jobparam = _dict_query_where_clause('job', jobdict)
+        where.append(jobquery)
+        param += jobparam
 
         query = select_query + from_query + \
             ' WHERE ' + ' AND '.join(where) + \
@@ -996,7 +1025,23 @@ class JSAProcDB:
             c.execute(query, [JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
 
-        return startresults, endresults, columns
+        endresults = np.array(endresults)
+        startresults = np.array(startresults)
+
+        # Get the times
+        starttimes = startresults[:,1]
+        endtimes = endresults[:,1]
+
+        # time delta
+        deltas = endtimes - starttimes
+        duration_seconds = np.array([i.total_seconds() for i in endtimes - starttimes])
+
+        # Job_numbers
+        job_ids = startresults[:,0]
+
+        #job_info
+        job_infos = startresults[:,2:]
+        return job_ids, duration_seconds, job_infos
 
     def get_tasks(self):
         """Retrieve list of task names which have been assigned to jobs.
