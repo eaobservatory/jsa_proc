@@ -101,6 +101,7 @@ def create_web_app():
         obsquerydict = {}
         for key in ObsQueryDict.keys():
             obsquerydict[key] = request.args.get(key, None)
+
         return prepare_job_list(
             db,
             request.args.get('location', None),
@@ -112,6 +113,8 @@ def create_web_app():
             request.args.get('date_max', None),
             request.args.get('qastate', None),
             request.args.get('name', None),
+            request.args.get('obsnum', None),
+            request.args.get('project', None),
             obsquerydict=obsquerydict,
             mode=request.args.get('mode', 'JSAProc')
         )

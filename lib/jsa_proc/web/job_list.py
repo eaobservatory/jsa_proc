@@ -24,7 +24,8 @@ from jsa_proc.web.util import url_for, calculate_pagination
 
 def prepare_job_list(db, location, state, task, number, page,
                      date_min, date_max, qastate,
-                     sourcename, obsquerydict={}, mode='JSAProc'):
+                     sourcename, obsnum, project,
+                     obsquerydict={}, mode='JSAProc'):
     if location == '':
         location = None
     if state == '' or state == []:
@@ -37,6 +38,10 @@ def prepare_job_list(db, location, state, task, number, page,
         date_max = None
     if qastate == '':
         qastate = None
+    if obsnum == '':
+        obsnum = None
+    if project == '':
+        project = None
 
     job_query = {
         'location': location,
@@ -55,6 +60,9 @@ def prepare_job_list(db, location, state, task, number, page,
         'name': sourcename,
         'mode': mode,
         'qa_state': qastate,
+        'sourcename': sourcename,
+        'obsnum': obsnum,
+        'project': project,
     })
 
     if (date_min is not None) or (date_max is not None):
@@ -62,6 +70,12 @@ def prepare_job_list(db, location, state, task, number, page,
 
     if sourcename:
         obsquery['sourcename'] = Fuzzy(sourcename)
+
+    if obsnum:
+        obsquery['obsnum'] = obsnum
+
+    if project:
+        obsquery['project'] = project
 
     # Get the values based on the strings passed to this.
     for key, value in obsquerydict.items():
@@ -119,4 +133,6 @@ def prepare_job_list(db, location, state, task, number, page,
         'date_max': date_max,
         'name': sourcename,
         'mode': mode,
+        'obsnum': obsnum,
+        'project': project,
     }

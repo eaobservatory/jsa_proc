@@ -96,7 +96,8 @@
         <input type="text" name="date_min" value="{{ date_min | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
         <input type="text" name="date_max" value="{{ date_max | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
         <input type="text" name="name" value="{{ name | default('', True) }}" placeholder="Source name" />
-
+        <input type="text" name="obsnum" value="{{ obsnum | default('', True) }}" size="5" placeholder="Obs #"/>
+        <input type="text" name="project" value="{{ project | default('', True) }}" size="10" placeholder="Project"/>
         <input type="submit" value="Filter" />
     </p>
 </form>
