@@ -78,6 +78,9 @@ ScanModes = dict(
     Daisy=ScanMode('Daisy', 'Daisy scans',
                    {'scanmode': ['DAISY', 'CV_DAISY']}),
     Pong=ScanMode('Pong', 'Pong scans', {'scanmode': 'CURVY_PONG'}),
+    Jiggle=ScanMode('Jiggle', 'Jiggle',{'scanmode': 'jiggle'}),
+    Grid=ScanMode('Grid','Grid',{'scanmode':'grid'}),
+    Raster = ScanMode('Raster', 'Raster', {'scandmode':'DISCRETE_BOUSTROPHEDON'}),
 )
 
 # Subsystem
