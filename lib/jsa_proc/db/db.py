@@ -735,6 +735,10 @@ class JSAProcDB:
         Search is limited by:
              * location (default None, can be 'JAC' or 'CADC')
              * task (default None)
+
+        Return: an ordered dictionary by job identifier.  This will be in
+        reverse chronological order of the last entry for each job
+        (i.e. newest first).
         """
 
         param = []
@@ -749,7 +753,7 @@ class JSAProcDB:
             query += ' AND job.task=%s '
             param.append(task)
 
-        query += ' ORDER BY job.location DESC, job.id DESC, log.id DESC'
+        query += ' ORDER BY log.id DESC'
 
         # Execute query
         with self.db as c:
