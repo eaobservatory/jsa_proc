@@ -18,7 +18,6 @@ import logging
 import re
 from socket import gethostname
 from getpass import getuser
-import numpy as np
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
@@ -973,11 +972,11 @@ class JSAProcDB:
 
         Returns job_ids, duration_seconds, obs_info
 
-        job_ids is a numpy array of the job_ids that the processing
+        job_ids is a list of the job_ids that the processing
         times were calculated for.
-        duration_seconds is a numpy array of the processing time in
+        duration_seconds is a list of the processing time in
         seconds for each job.
-        obs_info is a numpy array of the obs.obstype, obs.scanmode,
+        obs_info is a list of the obs.obstype, obs.scanmode,
         obs.project, obs.survey and obs.instrument for each job.
 
         For tasks where multiple observations are in the same job
@@ -1025,22 +1024,17 @@ class JSAProcDB:
             c.execute(query, [JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
 
-        endresults = np.array(endresults)
-        startresults = np.array(startresults)
 
-        # Get the times
-        starttimes = startresults[:,1]
-        endtimes = endresults[:,1]
+        # Get the times, job_id numbers and observation infos.
+        duration_seconds = []
+        job_ids = []
+        job_infos = []
+        for i in range(len(startresults)):
+            seconds = (endresults[i][1] - startresults[i][1]).total_seconds()
+            duration_seconds.append(seconds)
+            job_ids.append(startresults[i][0])
+            job_infos.append(startresults[i][2:])
 
-        # time delta
-        deltas = endtimes - starttimes
-        duration_seconds = np.array([i.total_seconds() for i in endtimes - starttimes])
-
-        # Job_numbers
-        job_ids = startresults[:,0]
-
-        #job_info
-        job_infos = startresults[:,2:]
         return job_ids, duration_seconds, job_infos
 
     def get_tasks(self):
