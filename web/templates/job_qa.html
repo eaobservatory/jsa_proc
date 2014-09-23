@@ -30,13 +30,17 @@
         {% endif %}
         {% endif %}
         <tr><th>Parameters</th><td class="recpar">{{ info.parameters }}</td></tr>
-        {% if obsinfo is not none %}
+
         <tr><th>Task</th><td>{{ info.task }} </td></tr>
         <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
-        <tr><th>ORAC-DR log </th><td><a href="{{orac_logs[0]}}">ORAC</a></td></tr>
-        <tr><th>WRAP DR log </th><td><a href="{{wrapdr_logs[0]}}">WRAPDR</a></td></tr>
+        <tr><th>ORAC-DR log </th><td>
+            {% if orac_logs is not none  and orac_logs|length > 0 %}<a href="{{orac_logs[0]}}">ORAC</a>{% endif %}
+        </td></tr>
+        <tr><th>WRAP DR log </th><td>
+            {% if wrapdr_logs is not none and wrapdr_logs|length > 0 %}<a href="{{wrapdr_logs[0]}}">WRAPDR</a>{% endif %}
+        </td></tr>
         <tr><th>Job Info Page</th><td><a href="{{url_for('job_info', job_id=info.id)}}">JobINFO</a></td></tr>
-        {% endif %}
+
       </table>
     </div>
   </div>
