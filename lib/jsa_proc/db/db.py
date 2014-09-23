@@ -795,7 +795,7 @@ class JSAProcDB:
     def find_jobs(self, state=None, location=None, task=None, qa_state=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
-                  obsquery=None):
+                  obsquery=None, tiles=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -805,6 +805,7 @@ class JSAProcDB:
             * location
             * task
             * qa_state
+            * tiles (a list)
 
         Results can be affected by the following optional parameters:
 
@@ -890,6 +891,12 @@ class JSAProcDB:
             where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
                          obswhere + ')')
             param.extend(obsparam)
+
+        if tiles:
+            (tilewhere, tileparam) = _dict_query_where_clause('tile',{'tile':tiles})
+            where.append('job.id IN (SELECT job_id FROM tile WHERE ' +
+                         tilewhere + ')')
+            param.extend(tileparam)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
