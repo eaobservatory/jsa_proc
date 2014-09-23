@@ -596,13 +596,14 @@ class InterfaceDBTest(DBTestCase):
         self.db.change_state(job_id, JSAProcState.PROCESSED, 'end')
 
         # Check that we find this job:
-        (start, end, col) = self.db.get_processing_time_obs_type()
+        (ids, duration, obsinfo) = self.db.get_processing_time_obs_type()
 
-        self.assertEqual(len(start), 1)
-        self.assertEqual(len(end), 1)
+        self.assertEqual(len(ids), 1)
+        self.assertEqual(len(duration), 1)
+        self.assertEqual(len(obsinfo), 1)
 
-        self.assertEqual(start[0][3], JSAProcState.RUNNING)
-        self.assertEqual(end[0][3], JSAProcState.PROCESSED)
+        # Check that it has no obsinfo but is the correct length
+        self.assertEqual([i for i in obsinfo[0]], [None]*5)
 
         # Check we don't find the job if it's running or in the error state:
         self.db.change_state(job_id, JSAProcState.RUNNING, 'start again')
