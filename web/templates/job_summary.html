@@ -2,11 +2,24 @@
 
 {% block content %}
 
-<h2>There are {{ total_count }} jobs in the database
+<h2>There are {{ total_count }} jobs in the database for this task.
 {% if date_min is not none or date_max is not none %}
 from {{date_min}} to {{date_max}}
 {% endif %}
 </h2>
+<h3> Observations are present from {{firstobs}} to {{lastobs}} </h3>
+
+<p> Processing times (hrs, one computer)</p>
+<dl>
+  <dt> Total</dt>
+  <dd> {{total_proc_time}}</dd>
+  <dt> Pointings</dt>
+  <dd> {{pointings_proc_time}} </dd>
+  <dt> Calibrations</dt>
+  <dd> {{cals_proc_time}}</dd>
+  <dt> Science</dt>
+  <dd> {{science_proc_time}}</dd>
+</dl>
 
 <h2>Summary table</h2>
 
@@ -16,7 +29,7 @@ from {{date_min}} to {{date_max}}
       <tr>
         <th>State</th>
         {% for l in locations %}
-        <th>{{ l }}</th>
+        <th>{{ l }}</t>
         {% endfor %}
       </tr>
       {% for s, value in job_summary_dict.items() %}
