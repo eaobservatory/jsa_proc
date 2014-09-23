@@ -25,6 +25,14 @@ from jsa_proc.db.db import Not
 def _where_maker(name):
     return namedtuple(name, 'name fullname where')
 
+# Instruments
+InstrumentsInfo = _where_maker('Instruments')
+Instruments = dict(
+    HARP = InstrumentsInfo('HARP', 'HARP', {'instrument': 'HARP'}),
+    RxA3 = InstrumentsInfo('RxA3', 'RxA3', {'instrument': 'RxA3'}),
+    SCUBA2 = InstrumentsInfo('SCUBA2', 'SCUBA2', {'instrument':'SCUBA-2'}),
+    Heterodyne = InstrumentsInfo('Heterodyne','Heterodyne', {'instrument':['HARP','RxA3','RxW']}),
+)
 
 # Surveys.
 SurveyInfo = _where_maker('SurveyInfo')
@@ -84,4 +92,5 @@ ObsQueryDict = {
         '450': SubsystemInfo('450', '450um', {'subsys': '450'}),
         '850': SubsystemInfo('850', '850um', {'subsys': '850'}),
     },
+    'instrument': Instruments,
 }
