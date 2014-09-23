@@ -987,7 +987,7 @@ class JSAProcDB:
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
                      " LEFT JOIN obs ON job.id = obs.job_id "
-        select_query = " SELECT job.id, MAX(log.datetime), " + \
+        select_query = " SELECT job.id, MAX(log.datetime) AS maxdt, " + \
                        "obs.obstype, obs.scanmode, obs.project, obs.survey, obs.instrument "
 
         where = ['state_new=%s' ]

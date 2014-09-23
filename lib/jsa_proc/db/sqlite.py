@@ -22,6 +22,24 @@ from jsa_proc.db.db import JSAProcDB
 from jsa_proc.error import JSAProcError
 
 
+def add_types(query):
+    """Add type information where needed for SQLite.
+
+    For expressions in SELECT queries, setting sqlite3.PARSE_DECLTYPES
+    is insufficient to allow the SQLite module to determine the type
+    of the result.  Therefore we need to set sqlite3.PARSE_COLNAMES
+    and include a type in the result column name.
+
+    This function makes substitutions for expressions where this
+    is known to happen in the JSAProcDB class.
+    """
+
+    query = re.sub('((MIN|MAX)\(([a-z]+\.)?datetime\)) AS ([a-z]+)',
+                   '\\1 AS "\\2 [timestamp]"', query)
+
+    return query
+
+
 class FormatCursor(sqlite3.Cursor):
     """Custom SQLite cursor class.
 
@@ -38,6 +56,7 @@ class FormatCursor(sqlite3.Cursor):
         with SQLite.
         """
         query = re.sub('\%s', '?', query)
+        query = add_types(query)
         return sqlite3.Cursor.execute(self, query, *args, **kwargs)
 
 
@@ -55,6 +74,7 @@ class AtCursor(sqlite3.Cursor):
         # we can simply replace the placeholder and use the single argument
         # if present.
         query = re.sub('\@[a-z]+', '?', query)
+        query = add_types(query)
         if args:
             args = (args[0].values(),)
             if len(args) > 1:
@@ -133,7 +153,9 @@ class JSAProcSQLite(JSAProcDB):
         if filename != ':memory:' and not os.path.exists(filename):
             raise Exception('SQLite file ' + filename + ' not found')
 
-        conn = sqlite3.connect(filename, check_same_thread=False)
+        conn = sqlite3.connect(
+            filename, check_same_thread=False,
+            detect_types=(sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES))
 
         c = conn.cursor()
         c.execute('PRAGMA foreign_keys = ON')

@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import OrderedDict
+from datetime import date
 from socket import gethostname
 from unittest import TestCase
 
@@ -568,7 +569,8 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(self.db.get_obs_info(job_1), [])
 
         info = {'obsid': 'x14_01_1T1', 'obsidss': 'x14_1_1T1_850',
-                'utdate': '2014-01-01', 'obsnum': 3, 'instrument': 'SCUBA-2',
+                'utdate': date(2014, 01, 01), 'obsnum': 3,
+                'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
                 'date_obs': '2014-01-01 09:00:00'}
 
