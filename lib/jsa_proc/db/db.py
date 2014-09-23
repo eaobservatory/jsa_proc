@@ -670,6 +670,30 @@ class JSAProcDB:
             c.execute('UPDATE job SET foreign_id = %s WHERE id = %s',
                       (foreign_id, job_id))
 
+    def get_date_range(self, task=None):
+        """
+        Get the minimum and maximum utdate for
+        observations associated with a given task.
+
+        *task*: optional, string
+
+        Returns: (utdatemin, utdatemax)
+        Atuple of datetime.date object.s
+        """
+
+        select = 'SELECT MIN(obs.utdate), MAX(obs.utdate) ' + \
+                 'FROM job JOIN obs ON job.id = obs.job_id'
+        params = ()
+        if task:
+            select += ' WHERE job.task = %s'
+            params = (task,)
+
+        with self.db as c:
+            c.execute(select, params)
+
+            times = c.fetchall()
+        return times
+
     def get_output_files(self, job_id):
         """
         Get the output file list for a job.
