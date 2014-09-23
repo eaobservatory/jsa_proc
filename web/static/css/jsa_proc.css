@@ -221,7 +221,10 @@ td, th {
     background: #ddd;
     color: black;
 }
-
+.qastate_invalid, .qastate_invalid a {
+    background: rgb(173,253,231);
+    color: black;
+}
 .qastate_questionable, .qastate_questionable a {
     background: #FFEB7D;
     color: black;
