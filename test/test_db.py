@@ -41,7 +41,7 @@ class BasicDBTest(DBTestCase):
                     tables.add(name)
 
         self.assertEqual(tables, set((
-            'job', 'input_file', 'output_file', 'log', 'obs', 'tile', 'qa',
+            'job', 'input_file', 'output_file', 'log', 'obs', 'tile', 'qa', 'task',
         )))
 
 

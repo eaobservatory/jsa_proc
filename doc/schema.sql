@@ -110,3 +110,11 @@ CREATE TABLE qa (
            ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 CREATE INDEX qa_job_id ON qa (job_id);
+
+CREATE TABLE task (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       taskname VARCHAR(80) NOT NULL,
+       etransfer BOOLEAN NOT NULL
+);
+
+CREATE INDEX task_name ON task (taskname);
