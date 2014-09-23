@@ -160,7 +160,7 @@ def create_web_app():
     def job_info(job_id):
         return prepare_job_info(db, job_id)
 
-    @app.route('/job-qa/<int:job_id>', methods=['GET'])
+    @app.route('/job/<int:job_id>/qa', methods=['GET'])
     @templated('job_qa.html')
     def job_qa(job_id):
         return prepare_job_qa_info(db, job_id)
