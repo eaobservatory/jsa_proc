@@ -140,10 +140,7 @@
   {% set entry = entry._asdict() %}
     {% for c in columns %}
 
-    {% if c[1] == "host" %}
-    <td class="{{c[1]}}"> {{ entry[c[1]] |replace(".jach.hawaii.edu", "") }} </td>
-
-    {% elif c[1] == "message" %}
+    {% if c[1] == "message" %}
     <td class="{{c[1]}}"> {{ entry[c[1]] |replace("\n", "<br/>" | safe) |replace("_","_<wbr />" | safe) }} </td>
 
     {% elif c[1] == "state_new" or c[1] == "state" %}
