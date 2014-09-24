@@ -20,6 +20,7 @@ from jsa_proc.action.datafile_handling \
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
+from jsa_proc.config import get_database
 from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.error import JSAProcError, NotAtJACError
@@ -27,6 +28,12 @@ from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
+# Get full list of tasks
+db = get_database()
+tasks = db.get_tasks()
+taskdict = {}
+for t in tasks:
+    taskdict[t] = db.get_etransfer_state(t)
 
 class JSAProcStateMachine:
     def __init__(self, db, cadc):
@@ -104,11 +111,23 @@ class JSAProcStateMachine:
                     pass
 
                 elif job.state == JSAProcState.PROCESSED:
+
+                    # Check if job has etransfer state
                     # Add to e-transfer and move to TRANSFERRING.
                     # (Only done if etransfer argument is True.)
 
-                    if etransfer and validate_output(job.id, self.db):
-                        ssh_etransfer_send_output(job.id)
+                    # Check if this task can be etransferred
+                    if taskdict[job.task] is True:
+                        if etransfer and validate_output(job.id, self.db):
+
+                            ssh_etransfer_send_output(job.id)
+                    else:
+                        if validate_output(job.id, self.db):
+                            self.db.change_state(job.id, JSAProcState.COMPLETE,
+                                                 'Processed job is COMPLETE (no etransfer)'
+                                                 state_prev=JSAProcState.PROCESSED)
+                            logger.debug('Processed job %i moved to COMPLETE (no etransfer)'
+                                         % (job.id))
 
                 elif job.state == JSAProcState.TRANSFERRING:
                     # Check e-transfer status and move to INGESTION if done.
