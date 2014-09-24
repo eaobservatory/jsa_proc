@@ -213,7 +213,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Change the state of job 1 twice.
         self.db.change_state(job_id, newstate, message)
-        self.db.change_state(job_id, newstate2, message2)
+        self.db.change_state(job_id, newstate2, message2, username='testuser')
 
         # Check the state and previous state of job 1
         job = self.db.get_job(id_=job_id)
@@ -225,8 +225,8 @@ class InterfaceDBTest(DBTestCase):
         hostname = gethostname()
         last_log = self.db.get_last_log(job_id)
         self.assertEqual([last_log.state_new, last_log.state_prev,
-                          last_log.message, last_log.host],
-                         [newstate2, newstate, message2, hostname])
+                          last_log.message, last_log.host, last_log.username],
+                         [newstate2, newstate, message2, hostname, 'testuser'])
         logs = self.db.get_logs(job_id)
         maxid = max([l.id for l in logs])
         for l in logs:

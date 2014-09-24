@@ -51,6 +51,7 @@ CREATE TABLE log (
     state_new CHAR(1) NOT NULL DEFAULT "?",
     message TEXT NOT NULL DEFAULT "",
     host VARCHAR(80) NOT NULL DEFAULT "unknown",
+    username VARCHAR(80) NOT NULL DEFAULT "unknown",
     FOREIGN KEY (job_id) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );

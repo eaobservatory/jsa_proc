@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # defined from table rows:
 JSAProcLog = namedtuple(
     'JSAProcLog',
-    'id job_id datetime state_prev state_new message host')
+    'id job_id datetime state_prev state_new message host username')
 JSAProcQa = namedtuple(
     'JSAProcQa',
     'id job_id datetime status  message username')
@@ -249,7 +249,7 @@ class JSAProcDB:
 
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
-                                'Job added to the database')
+                                'Job added to the database', None)
 
             # If present, insert the tile list.
             if tilelist:
@@ -371,7 +371,7 @@ class JSAProcDB:
                       ' VALUES ' + values_questions,
                       (job_id,) + values)
 
-    def change_state(self, job_id, newstate, message, state_prev=None):
+    def change_state(self, job_id, newstate, message, state_prev=None, username=None):
 
         """
         Change the state of a job in the JSA processing database.
@@ -400,13 +400,12 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            self._change_state(c, job_id, newstate, message, state_prev)
+            self._change_state(c, job_id, newstate, message, state_prev, username)
 
-    def _change_state(self, c, job_id, newstate, message, state_prev):
+    def _change_state(self, c, job_id, newstate, message, state_prev, username):
         # Validate input.
         if not JSAProcState.is_valid(newstate):
             raise JSAProcError('State {0} is not recognised'.format(newstate))
-
 
         # Change the state to new state and update the state_prev
         query = ('UPDATE job SET state_prev = state, state = %s '
@@ -438,7 +437,7 @@ class JSAProcDB:
             state_prev = state_prev[0][0]
 
         # Update log table.
-        self._add_log_entry(c, job_id, state_prev, newstate, message)
+        self._add_log_entry(c, job_id, state_prev, newstate, message, username)
 
         # Update QA table if appropriate
         if newstate in JSAProcState.STATE_PRE_QA:
@@ -482,17 +481,22 @@ class JSAProcDB:
 
         return input_files
 
-    def _add_log_entry(self, c, job_id, state_prev, state_new, message):
+    def _add_log_entry(self, c, job_id, state_prev, state_new, message,
+                       username):
         """Private method to add an entry to the log table.
 
         Assumes the database is already locked an takes a cursor
         object as argument "c".
         """
 
+        if username is None:
+            username = getuser()
+
         c.execute('INSERT INTO log '
-                  '(job_id, state_prev, state_new, message, host) '
-                  'VALUES (%s, %s, %s, %s, %s)',
-                  (job_id, state_prev, state_new, message, gethostname()))
+                  '(job_id, state_prev, state_new, message, host, username) '
+                  'VALUES (%s, %s, %s, %s, %s, %s)',
+                  (job_id, state_prev, state_new, message, gethostname(),
+                   username))
 
     def _add_qa_entry(self, c, job_id, status, message, username):
         """
@@ -655,7 +659,7 @@ class JSAProcDB:
                 if message is None:
                     message = 'Location changed to {0}'.format(location)
 
-                self._change_state(c, job_id, state_new, message, None)
+                self._change_state(c, job_id, state_new, message, None, None)
 
     def set_foreign_id(self, job_id, foreign_id):
         """
