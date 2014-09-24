@@ -495,8 +495,8 @@ class JSAProcDB:
         c.execute('INSERT INTO log '
                   '(job_id, state_prev, state_new, message, host, username) '
                   'VALUES (%s, %s, %s, %s, %s, %s)',
-                  (job_id, state_prev, state_new, message, gethostname(),
-                   username))
+                  (job_id, state_prev, state_new, message,
+                   gethostname().partition('.')[0], username))
 
     def _add_qa_entry(self, c, job_id, status, message, username):
         """

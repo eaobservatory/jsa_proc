@@ -279,7 +279,7 @@ def _etransfer_check_config(any_user=False):
     if pwd.getpwuid(os.getuid()).pw_name != etransferuser and not any_user:
         raise CommandError('etransfer should only be run as {0}'.
                            format(etransferuser))
-    if gethostname() != etransfermachine:
+    if gethostname().partition('.')[0] != etransfermachine:
         raise CommandError('etransfer should only be run on {0}'.
                            format(etransfermachine))
 

@@ -222,7 +222,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Check log for state and messages.
         # (check both get_last_log and get_logs).
-        hostname = gethostname()
+        hostname = gethostname().partition('.')[0]
         last_log = self.db.get_last_log(job_id)
         self.assertEqual([last_log.state_new, last_log.state_prev,
                           last_log.message, last_log.host, last_log.username],

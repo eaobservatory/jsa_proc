@@ -90,7 +90,7 @@ def run_a_job(job_id, db=None, force=False):
         # WAITING state.
         db.change_state(job_id, JSAProcState.RUNNING,
                         'Job is about to be run on host {0}'.format(
-                            gethostname()),
+                            gethostname().partition('.')[0]),
                         state_prev=(None if force else JSAProcState.WAITING))
 
     except NoRowsError:
