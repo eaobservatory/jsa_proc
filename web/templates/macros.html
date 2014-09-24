@@ -115,7 +115,7 @@
 {% macro log_table(log, headings=True,
                                 columns=[("Time","datetime"), ("State","state_new"),
                                      ("Previous state","state_prev"), ("Host","host"),
-                                     ("Message", "message")],
+                                     ('User', 'username'), ("Message", "message")],
                                 checkbox = None) %}
 
   {% if headings == true %}
