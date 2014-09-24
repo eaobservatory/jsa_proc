@@ -894,14 +894,8 @@ class JSAProcDB:
 
         """
 
-        where = []
         param = []
-        order = []
         join = ''
-
-        if sortdir != 'ASC' and sortdir != 'DESC':
-            raise JSAProcError('Can only sort jobs in ASC or DESC direction. '
-                               'You picked %s' % (sortdir))
 
         if count is True:
             query = 'SELECT COUNT(*)'
@@ -921,41 +915,13 @@ class JSAProcDB:
         # Note: join and count cannot be used together.
         query += ' FROM job' + join
 
-        jobquery = {}
-
-        if state is not None:
-            jobquery['state'] = state
-        else:
-            jobquery['state'] = Not(JSAProcState.DELETED)
-
-        if location is not None:
-            jobquery['location'] = location
-
-        if task is not None:
-            jobquery['task'] = task
-
-        if qa_state is not None:
-            jobquery['qa_state'] = qa_state
-
-        (jobwhere, jobparam) = _dict_query_where_clause('job', jobquery)
-        where.append(jobwhere)
-        param.extend(jobparam)
-
-        if obsquery:
-            (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
-
-            where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
-                         obswhere + ')')
-            param.extend(obsparam)
-
-        if tiles:
-            (tilewhere, tileparam) = _dict_query_where_clause('tile',{'tile':tiles})
-            where.append('job.id IN (SELECT job_id FROM tile WHERE ' +
-                         tilewhere + ')')
-            param.extend(tileparam)
+        # Use the _find_jobs_where method to prepare the WHERE clauses.
+        (where, whereparam) = self._find_jobs_where(
+            state, location, task, qa_state, obsquery, tiles)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
+            param.extend(whereparam)
 
         # If we performed a join, we need to group by job.id, on the
         # assumption that it was a one-to-many join.  If we ever
@@ -964,11 +930,8 @@ class JSAProcDB:
         if join:
             query += ' GROUP BY job.id '
 
-        if prioritize:
-            order.append('job.priority DESC')
-
-        if sort:
-            order.append('job.id ' + sortdir)
+        # Use the _find_jobs_order method to prepare the ORDER clauses.
+        order = self._find_jobs_order(prioritize, sort, sortdir)
 
         if order:
             query += ' ORDER BY ' + ', '.join(order)
@@ -1013,6 +976,72 @@ class JSAProcDB:
                 result.append(row)
 
         return result
+
+    def _find_jobs_where(self, state, location, task, qa_state,
+                        obsquery, tiles):
+        """Prepare WHERE expression for the find_jobs method.
+
+        Return: a tuple containing a list of SQL expressions
+        and a list of placeholder parameters.
+        """
+
+        where = []
+        param = []
+
+        jobquery = {}
+
+        if state is not None:
+            jobquery['state'] = state
+        else:
+            jobquery['state'] = Not(JSAProcState.DELETED)
+
+        if location is not None:
+            jobquery['location'] = location
+
+        if task is not None:
+            jobquery['task'] = task
+
+        if qa_state is not None:
+            jobquery['qa_state'] = qa_state
+
+        (jobwhere, jobparam) = _dict_query_where_clause('job', jobquery)
+        where.append(jobwhere)
+        param.extend(jobparam)
+
+        if obsquery:
+            (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
+
+            where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
+                         obswhere + ')')
+            param.extend(obsparam)
+
+        if tiles:
+            (tilewhere, tileparam) = _dict_query_where_clause('tile',{'tile':tiles})
+            where.append('job.id IN (SELECT job_id FROM tile WHERE ' +
+                         tilewhere + ')')
+            param.extend(tileparam)
+
+        return (where, param)
+
+    def _find_jobs_order(self, prioritize, sort, sortdir):
+        """Prepare ORDER expressions for the find_jobs method.
+
+        Return: a list of ORDER expressions.
+        """
+
+        if sortdir != 'ASC' and sortdir != 'DESC':
+            raise JSAProcError('Can only sort jobs in ASC or DESC direction. '
+                               'You picked %s' % (sortdir))
+
+        order = []
+
+        if prioritize:
+            order.append('job.priority DESC')
+
+        if sort:
+            order.append('job.id ' + sortdir)
+
+        return order
 
     def get_processing_time_obs_type(self, obsdict=None, jobdict=None,):
         """Get the processing times.
