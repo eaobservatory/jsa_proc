@@ -16,7 +16,8 @@
 from __future__ import absolute_import, division
 
 import datetime
-from flask import Flask, flash, request, send_file, Response, render_template
+from flask import Flask, flash, request, Response, render_template, \
+    send_file, session
 from functools import wraps
 import os.path
 
@@ -102,7 +103,7 @@ def create_web_app():
         for key in ObsQueryDict.keys():
             obsquerydict[key] = request.args.get(key, None)
 
-        return prepare_job_list(
+        (context, job_query) = prepare_job_list(
             db,
             request.args.get('location', None),
             request.args.getlist('state', None),
@@ -118,6 +119,10 @@ def create_web_app():
             obsquerydict=obsquerydict,
             mode=request.args.get('mode', 'JSAProc')
         )
+
+        session['job_query'] = job_query
+
+        return context
 
     @app.route('/image/<task>/piechart')
     def summary_piechart(task='None'):
@@ -162,7 +167,7 @@ def create_web_app():
     @app.route('/job/<int:job_id>', methods=['GET'])
     @templated('job_info.html')
     def job_info(job_id):
-        return prepare_job_info(db, job_id)
+        return prepare_job_info(db, job_id, session.get('job_query'))
 
     @app.route('/job/<int:job_id>/qa', methods=['GET'])
     @templated('job_qa.html')

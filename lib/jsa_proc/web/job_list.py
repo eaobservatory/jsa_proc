@@ -86,13 +86,16 @@ def prepare_job_list(db, location, state, task, number, page,
             # Add the parameter to the URL (for pagination links).
             url_query[key] = value
 
+    # Enable sorting (ignored in count mode).
+    job_query['sort'] = True
+
     (number, page, pagination) = calculate_pagination(
         db.find_jobs(count=True,  **job_query),
         number, 24, page, 'job_list', url_query)
 
     jobs = []
 
-    for job in db.find_jobs(sort=True, outputs='%preview_64.png',
+    for job in db.find_jobs(outputs='%preview_64.png',
                             number=number, offset=(number * page),
                             **job_query):
         if job.outputs:
@@ -114,7 +117,8 @@ def prepare_job_list(db, location, state, task, number, page,
     # If state is None, ensure we return a list like object.
     if state is None:
         state = []
-    return {
+
+    return ({
         'title': 'Job List',
         'jobs': jobs,
         'locations': ('JAC', 'CADC'),
@@ -135,4 +139,5 @@ def prepare_job_list(db, location, state, task, number, page,
         'mode': mode,
         'obsnum': obsnum,
         'project': project,
-    }
+    },
+    job_query)

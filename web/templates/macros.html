@@ -23,28 +23,32 @@
     </ul>
 {% endmacro %}
 
-{% macro render_page_control(pagination) %}
+{% macro render_page_control(pagination, description='page', firstlast=True) %}
     {% if pagination is not none %}
         <div>
-            {% if pagination.first is not none %}
-                <a href="{{ pagination.first }}">First page</a>
-            {% else %}
-                <span class="greyedlink">First page</span>
+            {% if firstlast %}
+                {% if pagination.first is not none %}
+                    <a href="{{ pagination.first }}">First {{ description }}</a>
+                {% else %}
+                    <span class="greyedlink">First page</span>
+                {% endif %}
             {% endif %}
             {% if pagination.prev is not none %}
-                <a href="{{ pagination.prev }}">Previous page</a>
+                <a href="{{ pagination.prev }}">Previous {{ description }}</a>
             {% else %}
                 <span class="greyedlink">Previous page</span>
             {% endif %}
             {% if pagination.next is not none %}
-                <a href="{{ pagination.next }}">Next page</a>
+                <a href="{{ pagination.next }}">Next {{ description }}</a>
             {% else %}
                 <span class="greyedlink">Next page</span>
             {% endif %}
-            {% if pagination.last is not none %}
-                <a href="{{ pagination.last }}">Last page</a>
-            {% else %}
-                <span class="greyedlink">Last page</span>
+            {% if firstlast %}
+                {% if pagination.last is not none %}
+                    <a href="{{ pagination.last }}">Last {{ description }}</a>
+                {% else %}
+                    <span class="greyedlink">Last page</span>
+                {% endif %}
             {% endif %}
         </div>
     {% endif %}

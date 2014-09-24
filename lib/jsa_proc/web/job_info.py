@@ -22,10 +22,10 @@ import os
 from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.web.util import url_for, HTTPNotFound
+from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
-def prepare_job_info(db, job_id):
+def prepare_job_info(db, job_id, job_query):
     # Fetch job information from the database.
     try:
         job = db.get_job(job_id)
@@ -103,6 +103,18 @@ def prepare_job_info(db, job_id):
     wrapdr_logfiles = [url_for('job_log_text', job_id=job.id, log=i)
                        for i in wrapdr_logfiles]
 
+    # If we know what the user's job query was (from the session information)
+    # then set up pagination based on the previous and next job identifiers.
+    if job_query is not None:
+        (prev, next) = db.job_prev_next(job_id, **job_query)
+        pagination = Pagination(
+            None,
+            None if prev is None else url_for('job_info', job_id=prev),
+            None if next is None else url_for('job_info', job_id=next),
+            None)
+    else:
+        pagination = None
+
     return {
         'title': 'Job {}'.format(job_id),
         'info': info,
@@ -115,4 +127,5 @@ def prepare_job_info(db, job_id):
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
+        'pagination': pagination,
     }
