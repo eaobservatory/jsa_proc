@@ -20,25 +20,28 @@ from jsa_proc.action.datafile_handling \
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
-from jsa_proc.config import get_database
 from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.preview import fetch_cadc_previews
-from jsa_proc.error import JSAProcError, NotAtJACError
+from jsa_proc.error import JSAProcError, NoRowsError, NotAtJACError
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
-# Get full list of tasks
-db = get_database()
-tasks = db.get_tasks()
-taskdict = {}
-for t in tasks:
-    taskdict[t] = db.get_etransfer_state(t)
 
 class JSAProcStateMachine:
     def __init__(self, db, cadc):
         self.db = db
         self.cadc = cadc
+
+        # Get full list of tasks
+        tasks = db.get_tasks()
+        self.task_etransfer = {}
+        for t in tasks:
+            try:
+                self.task_etransfer[t] = db.get_etransfer_state(t)
+
+            except NoRowsError:
+                pass
 
     def poll(self):
         self.poll_jac_jobs(self)
@@ -111,23 +114,31 @@ class JSAProcStateMachine:
                     pass
 
                 elif job.state == JSAProcState.PROCESSED:
+                    # Check if job's task has e-transfer state?
 
-                    # Check if job has etransfer state
-                    # Add to e-transfer and move to TRANSFERRING.
-                    # (Only done if etransfer argument is True.)
+                    if job.task not in self.task_etransfer:
+                        # Don't know if this should be e-transferred or not,
+                        # so do nothing for now.
+                        pass
 
-                    # Check if this task can be etransferred
-                    if taskdict[job.task] is True:
+                    elif self.task_etransfer[job.task]:
+                        # If this task should be e-transferred, attempt to
+                        # add to e-transfer and move to TRANSFERRING.
+                        # (Only done if etransfer argument is True.)
+
                         if etransfer and validate_output(job.id, self.db):
 
                             ssh_etransfer_send_output(job.id)
+
                     else:
+                        # If e-transfer is not required, then the job is now complete.
+
                         if validate_output(job.id, self.db):
                             self.db.change_state(job.id, JSAProcState.COMPLETE,
-                                                 'Processed job is COMPLETE (no etransfer)'
+                                                 'Processed job is COMPLETE (no etransfer)',
                                                  state_prev=JSAProcState.PROCESSED)
-                            logger.debug('Processed job %i moved to COMPLETE (no etransfer)'
-                                         % (job.id))
+                            logger.debug('Processed job %i moved to COMPLETE (no etransfer)',
+                                         job.id)
 
                 elif job.state == JSAProcState.TRANSFERRING:
                     # Check e-transfer status and move to INGESTION if done.
