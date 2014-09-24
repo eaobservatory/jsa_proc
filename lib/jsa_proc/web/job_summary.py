@@ -242,19 +242,29 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 
     # Get processing time taken for All jobs, pointings only, cals only, science only. for this task.
     jobs,durations, obsinfos =  db.get_processing_time_obs_type(jobdict={'task':task})
-    durations = np.array(durations)
-    obsinfos = np.array(obsinfos)
-    obstypes = obsinfos[:,0]
-    obsprojects = obsinfos[:,2]
 
-    pointings_mask = obstypes=='pointing'
-    cals_mask = (obstypes=='science') & ( (obsprojects=='JCMTCAL') | (obsprojects=='CAL'))
-    science_mask = (obstypes=='science') & ( (obsprojects!='JCMTCAL') & (obsprojects!='CAL'))
+    # Check if any jobs were found
+    if len(jobs) > 0:
+        durations = np.array(durations)
+        obsinfos = np.array(obsinfos)
+        obstypes = obsinfos[:,0]
+        obsprojects = obsinfos[:,2]
 
-    total_processing_time_hrs = durations.sum()/(60.0*60.0)
-    pointings_processing_time_hrs = durations[pointings_mask].sum()/(60.0*60.0)
-    cals_processing_time_hrs = durations[cals_mask].sum()/(60.0*60.0)
-    science_processing_time_hrs  = durations[science_mask].sum()/(60.0*60.0)
+        pointings_mask = obstypes=='pointing'
+        cals_mask = (obstypes=='science') & ( (obsprojects=='JCMTCAL') | (obsprojects=='CAL'))
+        science_mask = (obstypes=='science') & ( (obsprojects!='JCMTCAL') & (obsprojects!='CAL'))
+
+        total_processing_time_hrs = '%.1F' % (durations.sum()/(60.0*60.0))
+        pointings_processing_time_hrs = '%.1F' % (durations[pointings_mask].sum()/(60.0*60.0))
+        cals_processing_time_hrs = '%.1F' % (durations[cals_mask].sum()/(60.0*60.0))
+        science_processing_time_hrs  = '%.1F' % (durations[science_mask].sum()/(60.0*60.0))
+        processed_jobs_found = len(durations)
+    else:
+        total_processing_time_hrs = None
+        pointings_processing_time_hrs = None
+        cals_processing_time_hrs = None
+        science_processing_time_hrs = None
+        processed_jobs_found = 0
     # Title
     title = 'Summary of All jobs'
     if task:
@@ -272,8 +282,9 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
         'date_max': date_max,
         'firstobs': firstobs,
         'lastobs': lastobs,
-        'total_proc_time': '%.1F'%total_processing_time_hrs,
-        'pointings_proc_time': '%.1F'%pointings_processing_time_hrs,
-        'cals_proc_time': '%.1F'%cals_processing_time_hrs,
-        'science_proc_time': '%.1F'%science_processing_time_hrs,
+        'total_proc_time': total_processing_time_hrs,
+        'pointings_proc_time': pointings_processing_time_hrs,
+        'cals_proc_time': cals_processing_time_hrs,
+        'science_proc_time': science_processing_time_hrs,
+        'number_proc_jobs': processed_jobs_found,
     }

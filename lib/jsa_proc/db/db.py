@@ -991,10 +991,11 @@ class JSAProcDB:
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
                      " LEFT JOIN obs ON job.id = obs.job_id "
+
         select_query = " SELECT job.id, MAX(log.datetime) AS maxdt, " + \
                        "obs.obstype, obs.scanmode, obs.project, obs.survey, obs.instrument "
 
-        where = ['state_new=%s' ]
+        where = ['log.state_new=%s']
 
         param = []
         group_query = " GROUP BY job.id "
@@ -1018,16 +1019,28 @@ class JSAProcDB:
         query = select_query + from_query + \
             ' WHERE ' + ' AND '.join(where) + \
             group_query
-
+        where = [ 'log.state_prev=%s' ] + where
+        query_processed = select_query + from_query + \
+                          ' WHERE ' + ' AND '.join(where) + \
+                          group_query
         with self.db as c:
             c.execute(query, [JSAProcState.RUNNING] + param)
             startresults = c.fetchall()
             columns = c.description
 
         with self.db as c:
-            c.execute(query, [JSAProcState.PROCESSED] + param)
+            c.execute(query_processed, [JSAProcState.RUNNING, JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
 
+        job_ids_starts = [i[0] for i in startresults]
+        job_ids_ends = [i[0] for i in endresults]
+
+        for i in range(len(job_ids_starts)):
+            if job_ids_starts[i] not in job_ids_ends:
+                startresults.pop(i)
+        for i in range(len(job_ids_ends)):
+            if job_ids_ends[i] not in job_ids_starts:
+                endresults.pop(i)
 
         # Get the times, job_id numbers and observation infos.
         duration_seconds = []
