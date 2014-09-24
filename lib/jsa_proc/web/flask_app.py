@@ -169,6 +169,7 @@ def create_web_app():
         return prepare_job_qa_info(db, job_id)
 
     @app.route('/job_change_state', methods=['POST'])
+    @requires_auth
     def job_change_state():
 
         # Get the variables from POST
@@ -187,6 +188,7 @@ def create_web_app():
         raise HTTPRedirect(url)
 
     @app.route('/job_change_qa', methods=['POST'])
+    @requires_auth
     def job_change_qa():
 
         # Get the variables from POST
