@@ -930,11 +930,14 @@ class JSAProcDB:
         if join:
             query += ' GROUP BY job.id '
 
-        # Use the _find_jobs_order method to prepare the ORDER clauses.
-        order = self._find_jobs_order(prioritize, sort, sortdir)
+        # Do not generate the ORDER BY clause if we are only selecting
+        # the count.
+        if not count:
+            # Use the _find_jobs_order method to prepare the ORDER clauses.
+            order = self._find_jobs_order(prioritize, sort, sortdir)
 
-        if order:
-            query += ' ORDER BY ' + ', '.join(order)
+            if order:
+                query += ' ORDER BY ' + ', '.join(order)
 
         # Return [number] of results, starting at [offset]
         if number:
