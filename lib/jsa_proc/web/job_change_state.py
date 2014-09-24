@@ -20,7 +20,7 @@ from jsa_proc.qastate import JSAQAState
 from jsa_proc.web.util import url_for
 
 
-def prepare_change_state(db, job_ids, newstate, message):
+def prepare_change_state(db, job_ids, newstate, message, username):
 
     if not JSAProcState.get_name(newstate):
         raise Exception('Unknown state %s' % (newstate))
@@ -30,7 +30,8 @@ def prepare_change_state(db, job_ids, newstate, message):
     for job_id in job_ids:
         state_prev = db.get_job(id_=job_id).state
 
-        db.change_state(job_id, newstate, message, state_prev=state_prev)
+        db.change_state(job_id, newstate, message, state_prev=state_prev,
+                        username=username)
 
 def prepare_change_qa(db, job_ids, qastate, message, username):
 

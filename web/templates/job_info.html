@@ -130,6 +130,7 @@
 <!-- Allow users to change state of job. -->
 <h3> Change the state of this Job </h3>
 
+{% if request.authorization and request.authorization.username %}
 <div class="changestate">
 <form method="POST" action="{{ url_for('job_change_state')}}">
   <input type="hidden" name="job_id" value="{{ info.id }}" >
@@ -145,6 +146,11 @@
 
 </form>
 </div>
+{% else %}
+<p>
+    Please log in to change the job state.
+</p>
+{% endif %}
 </div>
 <div class="panel">
 <h3>ORAC-DR Logs</h3>

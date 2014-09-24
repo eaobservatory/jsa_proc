@@ -177,11 +177,13 @@ def create_web_app():
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
         url = request.form['url']
+        username = request.authorization['username']
 
         # Change the state.
         prepare_change_state(db, job_ids,
                              newstate,
-                             message)
+                             message,
+                             username)
 
         # Redirect the page to correct info.
         flash('You have successfully mangled the job status!')
