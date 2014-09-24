@@ -118,4 +118,4 @@ CREATE TABLE task (
        etransfer BOOLEAN NOT NULL
 );
 
-CREATE INDEX task_name ON task (taskname);
+CREATE UNIQUE INDEX task_name ON task (taskname);
