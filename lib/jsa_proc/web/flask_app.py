@@ -304,7 +304,17 @@ def create_web_app():
     def datetimeformat(value, format='%Y-%m-%d<br>%H:%M'):
         return value.strftime(format)
 
-
+    @app.template_filter('qahypenation')
+    def hyphenate_qastate(value):
+        hyph  = r'&shy;'
+        if value == 'Questionable':
+            return 'Ques' + hyph + 'tion' + hyph + 'able'
+        elif value == 'Unknown':
+            return 'Un' + hyph + 'known'
+        elif value == 'Invalid':
+            return 'In' + hyph + 'valid'
+        else:
+            return value
 
     @app.context_processor
     def add_to_context():

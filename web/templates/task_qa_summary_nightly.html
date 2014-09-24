@@ -14,13 +14,20 @@
 
 {% set results = results['jcmt-nightly'] %}
 {% set task = 'jcmt-nightly' %}
-<table>
+<table class="nightlyqa">
   <tr>
     <th class="date"> Date </th>
     <th></th>
     <th class="empty"> &nbsp;</th>
     {% for i in statedict.keys() %}
-    <th colspan="{{ results[results.keys()[0]][i].values()|length }}">{{ i }}</th><th class="empty">&nbsp;</th>
+    <th colspan="{{ results[results.keys()[0]][i].values()|length }}">
+      {% if i == 'Deleted' %}
+      Delet.
+      {% else %}
+      {{ i }}
+      {% endif %}
+    </th>
+    <th class="empty">&nbsp;</th>
     {% endfor %}
   </tr>
 
@@ -30,7 +37,7 @@
     <th class="empty"> &nbsp; </th>
     {% for i in statedict.keys() %}
     {% for qastate in results[results.keys()[0]][i].keys() %}
-    <th>{{qastate | qastate_name }}</th>
+    <th class="qa">{{qastate | qastate_name | qahypenation | safe}}</th>
     {% endfor %}
     <th class="empty">&nbsp;</th>
     {% endfor %}

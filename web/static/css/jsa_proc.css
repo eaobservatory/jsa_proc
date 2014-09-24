@@ -322,6 +322,10 @@ div.column-right div.panel {
     margin: 0px;
 }
 
+table.nightlyqa th.qa{
+    width: 7ex;
+}
+
 table.obsinfo {
     font-size: small;
 }
