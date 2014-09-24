@@ -22,7 +22,7 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_error_summary(db, filtering=None, chosentask=None):
+def prepare_error_summary(db, filtering=None, chosentask=None, extrafilter=None):
 
     """
     Prepare a summary of all jobs in error state.
@@ -41,11 +41,16 @@ def prepare_error_summary(db, filtering=None, chosentask=None):
 
     locations = ['JAC', 'CADC']
 
+    # Fixup the extrafilter parameter.
+    if extrafilter is None or extrafilter == '':
+        extrafilter = None
+
     # Prepare a filter based on last error messgae for each ID.
     if filtering is None or filtering == '':
         error_filter = None
-    else:
-        error_filter = JSAProcErrorFilter(filtering)
+
+    error_filter = JSAProcErrorFilter(filtering, extrafilter=extrafilter)
+
     if chosentask is None or chosentask == '':
         chosentask = None
     tasks = db.get_tasks()
@@ -58,6 +63,8 @@ def prepare_error_summary(db, filtering=None, chosentask=None):
         if error_filter is not None:
             error_filter(error_dict[l])
 
+    if extrafilter is None:
+        extrafilter = ''
     return {
         'title': 'Errors in JSA Processing Jobs',
         'job_summary_dict': error_dict,
@@ -66,4 +73,5 @@ def prepare_error_summary(db, filtering=None, chosentask=None):
         'filtering_options': JSAProcErrorFilter.filter_names,
         'tasks': tasks,
         'chosentask': chosentask,
+        'extrafilter': extrafilter,
     }

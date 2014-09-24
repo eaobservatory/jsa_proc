@@ -49,7 +49,7 @@ class JSAProcErrorFilter():
 
     filter_names = sorted(filters.keys()) + ['uncategorized']
 
-    def __init__(self, filter_name):
+    def __init__(self, filter_name, extrafilter=None):
         """Create error filter object.
 
         Parameters:
@@ -57,7 +57,10 @@ class JSAProcErrorFilter():
             of the JSAProcErrorFilter.filter_names list.
         """
 
-        if filter_name == 'uncategorized':
+        if filter_name is None or filter_name == '':
+            self.include = []
+            self.exclude = []
+        elif filter_name == 'uncategorized':
             exclude = []
             for f in self.filters:
                 exclude += self.filters[f].get('include', [])
@@ -66,6 +69,11 @@ class JSAProcErrorFilter():
         else:
             self.include = self.filters[filter_name].get('include', [])
             self.exclude = self.filters[filter_name].get('exclude', [])
+
+        if extrafilter:
+            self.additional = [extrafilter]
+        else:
+            self.additional = []
 
     def __call__(self, job_logs):
         """Apply filter to a dictionary of jobs and their errors.
@@ -83,3 +91,9 @@ class JSAProcErrorFilter():
             if not (any([i in log[0].message for i in self.include]) and not any(
                     [i in log[0].message for i in self.exclude])):
                 job_logs.pop(job)
+
+        for (job, log) in list(job_logs.items()):
+            if self.additional:
+                addtest = any([i in log[0].message for i in self.additional])
+                if addtest is False:
+                    job_logs.pop(job)

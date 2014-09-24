@@ -3,6 +3,15 @@
 {% from 'macros.html' import log_table %}
 {% block content%}
 
+<script language="JavaScript">
+function toggle(source) {
+  checkboxes = document.getElementsByName('job_id');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    checkboxes[i].checked = source.checked;
+  }
+}
+</script>
+
 <form>
   <select name="filtering">
     <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any error type</option>
@@ -16,13 +25,14 @@
     <option value="{{ t }}" {{ 'selected="selected"' | safe if chosentask == t }}> {{ t | capitalize }} </option>
     {% endfor %}
   </select>
+  <input type="text" placeholder="additional filter" value="{{extrafilter}}" name="extrafilter"/>
   <input type="submit" value="Filter" />
 </form>
 
 {% for l in job_summary_dict.keys() %}
 <h2> {{job_summary_dict[l]|length}} Jobs at {{l}} in {{ filtering | default('', True) | capitalize }} Error States {% if chosentask is not none %} in task {{chosentask}} {% endif %}</h2>
 <form method="POST" action="{{ url_for('job_change_state') }}"> 
-
+<input type="checkbox" onClick="toggle(this)" /> Select All <br/>
   <table class="page" style="font-size:9pt">
     <tr>
       <th/>
