@@ -1079,6 +1079,34 @@ class JSAProcDB:
 
         return result
 
+    def get_etransfer_state(self, task):
+        """
+        Query the task table to find out if a task should
+        be etransferred to CADC or not.
+
+        Returns a Boolean.
+        """
+        query = 'SELECT etransfer FROM task WHERE taskname=%s'
+        params = (task,)
+        with self.db as c:
+            c.execute(query, params)
+            row = c.fetchall()
+        if len(row) == 0:
+            raise NoRowsError('No task found!', query %  tuple(params))
+        return row[0][0]
+
+    def add_task(self, taskname, etransfer):
+        """
+        Add a task to the task table.
+
+        taskname: string, name of task. (limited to 80 characters)
+        etransfer: Boolean, if jobs should be etransferred & ingested or not.
+
+        """
+        with self.db as c:
+            c.execute('INSERT INTO task (taskname, etransfer) VALUES (%s, %s)',
+                      (taskname, etransfer,))
+
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
