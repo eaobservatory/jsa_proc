@@ -172,7 +172,7 @@ def create_web_app():
     @app.route('/job/<int:job_id>/qa', methods=['GET'])
     @templated('job_qa.html')
     def job_qa(job_id):
-        return prepare_job_qa_info(db, job_id)
+        return prepare_job_qa_info(db, job_id, session.get('job_query'))
 
     @app.route('/job_change_state', methods=['POST'])
     @requires_auth

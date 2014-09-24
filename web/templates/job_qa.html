@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
-{% from 'macros.html' import break_underscore %}
+{% from 'macros.html' import break_underscore, render_page_control %}
 {% block body %}
+
+{{ render_page_control(pagination, 'job', False) }}
 
 {% if info.task == 'jcmt-nightly' %}
 <h1> {{ info.task }} : {{obsinfo |map (attribute='utdate') | uniq | join(' ')}} : {{ title }} </h1>
