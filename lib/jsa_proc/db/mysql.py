@@ -114,3 +114,72 @@ class JSAProcMySQL(JSAProcDB):
         """Destroy MySQL access object."""
 
         self.db.close()
+
+    def job_prev_next(self, job_id,
+                      state=None, location=None, task=None, qa_state=None,
+                      prioritize=False, sort=False, sortdir='ASC',
+                      obsquery=None, tiles=None):
+        """MySQL-specific previous and next job query.
+
+        Return: a tuple of the previous and next job identifiers.
+        """
+
+        # Prepare the same kind of query which find_jobs would use, but
+        # select only the job identifier.
+        (where, param) = self._find_jobs_where(
+            state, location, task, qa_state, obsquery, tiles)
+
+        order = self._find_jobs_order(prioritize, sort, sortdir)
+
+        find_query = 'SELECT id FROM job'
+        if where:
+            find_query += ' WHERE ' + ' AND '.join(where)
+
+        if order:
+            find_query += ' ORDER BY ' + ', '.join(order)
+
+        # Now create the query to get the next and previous entries.  This
+        # is done in a MySQL-specific manner by using user-defined variables
+        # to add the previous row's job identifer to the result set.  MySQL
+        # tends to processes these variables just before the row is sent, so
+        # handle them in the WHERE clause to prevent them being out of sync
+        # between the SELECT and WHERE parts of the query.  If this stops
+        # working then the alternative would be to use a second "derived
+        # table" (a.k.a. "inline view") to make the rows containing the
+        # previous identifier, and then to select from it in order to apply
+        # the WHERE constraints.  Useful links for user-defined variables are:
+        # http://dev.mysql.com/doc/refman/5.1/en/user-variables.html
+        # http://code.openark.org/blog/mysql/sql-ranking-without-self-join-revisited
+        # http://www.xaprb.com/blog/2006/12/15/advanced-mysql-user-variable-techniques/
+        query = 'SELECT found.id, @prevprev ' \
+                'FROM (' + find_query + ') AS found ' \
+                'WHERE COALESCE(NULL + @prevprev := @prevjob, ' \
+                'NULL + @prevjob := found.id, ' \
+                '@prevprev = %s OR found.id = %s)'
+
+        param.extend((job_id, job_id))
+
+        prev = next = None
+
+        with self.db as c:
+            # Initialize the variables with the type we want them to be,
+            # i.e. integer --  so we have to then detect 0 later.
+            c.execute('SET @prevjob = 0, @prevprev = 0')
+            c.execute(query, param)
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                (row_id, row_prev) = row
+
+                if row_id == job_id:
+                    prev = None if row_prev == 0 else row_prev
+
+                elif row_prev == job_id:
+                    next = row_id
+
+                else:
+                    raise JSAProcError('Unexpected result in job_prev_next')
+
+        return (prev, next)
