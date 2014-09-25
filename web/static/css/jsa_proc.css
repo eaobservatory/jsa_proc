@@ -213,6 +213,11 @@ td, th {
     padding: 5px;
 }
 
+th {
+    hyphens: auto;
+    -moz-hyphens: auto;
+}
+
 .empty {
     border: none;
 }
