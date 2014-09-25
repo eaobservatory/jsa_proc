@@ -238,7 +238,7 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
                        for c in j.values()])
 
     # Get dates of first and last observations in task.
-    firstobs, lastobs = db.get_date_range(task=task)[0]
+    firstobs, lastobs = db.get_date_range(task=task)
 
     # Get processing time taken for All jobs, pointings only, cals only, science only. for this task.
     jobs,durations, obsinfos =  db.get_processing_time_obs_type(jobdict={'task':task})

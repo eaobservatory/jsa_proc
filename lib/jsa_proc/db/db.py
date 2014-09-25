@@ -695,7 +695,11 @@ class JSAProcDB:
         with self.db as c:
             c.execute(select, params)
 
-            times = c.fetchall()
+            times = c.fetchall()[0]
+
+        if times[0] is None and times[1] is None:
+            raise NoRowsError('obs', select % params)
+
         return times
 
     def get_output_files(self, job_id):
