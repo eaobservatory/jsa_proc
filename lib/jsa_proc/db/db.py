@@ -173,13 +173,14 @@ class JSAProcDB:
         return job
 
     def add_job(self, tag, location, mode, parameters, task,
-                input_file_names, foreign_id=None, state='?',
+                input_file_names=None, parent_jobs=None, filters=None,
+                foreign_id=None, state='?',
                 priority=0, obsinfolist=None, tilelist=None):
         """
         Add a JSA data processing job to the database.
 
         This will raise an error if the job already exists, if the
-        database interface raises an erro. The job must be specified
+        database interface raises an error. The job must be specified
         by its unique tag.
 
         If the job creation is successful, an entry will be added to the
@@ -192,15 +193,28 @@ class JSAProcDB:
         location: string, where the job will be run.
 
         mode: JSA processing mode (obs / night / project / public),
-        ignored for now but included in this function's interface for
-        future use.
 
-        print 'testing add jobs...'
         parameters: processing parameters to pass to jsawrapdr
         (typically the recipe name). (string)
 
-        input_file_names: iterable, each item being a string that
+        input_file_names: OPTIONAL iterable, each item being a string that
         identifies the name of an input file for the job.
+
+        parent_jobs: OPTIONAL, iterable, each item being the integer
+        job id of a parent job in this database.
+
+        [ 1 of input_file_name or parent_jobs must be provided]
+
+        filters: OPTIONAL, either a string or a list of strings.
+
+        If a string, it is a regular expression string to select only
+        the correct filenames from the output files of all the parent
+        job.
+
+        If it is an iterable, then each item is a regular expression
+        string to select the correct files from the output files for a
+        job, and it must be the samelength as the list of parent_jobs,
+        and each item is the filter for that specific job.
 
         foreign_id: OPTIONAL, default=None. (string), identifier from
         foreign system (probably  CADC).
@@ -227,6 +241,9 @@ class JSAProcDB:
         if not JSAProcState.is_valid(state):
             raise JSAProcError('State {0} is not recognised'.format(state))
 
+        if not parent_jobs  and not input_file_names:
+            raise JSAProcError('A Job must have either input files or parent jobs')
+
         # insert job into table
         with self.db as c:
             c.execute(
@@ -241,11 +258,33 @@ class JSAProcDB:
             # tables).
             job_id = c.lastrowid
 
-            # Need to get input file names and add them to table input_file
-            for filename in input_file_names:
-                c.execute('INSERT INTO input_file (job_id, filename) '
-                          'VALUES (%s, %s)',
-                          (job_id, filename))
+            # Need to get input file names and add them to table
+            # input_file
+            if input_file_names:
+                for filename in input_file_names:
+                    c.execute('INSERT INTO input_file (job_id, filename) '
+                              'VALUES (%s, %s)',
+                    (job_id, filename))
+
+            # Go through parent jobs and add to parent table with
+            # filters
+            if parent_jobs:
+                if filters is None:
+                    filters = ''
+
+                if isinstance(filters, basestring):
+                    filters = [filters]*len(parent_jobs)
+
+                else:
+                    if not len(filters) == len(parent_jobs):
+                        raise JSAProcError(
+                            'If more than one filter is given '+ \
+                            'len(filters) should match len(parents)')
+
+                for parent, filt in zip(parent_jobs, filters):
+                    c.execute('INSERT INTO parent (job_id, parent, filter) '
+                              'VALUES (%s, %s, %s)',
+                              (job_id, parent, filt))
 
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
