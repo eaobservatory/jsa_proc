@@ -120,6 +120,11 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(len(logs), 1)
         self.assertIn('added to the database', logs[0].message)
 
+        # Try adding a job with a state specified
+        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test', input_file_names=['test1'],
+                               state=JSAProcState.TRANSFERRING)
+        job2 = self.db.get_job(id_=id_2)
+        self.assertEqual(job2.state, JSAProcState.TRANSFERRING)
 
         # Try adding a job with parents
         job_id_p = self.db.add_job(tag2, location, mode, parameters, 'test',
@@ -131,12 +136,6 @@ class InterfaceDBTest(DBTestCase):
                           job.parameters, job.priority, job.task],
                          [job_id_p, tag2, location, mode, parameters, priority,
                           'test'])
-
-        # Try adding a job with a state specified
-        id_2 = self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test', input_file_names=['test1'],
-                               state=JSAProcState.TRANSFERRING)
-        job2 = self.db.get_job(id_=id_2)
-        self.assertEqual(job2.state, JSAProcState.TRANSFERRING)
 
         # Check can't add job with invalid state.
         with self.assertRaises(JSAProcError):
@@ -510,6 +509,16 @@ class InterfaceDBTest(DBTestCase):
 
         # Check you can recover the other way
         self.assertEqual([jobid3], self.db.get_child_jobs(jobid))
+
+        # Check you can't add a job with parents that aren't in the database
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag4', 'FAKELOC', 'obs', 'RECIPE', 'test',
+                            parent_jobs=[5,6], filters='850um', priority=8)
+
+        # Check that you can't add a job that lists itself as a parent
+        with self.assertRaises(JSAProcError):
+            self.db.add_job('tag4', 'FAKELOC', 'obs', 'RECIPE', 'test',
+                            parent_jobs=[4], filters='850um', priority=8)
 
     def test_find_jobs_obsquery(self):
 

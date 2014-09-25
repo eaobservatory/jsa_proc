@@ -258,17 +258,16 @@ class JSAProcDB:
             # tables).
             job_id = c.lastrowid
 
-            # Need to get input file names and add them to table
-            # input_file
-            if input_file_names:
-                for filename in input_file_names:
-                    c.execute('INSERT INTO input_file (job_id, filename) '
-                              'VALUES (%s, %s)',
-                    (job_id, filename))
-
             # Go through parent jobs and add to parent table with
-            # filters
+            # filters. Also check none of them are the same as the job_id
+            # and raise an error if so (aborting the adding of the job).
             if parent_jobs:
+
+                # Check none of the parent_jobs are the same as the
+                # child job that has just been created.
+                if job_id in parent_jobs:
+                    raise JSAProcError('Cannot insert a job as its own parent.')
+
                 if filters is None:
                     filters = ''
 
@@ -285,6 +284,16 @@ class JSAProcDB:
                     c.execute('INSERT INTO parent (job_id, parent, filter) '
                               'VALUES (%s, %s, %s)',
                               (job_id, parent, filt))
+
+            # Need to get input file names and add them to table
+            # input_file
+            if input_file_names:
+                for filename in input_file_names:
+                    c.execute('INSERT INTO input_file (job_id, filename) '
+                              'VALUES (%s, %s)',
+                    (job_id, filename))
+
+
 
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
