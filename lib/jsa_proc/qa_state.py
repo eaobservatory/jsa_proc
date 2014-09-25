@@ -37,6 +37,7 @@ class JSAQAState:
     _info[GOOD] = 'Good'
 
     STATE_ALL = tuple(_info.keys())
+    STATE_IFFY = set((INVALID, BAD, QUESTIONABLE))
 
     @classmethod
     def get_name(cls, state):

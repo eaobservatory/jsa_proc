@@ -221,8 +221,10 @@ def create_web_app():
         username = request.authorization['username']
 
         # Change the state.
-        if message == '' and (qa_state == 'B' or qa_state == 'Q'):
-            flash('You must provide a message to change QA state to Bad or Questionable')
+        if message == '' and qa_state in JSAQAState.STATE_IFFY:
+            flash('You must provide a message to change QA state to ' +
+                  ' or '.join((JSAQAState.get_name(x)
+                               for x in JSAQAState.STATE_IFFY)) + '.')
         else:
             try:
                 prepare_change_qa(db, job_ids,
