@@ -71,7 +71,10 @@ def templated(template):
         @functools.wraps(f)
         def decorated_function(*args, **kwargs):
             result = f(*args, **kwargs)
-            return flask.render_template(template, **result)
+            resp = flask.make_response(
+                flask.render_template(template, **result))
+            resp.headers['Content-Language'] = 'en'
+            return resp
         return decorated_function
     return decorator
 
