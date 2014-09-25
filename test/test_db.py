@@ -682,6 +682,46 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(len(self.db.get_qas(1)), 4)
         self.assertEqual(len(self.db.get_qas(2)), 0)
 
+    def test_get_date_range(self):
+        with self.assertRaises(NoRowsError):
+            self.db.get_date_range()
+
+        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', [])
+        info = {'obsid': 'x14_01_1T1', 'obsidss': 'x14_1_1T1_850',
+                'utdate': date(2014, 01, 01), 'obsnum': 3,
+                'instrument': 'SCUBA-2',
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2014-01-01 09:00:00'}
+        self.db.set_obs_info(job_1, [info])
+        self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range())
+        self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range(task='test'))
+
+        info2 = {'obsid': 'ax14_01_1T1', 'obsidss': 'ax14_1_1T1_850',
+                'utdate': date(2014, 05, 01), 'obsnum': 3,
+                'instrument': 'SCUBA-2',
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2014-05-01 09:00:00'}
+
+        self.db.set_obs_info(job_1, [info, info2])
+        self.assertEqual((str(info['utdate']), str(info2['utdate'])), self.db.get_date_range())
+        self.assertEqual((str(info['utdate']), str(info2['utdate'])), self.db.get_date_range(task='test'))
+
+        job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test2', [])
+        info3 = {'obsid': 'bx14_01_1T1', 'obsidss': 'bx14_1_1T1_850',
+                 'utdate': date(2013, 05, 01), 'obsnum': 3,
+                 'instrument': 'SCUBA-2',
+                 'backend': 'ACSIS', 'subsys': '1',
+                 'date_obs': '2013-05-01 09:00:00'}
+        info4 = {'obsid': 'cx14_01_1T1', 'obsidss': 'cx14_1_1T1_850',
+                'utdate': date(2013, 01, 01), 'obsnum': 3,
+                'instrument': 'SCUBA-2',
+                'backend': 'ACSIS', 'subsys': '1',
+                'date_obs': '2013-01-01 09:00:00'}
+        self.db.set_obs_info(job_2, [info3, info4])
+        self.assertEqual((str(info4['utdate']), str(info2['utdate'])), self.db.get_date_range())
+        self.assertEqual((str(info4['utdate']), str(info3['utdate'])), self.db.get_date_range(task='test2'))
+
+
 class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
         with self.assertRaises(JSAProcError):
