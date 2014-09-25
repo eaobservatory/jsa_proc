@@ -80,7 +80,7 @@ ScanModes = dict(
     Pong=ScanMode('Pong', 'Pong scans', {'scanmode': 'CURVY_PONG'}),
     Jiggle=ScanMode('Jiggle', 'Jiggle',{'scanmode': 'jiggle'}),
     Grid=ScanMode('Grid','Grid',{'scanmode':'grid'}),
-    Raster = ScanMode('Raster', 'Raster', {'scandmode':'DISCRETE_BOUSTROPHEDON'}),
+    Raster = ScanMode('Raster', 'Raster', {'scanmode':'DISCRETE_BOUSTROPHEDON'}),
 )
 
 # Subsystem
