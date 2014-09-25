@@ -487,6 +487,30 @@ class InterfaceDBTest(DBTestCase):
         # test the count option
         self.assertEqual(self.db.find_jobs(count=True), 8)
 
+    def test_parent_jobs(self):
+
+        # Test it raises an error if no results.
+        with self.assertRaises(NoRowsError):
+            self.db.get_parent_jobs(1)
+
+        # Add 2 jobs to the data base.
+        jobid = self.db.add_job('tag1', 'FAKELOC', 'obs', 'RECIPE', 'test',
+                                input_file_names=['test1','test2'],
+                               priority=7)
+        jobid2 = self.db.add_job('tag2', 'FAKELOC', 'obs', 'RECIPE', 'test',
+                                 input_file_names=['test3','test4'],
+                               priority=7)
+        # Add a job that depends on this one
+        jobid3 = self.db.add_job('tag3', 'FAKELOC', 'obs', 'RECIPE', 'test',
+                                 parent_jobs=[1,2], filters=['850um', '850um'],
+                               priority=7)
+        # Check you get back the right values
+        self.assertEqual(set([(1, '850um'), (2, '850um')]),
+                         set(self.db.get_parent_jobs(jobid3)))
+
+        # Check you can recover the other way
+        self.assertEqual([jobid3], self.db.get_child_jobs(jobid))
+
     def test_find_jobs_obsquery(self):
 
         info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',

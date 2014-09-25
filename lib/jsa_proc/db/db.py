@@ -1150,6 +1150,46 @@ class JSAProcDB:
             c.execute('INSERT INTO task (taskname, etransfer) VALUES (%s, %s)',
                       (taskname, etransfer,))
 
+    def get_parent_jobs(self, job_id):
+        """
+        Look in the parent table and get all parent jobs
+        for the given job_id.
+
+        Returns a list of tuples of (parent job id, filters).
+
+        Raises NoRowsError if no results are found.
+        """
+        query = 'SELECT parent, filter FROM parent WHERE job_id = %s'
+        params = (job_id,)
+        with self.db as c:
+            c.execute(query, params)
+            result = c.fetchall()
+
+        if len(result) == 0:
+            raise NoRowsError('parent', query % params)
+        return result
+
+    def get_child_jobs(self, job_id):
+        """
+        Get all jobs that list the current job as a parent.
+
+        Return a list of integer job_ids.
+
+        Raise NoRowsError if no results are found.
+        """
+        query = 'SELECT job_id FROM parent WHERE parent = %s'
+        params = (job_id,)
+
+        with self.db as c:
+            c.execute(query, params)
+            result = c.fetchall()
+
+        if len(result) == 0:
+            raise NoRowsError('parent', query % params)
+
+        # Fix up the format so its not a list of 1-item tuples:
+        result = [i[0] for i in result]
+        return result
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
