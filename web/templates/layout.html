@@ -7,6 +7,11 @@
         <title>JSA Processing: {{ title }}</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/jsa_proc.css') }}" type="text/css" />
         <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" sizes="16x16" />
+        {% if scripts is defined %}
+            {% for script in scripts %}
+                <script type="text/javascript" src="/static/js/{{ script }}.js"></script>
+            {% endfor %}
+        {% endif %}
     </head>
     <body>
         {{ render_navbar(active_page) }}

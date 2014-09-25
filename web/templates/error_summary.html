@@ -1,16 +1,8 @@
 {% extends "layout.html" %}
 {% set active_page='error_summary' %}
+{% set scripts=['select_all'] %}
 {% from 'macros.html' import log_table %}
 {% block content%}
-
-<script language="JavaScript">
-function toggle(source) {
-  checkboxes = document.getElementsByName('job_id');
-  for(var i=0, n=checkboxes.length;i<n;i++) {
-    checkboxes[i].checked = source.checked;
-  }
-}
-</script>
 
 <form>
   <select name="filtering">
