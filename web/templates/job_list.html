@@ -4,7 +4,7 @@
 {% from 'macros.html' import render_choices with context %}
 {% block body %}
 
-{{render_choices(locations, selected_location, states, selected_state, qastates, selected_qastate, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) }}
+{{render_choices() }}
 
 {{ render_page_control(pagination) }}
 
@@ -12,9 +12,9 @@
 <div class="tile{% if job.state is state_active %} state_active{% endif %}">
   {% if mode == 'JSAQA' %}
   {% set url = job.qaurl %}
-  <div class="tile_title qastate_{{ job.qastate | qastate_name | lower }}">
+  <div class="tile_title qa_state_{{ job.qa_state | qa_state_name | lower }}">
     <a href="{{ url }}" title="{{ job.tag }}">
-      {{ job.qastate | qastate_name }}
+      {{ job.qa_state | qa_state_name }}
     </a>
   </div>
   {% elif mode == 'JSAProc' %}

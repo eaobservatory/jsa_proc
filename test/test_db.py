@@ -22,7 +22,7 @@ from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
 
 from .db import DBTestCase
 

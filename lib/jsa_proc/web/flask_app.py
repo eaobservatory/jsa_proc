@@ -23,7 +23,7 @@ import os.path
 
 from jsa_proc.config import get_config, get_database, get_home
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
 
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.omp.auth import check_staff_password
@@ -99,30 +99,44 @@ def create_web_app():
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
-        obsquerydict = {}
-        for key in ObsQueryDict.keys():
-            obsquerydict[key] = request.args.get(key, None)
+        # Prepare query arguments list: special parameters first.
+        kwargs = {
+            'state': request.args.getlist('state'),
+            'mode': request.args.get('mode', 'JSAProc'),
+        }
 
-        (context, job_query) = prepare_job_list(
+        # Now add regular string parameters, including those from
+        # jcmtobsinfo.
+        params = [
+            'location',
+            'task',
+            'date_min',
+            'date_max',
+            'qa_state',
+            'sourcename',
+            'obsnum',
+            'project',
+        ]
+
+        params.extend(ObsQueryDict.keys())
+
+        for key in params:
+            kwargs[key] = request.args.get(key, None)
+
+        # Process empty strings used as null form parameters.
+        for argname in kwargs:
+            if kwargs[argname] == '':
+                kwargs[argname] = None
+
+        # Store the query in the session.
+        session['job_query'] = kwargs
+
+        # Finally prepare the template context.
+        return prepare_job_list(
             db,
-            request.args.get('location', None),
-            request.args.getlist('state', None),
-            request.args.get('task', None),
-            request.args.get('number', None),
-            request.args.get('page', None),
-            request.args.get('date_min', None),
-            request.args.get('date_max', None),
-            request.args.get('qastate', None),
-            request.args.get('name', None),
-            request.args.get('obsnum', None),
-            request.args.get('project', None),
-            obsquerydict=obsquerydict,
-            mode=request.args.get('mode', 'JSAProc')
-        )
-
-        session['job_query'] = job_query
-
-        return context
+            number=request.args.get('number', None),
+            page=request.args.get('page', None),
+            **kwargs)
 
     @app.route('/image/<task>/piechart')
     def summary_piechart(task='None'):
@@ -200,19 +214,19 @@ def create_web_app():
     def job_change_qa():
 
         # Get the variables from POST
-        qastate = request.form['qastate']
+        qa_state = request.form['qa_state']
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
         url = request.form['url']
         username = request.authorization['username']
 
         # Change the state.
-        if message == '' and (qastate == 'B' or qastate == 'Q'):
+        if message == '' and (qa_state == 'B' or qa_state == 'Q'):
             flash('You must provide a message to change QA state to Bad or Questionable')
         else:
             try:
                 prepare_change_qa(db, job_ids,
-                                  qastate,
+                                  qa_state,
                                   message,
                                   username,
                               )
@@ -294,10 +308,10 @@ def create_web_app():
             return 'error'
         raise HTTPError('Unknown phase {0}'.format(phase))
 
-    @app.template_filter('qastate_name')
-    def qastate_name(qastate):
-        if qastate.lower() != 'total':
-            name = JSAQAState.get_name(qastate)
+    @app.template_filter('qa_state_name')
+    def qa_state_name(qa_state):
+        if qa_state.lower() != 'total':
+            name = JSAQAState.get_name(qa_state)
         else:
             name = 'Total'
         return name

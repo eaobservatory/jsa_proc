@@ -217,25 +217,25 @@ td, th {
     border: none;
 }
 
-.qastate_unknown, .qastate_unknown a {
+.qa_state_unknown, .qa_state_unknown a {
     background: #ddd;
     color: black;
 }
-.qastate_invalid, .qastate_invalid a {
+.qa_state_invalid, .qa_state_invalid a {
     background: rgb(173,253,231);
     color: black;
 }
-.qastate_questionable, .qastate_questionable a {
+.qa_state_questionable, .qa_state_questionable a {
     background: #FFEB7D;
     color: black;
 }
 
-.qastate_good,.qastate_good a {
+.qa_state_good,.qa_state_good a {
     background: #C9DEF6;
     color: black;
 }
 
-.qastate_bad, .qastate_bad a {
+.qa_state_bad, .qa_state_bad a {
     background: #FF9D8B;
     color: black;
 }

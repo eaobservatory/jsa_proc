@@ -21,7 +21,7 @@ from getpass import getuser
 
 from jsa_proc.error import *
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
 
 logger = logging.getLogger(__name__)
 

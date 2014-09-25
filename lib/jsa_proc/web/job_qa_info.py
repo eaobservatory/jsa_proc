@@ -23,11 +23,12 @@ import re
 from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
+from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
-def prepare_job_qa_info(db, job_id, job_query):
+def prepare_job_qa_info(db, job_id, query):
     # Fetch job and qa information from the database.
     try:
         job = db.get_job(job_id)
@@ -94,7 +95,8 @@ def prepare_job_qa_info(db, job_id, job_query):
 
     # If we know what the user's job query was (from the session information)
     # then set up pagination based on the previous and next job identifiers.
-    if job_query is not None:
+    if query is not None:
+        (_, job_query) = job_search(**query)
         (prev, next) = db.job_prev_next(job_id, **job_query)
         pagination = Pagination(
             None,
@@ -114,6 +116,6 @@ def prepare_job_qa_info(db, job_id, job_query):
         'previews': zip(previews1024,previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
-        'qastates':JSAQAState.STATE_ALL,
+        'qa_states':JSAQAState.STATE_ALL,
         'pagination': pagination,
     }

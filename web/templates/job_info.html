@@ -14,8 +14,8 @@
     <tr><th>State</th><td class="state_{{ info.state | state_phase}}{% if info.state is state_active %} state_active{% endif %}">
         {{ info.state | state_name }}
     </td></tr>
-    <tr><th>QA State</th><td class="qastate_{{ info['qa_state'] | qastate_name |lower}}">
-        <a href="{{ url_for('job_qa', job_id=info.id)}}">{{ info['qa_state'] | qastate_name }}</a>
+    <tr><th>QA State</th><td class="qa_state_{{ info['qa_state'] | qa_state_name |lower}}">
+        <a href="{{ url_for('job_qa', job_id=info.id)}}">{{ info['qa_state'] | qa_state_name }}</a>
     </td></tr>
     <tr><th>Location</th><td>{{ info.location }}</td></tr>
     {% if info.foreign_id is not none %}

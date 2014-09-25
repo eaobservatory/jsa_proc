@@ -16,7 +16,7 @@
 from __future__ import absolute_import, division
 
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.util import url_for
 
 
@@ -33,10 +33,10 @@ def prepare_change_state(db, job_ids, newstate, message, username):
         db.change_state(job_id, newstate, message, state_prev=state_prev,
                         username=username)
 
-def prepare_change_qa(db, job_ids, qastate, message, username):
+def prepare_change_qa(db, job_ids, qa_state, message, username):
 
-    if not JSAQAState.get_name(qastate):
+    if not JSAQAState.get_name(qa_state):
         raise Exception('Unknown state %s' % (newstate))
 
     for job_id in job_ids:
-        db.add_qa_entry(job_id, qastate, message, username)
+        db.add_qa_entry(job_id, qa_state, message, username)

@@ -29,8 +29,8 @@
     <th> Total </th>
     <th class="empty"> &nbsp; </th>
     {% for i in statedict.keys() %}
-    {% for qastate in results[results.keys()[0]][i].keys() %}
-    <th>{{qastate | qastate_name }}</th>
+    {% for qa_state in results[results.keys()[0]][i].keys() %}
+    <th>{{qa_state | qa_state_name }}</th>
     {% endfor %}
     <th class="empty">&nbsp;</th>
     {% endfor %}
@@ -42,13 +42,13 @@
     <td><a href="{{ url_for('job_list', task=task, date_min=date, date_max=date, mode='JSAQA') }}">{{ results[date].pop('total') }}</a></td>
     <td class="empty"> &nbsp;</td>
     {% for s in statedict.keys() %}
-        {% for qastate in results[date][s].keys() %}
+        {% for qa_state in results[date][s].keys() %}
 
-        {% if qastate != 'total' %}
+        {% if qa_state != 'total' %}
 
-        <td class="qastate_{{ qastate | qastate_name | lower }}">
-          {% if results[date][s][qastate] != 0 %}
-          <a href="{{ url_for('job_list', task=task, qastate=qastate, mode='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>
+        <td class="qa_state_{{ qa_state | qa_state_name | lower }}">
+          {% if results[date][s][qa_state] != 0 %}
+          <a href="{{ url_for('job_list', task=task, qa_state=qa_state, mode='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qa_state] }}</a>
           {% else %}
           &ndash;
           {% endif %}
@@ -56,8 +56,8 @@
 
         {% else %}
         <td>
-          {% if results[date][s][qastate] != 0 %}
-          <a href="{{ url_for('job_list', task=task, mode='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qastate] }}</a>
+          {% if results[date][s][qa_state] != 0 %}
+          <a href="{{ url_for('job_list', task=task, mode='JSAQA', date_min=date, date_max=date, state=statedict[s])}} ">{{ results[date][s][qa_state] }}</a>
           {% else %}
           &ndash;
           {% endif %}

@@ -15,83 +15,20 @@
 
 from __future__ import absolute_import, division
 
-from jsa_proc.db.db import Fuzzy, Range
-from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.jcmtobsinfo import ObsQueryDict
+from jsa_proc.qa_state import JSAQAState
+from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
-def prepare_job_list(db, location, state, task, number, page,
-                     date_min, date_max, qastate,
-                     sourcename, obsnum, project,
-                     obsquerydict={}, mode='JSAProc'):
-    if location == '':
-        location = None
-    if state == '' or state == []:
-        state = None
-    if task == '':
-        task = None
-    if date_min == '':
-        date_min = None
-    if date_max == '':
-        date_max = None
-    if qastate == '':
-        qastate = None
-    if obsnum == '':
-        obsnum = None
-    if project == '':
-        project = None
-
-    job_query = {
-        'location': location,
-        'state': state,
-        'task': task,
-        'qa_state': qastate,
-    }
-
-    # Add dictionary of obs table requirements to send to find jobs
-    # to the job query.
-    url_query = job_query.copy()
-    obsquery = job_query['obsquery'] = {}
-    url_query.update({
-        'date_min': date_min,
-        'date_max': date_max,
-        'name': sourcename,
-        'mode': mode,
-        'qastate': qastate,
-        'sourcename': sourcename,
-        'obsnum': obsnum,
-        'project': project,
-    })
-
-    if (date_min is not None) or (date_max is not None):
-        obsquery['utdate'] = Range(date_min, date_max)
-
-    if sourcename:
-        obsquery['sourcename'] = Fuzzy(sourcename)
-
-    if obsnum:
-        obsquery['obsnum'] = obsnum
-
-    if project:
-        obsquery['project'] = project
-
-    # Get the values based on the strings passed to this.
-    for key, value in obsquerydict.items():
-        if value:
-            # Add the filtering information to the obsquery dictionary.
-            obsquery.update(ObsQueryDict[key][value].where)
-
-            # Add the parameter to the URL (for pagination links).
-            url_query[key] = value
-
-    # Enable sorting (ignored in count mode).
-    job_query['sort'] = True
+def prepare_job_list(db, number, page, **kwargs):
+    # Generate query objects based on the parameters.
+    (query, job_query) = job_search(**kwargs)
 
     (number, page, pagination) = calculate_pagination(
         db.find_jobs(count=True,  **job_query),
-        number, 24, page, 'job_list', url_query)
+        number, 24, page, 'job_list', query)
 
     jobs = []
 
@@ -111,33 +48,19 @@ def prepare_job_list(db, location, state, task, number, page,
             'tag': job.tag,
             'location': job.location,
             'preview': preview,
-            'qastate': job.qa_state
+            'qa_state': job.qa_state
         })
 
-    # If state is None, ensure we return a list like object.
-    if state is None:
-        state = []
-
-    return ({
+    return {
         'title': 'Job List',
         'jobs': jobs,
         'locations': ('JAC', 'CADC'),
-        'selected_location': location,
         'states': JSAProcState.STATE_ALL,
-        'selected_state': state,
-        'qastates': JSAQAState.STATE_ALL,
-        'selected_qastate': qastate,
+        'qa_states': JSAQAState.STATE_ALL,
         'tasks': db.get_tasks(),
-        'selected_task': task,
-        'selected_number': number,
+        'number': number,
         'pagination': pagination,
-        'selected_obsoptions': obsquerydict,
-        'obsoptions': ObsQueryDict,
-        'date_min': date_min,
-        'date_max': date_max,
-        'name': sourcename,
-        'mode': mode,
-        'obsnum': obsnum,
-        'project': project,
-    },
-    job_query)
+        'obsqueries': ObsQueryDict,
+        'query': query,
+        'mode': query['mode'],
+    }

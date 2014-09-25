@@ -54,54 +54,53 @@
     {% endif %}
 {% endmacro %}
 
-{% macro render_choices(locations, selected_location, states, selected_state, qastates, selected_qastate, tasks, selected_task, selected_number, obsoptions, selected_obsoptions) %}
+{% macro render_choices() %}
 <form>
     <p>
       <input type="hidden" name="mode" value="{{mode}}"></input>
         <select name="location">
-            <option value="" {{ 'selected="selected"' | safe if selected_location is none }}>Any location</option>
+            <option value="" {{ 'selected="selected"' | safe if query.location is none }}>Any location</option>
             {% for location in locations %}
-                <option value="{{ location }}" {{ 'selected="selected"' | safe if location == selected_location }}>{{ location }}</option>
+                <option value="{{ location }}" {{ 'selected="selected"' | safe if location == query.location }}>{{ location }}</option>
             {% endfor %}
         </select>
-        <select multiple="multiple" name="state" size="{{ states |length + 1}}">
-            <option value="" {{ 'selected="selected"' | safe if selected_state is none }}>Any state</option>
+        <select multiple="multiple" name="state" size="{{ states | length }}">
             {% for state in states %}
-                <option value="{{ state }}" {{ 'selected="selected"' | safe if state in selected_state }}>{{ state | state_name }}</option>
+                <option value="{{ state }}" {{ 'selected="selected"' | safe if state in query.state }}>{{ state | state_name }}</option>
             {% endfor %}
         </select>
-        <select name="qastate">
-          <option value="" {{ 'selected="selected"' | safe if selected_qastate is none }}> Any qastate</option>
-            {% for qastate in qastates %}
-                <option value="{{ qastate }}" {{ 'selected="selected"' | safe if qastate == selected_qastate }}>{{ qastate | qastate_name }}</option>
+        <select name="qa_state">
+          <option value="" {{ 'selected="selected"' | safe if query.qa_state is none }}> Any QA state</option>
+            {% for qa_state in qa_states %}
+                <option value="{{ qa_state }}" {{ 'selected="selected"' | safe if qa_state == query.qa_state }}>{{ qa_state | qa_state_name }}</option>
             {% endfor %}
         </select>
         <select name="task">
-            <option value="" {{ 'selected="selected"' | safe if selected_task is none }}>All tasks</option>
+            <option value="" {{ 'selected="selected"' | safe if query.task is none }}>All tasks</option>
             {% for task in tasks %}
-                <option value="{{ task }}" {{ 'selected="selected"' | safe if task == selected_task }}>{{ task }}</option>
+                <option value="{{ task }}" {{ 'selected="selected"' | safe if task == query.task }}>{{ task }}</option>
             {% endfor %}
         </select>
         <select name="number">
-          {% for number in [12, 24, 48, 100, 200, 500, 1000] %}
-          <option value="{{ number }}" {{ 'selected="selected"' | safe if number == selected_number }}>{{ number }}</option>
+          {% for number_option in [12, 24, 48, 100, 200, 500, 1000] %}
+          <option value="{{ number_option }}" {{ 'selected="selected"' | safe if number_option == number }}>{{ number_option }}</option>
           {% endfor %}
         </select>
-        {% for key in obsoptions %}
-        {% with selected = selected_obsoptions.get(key, None) %}
+        {% for key in obsqueries %}
+        {% with selected = query.get(key, None) %}
         <select name="{{ key }}">
           <option value="" {{ 'selected="selected"' | safe if selected is none }}>Any {{ key }}</option>
-          {% for option  in  obsoptions[key].values() %}
+          {% for option  in  obsqueries[key].values() %}
           <option value="{{ option.name }}" {{ 'selected="selected"' | safe if selected == option.name}}>{{ option.name }}</option>
           {% endfor %}
         </select>
         {% endwith %}
         {% endfor %}
-        <input type="text" name="date_min" value="{{ date_min | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
-        <input type="text" name="date_max" value="{{ date_max | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
-        <input type="text" name="name" value="{{ name | default('', True) }}" placeholder="Source name" />
-        <input type="text" name="obsnum" value="{{ obsnum | default('', True) }}" size="5" placeholder="Obs #"/>
-        <input type="text" name="project" value="{{ project | default('', True) }}" size="10" placeholder="Project"/>
+        <input type="text" name="date_min" value="{{ query.date_min | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
+        <input type="text" name="date_max" value="{{ query.date_max | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
+        <input type="text" name="sourcename" value="{{ query.sourcename | default('', True) }}" placeholder="Source name" />
+        <input type="text" name="obsnum" value="{{ query.obsnum | default('', True) }}" size="5" placeholder="Obs #"/>
+        <input type="text" name="project" value="{{ query.project | default('', True) }}" size="10" placeholder="Project"/>
         <input type="submit" value="Filter" />
     </p>
 </form>

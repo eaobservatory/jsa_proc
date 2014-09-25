@@ -11,16 +11,16 @@
   <tr>
     <th>(Click for summary)</th>
     <th> total </th>
-    {% for qastate in qastates %}
-    <th>{{qastate| qastate_name}}</th>
+    {% for qa_state in qa_states %}
+    <th>{{qa_state| qa_state_name}}</th>
     {% endfor %}
     </tr>
   {% for taskname, jobs in results.items() %}
   <tr>
     <td><a href="{{ url_for('job_summary', task=taskname) }}">{{ taskname }}</a></td>
     <td><a href="{{ url_for('job_list', task=taskname, mode='JSAQA') }}">{{ jobs['total'] }}</a></td>
-    {% for qastate in qastates %}
-    <td class = "qastate_{{qastate | qastate_name | lower }}"><a href="{{ url_for('job_list', task=taskname, qastate=qastate, mode='JSAQA')}} ">{{ jobs[qastate] }} </a></td>
+    {% for qa_state in qa_states %}
+    <td class = "qa_state_{{qa_state | qa_state_name | lower }}"><a href="{{ url_for('job_list', task=taskname, qa_state=qa_state, mode='JSAQA')}} ">{{ jobs[qa_state] }} </a></td>
     {% endfor %}
   </tr>
 {% endfor %}

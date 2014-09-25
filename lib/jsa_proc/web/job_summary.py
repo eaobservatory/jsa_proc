@@ -31,7 +31,7 @@ from flask import send_file
 from jsa_proc.db.db import Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
-from jsa_proc.qastate import JSAQAState
+from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.util import url_for
 
 
@@ -201,7 +201,7 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
             for q in JSAQAState.STATE_ALL:
                 results[t][q] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
 
-    return {'results':results, 'qastates':JSAQAState.STATE_ALL,
+    return {'results':results, 'qa_states':JSAQAState.STATE_ALL,
             'daylist': daylist, 'statedict' : statedict,
             'title': 'QA Summary'}
 
