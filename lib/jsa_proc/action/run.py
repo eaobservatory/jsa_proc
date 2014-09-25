@@ -104,10 +104,46 @@ def run_a_job(job_id, db=None, force=False):
 
     # Input file_list -- this should be better? or in jsawrapdr?
     input_dir = get_input_dir(job_id)
-    input_file_list = os.path.join(input_dir, 'input_files_job.lis')
-    if not os.path.exists(input_file_list):
+    input_file_list_path = os.path.join(input_dir, 'input_files_job.lis')
+    if not os.path.exists(input_file_list_path):
         raise JSAProcError('Input file list %s not found for job_id %i'
-                           % (input_file_list, job_id))
+                           % (input_file_list_path, job_id))
+
+
+
+    # Check every file on input_file list exists.
+    inputfl = open(input_file_list_path, 'r')
+
+    for input_file in inputfl:
+        input_file = input_file.strip()
+        if os.path.isfile(input_file)  is False:
+
+            # If a file is missing, get log.
+            logstring = 'Input file %s for job %i has gone missing' % (input_file, job_id)
+            logger.error(logstring)
+            logs = db.get_logs(job_id)
+            states = [i.state_new for i in logs]
+
+            # If it has only been in the state MISSING twice before, then try again.
+            if states.count(JSAProcState.MISSING) <= 2:
+                logstring += ': moving to missing.'
+                logger.info('Moving job %i to state MISSING due to missing file(s) %s',
+                            job_id, input_file)
+                db.change_state(job_id, JSAProcState.MISSING,
+                                logstring, state_prev = JSAProcState.RUNNING)
+
+            else:
+                # If it has been in the missing STATE more than two times, give up and
+                # move it into ERROR state to be fixed manually.
+                logstring += ': moving to error.'
+                logger.info('Moving job %s to state ERROR due to missing file(s).', job_id)
+                inputfl.close()
+                raise JSAProcError('Input file %s for job %i has gone missing.'
+                                       % (input_file, job_id))
+
+    inputfl.close()
+    logger.debug('All input files found for job %s.', job_id)
+
 
     # Get the mode and drparameters of the job.
     job = db.get_job(id_=job_id)
@@ -118,7 +154,7 @@ def run_a_job(job_id, db=None, force=False):
     logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
                  mode, drparameters)
     log = jsawrapdr_run(
-        job_id, input_file_list, mode,
+        job_id, input_file_list_path, mode,
         drparameters,
         cleanup='cadc', location='JAC', persist=True)
 
