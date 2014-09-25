@@ -119,3 +119,13 @@ CREATE TABLE task (
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);
+
+CREATE TABLE parent (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       job_id INTEGER NOT NULL,
+       parent INTEGER NOT NULL,
+       filter TEXT NOT NULL DEFAULT ""
+);
+
+CREATE INDEX parent_parent on parent (parent);
+CREATE INDEX parent_job_id on parent (job_id);
