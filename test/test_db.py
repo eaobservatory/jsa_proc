@@ -722,6 +722,56 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual((str(info4['utdate']), str(info3['utdate'])), self.db.get_date_range(task='test2'))
 
 
+    def test_find_errors_logs(self):
+        """
+        Check the db.find_errors_logs function
+        """
+        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', [])
+        job_2 = self.db.add_job('tag2', 'CANFAR',  'obs', 'RECIPE', 'test1', [])
+        # Values to change to.
+        newstate = JSAProcState.RUNNING
+        message = 'Changed state of job %s to S' % (job_1)
+        newstate2 = JSAProcState.ERROR
+        message2 = 'Changed state of job %s to %s' % (job_1, newstate2)
+        self.db.change_state(job_1, newstate, message)
+        self.db.change_state(job_1, newstate2, message2)
+        newstate3 = JSAProcState.QUEUED
+        message3 = 'Changed state of job %s to S' % (job_2)
+        newstate4 = JSAProcState.ERROR
+        message4 = 'Changed state of job %s to %s' % (job_2, newstate4)
+        self.db.change_state(job_2, newstate3, message3)
+        self.db.change_state(job_2, newstate4, message4)
+
+        elog_all = self.db.find_errors_logs()
+        ej1 = elog_all[job_1]
+        self.assertEqual((ej1[1].message, ej1[1].state, ej1[1].location, ej1[1].id),
+                         (message, newstate, 'JAC', job_1))
+        self.assertEqual((ej1[0].message, ej1[0].state, ej1[0].location, ej1[0].id),
+                         (message2, newstate2, 'JAC', job_1))
+        ej2 = elog_all[job_2]
+        self.assertEqual((ej2[1].message, ej2[1].state, ej2[1].location, ej2[1].id),
+                         (message3, newstate3, 'CANFAR', job_2))
+        self.assertEqual((ej2[0].message, ej2[0].state, ej2[0].location, ej2[0].id),
+                         (message4, newstate4, 'CANFAR', job_2))
+
+        elog_canfar = self.db.find_errors_logs(location='CANFAR')
+        ej2 = elog_canfar[job_2]
+        self.assertEqual((ej2[1].message, ej2[1].state, ej2[1].location, ej2[1].id),
+                         (message3, newstate3, 'CANFAR', job_2))
+        self.assertEqual((ej2[0].message, ej2[0].state, ej2[0].location, ej2[0].id),
+                         (message4, newstate4, 'CANFAR', job_2))
+        with self.assertRaises(KeyError):
+            ej1 = elog_canfar[job_1]
+
+        elog_test1 = self.db.find_errors_logs(task='test1')
+        ej2 = elog_test1[job_2]
+        self.assertEqual((ej2[1].message, ej2[1].state, ej2[1].location, ej2[1].id),
+                         (message3, newstate3, 'CANFAR', job_2))
+        self.assertEqual((ej2[0].message, ej2[0].state, ej2[0].location, ej2[0].id),
+                         (message4, newstate4, 'CANFAR', job_2))
+        with self.assertRaises(KeyError):
+            ej1 = elog_test1[job_1]
+
 class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
         with self.assertRaises(JSAProcError):
