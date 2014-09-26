@@ -7,7 +7,10 @@
 from {{date_min}} to {{date_max}}
 {% endif %}
 </h2>
-<h3> Observations are present from {{firstobs}} to {{lastobs}} </h3>
+
+{% if firstobs is not none and lastobs is not none %}
+    <h3> Observations are present from {{firstobs}} to {{lastobs}} </h3>
+{% endif %}
 
 <p> Processing times were identified for {{number_proc_jobs}} jobs</p>
 <dl>

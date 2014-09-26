@@ -29,6 +29,7 @@ import time
 from flask import send_file
 
 from jsa_proc.db.db import Range
+from jsa_proc.error import NoRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
@@ -238,7 +239,11 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
                        for c in j.values()])
 
     # Get dates of first and last observations in task.
-    firstobs, lastobs = db.get_date_range(task=task)
+    try:
+        firstobs, lastobs = db.get_date_range(task=task)
+    except NoRowsError:
+        firstobs = None
+        lastobs = None
 
     # Get processing time taken for All jobs, pointings only, cals only, science only. for this task.
     jobs,durations, obsinfos =  db.get_processing_time_obs_type(jobdict={'task':task})
