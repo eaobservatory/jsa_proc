@@ -18,6 +18,9 @@
 Functions for examining the files and disks.
 """
 
+from __future__ import absolute_import, division, print_function
+
+import os
 import subprocess
 
 from jsa_proc.config import get_config
@@ -49,6 +52,16 @@ def get_size(path):
     return sizeg
 
 
+def get_space(path):
+    """Determine the amout of available space on a given path.
+
+    Return: available space in GiB."""
+
+    s = os.statvfs(path)
+
+    return s.f_bsize * s.f_bavail / (1024 ** 3)
+
+
 def _get_config_dir_size(type_):
     """
     Return size of directorie tree described in config GiB.
@@ -62,6 +75,13 @@ def _get_config_dir_size(type_):
     return size
 
 
+def _get_config_dir_space(type_):
+    """Return space in a configured directory tree (GiB)."""
+
+    config = get_config()
+    return get_space(config.get('directories', type_))
+
+
 def get_input_dir_size():
     """
     Get the size of the input data directory tree.
@@ -69,6 +89,12 @@ def get_input_dir_size():
     Returns size in GiB.
     """
     return _get_config_dir_size('input')
+
+
+def get_input_dir_space():
+    """Determine space in input directory (GiB)."""
+
+    return _get_config_dir_space('input')
 
 
 def get_output_dir_size():
@@ -80,6 +106,12 @@ def get_output_dir_size():
     return _get_config_dir_size('output')
 
 
+def get_output_dir_space():
+    """Determine space in output directory (GiB)."""
+
+    return _get_config_dir_space('output')
+
+
 def get_scratch_dir_size():
     """
     Get the size of the scratch data directory tree.
@@ -89,6 +121,12 @@ def get_scratch_dir_size():
     return _get_config_dir_size('scratch')
 
 
+def get_scratch_dir_space():
+    """Determine space in scratch directory (GiB)."""
+
+    return _get_config_dir_space('scratch')
+
+
 def get_log_dir_size():
     """
     Get the size of the log data directory tree.
@@ -96,3 +134,9 @@ def get_log_dir_size():
     Returns size in GiB.
     """
     return _get_config_dir_size('log')
+
+
+def get_log_dir_space():
+    """Determine space in log directory (GiB)."""
+
+    return _get_config_dir_space('log')
