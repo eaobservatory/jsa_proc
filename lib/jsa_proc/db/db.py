@@ -244,6 +244,9 @@ class JSAProcDB:
         if not parent_jobs  and not input_file_names:
             raise JSAProcError('A Job must have either input files or parent jobs')
 
+        if parent_jobs:
+            job_id, parents, filters = _validate_parents(None, parent_jobs, filters=filters)
+
         # insert job into table
         with self.db as c:
             c.execute(
@@ -258,35 +261,15 @@ class JSAProcDB:
             # tables).
             job_id = c.lastrowid
 
-            # Go through parent jobs and add to parent table with
-            # filters. Also check none of them are the same as the job_id
-            # and raise an error if so (aborting the adding of the job).
+            # Add parent jobs to parent table with filters.
             if parent_jobs:
-
-                # Check none of the parent_jobs are the same as the
-                # child job that has just been created.
+                # Check job_id is not contained within parent_list
                 if job_id in parent_jobs:
-                    raise JSAProcError('Cannot insert a job as its own parent.')
+                    raise JSAProcError('Cannot insert a job as its own parent')
 
-                if filters is None:
-                    filters = ''
+                self._insert_parents(job_id, c, parent_jobs, filters)
 
-                if isinstance(filters, basestring):
-                    filters = [filters]*len(parent_jobs)
-
-                else:
-                    if not len(filters) == len(parent_jobs):
-                        raise JSAProcError(
-                            'If more than one filter is given '+ \
-                            'len(filters) should match len(parents)')
-
-                for parent, filt in zip(parent_jobs, filters):
-                    c.execute('INSERT INTO parent (job_id, parent, filter) '
-                              'VALUES (%s, %s, %s)',
-                              (job_id, parent, filt))
-
-            # Need to get input file names and add them to table
-            # input_file
+            # Add input file names to input_file table.
             if input_file_names:
                 for filename in input_file_names:
                     c.execute('INSERT INTO input_file (job_id, filename) '
@@ -1191,7 +1174,7 @@ class JSAProcDB:
             c.execute('INSERT INTO task (taskname, etransfer) VALUES (%s, %s)',
                       (taskname, etransfer,))
 
-    def get_parent_jobs(self, job_id):
+    def get_parents(self, job_id):
         """
         Look in the parent table and get all parent jobs
         for the given job_id.
@@ -1210,7 +1193,7 @@ class JSAProcDB:
             raise NoRowsError('parent', query % params)
         return result
 
-    def get_child_jobs(self, job_id):
+    def get_children(self, job_id):
         """
         Get all jobs that list the current job as a parent.
 
@@ -1231,6 +1214,84 @@ class JSAProcDB:
         # Fix up the format so its not a list of 1-item tuples:
         result = [i[0] for i in result]
         return result
+
+    def add_to_parents(self, job_id, parents, filters=None):
+        """
+        Add additional jobs to the parent table for the child 'job_id'.
+        DOES NOT REMOVE CURRENT JOBS.
+
+        job_id: integer, id of child job.
+
+        parents: list of integers, ids of parent jobs.
+
+        filters: string or list of strings.
+        RE filter to select only appropriate input files for child from
+        output file list of parent.
+        """
+
+        # Validate input.
+        job_id, parents, filters = _validate_parents(job_id, parents,
+                                                     filters=filters)
+
+        # Update table.
+        with self.db as c:
+            self._insert_parents(job_id, c, parents, filters)
+
+        return job_id
+
+
+    def _delete_all_parents(self, job_id, c):
+
+        c.execute('DELETE FROM parent WHERE job_id = %s',
+                  (job_id,))
+
+    def _insert_parents(self, job_id, c, parents, filters):
+
+        for parent, filt in zip(parents, filters):
+            c.execute('INSERT INTO parent (job_id, parent, filter) '
+                              'VALUES (%s, %s, %s)',
+                              (job_id, parent, filt))
+
+    def delete_some_parents(self, job_id, parents):
+        """
+        removes specified jobs from the parent table for the child 'job_id'.
+        DOES NOT ATTEMPT TO REMOVE ALL JOBS.
+        Will raise an error if parent job_id is not present in parent table
+        for given child job_id
+
+        job_id: integer, id of child job.
+
+        parents: list of integers, ids of parent jobs.
+
+        """
+
+        # Validate input.
+        isvalid = _validate_parents_to_remove(job_id, parents, self)
+
+        # Update table
+        with self.db as c:
+            for parent in parents:
+                c.execute('DELETE FROM parent WHERE job_id =%s and parent = %s ',
+                          (job_id, parent))
+
+        return job_id
+
+    def replace_parents(self, job_id, newparents, filters=None):
+        """
+        Replace all parent jobs in data base with new parents
+
+        """
+
+        jov_id, parents, filters = _validate_parents(job_id, newparents,
+                                                     filters=filters)
+        with self.db as c:
+            self._delete_all_parents(job_id, c)
+            self._insert_parents(job_id, c, parents, filters)
+
+    def delete_parents(self, job_id):
+        _validate_parents_to_remove(job_id, [], self)
+        with self.db as c:
+            self._delete_all_parents(job_id, c)
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
@@ -1351,3 +1412,49 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
 
     where = (' OR ' if logic_or else ' AND ').join(where)
     return ('({0})'.format(where), params)
+
+
+def _validate_parents(job_id, parents, filters=None):
+    """
+    Validate that parents and filters are
+    valid parents for given job_id.
+
+    Raise JSAProc Error if not valid.
+
+    """
+    if job_id in parents:
+        raise JSAProcError('Cannot insert a job as its own parent.')
+    if filters is None:
+        filters = ''
+    if isinstance(filters, basestring):
+        filters = [filters] * len(parents)
+    else:
+        if not len(filters) == len(parents):
+            raise JSAProcError(
+                'If more than one filter is given '+ \
+                'len(filters) should match len(parents)')
+
+    return job_id, parents, filters
+
+def _validate_parents_to_remove(job_id, parents,db):
+    """
+    Check all the parents are in the parents table
+    for child job_id.
+
+    Returns True if all are present, False if they are not.
+
+    Raises an error if no results are in the database.
+    """
+    with db.db as c:
+        c.execute('SELECT parent FROM parent WHERE job_id = %s',
+                  (job_id,))
+        results = c.fetchall()
+
+    if len(results) == 0:
+        raise JSAProcError('job %s has no entries in parent table' % job_id )
+    results = [i[0] for i in results]
+
+    isvalid = set(parents) <= set(results)
+    if not isvalid:
+        raise JSAProcError('Not all parent-jobs to be removed are present in parent table for child %s' % job_id)
+    return isvalid

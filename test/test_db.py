@@ -490,7 +490,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Test it raises an error if no results.
         with self.assertRaises(NoRowsError):
-            self.db.get_parent_jobs(1)
+            self.db.get_parents(1)
 
         # Add 2 jobs to the data base.
         jobid = self.db.add_job('tag1', 'FAKELOC', 'obs', 'RECIPE', 'test',
@@ -505,10 +505,10 @@ class InterfaceDBTest(DBTestCase):
                                priority=7)
         # Check you get back the right values
         self.assertEqual(set([(1, '850um'), (2, '850um')]),
-                         set(self.db.get_parent_jobs(jobid3)))
+                         set(self.db.get_parents(jobid3)))
 
         # Check you can recover the other way
-        self.assertEqual([jobid3], self.db.get_child_jobs(jobid))
+        self.assertEqual([jobid3], self.db.get_children(jobid))
 
         # Check you can't add a job with parents that aren't in the database
         with self.assertRaises(JSAProcError):
@@ -519,6 +519,29 @@ class InterfaceDBTest(DBTestCase):
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag4', 'FAKELOC', 'obs', 'RECIPE', 'test',
                             parent_jobs=[4], filters='850um', priority=8)
+
+        # Test that you can delete a single parent job.
+        self.db.delete_some_parents(jobid3, [1])
+        self.assertEqual(set([(2, '850um')]),
+                         set(self.db.get_parents(jobid3)))
+
+        # Test that you can't delete a parent that doesn't exist
+        with self.assertRaises(JSAProcError):
+            self.db.delete_some_parents(jobid3, [1])
+
+        # Test that you can add a single job.
+        self.db.add_to_parents(jobid3, [jobid], filters='450um')
+        self.assertEqual(set([(1, '450um'), (2, '850um')]),
+                         set(self.db.get_parents(jobid3)))
+        # Test that you can delete all parents
+        self.db.delete_parents(jobid3)
+        with self.assertRaises(NoRowsError):
+            self.db.get_parents(jobid3)
+
+        # Test that you can't delete parents if none are present
+        with self.assertRaises(JSAProcError):
+            self.db.delete_parents(jobid3)
+
 
     def test_find_jobs_obsquery(self):
 
