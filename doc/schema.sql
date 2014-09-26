@@ -99,36 +99,37 @@ CREATE INDEX tile_job_id ON tile (job_id);
 CREATE INDEX tile_tile ON tile (tile);
 
 CREATE TABLE qa (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       job_id INTEGER NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL,
 
-       datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-       status CHAR(1) NOT NULL DEFAULT "?",
-       message TEXT NOT NULL DEFAULT "",
-       username VARCHAR(80) NOT NULL DEFAULT "unknown",
+    datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status CHAR(1) NOT NULL DEFAULT "?",
+    message TEXT NOT NULL DEFAULT "",
+    username VARCHAR(80) NOT NULL DEFAULT "unknown",
 
-       FOREIGN KEY (job_id) REFERENCES job(id)
-           ON DELETE RESTRICT ON UPDATE RESTRICT
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
+
 CREATE INDEX qa_job_id ON qa (job_id);
 
 CREATE TABLE task (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       taskname VARCHAR(80) NOT NULL,
-       etransfer BOOLEAN NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    taskname VARCHAR(80) NOT NULL,
+    etransfer BOOLEAN NOT NULL
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);
 
 CREATE TABLE parent (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       job_id INTEGER NOT NULL,
-       parent INTEGER NOT NULL,
-       filter TEXT NOT NULL DEFAULT "",
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL,
+    parent INTEGER NOT NULL,
+    filter TEXT NOT NULL DEFAULT "",
 
-       FOREIGN KEY (job_id) REFERENCES job(id)
+    FOREIGN KEY (job_id) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT,
-       FOREIGN KEY (parent) REFERENCES job(id)
+    FOREIGN KEY (parent) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
