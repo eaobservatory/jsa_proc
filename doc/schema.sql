@@ -91,7 +91,10 @@ CREATE INDEX obs_project ON obs (project);
 CREATE TABLE tile (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     job_id INTEGER NOT NULL,
-    tile INTEGER NOT NULL
+    tile INTEGER NOT NULL,
+
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE UNIQUE INDEX tile_job_tile ON tile (job_id, tile);
