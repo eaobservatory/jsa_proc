@@ -138,3 +138,4 @@ CREATE TABLE parent (
 
 CREATE INDEX parent_parent on parent (parent);
 CREATE INDEX parent_job_id on parent (job_id);
+CREATE UNIQUE INDEX parent_parent_job ON parent (job_id, parent);
