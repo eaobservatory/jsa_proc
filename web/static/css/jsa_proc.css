@@ -25,6 +25,41 @@ span.greyedlink {
     cursor: not-allowed;
 }
 
+div.pagination {
+    text-align: center;
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+}
+
+div.pagination > * {
+    padding-left: 1ex;
+    padding-right: 1ex;
+}
+
+.page_first:before {
+    content: '<< ';
+}
+
+.page_prev:before {
+    content: '< ';
+}
+
+.page_next:after {
+    content: ' >';
+}
+
+.page_last:after {
+    content: ' >>';
+}
+
+div.pagination > .page_up {
+    padding-left: 5ex;
+}
+
+.page_up:after {
+    content: ' ^';
+}
+
 ul.multicol {
     columns: auto;
     -moz-columns: auto;

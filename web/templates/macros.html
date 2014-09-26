@@ -25,33 +25,33 @@
 
 {% macro render_page_control(pagination, description='page', firstlast=True) %}
     {% if pagination is not none %}
-        <div>
+        <div class="pagination">
             {% if firstlast %}
                 {% if pagination.first is not none %}
-                    <a href="{{ pagination.first }}">First {{ description }}</a>
+                    <a class="page_first" href="{{ pagination.first }}">First {{ description }}</a>
                 {% else %}
-                    <span class="greyedlink">First page</span>
+                    <span class="page_first greyedlink">First page</span>
                 {% endif %}
             {% endif %}
             {% if pagination.prev is not none %}
-                <a href="{{ pagination.prev }}">Previous {{ description }}</a>
+                <a class="page_prev" href="{{ pagination.prev }}">Previous {{ description }}</a>
             {% else %}
-                <span class="greyedlink">Previous page</span>
+                <span class="page_prev greyedlink">Previous page</span>
             {% endif %}
             {% if pagination.next is not none %}
-                <a href="{{ pagination.next }}">Next {{ description }}</a>
+                <a class="page_next" href="{{ pagination.next }}">Next {{ description }}</a>
             {% else %}
-                <span class="greyedlink">Next page</span>
+                <span class="page_next greyedlink">Next page</span>
             {% endif %}
             {% if firstlast %}
                 {% if pagination.last is not none %}
-                    <a href="{{ pagination.last }}">Last {{ description }}</a>
+                    <a class="page_last" href="{{ pagination.last }}">Last {{ description }}</a>
                 {% else %}
-                    <span class="greyedlink">Last page</span>
+                    <span class="page_last greyedlink">Last page</span>
                 {% endif %}
             {% endif %}
             {% if pagination.up is not none %}
-                <a href="{{ pagination.up}}">Up</a>
+                <a class="page_up" href="{{ pagination.up}}">Up</a>
             {% endif %}
         </div>
     {% endif %}
