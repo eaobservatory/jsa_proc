@@ -44,7 +44,7 @@ def fetch(job_id=None, db=None, force=False):
 
     # Check we have sufficient disk space for fetching to occur.
     input_space = get_input_dir_space()
-    required_space = get_config().get('disk_limit', 'fetch_min_space')
+    required_space = float(get_config().get('disk_limit', 'fetch_min_space'))
 
     if input_space < required_space:
         logger.warning('Insufficient disk space: %f / %f GiB required',
