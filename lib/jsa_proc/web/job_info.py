@@ -107,13 +107,14 @@ def prepare_job_info(db, job_id, query):
     # If we know what the user's job query was (from the session information)
     # then set up pagination based on the previous and next job identifiers.
     if query is not None:
-        (_, job_query) = job_search(**query)
+        (url_query, job_query) = job_search(**query)
         (prev, next) = db.job_prev_next(job_id, **job_query)
         pagination = Pagination(
             None,
             None if prev is None else url_for('job_info', job_id=prev),
             None if next is None else url_for('job_info', job_id=next),
-            None)
+            None,
+            url_for('job_list', **url_query))
     else:
         pagination = None
 

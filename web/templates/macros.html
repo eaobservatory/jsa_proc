@@ -50,6 +50,9 @@
                     <span class="greyedlink">Last page</span>
                 {% endif %}
             {% endif %}
+            {% if pagination.up is not none %}
+                <a href="{{ pagination.up}}">Up</a>
+            {% endif %}
         </div>
     {% endif %}
 {% endmacro %}

@@ -24,7 +24,7 @@ import werkzeug.exceptions
 import werkzeug.routing
 import werkzeug.urls
 
-Pagination = namedtuple('Pagination', 'first prev next last')
+Pagination = namedtuple('Pagination', 'first prev next last up')
 
 url_for = flask.url_for
 
@@ -138,7 +138,9 @@ def calculate_pagination(count, number_per_page, default_number,
 
         url_for('job_list', page=page_max,
                 number=number_per_page, **url_args)
-        if page_number < (page_max - 1) else None
+        if page_number < (page_max - 1) else None,
+
+        None
     )
 
     return (number_per_page, page_number, pagination)
