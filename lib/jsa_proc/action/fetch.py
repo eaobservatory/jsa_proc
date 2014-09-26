@@ -18,8 +18,9 @@ import logging
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.datafile_handling \
     import assemble_input_data_for_job
-from jsa_proc.config import get_database
+from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
+from jsa_proc.files import get_input_dir_space
 from jsa_proc.error import JSAProcError, NoRowsError
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,15 @@ def fetch(job_id=None, db=None, force=False):
     Any error's raised in the process will be logged to the job log.
 
     """
+
+    # Check we have sufficient disk space for fetching to occur.
+    input_space = get_input_dir_space()
+    required_space = get_config().get('disk_limit', 'fetch_min_space')
+
+    if input_space < required_space:
+        logger.warning('Insufficient disk space: %f / %f GiB required',
+                        input_space, required_space)
+        return
 
     # Get the database.
     if not db:

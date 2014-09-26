@@ -14,6 +14,12 @@ output=/net/kamaka/export/data/jsa_proc/output
 scratch=/export/data/jsa_proc/scratch
 log=/net/kamaka/export/data/jsa_proc/log
 
+# Disk space / usage limits which control when various
+# actions can take place and / or when clean-up should
+# occur.
+[disk_limit]
+fetch_min_space=1000
+
 [job_run]
 starpath=/net/kamaka/export/data/stardev-stable
 
