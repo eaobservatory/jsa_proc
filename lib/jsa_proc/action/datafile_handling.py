@@ -15,6 +15,7 @@
 
 import os
 import os.path
+import re
 import subprocess
 import shutil
 
@@ -210,3 +211,30 @@ def valid_hds(filepath):
 
     # Status is True for returncode=0, False otherwise.
     return returncode == 0
+
+
+def filter_file_list(filelist, filt):
+    """
+    Filter out only files that match a given filter.
+
+    filelist: list of strings.
+    Each string is a file name.
+
+    filt: string.
+    string for a regular expression search.
+    Only files that match the re.search option
+    will be returned.
+
+    returns:
+    filtered filelist
+    list containing only files that match the filter.
+
+    """
+
+    match = re.compile(filt)
+
+    filtered = []
+    for f in filelist:
+        if match.search(f):
+            filtered.append(f)
+    return filtered
