@@ -18,13 +18,17 @@
         {{ render_navbar(active_page) }}
 
         {% with messages = get_flashed_messages() %}
-        {% if messages %}
+
         <ul class="flashes">
+        {% if messages %}
             {% for message in messages %}
             <li>{{ message }}</li>
             {% endfor %}
+        {% else %}
+        &nbsp;
+        {% endif %}
         </ul>
-      {% endif %}
+
       {% endwith %}
 
       {% block body %}
