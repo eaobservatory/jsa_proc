@@ -60,7 +60,6 @@
 {% macro render_choices() %}
 <form>
     <p>
-      <input type="hidden" name="mode" value="{{mode}}"></input>
         <select name="location">
             <option value="" {{ 'selected="selected"' | safe if query.location is none }}>Any location</option>
             {% for location in locations %}
@@ -104,7 +103,9 @@
         <input type="text" name="sourcename" value="{{ query.sourcename | default('', True) }}" placeholder="Source name" />
         <input type="text" name="obsnum" value="{{ query.obsnum | default('', True) }}" size="5" placeholder="Obs #"/>
         <input type="text" name="project" value="{{ query.project | default('', True) }}" size="10" placeholder="Project"/>
+        <input type="checkbox" name="mode" value="JSAQA"> QA </input>
         <input type="submit" value="Filter" />
+
     </p>
 </form>
 
