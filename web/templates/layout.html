@@ -17,6 +17,12 @@
     <body>
         {{ render_navbar(active_page) }}
 
+        {% if database_name != 'jsa_proc' %}
+            <p class="large_warning">
+                Database: {{ database_name }}
+            </p>
+        {% endif %}
+
         {% with messages = get_flashed_messages() %}
 
         <ul class="flashes">

@@ -411,3 +411,9 @@ dd {
     margin: 0 0 0 110px;
     padding: 0 0 0.5em 0;
 }
+
+p.large_warning {
+    color: red;
+    font-size: 200%;
+    font-weight: bold;
+}

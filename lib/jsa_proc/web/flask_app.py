@@ -49,6 +49,7 @@ def create_web_app():
 
     home = get_home()
     db = get_database()
+    database_name = get_config().get('database', 'database')
 
     app = Flask(
         'jsa_proc',
@@ -330,7 +331,11 @@ def create_web_app():
 
     @app.context_processor
     def add_to_context():
-        return {'url_for_omp': url_for_omp, 'url_for_omp_comment': url_for_omp_comment}
+        return {
+            'url_for_omp': url_for_omp,
+            'url_for_omp_comment': url_for_omp_comment,
+            'database_name': database_name,
+        }
 
     # Return the Application.
 
