@@ -55,7 +55,9 @@ def _move_job_from(job_id, db, dpsub, dry_run):
 
     logger.debug('Changing location in jsa_proc database')
     if not dry_run:
-        db.set_location(job_id, 'JAC', None)
+        db.set_location(job_id, 'JAC', None,
+                        message='Location changed to JAC from CADC, '
+                                'recipe instance was: ' + job.foreign_id)
 
     rc_instance = job.foreign_id
     logger.debug('Deleting recipe instance %s at CADC', rc_instance)
