@@ -17,7 +17,7 @@ import logging
 
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.datafile_handling \
-    import assemble_input_data_for_job
+    import assemble_input_data_for_job, filter_file_list, assemble_parent_data_for_job, write_input_list
 from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.files import get_input_dir_space
@@ -86,6 +86,7 @@ def fetch_a_job(job_id, db=None, force=False):
 
     This will raise an error if job is not in MISSING state to start with.
     This will advance the state of the job to WAITING on completion.
+
     """
 
     if not db:
@@ -109,11 +110,28 @@ def fetch_a_job(job_id, db=None, force=False):
                      job_id)
         return
 
-    # Get the list of files.
-    input_files = db.get_input_files(job_id)
 
-    # Assemble the data.
-    input_file_list = assemble_input_data_for_job(job_id, input_files)
+    # Assemble any files listed in the input files tree
+    try:
+        input_files = db.get_input_files(job_id)
+        input_files_with_paths = assemble_input_data_for_job(job_id, input_files)
+    except NoRowsError:
+        input_files_with_paths = []
+
+    # Assemble any files from the parent jobs
+    try:
+        parents = db.get_parents(job_id)
+        parent_files_with_paths = []
+        for p, f in parents:
+            outputs = db.get_output_files(p)
+            parent_files = filter_file_list(outputs, f)
+            parent_files_with_paths+=assemble_parent_data_for_job(job_id, p, parent_files)
+    except NoRowsError:
+        parent_files_with_paths = []
+
+    # Write out list of all input files with full path list
+    files_list = input_files_with_paths + parent_files_with_paths
+    list_name_path = write_input_list(job_id, files_list)
 
     # Advance the state of the job to 'Waiting'.
     db.change_state(
@@ -124,3 +142,5 @@ def fetch_a_job(job_id, db=None, force=False):
     logger.info('Done fetching data for job %i', job_id)
 
     return job_id
+
+

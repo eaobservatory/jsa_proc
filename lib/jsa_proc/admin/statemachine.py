@@ -16,7 +16,7 @@
 import logging
 
 from jsa_proc.action.datafile_handling \
-    import get_jac_input_data, write_input_list
+    import get_jac_input_data, write_input_list, check_data_already_present
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
@@ -73,8 +73,7 @@ class JSAProcStateMachine:
                 elif job.state == JSAProcState.QUEUED:
                     # Check if all data are at JAC:
                     try:
-                        input_file_list = self.db.get_input_files(job.id)
-                        inputs = get_jac_input_data(input_file_list)
+                        inputs = check_data_already_present(job_id)
                         thelist = write_input_list(job.id, inputs)
                         self.db.change_state(job.id, JSAProcState.WAITING,
                                              'All files found at JAC',

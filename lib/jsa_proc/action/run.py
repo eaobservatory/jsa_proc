@@ -23,7 +23,7 @@ from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.action.decorators import ErrorDecorator
-from jsa_proc.action.datafile_handling import get_output_files
+from jsa_proc.action.datafile_handling import get_output_files, input_list_name
 from jsa_proc.action.job_running import jsawrapdr_run
 from jsa_proc.jac.file import hpx_tiles_from_filenames
 
@@ -103,8 +103,9 @@ def run_a_job(job_id, db=None, force=False):
         return
 
     # Input file_list -- this should be better? or in jsawrapdr?
+
     input_dir = get_input_dir(job_id)
-    input_file_list_path = os.path.join(input_dir, 'input_files_job.lis')
+    input_file_list_path = os.path.join(input_dir, input_list_name)
     if not os.path.exists(input_file_list_path):
         raise JSAProcError('Input file list %s not found for job_id %i'
                            % (input_file_list_path, job_id))
@@ -176,7 +177,7 @@ def run_a_job(job_id, db=None, force=False):
         logger.debug('Job ' + str(job_id) + ' produced output on tiles ' + \
                      ', '.join(str(i) for i in tiles))
 
-    # Change stateof job.
+    # Change state of job.
     db.change_state(
         job_id, JSAProcState.PROCESSED,
         'Job has been sucessfully processed',
