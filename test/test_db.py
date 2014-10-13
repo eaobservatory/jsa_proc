@@ -651,7 +651,8 @@ class InterfaceDBTest(DBTestCase):
                 'utdate': date(2014, 01, 01), 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-01-01 09:00:00'}
+                'date_obs': '2014-01-01 09:00:00',
+                'omp_status': 4}
 
         self.db.set_obs_info(job_1, [info])
 
