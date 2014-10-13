@@ -229,8 +229,8 @@ class JSAProcDB:
         tilelist: optional, list of integers.
         The list of tiles this job will produce.
 
-        obsinfolist: optional, list of dictionarys.
-        A list of observations dictionarys. Each item in list represents a
+        obsinfolist: optional, list of dictionaries.
+        A list of observations dictionaries. Each item in list represents a
         single observation which is included in this job. The dictionary
         should contain an entry for each column in the 'obs' table.
 
