@@ -402,6 +402,17 @@ class JSAProcDB:
                       ' VALUES ' + values_questions,
                       (job_id,) + values)
 
+    def set_omp_status(self, obsid, status_new):
+        """Update the OMP status of an observation.
+
+        Changes the omp_status column of all entries in the obs table
+        for a given obsid.
+        """
+
+        with self.db as c:
+            c.execute('UPDATE obs SET omp_status=%s WHERE obsid=%s',
+                      (status_new, obsid))
+
     def change_state(self, job_id, newstate, message, state_prev=None, username=None):
 
         """

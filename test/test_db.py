@@ -669,6 +669,19 @@ class InterfaceDBTest(DBTestCase):
             for key, value in info.items():
                 self.assertEqual(getattr(info_retrieved, key), value)
 
+        # Now test changing OMP status.  First give one of the jobs a
+        # different obsid so that we can update only one of them.
+        info['obsid'] = 'x14_02_2T2'
+        self.db.set_obs_info(job_1, [info])
+
+        self.assertEqual(self.db.get_obs_info(job_1)[0].omp_status, 4)
+        self.assertEqual(self.db.get_obs_info(job_2)[0].omp_status, 4)
+
+        self.db.set_omp_status('x14_02_2T2', 0)
+
+        self.assertEqual(self.db.get_obs_info(job_1)[0].omp_status, 0)
+        self.assertEqual(self.db.get_obs_info(job_2)[0].omp_status, 4)
+
     def test_processing_time(self):
         job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'])
 
