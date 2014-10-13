@@ -78,6 +78,7 @@ CREATE TABLE obs (
     obstype VARCHAR(80),
 
     association VARCHAR(80),
+    omp_status INTEGER NOT NULL DEFAULT 0,
 
     FOREIGN KEY (job_id) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT
