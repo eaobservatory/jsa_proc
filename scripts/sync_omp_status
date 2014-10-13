@@ -1,0 +1,94 @@
+#!/usr/bin/env python2
+
+# Copyright (C) 2014 Science and Technology Facilities Council.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import print_function
+
+from datetime import datetime, timedelta
+import logging
+import sys
+
+from taco import Taco
+
+from jsa_proc.config import get_database
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('sync_omp_status')
+
+
+def main():
+    """Script to synchronize the OMP status for a range of
+    dates.
+
+    Takes the start and end date as command line arguments,
+    e.g.:
+
+        sync_omp_status 20120101 20120131
+    """
+
+    dt_start = datetime.strptime(sys.argv[1], '%Y%m%d')
+    dt_end = datetime.strptime(sys.argv[2], '%Y%m%d')
+
+    one_day = timedelta(days=1)
+    forward = dt_end > dt_start
+
+    dt = dt_start
+
+    db = get_database()
+
+    taco = Taco(lang='starperl')
+    taco.import_module('JAC::Setup', 'omp', 'sybase')
+    taco.import_module('OMP::Info::ObsGroup')
+
+    while True:
+        sync_date(db, taco, dt)
+
+        if forward:
+            dt += one_day
+            if dt > dt_end:
+                break
+        else:
+            dt -= one_day
+            if dt < dt_end:
+                break
+
+
+def sync_date(db, taco, dt):
+    """Synchronize the OMP status for a given date.
+
+    Parameters:
+    * db: the jsa_proc database object
+    * taco: a Taco object set up to access the OMP
+    * dt: a datetime object
+    """
+
+    logger.info('Processing date %s', dt.strftime('%Y-%m-%d'))
+
+    grp = taco.construct_object(
+        'OMP::Info::ObsGroup',
+        nocomments=0, retainhdr=1,
+        telescope='JCMT', date=dt.strftime('%Y%m%d')
+    )
+
+    for obs in grp.call_method('obs'):
+        obs_id = obs.call_method('obsid')
+        omp_status = obs.call_method('status')
+
+        db.set_omp_status(obs_id, omp_status)
+
+
+if __name__ == '__main__':
+    main()
