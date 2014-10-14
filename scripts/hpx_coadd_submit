@@ -137,7 +137,7 @@ def all(args):
     never_update = args.get('--never-update', False)
     exclude_pointing_jobs = args.get('--exclude-pointing-jobs', False)
     dryrun = args.get('--dry-run', True)
-    priority = args.get('--priority', None)
+    priority = args.get('--priority', 0)
     #Values that are unchanging.
     mode='public'
     parameters='COADD_JSA_TILES'
@@ -177,7 +177,7 @@ def one(args):
     exclude_pointing_jobs = args.get('--exclude-pointing-jobs', False)
     dryrun = args.get('--dry-run', True)
     tile = args.get('--tile')
-    priority = args.get('--priority', None)
+    priority = args.get('--priority', 0)
 
     #Values that are unchanging.
     mode = 'public'
