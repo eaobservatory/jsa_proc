@@ -203,7 +203,7 @@ class InterfaceDBTest(DBTestCase):
         job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RED', 'test',
                                 input_file_names=['test1'], tilelist=[42])
 
-        self.assertEqual(self.db.get_tilelist(job_7), [42])
+        self.assertEqual(self.db.get_tilelist(job_7), set([42]))
 
     def test_change_state(self):
         """
@@ -737,17 +737,17 @@ class InterfaceDBTest(DBTestCase):
         job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'])
 
         # Start with no tilelist.
-        self.assertEqual(self.db.get_tilelist(job_id), [])
+        self.assertEqual(self.db.get_tilelist(job_id), set([]))
 
         # Add tiles
         tiles = set((42, 43, 44))
         self.db.set_tilelist(job_id, tiles)
-        self.assertEqual(set(self.db.get_tilelist(job_id)), tiles)
+        self.assertEqual(set(self.db.get_tilelist(job_id)), set(tiles))
 
         # Change tiles
         newtiles = set((45, 46, 47))
         self.db.set_tilelist(job_id, newtiles)
-        self.assertEqual(set(self.db.get_tilelist(job_id)), newtiles)
+        self.assertEqual(set(self.db.get_tilelist(job_id)), set(newtiles))
 
     def test_get_tasks(self):
         with self.assertRaises(NoRowsError):
