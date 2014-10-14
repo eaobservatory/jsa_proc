@@ -73,12 +73,12 @@ class JSAProcStateMachine:
                 elif job.state == JSAProcState.QUEUED:
                     # Check if all data are at JAC:
                     try:
-                        inputs = check_data_already_present(job_id)
+                        inputs = check_data_already_present(job.id, self.db)
                         thelist = write_input_list(job.id, inputs)
                         self.db.change_state(job.id, JSAProcState.WAITING,
                                              'All files found at JAC',
                                              state_prev=JSAProcState.QUEUED)
-                        logger.debug('Job %i has been found data and '
+                        logger.debug('Job %i has found data and been'
                                      'moved to WAITING', job.id)
                     except NotAtJACError:
                         # If the data are not present, change the state to

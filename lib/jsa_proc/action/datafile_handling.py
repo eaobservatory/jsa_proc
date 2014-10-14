@@ -22,7 +22,7 @@ import shutil
 from jsa_proc.admin.directories import get_input_dir, get_output_dir
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
-from jsa_proc.error import JSAProcError, NotAtJACError
+from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError
 from jsa_proc.config import get_config
 
 """
@@ -50,7 +50,7 @@ def is_file_in_a_dir(filename, directory):
         return pathname
     return False
 
-def check_data_already_present(job_id):
+def check_data_already_present(job_id, db):
     """
     Check if all data are present already on disk,
     outside of the input directory.
@@ -66,8 +66,9 @@ def check_data_already_present(job_id):
 
     It does not copy any files into the input directory.
     """
+
     try:
-        input_file_list = self.db.get_input_files(job.id)
+        input_file_list = db.get_input_files(job_id)
         inputs = get_jac_input_data(input_file_list)
     except NoRowsError:
         inputs=[]

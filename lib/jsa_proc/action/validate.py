@@ -49,9 +49,16 @@ def validate_job(job_id, db):
         # Ensure we can retrieve the list of input files.
         try:
             input = db.get_input_files(job_id)
-
         except NoRowsError:
-            raise ValidationError('input file list could not be retrieved')
+            input = None
+
+        try:
+            parents = db.get_parents(job_id)
+        except NoRowsError:
+            parents = None
+
+        if not input and not parents:
+            raise ValidationError('Neither input file list nor parents could be retrieved')
 
         # Check that the job has a mode string which jsawrapdr will
         # acccept.
@@ -59,14 +66,15 @@ def validate_job(job_id, db):
             raise ValidationError('invalid mode: {0}'.format(job.mode))
 
         # Check that we have some input files.
-        if not input:
+        if not input and not parents:
             raise ValidationError('input file list is empty')
 
         # Ensure input filenames are plain names without path or
         # extension.
-        for file in input:
-            if not valid_file.match(file):
-                raise ValidationError('invalid input file: {0}'.format(file))
+        if input:
+            for file in input:
+                if not valid_file.match(file):
+                    raise ValidationError('invalid input file: {0}'.format(file))
 
     except ValidationError as e:
         logger.error('Job %i failed validation: %s', job_id, e.message)

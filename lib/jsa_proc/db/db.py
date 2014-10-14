@@ -293,15 +293,32 @@ class JSAProcDB:
         # job_id may not be necessary but sometimes useful.
         return job_id
 
-    def get_tilelist(self, job_id):
-        """Retrieve the list of tiles for a given job.
+
+    def get_tilelist(self, job_id=None, task=None):
+        """Retrieve the unique list of tiles.
+        OPtionally filtered either by job_id or by task (or both)
+
+        Returns a set.
         """
 
         tiles = []
+        query = 'SELECT DISTINCT(tile) FROM tile'
+        where = ()
+        params= ()
+        join = ''
+        if job_id:
+            where +=('job_id = %s',)
+            params += (job_id,)
+        if task:
+            where += ('job.task = %s',)
+            join  = ' JOIN job ON tile.job_id = job.id'
+            params += (task,)
+        query = query + join
+        if where:
+            query += ' WHERE ' + ' '.join(where)
 
         with self.db as c:
-            c.execute('SELECT tile FROM tile WHERE job_id = %s',
-                      (job_id,))
+            c.execute(query+' ORDER BY tile ', params)
 
             while True:
                 row = c.fetchone()
@@ -310,7 +327,7 @@ class JSAProcDB:
 
                 tiles.append(row[0])
 
-        return tiles
+        return set(tiles)
 
     def set_tilelist(self, job_id, tiles):
         """
@@ -801,6 +818,7 @@ class JSAProcDB:
                 c.execute('INSERT INTO output_file (job_id, filename) '
                           'VALUES (%s, %s)',
                           (job_id, f))
+
 
     def find_errors_logs(self, location=None, task=None):
         """
