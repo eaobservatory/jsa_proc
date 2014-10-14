@@ -71,7 +71,7 @@ def main():
     """Main routine for the hpx_coadd_submit."""
 
     args = docopt(__doc__)
-    print(args)
+
     # Determine logging level from the --quiet and --verbose options.
     loglevel = logging.INFO
 
