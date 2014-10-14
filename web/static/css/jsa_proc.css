@@ -370,7 +370,7 @@ table.obsinfo td {
     max-width: 18ex;
 }
 
-td.asscn {
+td.asscn, td.sourcename {
     word-wrap: break-word;
 }
 

@@ -27,6 +27,7 @@ from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
 def prepare_job_info(db, job_id, query):
+
     # Fetch job information from the database.
     try:
         job = db.get_job(job_id)
@@ -50,10 +51,26 @@ def prepare_job_info(db, job_id, query):
         tiles = None
     if tiles == []:
         tiles = None
+
+    # Try to get input files (if any)
     try:
         input_files = db.get_input_files(job_id)
     except NoRowsError:
-        input_files = ['in', 'in']
+        input_files = None
+
+    # Try to get parent jobs (if any).
+    # Dictionary with parent as key and filter as item.
+    try:
+        parents = db.get_parents(job_id)
+        parents = dict(parents)
+        parent_obs = OrderedDict()
+        pjobs = parents.keys()
+        pjobs.sort()
+        for i in pjobs:
+            parent_obs[i] = [o._asdict() for o in db.get_obs_info(i)]
+    except NoRowsError:
+        parents = None
+        parent_obs = None
 
     previews256 = []
     previews1024 = []
@@ -124,11 +141,13 @@ def prepare_job_info(db, job_id, query):
         'tiles': tiles,
         'log': log,
         'input_files': input_files,
+        'parents': parents,
         'output_files': output_files,
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
+        'parent_obs': parent_obs,
         'pagination': pagination,
     }
