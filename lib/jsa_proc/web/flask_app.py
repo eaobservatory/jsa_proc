@@ -22,6 +22,7 @@ from functools import wraps
 import os.path
 
 from jsa_proc.config import get_config, get_database, get_home
+from jsa_proc.omp_state import OMPState
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
 
@@ -318,6 +319,10 @@ def create_web_app():
         else:
             name = 'Total'
         return name
+
+    @app.template_filter('omp_state_name')
+    def omp_state_name_filter(ompstate):
+        return OMPState.get_name(ompstate)
 
     @app.template_filter('uniq')
     def uniq_filter(xs):

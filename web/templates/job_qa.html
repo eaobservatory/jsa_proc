@@ -81,11 +81,12 @@
         <th> scan </th>
         {% elif key == 'instrument' %}
         <th> Inst. </th>
+        {% elif key == 'omp_status' %}
+        <th> Synced OMP Status </th>
         {% else %}
         <th> {{ key }} </th>
         {% endif %}
         {% endfor %}
-        <th> Change OMP Observation Status </th>
       </tr>
       {% for o in obsinfo %}
       <tr>
@@ -99,11 +100,16 @@
         <td> {{uttime}} </td>
         {% elif key == 'obsid' or key == 'obsidss' or key=='scanmode' %}
         <td> {{ break_underscore(o.get(key, '')) }} </td>
+        {% elif key=='omp_status' %}
+        <td class="omp-{{o.get(key, '')|omp_state_name}}">
+          <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}">
+            {{o.get(key, '') | omp_state_name}}
+          </a>
+        </td>
         {% else %}
         <td> {{ o.get(key, '') }} </td>
         {% endif %}
         {% endfor %}
-        <td> <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}"> OMP STATUS </a></td>
       </tr>
       {% endfor %}
     </table>
