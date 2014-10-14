@@ -140,7 +140,7 @@ def all(args):
     priority = args.get('--priority', None)
     #Values that are unchanging.
     mode='public'
-    parameters='-nodisplay COADD_JSA_TILES'
+    parameters='COADD_JSA_TILES'
     location = 'JAC'
 
     # Get full list of tiles.
