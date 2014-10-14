@@ -102,7 +102,9 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
 
     # If the job was previously there, check if the job list/filters are different, and rewrite if required.
     if oldparents:
-        if parents != oldparents:
+        oldspars, oldfilts = zip(*oldparents)
+        pars, filts = zip(*parents)
+        if set(pars) != set(oldspars) or set(oldfilts) != set(filts):
             logger.info('Parent/filter list for job %i has changed from previous state' % oldjob.id)
 
             # Get lists of added and removed jobs.
@@ -112,7 +114,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
             logger.debug('Parent jobs %s have been added to coadd.' % str(added_jobs))
 
             # Replace the parent jobs with updated list
-            pars, filts = zip(*parentjobs)
+            pars, filts = zip(*parents)
             if not dryrun:
                 db.replace_parents(oldjob.id, pars, filt=filts)
                 db.change_state(oldjob.id, JSAProcState.QUEUED,
@@ -124,6 +126,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                 job_id = 0
         else:
             logger.info('Parent/filter list for job %i is unchanged' % oldjob.id)
+            job_id = oldjob.id
             # Check if last changed time of each parent job is < last
             # processed time of old job If nothing has changed, check
             # if the job needs redoing( if any of its parent jobs have
