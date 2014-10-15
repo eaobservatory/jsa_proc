@@ -219,12 +219,24 @@
 {% endif %}
 </div>
 <div class="panel">
+{% if orac_logs %}
 <h3>ORAC-DR Logs</h3>
 <ul>
 {% for l in orac_logs %}
   <li><a href="{{l}}" >{{l}}</a></li>
 {% endfor %}
 </ul>
+{% endif %}
+
+{% if picard_logs %}
+<h3>PICARD Logs</h3>
+<ul>
+{% for l in picard_logs %}
+  <li><a href="{{l}}" >{{l}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
 
 <h3>jsawrapdr Logs</h3>
 <ul>

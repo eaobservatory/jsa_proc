@@ -101,6 +101,12 @@ def prepare_job_qa_info(db, job_id, query):
     orac_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
                      for i in orac_logfiles]
 
+    picard_logfiles = sorted(glob.glob(os.path.join(logdir, 'picard*.html')),
+                             reverse=True)
+    picard_logfiles = [os.path.split(i)[1] for i in picard_logfiles]
+    picard_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
+                               for i in picard_logfiles]
+
     wrapdr_logfiles = sorted(glob.glob(os.path.join(logdir, 'jsawrapdr*.log')),
                              reverse=True)
     wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
@@ -133,6 +139,7 @@ def prepare_job_qa_info(db, job_id, query):
         'parents': parents,
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
+        'picard_logs': picard_logfiles,
         'previews': zip(previews1024,previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,

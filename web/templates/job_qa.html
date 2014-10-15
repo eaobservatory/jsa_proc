@@ -35,8 +35,9 @@
 
         <tr><th>Task</th><td>{{ info.task }} </td></tr>
         <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
-        <tr><th>ORAC-DR log </th><td>
-            {% if orac_logs is not none  and orac_logs|length > 0 %}<a href="{{orac_logs[0]}}">ORAC</a>{% endif %}
+        <tr><th>{% if picard_logs %} PICARD log {% else %} ORAC-DR log {% endif %} </th><td>
+            {% if picard_logs is not none and picard_logs|length >0 %}<a href="{{picard_logs[0]}}"> PICARD</a>
+            {% elif orac_logs is not none  and orac_logs|length > 0 %}<a href="{{orac_logs[0]}}">ORAC</a>{% endif %}
         </td></tr>
         <tr><th>WRAP DR log </th><td>
             {% if wrapdr_logs is not none and wrapdr_logs|length > 0 %}<a href="{{wrapdr_logs[0]}}">WRAPDR</a>{% endif %}
