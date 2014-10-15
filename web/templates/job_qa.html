@@ -158,6 +158,8 @@
     <td> {{ break_underscore(o.get(key, '')) }} </td>
     {% elif key == 'association' %}
     <td class="asscn"> {{o.get(key, '') }} </td>
+    {% elif key == 'sourcename' %}
+    <td class="sourcename"> {{o.get(key, '') }} </td>
     {% elif key == 'omp_status' %}
     <td class="omp-{{o.get(key, '')|omp_state_name}}">
       <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}">
