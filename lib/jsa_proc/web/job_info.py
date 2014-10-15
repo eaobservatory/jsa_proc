@@ -72,6 +72,11 @@ def prepare_job_info(db, job_id, query):
         parents = None
         parent_obs = None
 
+    # See if there are any child jobs.
+    try:
+        children = db.get_children(job_id)
+    except NoRowsError:
+        children = None
     previews256 = []
     previews1024 = []
     try:
@@ -148,6 +153,7 @@ def prepare_job_info(db, job_id, query):
         'log': log,
         'input_files': input_files,
         'parents': parents,
+        'children': children,
         'output_files': output_files,
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
