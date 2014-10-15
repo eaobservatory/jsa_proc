@@ -116,7 +116,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
             # Replace the parent jobs with updated list
             pars, filts = zip(*parents)
             if not dryrun:
-                db.replace_parents(oldjob.id, pars, filt=filts)
+                db.replace_parents(oldjob.id, pars, filters=filts)
                 db.change_state(oldjob.id, JSAProcState.QUEUED,
                                 'Parent job list has been updated; job reset to QUEUED')
                 job_id = oldjob.id
