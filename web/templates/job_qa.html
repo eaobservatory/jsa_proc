@@ -54,8 +54,12 @@
     <p>
       <input type="hidden" name="job_id" value="{{ info.id }}" >
       <input type="hidden" name="url" value="{{url_for('job_qa', job_id=info.id)}}">
+
       {% for q in qa_states %}
-      <input type="radio" name="qa_state" value="{{q}}" {% if q == info.qa_state %} checked="checked" {% endif %}>{{q|qa_state_name}}</br>
+      <input type="radio" name="qa_state" id="{{q}}" value="{{q}}" {% if q == info.qa_state %} checked="checked" {% endif %}>
+      <label for="{{q}}" class="qa_state_{{q|qa_state_name|lower}}"> {{q|qa_state_name}}</label>
+      </input>
+       </br>
       {% endfor %}
     </p>
     <textarea placeholder="List any problems seen" rows="3" name="message"></textarea></br>
@@ -115,6 +119,62 @@
     </table>
   </div>
   {% endif %}
+
+{% if parent_obs is not none %}
+<div class="panel">
+<table class="obsinfo">
+  <caption> Parent Observation Info </caption>
+  <tr>
+  {% for key in parent_obs.values()[0][0]
+                         if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
+
+  {% if key == 'obsnum' %}
+  <th> scan </th>
+  {% elif key == 'association' %}
+  <th class="asscn"> asscn </th>
+  {% elif key == 'job_id' %}
+  <th> id </th>
+  {% elif key == 'sourcename' %}
+  <th class="sourcename"> source </th>
+  {% elif key == 'omp_status' %}
+  <th> Synced OMP Status </th>
+  {% else %}
+  <th> {{ key }} </th>
+  {% endif %}
+  {% endfor %}
+  </tr>
+
+  {% for obs in parent_obs.values() %}
+
+    {% for o in obs%}
+    <tr class="qa_state_{{ o.get('qa_state', '?')| qa_state_name | lower }}">
+    {% for key in o.keys()
+                         if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
+    {% if key == 'job_id'%}
+    <td> <a href="{{url_for('job_info', job_id=o.get(key, ''))}}"> {{ o.get(key, '') }} </a></td>
+    {% elif key == 'utdate' %}
+    <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
+    {% elif key == 'obsid' or key == 'obsidss' %}
+    <td> {{ break_underscore(o.get(key, '')) }} </td>
+    {% elif key == 'association' %}
+    <td class="asscn"> {{o.get(key, '') }} </td>
+    {% elif key == 'omp_status' %}
+    <td class="omp-{{o.get(key, '')|omp_state_name}}">
+      <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}">
+        {{o.get(key, '') | omp_state_name}}
+      </a>
+    </td>
+    {% else %}
+    <td> {{ o.get(key, '') }} </td>
+    {% endif %}
+    {% endfor %}
+    </tr>
+    {% endfor %}
+
+  {% endfor %}
+  </table>
+</div>
+{% endif %}
 
   <div class="panel panel-small">
     <table class="qalog">

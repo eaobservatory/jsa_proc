@@ -48,12 +48,30 @@ def prepare_job_qa_info(db, job_id, query):
     try:
         input_files = db.get_input_files(job_id)
     except NoRowsError:
-        input_files = ['in', 'in']
+        input_files = None
 
+        # Try to get parent jobs (if any).
+    # Dictionary with parent as key and filter as item.
+    try:
+        parents = db.get_parents(job_id)
+        parents = dict(parents)
+        parent_obs = OrderedDict()
+        pjobs = parents.keys()
+        pjobs.sort()
+        for i in pjobs:
+            obsinfo = [o._asdict() for o in db.get_obs_info(i)]
+            qa_state = db.get_job(i).qa_state
+            for o in obsinfo:
+                o['qa_state'] = qa_state
+            parent_obs[i] = obsinfo
+    except NoRowsError:
+        parents = None
+        parent_obs = None
 
     previews1024 = []
     try:
         output_files = db.get_output_files(job.id)
+
         for i in output_files:
             if re.search('preview_1024.png', i) and (re.search('_reduced-', i) or re.search('_healpix-', i)):
                 previews1024.append(i)
@@ -112,11 +130,13 @@ def prepare_job_qa_info(db, job_id, query):
         'info': info,
         'qalog': qalog,
         'output_files': output_files,
+        'parents': parents,
         'orac_logs': orac_logfiles,
         'wrapdr_logs': wrapdr_logfiles,
         'previews': zip(previews1024,previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
+        'parent_obs':parent_obs,
         'qa_states':JSAQAState.STATE_ALL,
         'pagination': pagination,
     }
