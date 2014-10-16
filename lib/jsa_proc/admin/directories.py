@@ -55,8 +55,7 @@ def make_temp_scratch_dir(job_id):
     if not os.path.exists(scratch_base_dir):
         os.makedirs(scratch_base_dir)
 
-    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
-    scratch = os.path.join(scratch_base_dir, timestamp)
+    scratch = os.path.join(scratch_base_dir, _get_timestamp())
 
     if os.path.exists(scratch):
         scratch = tempfile.mkdtemp(prefix=scratch)
@@ -81,7 +80,7 @@ def open_log_file(job_id, log_name):
         os.makedirs(log_dir)
 
     # Make logfile name using timestamp
-    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+    timestamp = _get_timestamp()
     logfile = os.path.join(log_dir, '{0}_{1}.log'.format(log_name, timestamp))
 
     # Open logfile
@@ -119,3 +118,7 @@ def _get_dir(type_, job_id):
     # the fixed 9 end up in the first component.
     decimal = '{0:09d}'.format(job_id)
     return os.path.join(basedir, decimal[:-6], decimal[:-3], decimal)
+
+
+def _get_timestamp():
+    return datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
