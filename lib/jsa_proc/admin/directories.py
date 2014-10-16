@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime
+import os
 import os.path
+import tempfile
 
 from jsa_proc.error import JSAProcError
 from jsa_proc.config import get_config
@@ -41,6 +44,25 @@ def get_log_dir(job_id):
     """Get the log directory for a given job."""
 
     return _get_dir('log', job_id)
+
+
+def make_temp_scratch_dir(job_id):
+    """Create and return path to a temporary working directory inside
+    of a job's scratch directory."""
+
+    scratch_base_dir = get_scratch_dir(job_id)
+    if not os.path.exists(scratch_base_dir):
+        os.makedirs(scratch_base_dir)
+
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+    scratch = os.path.join(scratch_base_dir, timestamp)
+
+    if os.path.exists(scratch):
+        scratch = tempfile.mkdtemp(prefix=scratch)
+    else:
+        os.mkdir(scratch)
+
+    return scratch
 
 
 def _get_dir(type_, job_id):

@@ -28,7 +28,7 @@ import os
 import re
 
 from jsa_proc.admin.directories \
-    import get_scratch_dir, get_log_dir, get_output_dir
+    import make_temp_scratch_dir, get_log_dir, get_output_dir
 from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
 
@@ -94,22 +94,16 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     """
 
     # Get config information.
-    scratch_base_dir = get_scratch_dir(job_id)
-    if not os.path.exists(scratch_base_dir):
-        os.makedirs(scratch_base_dir)
-
     log_dir = get_log_dir(job_id)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    # Get scratchdir and logfile name using timestamp
+    # Make logfile name using timestamp
     timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
-    scratch_dir = os.path.join(scratch_base_dir, timestamp)
-    if os.path.exists(scratch_dir):
-        scratch_dir = tempfile.mkdtemp(prefix=scratch_dir)
-    else:
-        os.mkdir(scratch_dir)
     logfile = os.path.join(log_dir, 'jsawrapdr_'+timestamp+'.log')
+
+    # Prepare scratch directory.
+    scratch_dir = make_temp_scratch_dir(job_id)
 
     # Get output directory name
     out_dir = get_output_dir(job_id)
