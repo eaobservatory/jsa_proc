@@ -26,7 +26,6 @@ import subprocess
 import tempfile
 import os
 import re
-import sys
 
 from jsa_proc.admin.directories \
     import get_scratch_dir, get_log_dir, get_output_dir
