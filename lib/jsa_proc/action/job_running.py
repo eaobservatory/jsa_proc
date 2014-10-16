@@ -21,7 +21,6 @@ processing system.
 from datetime import datetime
 
 import shutil
-import signal
 import subprocess
 import tempfile
 import os
@@ -31,6 +30,7 @@ from jsa_proc.admin.directories \
     import make_temp_scratch_dir, get_log_dir, get_output_dir
 from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
+from jsa_proc.util import restore_signals
 
 
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
@@ -194,13 +194,3 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Need to return list of produced files in output directory?
 
     return log.name
-
-
-def restore_signals():
-    """Restore signals which Python otherwise ignores.
-
-    For more information about this issue, please see:
-    http://bugs.python.org/issue1652"""
-
-    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-    signal.signal(signal.SIGXFSZ, signal.SIG_DFL)

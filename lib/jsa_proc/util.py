@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import signal
+
 from jsa_proc.error import JSAProcError
 
 
@@ -31,3 +33,16 @@ def identifier_to_pattern(identifier, patterns):
             return pattern.format(*match.groups())
 
     raise JSAProcError('Pattern for "{0}" not recognised'.format(identifier))
+
+
+def restore_signals():
+    """Restore signals which Python otherwise ignores.
+
+    This is designed to be given as the preexec_fn keyword
+    argument to subprocess calls.
+
+    For more information about this issue, please see:
+    http://bugs.python.org/issue1652"""
+
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
