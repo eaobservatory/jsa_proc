@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from contextlib import contextmanager
 from datetime import datetime
 import os
 import os.path
@@ -63,6 +64,41 @@ def make_temp_scratch_dir(job_id):
         os.mkdir(scratch)
 
     return scratch
+
+
+@contextmanager
+def open_log_file(job_id, log_name):
+    """Context manager which supplies a log file handle.
+
+    Opens a new log file created in a job's log directory with
+    a new unique file name based on the given log name and current
+    timestamp.  The log file is automatically closed at the
+    end of the context block.
+    """
+
+    log_dir = get_log_dir(job_id)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    # Make logfile name using timestamp
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+    logfile = os.path.join(log_dir, '{0}_{1}.log'.format(log_name, timestamp))
+
+    # Open logfile
+    if os.path.exists(logfile):
+        log = tempfile.NamedTemporaryFile(
+            prefix='{0}_{1}'.format(log_name, timestamp),
+            dir=log_dir, suffix='.log',
+            delete=False)
+    else:
+        log = open(logfile, 'w')
+
+    # Provide the log file handle to the calling with statement.
+    try:
+        yield log
+
+    finally:
+        log.close()
 
 
 def _get_dir(type_, job_id):

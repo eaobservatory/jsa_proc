@@ -18,16 +18,13 @@ Routines for running the perl-JSA script 'jsawrapdr' from the JAC
 processing system.
 """
 
-from datetime import datetime
-
 import shutil
 import subprocess
-import tempfile
 import os
 import re
 
 from jsa_proc.admin.directories \
-    import make_temp_scratch_dir, get_log_dir, get_output_dir
+    import make_temp_scratch_dir, get_log_dir, get_output_dir, open_log_file
 from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
 from jsa_proc.util import restore_signals
@@ -93,14 +90,9 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     """
 
-    # Get config information.
+    # Get log directory.  Note that opening a log file in this
+    # directory using open_log_file will ensure that it exists.
     log_dir = get_log_dir(job_id)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    # Make logfile name using timestamp
-    timestamp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
-    logfile = os.path.join(log_dir, 'jsawrapdr_'+timestamp+'.log')
 
     # Prepare scratch directory.
     scratch_dir = make_temp_scratch_dir(job_id)
@@ -158,26 +150,20 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Remainder of oracdr required environmental variables are set
     # inside WrapDR.pm->run_pipeline
 
-    # Set up logfile
-    if os.path.exists(logfile):
-        log = tempfile.NamedTemporaryFile(prefix='jsawrapdr_'+timestamp,
-                                          dir=log_dir, suffix='.log',
-                                          delete=False)
-    else:
-        log = open(logfile, 'w')
+    with open_log_file(job_id, 'jsawrapdr') as log:
+        # Keep the log file name.
+        log_name = log.name
 
-    # Run jsawrapdr
-    retcode = subprocess.call(jsawrapdrcom, env=jsa_env, bufsize=1,
-                              stdout=log, stderr=subprocess.STDOUT,
-                              preexec_fn=restore_signals)
-
-    log.close()
+        # Run jsawrapdr
+        retcode = subprocess.call(jsawrapdrcom, env=jsa_env, bufsize=1,
+                                  stdout=log, stderr=subprocess.STDOUT,
+                                  preexec_fn=restore_signals)
 
     if retcode != 0:
         errormessage = 'jsawrapdr exited with Retcode %i ' % ( retcode)
 
         # Find the first ORAC error message in the jsawrapdr log
-        jsalogfile = open(log.name, 'r')
+        jsalogfile = open(log_name, 'r')
         lines = jsalogfile.read()
         jsalogfile.close()
         result = re.search(r'.*(STDERR:\s*.*)$', lines, re.DOTALL)
@@ -193,4 +179,4 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         raise JSAProcError(errormessage)
     # Need to return list of produced files in output directory?
 
-    return log.name
+    return log_name
