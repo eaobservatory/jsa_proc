@@ -208,7 +208,7 @@ def create_web_app():
                              username)
 
         # Redirect the page to correct info.
-        flash('The status has been updated to %s.' % JSAProcState.get_name(newstate))
+        flash('The status has been changed to %s.' % JSAProcState.get_name(newstate))
         raise HTTPRedirect(url)
 
     @app.route('/job_change_qa', methods=['POST'])
@@ -235,7 +235,7 @@ def create_web_app():
                                   username,
                               )
                 # Redirect the page to correct info.
-                flash('The QA status has been updated to %s.' % JSAQAState.get_name(qa_state))
+                flash('The QA status has been changed to %s.' % JSAQAState.get_name(qa_state))
             except:
                 flash('UNSUCCESSFUL attempt to update qa status!')
         raise HTTPRedirect(url)
