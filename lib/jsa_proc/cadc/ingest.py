@@ -29,7 +29,7 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def ingest_output(job_id, dry_run=False):
+def ingest_output(job_id, location=None, task=None, dry_run=False):
     """High-level output ingestion function for use from scripts."""
 
     logger.debug('Connecting to JSA processing database')
@@ -39,7 +39,9 @@ def ingest_output(job_id, dry_run=False):
         job_ids = [job_id]
 
     else:
-        raise CommandError('Searching for jobs to ingest is not yet supported')
+        job_ids = [x.id for x in db.find_jobs(state=JSAProcState.INGESTION,
+                                              location=location,
+                                              task=task)]
 
     for job_id in job_ids:
         if not dry_run:

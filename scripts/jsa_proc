@@ -24,6 +24,7 @@ Usage:
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc ingest [-v | -q] [--dry-run] --job-id <id>
+    jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
@@ -195,7 +196,10 @@ def ingest(args):
 
     from jsa_proc.cadc.ingest import ingest_output
 
-    ingest_output(args['--job-id'], dry_run=args['--dry-run'])
+    ingest_output(args['--job-id'],
+                  location='JAC',
+                  task=args['--task'],
+                  dry_run=args['--dry-run'])
 
 
 @command
