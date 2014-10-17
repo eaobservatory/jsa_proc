@@ -88,6 +88,10 @@ class StateTestCase(TestCase):
                          'Running')
         self.assertEqual(JSAProcState.get_info(JSAProcState.COMPLETE).name,
                          'Complete')
+        self.assertEqual(JSAProcState.get_info(JSAProcState.INGESTING).final,
+                         False)
+        self.assertEqual(JSAProcState.get_info(JSAProcState.DELETED).final,
+                         True)
 
     def test_cadc_state_name(self):
         """Test lookup of CADC state names."""

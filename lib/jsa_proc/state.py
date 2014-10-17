@@ -21,7 +21,7 @@ from jsa_proc.error import JSAProcError
 #     name: Human-readable name of the state.
 #     phase: General phase of processing (for display purposes).
 #     active: True if the state represents a long-running process.
-StateInfo = namedtuple('StateInfo', 'name phase active pre_run')
+StateInfo = namedtuple('StateInfo', 'name phase active pre_run final')
 
 
 class JSAProcState:
@@ -49,19 +49,19 @@ class JSAProcState:
     PHASE_ERROR = 'E'
 
     _info = OrderedDict((
-        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False, True)),
-        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False, True)),
-        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,    False, True)),
-        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True,  True)),
-        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False, True)),
-        (RUNNING,      StateInfo('Running',      PHASE_RUN,      True,  None)),
-        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False, False)),
-        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False, False)),
-        (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False, False)),
-        (INGESTING,    StateInfo('Ingesting',    PHASE_RUN,      True,  False)),
-        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False)),
-        (ERROR,        StateInfo('Error',        PHASE_ERROR,    False, None)),
-        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False, None)),
+        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,    False, True,  False)),
+        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,    False, True,  False)),
+        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,    False, True,  False)),
+        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,    True,  True,  False)),
+        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,    False, True,  False)),
+        (RUNNING,      StateInfo('Running',      PHASE_RUN,      True,  None,  False)),
+        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False, False, False)),
+        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False, False, False)),
+        (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False, False, False)),
+        (INGESTING,    StateInfo('Ingesting',    PHASE_RUN,      True,  False, False)),
+        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False, True)),
+        (ERROR,        StateInfo('Error',        PHASE_ERROR,    False, None,  True)),
+        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False, None,  True)),
     ))
 
     STATE_ALL = tuple(_info.keys())
@@ -70,6 +70,8 @@ class JSAProcState:
     STATE_POST_RUN = set((s for (s, i) in _info.items() if i.pre_run is False))
 
     STATE_PRE_QA = STATE_PRE_RUN | set((RUNNING, PROCESSED))
+
+    STATE_FINAL = set((s for (s, i) in _info.items() if i.final))
 
     @classmethod
     def get_name(cls, state):
