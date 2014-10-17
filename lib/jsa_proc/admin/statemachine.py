@@ -22,6 +22,7 @@ from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.preview import fetch_cadc_previews
+from jsa_proc.db.db import Not
 from jsa_proc.error import JSAProcError, NoRowsError, NotAtJACError
 from jsa_proc.state import JSAProcState
 
@@ -62,7 +63,8 @@ class JSAProcStateMachine:
         logger.info('Starting update of JAC job status')
         n_err = 0
 
-        for job in self.db.find_jobs(location='JAC'):
+        for job in self.db.find_jobs(location='JAC',
+                                     state=Not(JSAProcState.STATE_FINAL)):
             logger.debug('Checking state of job %i', job.id)
 
             try:
@@ -150,14 +152,6 @@ class JSAProcStateMachine:
 
                 elif job.state == JSAProcState.INGESTING:
                     # A separate processes is performing an ingestion.
-                    pass
-
-                elif job.state == JSAProcState.COMPLETE:
-                    # Job is in a final state: do nothing.
-                    pass
-
-                elif job.state == JSAProcState.ERROR:
-                    # Job is in a final state: do nothing.
                     pass
 
                 else:
