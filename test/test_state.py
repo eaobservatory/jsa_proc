@@ -56,6 +56,7 @@ class StateTestCase(TestCase):
             JSAProcState.PROCESSED: 'Processed',
             JSAProcState.TRANSFERRING: 'Transferring',
             JSAProcState.INGESTION: 'Ingestion',
+            JSAProcState.INGESTING: 'Ingesting',
             JSAProcState.COMPLETE: 'Complete',
             JSAProcState.ERROR: 'Error',
             JSAProcState.DELETED: 'Deleted',

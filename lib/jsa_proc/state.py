@@ -37,6 +37,7 @@ class JSAProcState:
     PROCESSED = 'P'
     TRANSFERRING = 'T'
     INGESTION = 'I'
+    INGESTING = 'J'
     COMPLETE = 'Y'
     ERROR = 'E'
     DELETED = 'X'
@@ -57,6 +58,7 @@ class JSAProcState:
         (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False, False)),
         (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False, False)),
         (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False, False)),
+        (INGESTING,    StateInfo('Ingesting',    PHASE_RUN,      True,  False)),
         (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False)),
         (ERROR,        StateInfo('Error',        PHASE_ERROR,    False, None)),
         (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False, None)),
