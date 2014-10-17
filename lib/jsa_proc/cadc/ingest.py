@@ -22,7 +22,7 @@ from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.admin.directories import get_output_dir, \
     open_log_file, make_temp_scratch_dir
 from jsa_proc.config import get_database
-from jsa_proc.error import CommandError
+from jsa_proc.error import CommandError, NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.util import restore_signals
 
@@ -36,19 +36,26 @@ def ingest_output(job_id, dry_run=False):
     db = get_database()
 
     if job_id is not None:
-        job = db.get_job(id_=job_id)
-
-        if job.state != JSAProcState.INGESTION:
-            raise CommandError('Job is not in the INGESTION state')
-
         job_ids = [job_id]
 
     else:
         raise CommandError('Searching for jobs to ingest is not yet supported')
 
     for job_id in job_ids:
-
         if not dry_run:
+            try:
+                # Change the state from INGESTION to INGESTING, raising an
+                # error if the job was not already in that state.
+                db.change_state(job_id, JSAProcState.INGESTING,
+                                'Job output is being ingested into CAOM-2',
+                                state_prev=JSAProcState.INGESTION)
+
+            except NoRowsError:
+                logger.error('Job %i can not be ingested as it is not ready',
+                             job_id)
+
+                continue
+
             _perform_ingestion(job_id=job_id, db=db)
 
         else:
@@ -59,7 +66,8 @@ def ingest_output(job_id, dry_run=False):
 def _perform_ingestion(job_id, db):
     """Private function to peform the CAOM-2 ingestion.
 
-    Runs under the ErrorDecorator to capture errors.
+    Runs under the ErrorDecorator to capture errors.  Sets the job state
+    to COMPLETE if it finishes successfully, or ERROR otherwise.
     """
 
     logger.debug('Preparing to ingest ouput for job {0}'.format(job_id))
@@ -86,7 +94,8 @@ def _perform_ingestion(job_id, db):
                 preexec_fn=restore_signals)
 
             db.change_state(job_id, JSAProcState.COMPLETE,
-                            'CAOM-2 ingestion completed successfully')
+                            'CAOM-2 ingestion completed successfully',
+                            state_prev=JSAProcState.INGESTING)
 
             logger.info('Done ingesting ouput for job {0}'.format(job_id))
 
