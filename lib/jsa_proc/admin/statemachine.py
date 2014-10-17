@@ -145,7 +145,11 @@ class JSAProcStateMachine:
                     pass
 
                 elif job.state == JSAProcState.INGESTION:
-                    # Ingestion to be a separate process?
+                    # Wait for ingestion by a separate process.
+                    pass
+
+                elif job.state == JSAProcState.INGESTING:
+                    # A separate processes is performing an ingestion.
                     pass
 
                 elif job.state == JSAProcState.COMPLETE:
