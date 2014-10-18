@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% set scripts=['samp', 'samp_broadcast'] %}
 {% from 'macros.html' import break_underscore, log_table, render_page_control %}
 {% block body %}
 
@@ -185,7 +186,14 @@
 <h2>Output Files</h2>
 <ul>
 {% for file in output_files %}
-    <li>{{ file }}</li>
+    <li>
+        {{ file.name }}
+        {% if file.url %}
+            <button disabled="disabled" id="broadcast_output_{{ loop.index }}" data-url="{{ file.url }}">
+                broadcast
+            </button>
+        {% endif %}
+    </li>
 {% endfor %}
 </ul>
 </div>

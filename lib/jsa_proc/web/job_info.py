@@ -15,15 +15,17 @@
 
 from __future__ import absolute_import, division
 
-from collections import OrderedDict
+from collections import namedtuple, OrderedDict
 import glob
 import os
 
-from jsa_proc.admin.directories import get_log_dir
+from jsa_proc.admin.directories import get_log_dir, get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
+
+FileInfo = namedtuple('FileInfo', ['name', 'url'])
 
 
 def prepare_job_info(db, job_id, query):
@@ -80,15 +82,24 @@ def prepare_job_info(db, job_id, query):
     previews256 = []
     previews1024 = []
     try:
-        output_files = db.get_output_files(job.id)
+        output_files = []
 
-        for i in output_files:
+        for i in db.get_output_files(job.id):
             s = i.find('preview_256.png')
             if s != -1:
                 previews256.append(i)
             s = i.find('preview_1024.png')
             if s != -1:
                 previews1024.append(i)
+
+
+            if i.endswith('.fits'):
+                url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
+
+            else:
+                url = None
+
+            output_files.append(FileInfo(i, url))
 
     except NoRowsError:
         output_files = []
