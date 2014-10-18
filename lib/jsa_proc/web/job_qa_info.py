@@ -16,15 +16,13 @@
 from __future__ import absolute_import, division
 
 from collections import OrderedDict
-import glob
-import os
 import re
 
-from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.job_search import job_search
+from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
@@ -94,24 +92,7 @@ def prepare_job_qa_info(db, job_id, query):
 
 
     # Get the log files on disk (if any)
-    logdir = get_log_dir(job_id)
-    orac_logfiles = sorted(glob.glob(os.path.join(logdir, 'oracdr*.html')),
-                           reverse=True)
-    orac_logfiles = [os.path.split(i)[1] for i in orac_logfiles]
-    orac_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
-                     for i in orac_logfiles]
-
-    picard_logfiles = sorted(glob.glob(os.path.join(logdir, 'picard*.html')),
-                             reverse=True)
-    picard_logfiles = [os.path.split(i)[1] for i in picard_logfiles]
-    picard_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
-                               for i in picard_logfiles]
-
-    wrapdr_logfiles = sorted(glob.glob(os.path.join(logdir, 'jsawrapdr*.log')),
-                             reverse=True)
-    wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
-    wrapdr_logfiles = [url_for('job_log_text', job_id=job.id, log=i)
-                       for i in wrapdr_logfiles]
+    log_files = get_log_files(job_id)
 
     # QA log (f any)
     qalog = db.get_qas(job_id)
@@ -137,9 +118,7 @@ def prepare_job_qa_info(db, job_id, query):
         'qalog': qalog,
         'output_files': output_files,
         'parents': parents,
-        'orac_logs': orac_logfiles,
-        'wrapdr_logs': wrapdr_logfiles,
-        'picard_logs': picard_logfiles,
+        'log_files': log_files,
         'previews': zip(previews1024,previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
