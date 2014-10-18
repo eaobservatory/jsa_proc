@@ -209,6 +209,7 @@
 <table>
 {{ log_table(log) }}
 </table>
+{% endif %}
 
 <!-- Allow users to change state of job. -->
 <h3> Change the state of this Job </h3>
@@ -264,8 +265,6 @@
 <p>The time stamp may not match with the database log comments: different time zones in different systems </p>
 </div>
 </div>
-
-{% endif %}
 
 {% if previews|length > 1 %}
 <h3 id="previews"> Preview images  (Click image to embiggen)</h3>
