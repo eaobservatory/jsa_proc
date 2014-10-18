@@ -236,34 +236,24 @@
 </p>
 {% endif %}
 </div>
-<div class="panel">
-{% if orac_logs %}
-<h3>ORAC-DR Logs</h3>
-<ul>
-{% for l in orac_logs %}
-  <li><a href="{{l}}" >{{l}}</a></li>
-{% endfor %}
-</ul>
+
+{% if log_files %}
+    <div class="panel">
+        {% for type, logs in log_files | dictsort %}
+            <h3>{{ type }} Logs</h3>
+            <ul>
+                {% for log in logs %}
+                    <li><a href="{{ log.url }}" >{{ log.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+
+        <p>
+            The time stamp may not match with the database log comments:
+            different time zones in different systems.
+        </p>
+    </div>
 {% endif %}
-
-{% if picard_logs %}
-<h3>PICARD Logs</h3>
-<ul>
-{% for l in picard_logs %}
-  <li><a href="{{l}}" >{{l}}</a></li>
-{% endfor %}
-</ul>
-{% endif %}
-
-
-<h3>jsawrapdr Logs</h3>
-<ul>
-{% for l in wrapdr_logs %}
-  <li><a href="{{l}}" >{{l}}</a></li>
-{% endfor %}
-</ul>
-<p>The time stamp may not match with the database log comments: different time zones in different systems </p>
-</div>
 </div>
 
 {% if previews|length > 1 %}

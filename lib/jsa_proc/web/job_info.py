@@ -16,8 +16,8 @@
 from __future__ import absolute_import, division
 
 from collections import namedtuple, OrderedDict
-import glob
 import os
+import re
 
 from jsa_proc.admin.directories import get_log_dir, get_output_dir
 from jsa_proc.error import NoRowsError
@@ -124,24 +124,26 @@ def prepare_job_info(db, job_id, query):
     log.reverse()
 
     # Get the log files on disk (if any)
-    logdir = get_log_dir(job_id)
-    orac_logfiles = sorted(glob.glob(os.path.join(logdir, 'oracdr*.html')),
-                           reverse=True)
-    orac_logfiles = [os.path.split(i)[1] for i in orac_logfiles]
-    orac_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
-                     for i in orac_logfiles]
+    log_files = {}
 
-    picard_logfiles = sorted(glob.glob(os.path.join(logdir, 'picard*.html')),
-                             reverse=True)
-    picard_logfiles = [os.path.split(i)[1] for i in picard_logfiles]
-    picard_logfiles = [url_for('job_log_html', job_id=job.id, log=i)
-                               for i in picard_logfiles]
+    log_types = {
+        'ORAC-DR': re.compile('oracdr.*\.html'),
+        'PICARD': re.compile('picard.*\.html'),
+        'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
+    }
 
-    wrapdr_logfiles = sorted(glob.glob(os.path.join(logdir, 'jsawrapdr*.log')),
-                             reverse=True)
-    wrapdr_logfiles = [os.path.split(i)[1] for i in wrapdr_logfiles]
-    wrapdr_logfiles = [url_for('job_log_text', job_id=job.id, log=i)
-                       for i in wrapdr_logfiles]
+    for file in sorted(os.listdir(get_log_dir(job_id)), reverse=True):
+        for (type_, pattern) in log_types.items():
+            if pattern.match(file):
+                if file.endswith('.html'):
+                    url = url_for('job_log_html', job_id=job.id, log=file)
+                else:
+                    url = url_for('job_log_text', job_id=job.id, log=file)
+
+                if type_ in log_files:
+                    log_files[type_].append(FileInfo(file, url))
+                else:
+                    log_files[type_] = [FileInfo(file, url)]
 
     # If we know what the user's job query was (from the session information)
     # then set up pagination based on the previous and next job identifiers.
@@ -166,9 +168,7 @@ def prepare_job_info(db, job_id, query):
         'parents': parents,
         'children': children,
         'output_files': output_files,
-        'orac_logs': orac_logfiles,
-        'wrapdr_logs': wrapdr_logfiles,
-        'picard_logs': picard_logfiles,
+        'log_files': log_files,
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
