@@ -16,12 +16,11 @@
 from __future__ import absolute_import, division
 
 from collections import namedtuple, OrderedDict
-import os
-import re
 
-from jsa_proc.admin.directories import get_log_dir, get_output_dir
+from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
+from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
@@ -124,27 +123,7 @@ def prepare_job_info(db, job_id, query):
     log.reverse()
 
     # Get the log files on disk (if any)
-    log_files = {}
-
-    log_types = {
-        'ORAC-DR': re.compile('oracdr.*\.html'),
-        'PICARD': re.compile('picard.*\.html'),
-        'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
-        'Ingestion': re.compile('ingestion.*\.log'),
-    }
-
-    for file in sorted(os.listdir(get_log_dir(job_id)), reverse=True):
-        for (type_, pattern) in log_types.items():
-            if pattern.match(file):
-                if file.endswith('.html'):
-                    url = url_for('job_log_html', job_id=job.id, log=file)
-                else:
-                    url = url_for('job_log_text', job_id=job.id, log=file)
-
-                if type_ in log_files:
-                    log_files[type_].append(FileInfo(file, url))
-                else:
-                    log_files[type_] = [FileInfo(file, url)]
+    log_files = get_log_files(job_id)
 
     # If we know what the user's job query was (from the session information)
     # then set up pagination based on the previous and next job identifiers.
