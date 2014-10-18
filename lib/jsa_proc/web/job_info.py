@@ -130,6 +130,7 @@ def prepare_job_info(db, job_id, query):
         'ORAC-DR': re.compile('oracdr.*\.html'),
         'PICARD': re.compile('picard.*\.html'),
         'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
+        'Ingestion': re.compile('ingestion.*\.log'),
     }
 
     for file in sorted(os.listdir(get_log_dir(job_id)), reverse=True):
