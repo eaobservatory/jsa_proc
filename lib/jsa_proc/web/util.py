@@ -83,13 +83,11 @@ def templated(template):
     return decorator
 
 
-def calculate_pagination(count, number_per_page, default_number,
+def calculate_pagination(count, default_number,
                          page_number, page_name, url_args):
     """Process pagination options and create pagination links.
 
     Arguments:
-        number_per_page: number of items to show per page
-                         (sanitized -- can be an HTTP parameter)
         default_number: default number of items per page
         page_number: requested page number
                      (sanitized -- can be an HTTP parameter)
@@ -102,12 +100,16 @@ def calculate_pagination(count, number_per_page, default_number,
         pagination: named tuple with first, prev, next and last elements
     """
 
-    # Sanitize input of number_per_page and page_number.
-    if (number_per_page == '') or (number_per_page is None):
-        number_per_page = default_number
-    else:
-        number_per_page = int(number_per_page)
 
+    # Check if number is given within the url_args, if not then
+    # set it to the default number.
+    if 'number' not in url_args or url_args['number'] is None or url_args['number'] == 0:
+        number_per_page = default_number
+        url_args['number'] = default_number
+    else:
+        number_per_page = int(url_args['number'])
+
+    # Sanitize input of page_number.
     if (page_number == '') or (page_number is None):
         page_number = 0
     else:
@@ -129,19 +131,19 @@ def calculate_pagination(count, number_per_page, default_number,
     # rather than "first" and "last".
     pagination = Pagination(
         url_for('job_list', page=0,
-                number=number_per_page, **url_args)
+                **url_args)
         if page_number > 1 else None,
 
         url_for('job_list', page=(page_number - 1),
-                number=number_per_page, **url_args)
+                **url_args)
         if page_number > 0 else None,
 
         url_for('job_list', page=(page_number + 1),
-                number=number_per_page, **url_args)
+                **url_args)
         if page_number < page_max else None,
 
         url_for('job_list', page=page_max,
-                number=number_per_page, **url_args)
+                **url_args)
         if page_number < (page_max - 1) else None,
 
         None

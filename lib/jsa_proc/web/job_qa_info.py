@@ -101,7 +101,13 @@ def prepare_job_qa_info(db, job_id, query):
     # then set up pagination based on the previous and next job identifiers.
     if query is not None:
         (url_query, job_query) = job_search(**query)
-        (prev, next) = db.job_prev_next(job_id, **job_query)
+
+        # prev_next query should not  contain kwarg 'number'.
+        pnquery = job_query.copy()
+        if 'number' in pnquery:
+            pnquery.pop('number')
+
+        (prev, next) = db.job_prev_next(job_id, **pnquery)
         pagination = Pagination(
             None,
             None if prev is None else url_for('job_qa', job_id=prev),

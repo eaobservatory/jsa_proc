@@ -22,18 +22,17 @@ from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import url_for, calculate_pagination
 
 
-def prepare_job_list(db, number, page, **kwargs):
+def prepare_job_list(db, page, **kwargs):
     # Generate query objects based on the parameters.
     (query, job_query) = job_search(**kwargs)
-
     (number, page, pagination) = calculate_pagination(
         db.find_jobs(count=True,  **job_query),
-        number, 24, page, 'job_list', query)
+        24, page, 'job_list', query)
 
     jobs = []
 
     for job in db.find_jobs(outputs='%preview_64.png',
-                            number=number, offset=(number * page),
+                            offset=(number * page),
                             **job_query):
         if job.outputs:
             preview = url_for('job_preview', job_id=job.id,

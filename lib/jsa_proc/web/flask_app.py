@@ -123,6 +123,7 @@ def create_web_app():
             'sourcename',
             'obsnum',
             'project',
+            'number',
         ]
 
         params.extend(ObsQueryDict.keys())
@@ -141,7 +142,6 @@ def create_web_app():
         # Finally prepare the template context.
         return prepare_job_list(
             db,
-            number=request.args.get('number', None),
             page=request.args.get('page', None),
             **kwargs)
 

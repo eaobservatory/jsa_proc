@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division#, print_function
 
 from jsa_proc.db.db import Fuzzy, Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
@@ -22,12 +22,14 @@ from jsa_proc.jcmtobsinfo import ObsQueryDict
 def job_search(location, state, task,
                date_min, date_max, qa_state,
                sourcename, obsnum, project,
-               mode, **kwargs):
+               mode, number, **kwargs):
+
     # Initialize entries which the job and URL queries have in common.
     job_query = {
         'location': location,
         'task': task,
         'qa_state': qa_state,
+        'number': number,
     }
 
     # Initialize the URL query / template context with a copy of the common
