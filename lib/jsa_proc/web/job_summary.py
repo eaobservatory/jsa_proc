@@ -74,9 +74,16 @@ def prepare_summary_piechart(db, task=None, obsquerydict=None, date_min=None,
     # Get numbers, names and colors for the pie chart.
     values = job_summary_dict.values()
     names = [JSAProcState.get_name(i) for i in JSAProcState.STATE_ALL[:-1]]
+
     # This should probably be done better...
-    phases = ['red'] * 3 + ['yellow'] * 2 + ['green'] * 4 + ['blue'] + \
-             ['black'] * 1
+    phase_colors = {}
+    phase_colors[JSAProcState.PHASE_QUEUE] = 'red'
+    phase_colors[JSAProcState.PHASE_FETCH] = 'yellow'
+    phase_colors[JSAProcState.PHASE_RUN] = 'green'
+    phase_colors[JSAProcState.PHASE_COMPLETE] = 'blue'
+    phase_colors[JSAProcState.PHASE_ERROR] = 'black'
+
+    phases = [ phase_colors[JSAProcState.get_info(s).phase] for s in JSAProcState.STATE_ALL[:-1]]
 
     # Remove any states that don't have any jobs in them
     i = 0
