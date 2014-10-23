@@ -417,3 +417,12 @@ p.large_warning {
     font-size: 200%;
     font-weight: bold;
 }
+
+
+.goodbutton {
+    width:90%;
+    height: 3em;
+    font-size: large;
+    border-radius: 10px;
+    background-image: linear-gradient(to bottom, #C9DEF6 30%, #80A0C5 110%)
+}

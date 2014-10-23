@@ -51,7 +51,15 @@
 
   <div class="panel panel-small jobqa">
     {% if request.authorization and request.authorization.username %}
-    <h4> QA for reduction of this job</h4>
+    <form method="POST" action="{{ url_for('job_change_qa')}}">
+      <input type="hidden" name="job_id" value="{{ info.id }}" >
+      <input type="hidden" name="url" value="{{pagination.next}}">
+      <input type="hidden" name="qa_state" value="G">
+      <input type="hidden" name="message" value="">
+      <input type="submit" class="goodbutton" value="Good [go to next job]">
+    </form>
+
+    <h4> Set QA state for this job</h4>
     <form method="POST" action="{{ url_for('job_change_qa')}}">
     <p>
       <input type="hidden" name="job_id" value="{{ info.id }}" >

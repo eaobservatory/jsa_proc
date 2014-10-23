@@ -244,8 +244,8 @@ def create_web_app():
                                   )
                 # Redirect the page to correct info.
                 flash(
-                    'The QA status has been changed to %s.' %
-                    JSAQAState.get_name(qa_state)
+                    'The QA status of job %s has been changed to %s.' %
+                    (str(' '.join(job_ids)),JSAQAState.get_name(qa_state))
                 )
             except:
                 flash('UNSUCCESSFUL attempt to update qa status!')
