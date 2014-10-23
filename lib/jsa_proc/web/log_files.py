@@ -43,18 +43,19 @@ def get_log_files(job_id):
     """
 
     log_files = {}
+    log_dir = get_log_dir(job_id)
+    if os.path.isdir(log_dir):
+        for file in sorted(os.listdir(get_log_dir(job_id)), reverse=True):
+            for (type_, pattern) in log_types.items():
+                if pattern.match(file):
+                    if file.endswith('.html'):
+                        url = url_for('job_log_html', job_id=job_id, log=file)
+                    else:
+                        url = url_for('job_log_text', job_id=job_id, log=file)
 
-    for file in sorted(os.listdir(get_log_dir(job_id)), reverse=True):
-        for (type_, pattern) in log_types.items():
-            if pattern.match(file):
-                if file.endswith('.html'):
-                    url = url_for('job_log_html', job_id=job_id, log=file)
-                else:
-                    url = url_for('job_log_text', job_id=job_id, log=file)
-
-                if type_ in log_files:
-                    log_files[type_].append(LogInfo(file, url))
-                else:
-                    log_files[type_] = [LogInfo(file, url)]
+                    if type_ in log_files:
+                        log_files[type_].append(LogInfo(file, url))
+                    else:
+                        log_files[type_] = [LogInfo(file, url)]
 
     return log_files
