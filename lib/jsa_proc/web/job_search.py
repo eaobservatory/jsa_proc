@@ -24,6 +24,9 @@ def job_search(location, state, task,
                sourcename, obsnum, project,
                mode, number, **kwargs):
 
+    # If number is None, reset to default
+    if not number or number is None:
+        number = 24
     # Initialize entries which the job and URL queries have in common.
     job_query = {
         'location': location,

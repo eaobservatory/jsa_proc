@@ -29,6 +29,10 @@ def prepare_job_list(db, page, **kwargs):
         db.find_jobs(count=True,  **job_query),
         24, page, 'job_list', query)
 
+    # If no number in kwargs, add in default.
+    if 'number' not in job_query:
+        job_query['number'] = number
+        print number
     jobs = []
 
     for job in db.find_jobs(outputs='%preview_64.png',
