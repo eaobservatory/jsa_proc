@@ -28,7 +28,6 @@ FileInfo = namedtuple('FileInfo', ['name', 'url'])
 
 
 def prepare_job_info(db, job_id, query):
-
     # Fetch job information from the database.
     try:
         job = db.get_job(job_id)
@@ -90,7 +89,6 @@ def prepare_job_info(db, job_id, query):
             s = i.find('preview_1024.png')
             if s != -1:
                 previews1024.append(i)
-
 
             if i.endswith('.fits'):
                 url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)

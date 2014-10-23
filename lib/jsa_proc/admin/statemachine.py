@@ -132,13 +132,16 @@ class JSAProcStateMachine:
                             ssh_etransfer_send_output(job.id)
 
                     else:
-                        # If e-transfer is not required, then the job is now complete.
+                        # If e-transfer is not required, then the job is now
+                        #  complete.
 
                         if validate_output(job.id, self.db):
-                            self.db.change_state(job.id, JSAProcState.COMPLETE,
-                                                 'Processed job is COMPLETE (no etransfer)',
-                                                 state_prev=JSAProcState.PROCESSED)
-                            logger.debug('Processed job %i moved to COMPLETE (no etransfer)',
+                            self.db.change_state(
+                                job.id, JSAProcState.COMPLETE,
+                                'Processed job is COMPLETE (no etransfer)',
+                                state_prev=JSAProcState.PROCESSED)
+                            logger.debug('Processed job %i moved to ' +
+                                         'COMPLETE (no etransfer)',
                                          job.id)
 
                 elif job.state == JSAProcState.TRANSFERRING:

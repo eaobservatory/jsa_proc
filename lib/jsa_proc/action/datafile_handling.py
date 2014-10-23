@@ -33,6 +33,7 @@ Routines for handling input and output files when running jobs.
 # Name of .lis file containing each input file with full path.
 input_list_name = 'input_files_job.lis'
 
+
 def is_file_in_a_dir(filename, directory):
     """
     Checks whether a filename is present in a given directory.
@@ -49,6 +50,7 @@ def is_file_in_a_dir(filename, directory):
     if os.path.exists(pathname):
         return pathname
     return False
+
 
 def check_data_already_present(job_id, db):
     """
@@ -71,7 +73,7 @@ def check_data_already_present(job_id, db):
         input_file_list = db.get_input_files(job_id)
         inputs = get_jac_input_data(input_file_list)
     except NoRowsError:
-        inputs=[]
+        inputs = []
 
     try:
         parents = db.get_parents(job_id)
@@ -108,6 +110,8 @@ def get_jac_input_data(input_file_list):
         else:
             inputsfiles.append(filepath)
     return inputsfiles
+
+
 def get_jac_input_data(input_file_list):
     """
     Try and assemble data for job, if it is all in the JAC
@@ -127,6 +131,7 @@ def get_jac_input_data(input_file_list):
             inputsfiles.append(filepath)
     return inputsfiles
 
+
 def write_input_list(job_id, input_file_list):
     """
     Write a textfile to list in the input directory
@@ -134,7 +139,6 @@ def write_input_list(job_id, input_file_list):
 
     Returns the name of the textfile.
     """
-
 
     input_directory = get_input_dir(job_id)
     if not os.path.exists(input_directory):
@@ -146,7 +150,6 @@ def write_input_list(job_id, input_file_list):
         f.write(i + os.linesep)
     f.close()
     return fname
-
 
 
 def setup_input_directory(job_id):
@@ -193,7 +196,7 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
     dirpath = get_output_dir(parent_job_id)
 
     # List to hold full paths to input files.
-    files_list=[]
+    files_list = []
     for f in parent_files:
 
         # First of all check if file is already in input directory.
@@ -210,7 +213,8 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
             print filepath
             if filepath:
                 shutil.copy(filepath, input_directory)
-                filepath = os.path.join(input_directory, os.path.split(filepath)[1])
+                filepath = os.path.join(input_directory,
+                                        os.path.split(filepath)[1])
                 files_list.append(filepath)
 
             else:
@@ -225,6 +229,7 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
                                                 os.path.split(filepath)[1])
                     shutil.move(filepath, invalid_file)
     return files_list
+
 
 def assemble_input_data_for_job(job_id, input_file_list):
     """
@@ -287,6 +292,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
     # Return list of files with full paths.
     return files_list
 
+
 def setup_invalid_dir(input_directory):
     """
     Create a directory to hold invalid files.
@@ -296,6 +302,7 @@ def setup_invalid_dir(input_directory):
     if not os.path.exists(invalid_dir):
         os.mkdir(invalid_dir)
     return invalid_dir
+
 
 def get_output_files(job_id):
     """

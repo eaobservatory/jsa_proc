@@ -42,10 +42,12 @@ class HTTPError(werkzeug.exceptions.InternalServerError):
 
     pass
 
+
 class HTTPUnauthorized(werkzeug.exceptions.Unauthorized):
     """Exception class raising an HTTP unauthorized 401 error"""
 
     pass
+
 
 class HTTPNotFound(werkzeug.exceptions.NotFound):
     """Exception class for HTTP not found errors."""
@@ -75,7 +77,9 @@ def templated(template):
                 flask.render_template(template, **result))
             resp.headers['Content-Language'] = 'en'
             return resp
+
         return decorated_function
+
     return decorator
 
 

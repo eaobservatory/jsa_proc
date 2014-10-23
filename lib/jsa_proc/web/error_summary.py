@@ -22,8 +22,8 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_error_summary(db, filtering=None, chosentask=None, extrafilter=None):
-
+def prepare_error_summary(db, filtering=None, chosentask=None,
+                          extrafilter=None):
     """
     Prepare a summary of all jobs in error state.
 

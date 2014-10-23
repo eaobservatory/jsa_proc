@@ -26,7 +26,8 @@ valid_modes = ('obs', 'night', 'project', 'public')
 valid_file = re.compile('^[_a-z0-9]+$')
 
 valid_preview_sizes = set([64, 256, 1024])
-valid_preview_file = re.compile('^(jcmt_[-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
+valid_preview_file = re.compile(
+    '^(jcmt_[-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
 valid_product_file = re.compile('^jcmt[hs][-_a-z0-9]+\.fits$')
 
 
@@ -58,7 +59,8 @@ def validate_job(job_id, db):
             parents = None
 
         if not input and not parents:
-            raise ValidationError('Neither input file list nor parents could be retrieved')
+            raise ValidationError(
+                'Neither input file list nor parents could be retrieved')
 
         # Check that the job has a mode string which jsawrapdr will
         # acccept.
@@ -74,7 +76,8 @@ def validate_job(job_id, db):
         if input:
             for file in input:
                 if not valid_file.match(file):
-                    raise ValidationError('invalid input file: {0}'.format(file))
+                    raise ValidationError(
+                        'invalid input file: {0}'.format(file))
 
     except ValidationError as e:
         logger.error('Job %i failed validation: %s', job_id, e.message)

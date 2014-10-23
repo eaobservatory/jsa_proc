@@ -25,7 +25,6 @@ from matplotlib.figure import Figure
 import StringIO
 import time
 
-
 from flask import send_file
 
 from jsa_proc.db.db import Range
@@ -36,13 +35,15 @@ from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.util import url_for
 
 
-def prepare_summary_piechart(db, task=None, obsquerydict = None, date_min=None, date_max=None):
+def prepare_summary_piechart(db, task=None, obsquerydict=None, date_min=None,
+                             date_max=None):
     """
     Create a piechart of number of jobs in each state for a given task
     and obsquery.
 
     *task*: name of task in database
-    *obsquerydict*: dictionary of values that match the jcmtobsinfo.ObsQueryDict.
+    *obsquerydict*: dictionary of values that match the
+    jcmtobsinfo.ObsQueryDict.
 
     Returns a sendfile object of mime-type image/png.
 
@@ -60,22 +61,25 @@ def prepare_summary_piechart(db, task=None, obsquerydict = None, date_min=None, 
     if date_min is not None or date_max is not None:
         obsquery['utdate'] = Range(date_min, date_max)
 
-    # Perform the find_jobs task for the given constraints in each JSAProcState.
+    # Perform the find_jobs task for the given constraints in each
+    # JSAProcState.
     for s in JSAProcState.STATE_ALL:
 
         # Don't include deleted jobs in pie chart
         if JSAProcState.get_name(s) != 'Deleted':
-            job_summary_dict[s] = db.find_jobs(state=s, task=task, obsquery=obsquery,
+            job_summary_dict[s] = db.find_jobs(state=s, task=task,
+                                               obsquery=obsquery,
                                                count=True)
 
     # Get numbers, names and colors for the pie chart.
     values = job_summary_dict.values()
     names = [JSAProcState.get_name(i) for i in JSAProcState.STATE_ALL[:-1]]
     # This should probably be done better...
-    phases = ['red'] *3 + [ 'yellow'] *2 + ['green'] * 4 + ['blue'] + ['black'] * 1
+    phases = ['red'] * 3 + ['yellow'] * 2 + ['green'] * 4 + ['blue'] + \
+             ['black'] * 1
 
     # Remove any states that don't have any jobs in them
-    i=0
+    i = 0
     while i < len(values):
         if values[i] == 0:
             values.pop(i)
@@ -85,10 +89,10 @@ def prepare_summary_piechart(db, task=None, obsquerydict = None, date_min=None, 
             i += 1
 
     # Create pie chart
-    fig = Figure(figsize=(6,5))
+    fig = Figure(figsize=(6, 5))
     ax = fig.add_subplot(111)
     ax.set_aspect(1)
-    p,t,a = ax.pie(values, labels=names, colors= phases, autopct = '%.1F')
+    p, t, a = ax.pie(values, labels=names, colors=phases, autopct='%.1F')
     for i in range(len(a)):
         if p[i].get_facecolor() == (1.0, 1.0, 0.0, 1.0):
             a[i].set_color('black')
@@ -117,14 +121,16 @@ def prepare_task_summary(db):
     tasks = db.get_tasks()
     results = {}
     for t in tasks:
-        results[t] = {'total':db.find_jobs(task=t, count=True)}
+        results[t] = {'total': db.find_jobs(task=t, count=True)}
         for s in JSAProcState.STATE_ALL:
             results[t][s] = db.find_jobs(task=t, state=s, count=True)
 
     return {'results': results, 'states': JSAProcState.STATE_ALL,
             'title': 'Summary'}
 
-def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=None):
+
+def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None,
+                            byDate=None):
     """
     Prepare a summary of tasks in the database based on QA state.
 
@@ -143,12 +149,13 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
         smaller = min(d2, d1)
         delta = larger + datetime.timedelta(1) - smaller
         if larger == d2:
-            direction =  1
+            direction = 1
         else:
             direction = -1
 
-        daylist = [(d1 + datetime.timedelta(days=i*direction)).strftime('%Y-%m-%d') for i in range(abs(delta.days))]
-
+        daylist = [
+            (d1 + datetime.timedelta(days=i * direction)).strftime('%Y-%m-%d')
+            for i in range(abs(delta.days))]
 
     if task:
         tasks = [task]
@@ -156,12 +163,14 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
         tasks = db.get_tasks()
 
     qa_reduced_state = list(JSAProcState.STATE_POST_RUN)
-    qa_raw_state = list(JSAProcState.STATE_PRE_RUN | set((JSAProcState.RUNNING,)))
+    qa_raw_state = list(
+        JSAProcState.STATE_PRE_RUN | set((JSAProcState.RUNNING,)))
     qa_error_state = [JSAProcState.ERROR]
     qa_deleted_state = [JSAProcState.DELETED]
     results = {}
     statedict = OrderedDict(zip(['Reduced', 'Error', 'Deleted', 'Raw'],
-                                      [qa_reduced_state, qa_error_state, qa_deleted_state, qa_raw_state]))
+                                [qa_reduced_state, qa_error_state,
+                                 qa_deleted_state, qa_raw_state]))
     if byDate is True:
 
         # Go through each task
@@ -173,23 +182,32 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
                 # Create the Range object
                 obsquery['utdate'] = Range(d, d)
 
-                # Find the total number of jobsf or that dat, put it in the dayresults dictionary
-                dayresults = OrderedDict(total=db.find_jobs(task=t, count=True, obsquery=obsquery))
+                # Find the total number of jobs for that date, and put it in
+                # the dayresults dictionary.
+                dayresults = OrderedDict(
+                    total=db.find_jobs(task=t, count=True, obsquery=obsquery))
 
                 # Go through each Reduced and Error states.
-                for name,state_options in zip(['Reduced','Error'],[qa_reduced_state, qa_error_state]):
+                for name, state_options in zip(['Reduced', 'Error'],
+                                               [qa_reduced_state,
+                                                qa_error_state]):
                     dayresults[name] = OrderedDict()
                     # Go through each  qa state
                     for q in JSAQAState.STATE_ALL:
-                        dayresults[name][q] = db.find_jobs(task=t, qa_state=q, state=state_options,count=True,
-                                                       obsquery=obsquery)
+                        dayresults[name][q] = db.find_jobs(task=t, qa_state=q,
+                                                           state=state_options,
+                                                           count=True,
+                                                           obsquery=obsquery)
 
                     dayresults[name]['total'] = sum(dayresults[name].values())
 
                 # Add on the totals for Raw and Deleted jobs to the dayresults
-                dayresults['Deleted'] = {'total': db.find_jobs(task=t, state='X', count=True, obsquery=obsquery)}
-                dayresults['Raw'] = {'total': db.find_jobs(task=t, state=qa_raw_state,
-                                                           count=True, obsquery=obsquery)}
+                dayresults['Deleted'] = {
+                    'total': db.find_jobs(task=t, state='X', count=True,
+                                          obsquery=obsquery)}
+                dayresults['Raw'] = {
+                    'total': db.find_jobs(task=t, state=qa_raw_state,
+                                          count=True, obsquery=obsquery)}
 
                 # Update the results object
                 results[t][d] = dayresults
@@ -198,16 +216,18 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None, byDate=
     else:
         for t in tasks:
             # Results dict for each task
-            results[t] = {'total':db.find_jobs(task=t, count=True, obsquery=obsquery)}
+            results[t] = {
+                'total': db.find_jobs(task=t, count=True, obsquery=obsquery)}
             for q in JSAQAState.STATE_ALL:
-                results[t][q] = db.find_jobs(task=t, qa_state=q, count=True, obsquery=obsquery)
+                results[t][q] = db.find_jobs(task=t, qa_state=q, count=True,
+                                             obsquery=obsquery)
 
-    return {'results':results, 'qa_states':JSAQAState.STATE_ALL,
-            'daylist': daylist, 'statedict' : statedict,
+    return {'results': results, 'qa_states': JSAQAState.STATE_ALL,
+            'daylist': daylist, 'statedict': statedict,
             'title': 'QA Summary'}
 
-def prepare_job_summary(db, task=None, date_min=None, date_max=None):
 
+def prepare_job_summary(db, task=None, date_min=None, date_max=None):
     """
     Prepare a summary of jobs, for a specific task and date.
 
@@ -227,13 +247,13 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
     if date_min is not None or date_max is not None:
         obsquery['utdate'] = Range(date_min, date_max)
 
-
     job_summary_dict = OrderedDict()
     for s in states:
         job_summary_dict[s] = OrderedDict()
         for l in locations:
             job_summary_dict[s][l] = db.find_jobs(location=l, state=s,
-                                                  count=True, task=task, obsquery=obsquery)
+                                                  count=True, task=task,
+                                                  obsquery=obsquery)
 
     total_count = sum([int(c) for j in job_summary_dict.values()
                        for c in j.values()])
@@ -245,24 +265,31 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
         firstobs = None
         lastobs = None
 
-    # Get processing time taken for All jobs, pointings only, cals only, science only. for this task.
-    jobs,durations, obsinfos =  db.get_processing_time_obs_type(jobdict={'task':task})
+    # Get processing time taken for All jobs, pointings only, cals only,
+    # and science only observations for this task.
+    jobs, durations, obsinfos = db.get_processing_time_obs_type(
+        jobdict={'task': task})
 
     # Check if any jobs were found
     if len(jobs) > 0:
         durations = np.array(durations)
         obsinfos = np.array(obsinfos)
-        obstypes = obsinfos[:,0]
-        obsprojects = obsinfos[:,2]
+        obstypes = obsinfos[:, 0]
+        obsprojects = obsinfos[:, 2]
 
-        pointings_mask = obstypes=='pointing'
-        cals_mask = (obstypes=='science') & ( (obsprojects=='JCMTCAL') | (obsprojects=='CAL'))
-        science_mask = (obstypes=='science') & ( (obsprojects!='JCMTCAL') & (obsprojects!='CAL'))
+        pointings_mask = obstypes == 'pointing'
+        cals_mask = (obstypes == 'science') & (
+            (obsprojects == 'JCMTCAL') | (obsprojects == 'CAL'))
+        science_mask = (obstypes == 'science') & (
+            (obsprojects != 'JCMTCAL') & (obsprojects != 'CAL'))
 
-        total_processing_time_hrs = '%.1F' % (durations.sum()/(60.0*60.0))
-        pointings_processing_time_hrs = '%.1F' % (durations[pointings_mask].sum()/(60.0*60.0))
-        cals_processing_time_hrs = '%.1F' % (durations[cals_mask].sum()/(60.0*60.0))
-        science_processing_time_hrs  = '%.1F' % (durations[science_mask].sum()/(60.0*60.0))
+        total_processing_time_hrs = '%.1F' % (durations.sum() / (60.0 * 60.0))
+        pointings_processing_time_hrs = '%.1F' % (
+            durations[pointings_mask].sum() / (60.0 * 60.0))
+        cals_processing_time_hrs = '%.1F' % (
+            durations[cals_mask].sum() / (60.0 * 60.0))
+        science_processing_time_hrs = '%.1F' % (
+            durations[science_mask].sum() / (60.0 * 60.0))
         processed_jobs_found = len(durations)
     else:
         total_processing_time_hrs = None

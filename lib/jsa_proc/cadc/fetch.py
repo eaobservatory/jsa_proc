@@ -51,7 +51,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     """
 
     # Data path.
-    data_path = jcmt_data_url+filename
+    data_path = jcmt_data_url + filename
 
     # Get CADC login.
     config = get_config()

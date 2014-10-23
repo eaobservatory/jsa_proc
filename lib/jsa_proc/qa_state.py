@@ -18,7 +18,6 @@ from collections import namedtuple, OrderedDict
 from jsa_proc.error import JSAProcError
 
 
-
 class JSAQAState:
     """Class for handling job QA states.
     """
@@ -31,7 +30,7 @@ class JSAQAState:
 
     _info = OrderedDict()
     _info[INVALID] = 'Invalid'
-    _info[UNKNOWN] =   'Unknown'
+    _info[UNKNOWN] = 'Unknown'
     _info[BAD] = 'Bad'
     _info[QUESTIONABLE] = 'Questionable'
     _info[GOOD] = 'Good'
@@ -50,7 +49,6 @@ class JSAQAState:
             return cls._info[state]
         except KeyError:
             raise JSAProcError('Unknown state code {0}'.format(state))
-
 
     @classmethod
     def is_valid(cls, state):

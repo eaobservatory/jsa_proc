@@ -21,7 +21,6 @@ from jsa_proc.web.util import url_for
 
 
 def prepare_change_state(db, job_ids, newstate, message, username):
-
     if not JSAProcState.get_name(newstate):
         raise Exception('Unknown state %s' % (newstate))
     if message == '':
@@ -33,8 +32,8 @@ def prepare_change_state(db, job_ids, newstate, message, username):
         db.change_state(job_id, newstate, message, state_prev=state_prev,
                         username=username)
 
-def prepare_change_qa(db, job_ids, qa_state, message, username):
 
+def prepare_change_qa(db, job_ids, qa_state, message, username):
     if not JSAQAState.get_name(qa_state):
         raise Exception('Unknown state %s' % (newstate))
 

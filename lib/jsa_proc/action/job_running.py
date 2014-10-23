@@ -160,7 +160,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                                   preexec_fn=restore_signals)
 
     if retcode != 0:
-        errormessage = 'jsawrapdr exited with Retcode %i ' % ( retcode)
+        errormessage = 'jsawrapdr exited with Retcode %i ' % (retcode)
 
         # Find the first ORAC error message in the jsawrapdr log
         jsalogfile = open(log_name, 'r')

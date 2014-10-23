@@ -19,8 +19,8 @@ from jsa_proc.db.db import Not
 
 
 # Information about the query:
-#      name: Short name
-#  fullname: Longer description
+# name: Short name
+# fullname: Longer description
 #     where: Query string to be included in where part of query.
 def _where_maker(name):
     return namedtuple(name, 'name fullname where')
@@ -28,10 +28,11 @@ def _where_maker(name):
 # Instruments
 InstrumentsInfo = _where_maker('Instruments')
 Instruments = dict(
-    HARP = InstrumentsInfo('HARP', 'HARP', {'instrument': 'HARP'}),
-    RxA3 = InstrumentsInfo('RxA3', 'RxA3', {'instrument': 'RxA3'}),
-    SCUBA2 = InstrumentsInfo('SCUBA2', 'SCUBA2', {'instrument':'SCUBA-2'}),
-    Heterodyne = InstrumentsInfo('Heterodyne','Heterodyne', {'instrument':['HARP','RxA3','RxW']}),
+    HARP=InstrumentsInfo('HARP', 'HARP', {'instrument': 'HARP'}),
+    RxA3=InstrumentsInfo('RxA3', 'RxA3', {'instrument': 'RxA3'}),
+    SCUBA2=InstrumentsInfo('SCUBA2', 'SCUBA2', {'instrument': 'SCUBA-2'}),
+    Heterodyne=InstrumentsInfo('Heterodyne', 'Heterodyne',
+                               {'instrument': ['HARP', 'RxA3', 'RxW']}),
 )
 
 # Surveys.
@@ -45,7 +46,8 @@ Surveys = dict(
     NoSurvey=SurveyInfo('NoSurvey', 'No Survey', {'survey': None}),
     SASSY=SurveyInfo('SASSY', 'SASSY', {'survey': 'SASSY'}),
     CLS=SurveyInfo('CLS', 'Cosmology Legacy Survey', {'survey': 'CLS'}),
-    NotCLS=SurveyInfo('NotCLS', 'Cosmology Legacy Survey', {'survey': Not('CLS')}),
+    NotCLS=SurveyInfo('NotCLS', 'Cosmology Legacy Survey',
+                      {'survey': Not('CLS')}),
     SLS=SurveyInfo('SLS', 'Spectral Legacy Survey', {'survey': 'SLS'}),
 )
 
@@ -78,9 +80,10 @@ ScanModes = dict(
     Daisy=ScanMode('Daisy', 'Daisy scans',
                    {'scanmode': ['DAISY', 'CV_DAISY']}),
     Pong=ScanMode('Pong', 'Pong scans', {'scanmode': 'CURVY_PONG'}),
-    Jiggle=ScanMode('Jiggle', 'Jiggle',{'scanmode': 'jiggle'}),
-    Grid=ScanMode('Grid','Grid',{'scanmode':'grid'}),
-    Raster = ScanMode('Raster', 'Raster', {'scanmode':'DISCRETE_BOUSTROPHEDON'}),
+    Jiggle=ScanMode('Jiggle', 'Jiggle', {'scanmode': 'jiggle'}),
+    Grid=ScanMode('Grid', 'Grid', {'scanmode': 'grid'}),
+    Raster=ScanMode('Raster', 'Raster',
+                    {'scanmode': 'DISCRETE_BOUSTROPHEDON'}),
 )
 
 # Subsystem

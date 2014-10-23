@@ -18,7 +18,6 @@ from collections import namedtuple, OrderedDict
 from jsa_proc.error import JSAProcError
 
 
-
 class OMPState:
     """Class for handling OMP observation states.
     """
@@ -51,7 +50,6 @@ class OMPState:
             return cls._info[state]
         except KeyError:
             raise JSAProcError('Unknown OMP state code {0}'.format(state))
-
 
     @classmethod
     def is_valid(cls, state):

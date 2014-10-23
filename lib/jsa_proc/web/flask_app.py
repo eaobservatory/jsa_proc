@@ -29,12 +29,14 @@ from jsa_proc.qa_state import JSAQAState
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.omp.auth import check_staff_password
 from jsa_proc.web.util import \
-    url_for, url_for_omp, url_for_omp_comment, templated, HTTPError, HTTPNotFound, HTTPRedirect, HTTPUnauthorized
-
+    url_for, url_for_omp, url_for_omp_comment, templated, HTTPError, \
+    HTTPNotFound, HTTPRedirect, HTTPUnauthorized
 
 from jsa_proc.web.job_list import prepare_job_list
-from jsa_proc.web.job_change_state import prepare_change_state, prepare_change_qa
-from jsa_proc.web.job_summary import prepare_job_summary, prepare_task_summary, prepare_summary_piechart, \
+from jsa_proc.web.job_change_state import prepare_change_state, \
+    prepare_change_qa
+from jsa_proc.web.job_summary import prepare_job_summary, \
+    prepare_task_summary, prepare_summary_piechart, \
     prepare_task_qa_summary
 from jsa_proc.web.job_info import prepare_job_info
 from jsa_proc.web.job_preview import prepare_job_preview
@@ -43,7 +45,9 @@ from jsa_proc.web.job_log import prepare_job_log
 from jsa_proc.web.error_summary import prepare_error_summary
 
 
-loginstring = 'Basic realm="Login Required: use your username and the staff password, or hit cancel to log out"'
+loginstring = 'Basic realm="Login Required: use your username and ' + \
+              'the staff password, or hit cancel to log out"'
+
 
 def create_web_app():
     """Function to prepare the Flask web application."""
@@ -79,17 +83,18 @@ def create_web_app():
                                         redirect=request.referrer),
                         401, {'WWW-Authenticate': loginstring})
 
-
     def requires_auth(f):
         """
         A decorator to wrap functions that require authorization.
         """
+
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = request.authorization
             if not auth or not check_auth(auth.password):
                 return authenticate()
             return f(*args, **kwargs)
+
         return decorated
 
     # Route Handlers.
@@ -149,8 +154,9 @@ def create_web_app():
             obsquerydict[key] = request.args.get(key, None)
         date_min = request.args.get('date_min', None)
         date_max = request.args.get('date_max', None)
-        return prepare_summary_piechart(db, task=task, obsquerydict=obsquerydict, date_min=date_min, date_max=date_max)
-
+        return prepare_summary_piechart(db, task=task,
+                                        obsquerydict=obsquerydict,
+                                        date_min=date_min, date_max=date_max)
 
     @app.route('/summary/')
     @templated('task_summary.html')
@@ -168,7 +174,8 @@ def create_web_app():
         task = request.args.get('task', None)
         date_min = request.args.get('date_min', None)
         date_max = request.args.get('date_max', None)
-        return prepare_job_summary(db, task=task, date_min=date_min, date_max=date_max)
+        return prepare_job_summary(db, task=task, date_min=date_min,
+                                   date_max=date_max)
 
     @app.route('/error_summary/')
     @templated('error_summary.html')
@@ -176,8 +183,8 @@ def create_web_app():
         return prepare_error_summary(
             db,
             filtering=request.args.get('filtering', None),
-            chosentask = request.args.get('chosentask', None),
-            extrafilter = request.args.get('extrafilter', None),
+            chosentask=request.args.get('chosentask', None),
+            extrafilter=request.args.get('extrafilter', None),
         )
 
     @app.route('/job/<int:job_id>', methods=['GET'])
@@ -208,7 +215,8 @@ def create_web_app():
                              username)
 
         # Redirect the page to correct info.
-        flash('The status has been changed to %s.' % JSAProcState.get_name(newstate))
+        flash('The status has been changed to %s.' % JSAProcState.get_name(
+            newstate))
         raise HTTPRedirect(url)
 
     @app.route('/job_change_qa', methods=['POST'])
@@ -233,13 +241,15 @@ def create_web_app():
                                   qa_state,
                                   message,
                                   username,
-                              )
+                                  )
                 # Redirect the page to correct info.
-                flash('The QA status has been changed to %s.' % JSAQAState.get_name(qa_state))
+                flash(
+                    'The QA status has been changed to %s.' %
+                    JSAQAState.get_name(qa_state)
+                )
             except:
                 flash('UNSUCCESSFUL attempt to update qa status!')
         raise HTTPRedirect(url)
-
 
     # QA Nightly Summary pages
     @app.route('/qa-nightly')
@@ -254,12 +264,16 @@ def create_web_app():
         """
         date_min = request.args.get('date_min', None)
         if date_min is None or date_min == '':
-            date_min = (datetime.date.today() - datetime.timedelta(days=6)).strftime('%Y-%m-%d')
+            date_min = (
+                datetime.date.today() - datetime.timedelta(days=6)
+            ).strftime('%Y-%m-%d')
 
         date_max = request.args.get('date_max', None)
         if date_max is None or date_max == '':
             date_max = datetime.date.today().strftime('%Y-%m-%d')
-        return prepare_task_qa_summary(db, date_min=date_min, date_max=date_max, task='jcmt-nightly', byDate=True)
+        return prepare_task_qa_summary(db, date_min=date_min,
+                                       date_max=date_max, task='jcmt-nightly',
+                                       byDate=True)
 
     @app.route('/login')
     @requires_auth
@@ -285,7 +299,6 @@ def create_web_app():
     def job_log_text(job_id, log):
         path = prepare_job_log(job_id, log)
         return send_file(path, mimetype='text/plain')
-
 
     # Filters and Tests.
 
@@ -331,8 +344,6 @@ def create_web_app():
     @app.template_filter('datetimeformat')
     def datetimeformat(value, format='%Y-%m-%d<br>%H:%M'):
         return value.strftime(format)
-
-
 
     @app.context_processor
     def add_to_context():

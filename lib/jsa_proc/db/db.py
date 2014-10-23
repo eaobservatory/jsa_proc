@@ -99,7 +99,7 @@ class JSAProcDB:
         This checks that the subclass has created a "db" attribute.
         """
 
-        assert(hasattr(self, 'db'))
+        assert (hasattr(self, 'db'))
 
     def get_job(self, id_=None, tag=None):
         """
@@ -141,12 +141,13 @@ class JSAProcDB:
         value is either the integer job_id or the string tag for
         the job you want to get.
 
-        Takes in a cursor instance "c" (assumes you already have a cursor lock).
+        Takes in a cursor instance "c" (assumes you already
+        have a cursor lock).
 
         Returns JSAProcJob named tuple.
         """
         # Get the values form the database
-        c.execute('SELECT * FROM job WHERE '+name+'=%s', (value,))
+        c.execute('SELECT * FROM job WHERE ' + name + '=%s', (value,))
         job = c.fetchall()
         if len(job) == 0:
             raise NoRowsError(
@@ -241,11 +242,13 @@ class JSAProcDB:
         if not JSAProcState.is_valid(state):
             raise JSAProcError('State {0} is not recognised'.format(state))
 
-        if not parent_jobs  and not input_file_names:
-            raise JSAProcError('A Job must have either input files or parent jobs')
+        if not parent_jobs and not input_file_names:
+            raise JSAProcError(
+                'A Job must have either input files or parent jobs')
 
         if parent_jobs:
-            job_id, parents, filters = _validate_parents(None, parent_jobs, filters=filters)
+            job_id, parents, filters = _validate_parents(None, parent_jobs,
+                                                         filters=filters)
 
         # insert job into table
         with self.db as c:
@@ -255,7 +258,7 @@ class JSAProcDB:
                 'foreign_id, priority, task) '
                 'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
                 (tag, state, location, mode, parameters, foreign_id,
-                    priority, task))
+                 priority, task))
 
             # Get the autoincremented id from job table (job_id in all other
             # tables).
@@ -274,9 +277,7 @@ class JSAProcDB:
                 for filename in input_file_names:
                     c.execute('INSERT INTO input_file (job_id, filename) '
                               'VALUES (%s, %s)',
-                    (job_id, filename))
-
-
+                              (job_id, filename))
 
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
@@ -293,7 +294,6 @@ class JSAProcDB:
         # job_id may not be necessary but sometimes useful.
         return job_id
 
-
     def get_tilelist(self, job_id=None, task=None):
         """Retrieve the unique list of tiles.
         OPtionally filtered either by job_id or by task (or both)
@@ -304,21 +304,21 @@ class JSAProcDB:
         tiles = []
         query = 'SELECT DISTINCT(tile) FROM tile'
         where = ()
-        params= ()
+        params = ()
         join = ''
         if job_id:
-            where +=('job_id = %s',)
+            where += ('job_id = %s',)
             params += (job_id,)
         if task:
             where += ('job.task = %s',)
-            join  = ' JOIN job ON tile.job_id = job.id'
+            join = ' JOIN job ON tile.job_id = job.id'
             params += (task,)
         query = query + join
         if where:
             query += ' WHERE ' + ' '.join(where)
 
         with self.db as c:
-            c.execute(query+' ORDER BY tile ', params)
+            c.execute(query + ' ORDER BY tile ', params)
 
             while True:
                 row = c.fetchone()
@@ -359,7 +359,6 @@ class JSAProcDB:
         """
 
         with self.db as c:
-
             # Get all observations with job_id
             c.execute('SELECT * FROM obs WHERE job_id = %s', (job_id,))
             results = c.fetchall()
@@ -413,7 +412,7 @@ class JSAProcDB:
 
             # Escape column names with back ticks.
             column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
-            values_questions = '(%s, ' + ', '.join(['%s'] * len(values))+')'
+            values_questions = '(%s, ' + ', '.join(['%s'] * len(values)) + ')'
 
             c.execute('INSERT INTO obs ' + column_query +
                       ' VALUES ' + values_questions,
@@ -430,7 +429,8 @@ class JSAProcDB:
             c.execute('UPDATE obs SET omp_status=%s WHERE obsid=%s',
                       (status_new, obsid))
 
-    def change_state(self, job_id, newstate, message, state_prev=None, username=None):
+    def change_state(self, job_id, newstate, message, state_prev=None,
+                     username=None):
 
         """
         Change the state of a job in the JSA processing database.
@@ -459,9 +459,11 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            self._change_state(c, job_id, newstate, message, state_prev, username)
+            self._change_state(c, job_id, newstate, message, state_prev,
+                               username)
 
-    def _change_state(self, c, job_id, newstate, message, state_prev, username):
+    def _change_state(self, c, job_id, newstate, message, state_prev,
+                      username):
         # Validate input.
         if not JSAProcState.is_valid(newstate):
             raise JSAProcError('State {0} is not recognised'.format(newstate))
@@ -509,7 +511,8 @@ class JSAProcDB:
                 c.execute('UPDATE job SET qa_state = %s WHERE id= %s',
                           (JSAQAState.UNKNOWN, job_id))
                 self._add_qa_entry(c, job_id, JSAQAState.UNKNOWN,
-                                   'This job is being reprocessed; QA state reset automatically.',
+                                   'This job is being reprocessed;' +
+                                   ' QA state reset automatically.',
                                    getuser())
 
     def get_input_files(self, job_id):
@@ -559,7 +562,7 @@ class JSAProcDB:
 
     def _add_qa_entry(self, c, job_id, status, message, username):
         """
-        Private method to add an entry to the qa table for a job of the given ID.
+        Private method: adds an entry to the qa table for a job with job_id.
 
         Assumes the database is already locked and takes a cursor
         object as argument "c"
@@ -571,7 +574,6 @@ class JSAProcDB:
                   'VALUES (%s, %s, %s, %s)',
                   (job_id, status, message, username))
 
-
     def add_qa_entry(self, job_id, status, message, username):
         """
         Add an entry to the QA table for a job of given job_id, and
@@ -579,13 +581,14 @@ class JSAProcDB:
 
         Status must be in JSAQAState.STATE_ALL
         """
-        if status in  JSAQAState.STATE_ALL:
+        if status in JSAQAState.STATE_ALL:
             with self.db as c:
                 self._add_qa_entry(c, job_id, status, message, username)
                 c.execute('UPDATE job SET qa_state = %s WHERE id = %s',
                           (status, job_id))
         else:
-            raise JSAProcError('QA status can only be changed to allowed values.')
+            raise JSAProcError(
+                'QA status can only be changed to allowed values.')
 
     def get_logs(self, job_id):
         """
@@ -630,11 +633,11 @@ class JSAProcDB:
         given job_id.
         """
         with self.db as c:
-            c.execute('SELECT * FROM ' + tablename + ' WHERE job_id = %s', (job_id,))
+            c.execute('SELECT * FROM ' + tablename + ' WHERE job_id = %s',
+                      (job_id,))
             entries = c.fetchall()
 
         return entries
-
 
     def _get_last_entry(self, job_id, tablename):
         """
@@ -643,15 +646,16 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT * FROM ' + tablename + ' WHERE job_id = %s '
-                      'ORDER BY id DESC LIMIT 1',
+            c.execute("SELECT * FROM " + tablename + " WHERE job_id = %s " +
+                      "ORDER BY id DESC LIMIT 1",
                       (job_id,))
             entry = c.fetchall()
         if len(entry) < 1:
             raise NoRowsError(
                 'job',
-                'SELECT * FROM ' + tablename + ' WHERE job_id = %i '
-                'ORDER BY id DESC LIMIT 1' % (job_id))
+                'SELECT * FROM ' + tablename +
+                ' WHERE job_id = %i ORDER BY id DESC LIMIT 1' % (job_id))
+
         return entry[0]
 
     def get_last_qa(self, job_id):
@@ -809,7 +813,6 @@ class JSAProcDB:
         """
 
         with self.db as c:
-
             # First of all blank out any current output files for this job_id.
             c.execute('DELETE FROM output_file WHERE job_id = %s', (job_id,))
 
@@ -818,7 +821,6 @@ class JSAProcDB:
                 c.execute('INSERT INTO output_file (job_id, filename) '
                           'VALUES (%s, %s)',
                           (job_id, f))
-
 
     def find_errors_logs(self, location=None, task=None):
         """
@@ -993,7 +995,7 @@ class JSAProcDB:
         return result
 
     def _find_jobs_where(self, state, location, task, qa_state,
-                        obsquery, tiles):
+                         obsquery, tiles):
         """Prepare WHERE expression for the find_jobs method.
 
         Return: a tuple containing a list of SQL expressions
@@ -1031,7 +1033,8 @@ class JSAProcDB:
             param.extend(obsparam)
 
         if tiles:
-            (tilewhere, tileparam) = _dict_query_where_clause('tile',{'tile':tiles})
+            (tilewhere, tileparam) = _dict_query_where_clause('tile',
+                                                              {'tile': tiles})
             where.append('job.id IN (SELECT job_id FROM tile WHERE ' +
                          tilewhere + ')')
             param.extend(tileparam)
@@ -1058,7 +1061,7 @@ class JSAProcDB:
 
         return order
 
-    def get_processing_time_obs_type(self, obsdict=None, jobdict=None,):
+    def get_processing_time_obs_type(self, obsdict=None, jobdict=None, ):
         """Get the processing times.
 
         By default looks for all types of observations in location JAC
@@ -1081,15 +1084,16 @@ class JSAProcDB:
 
         For tasks where multiple observations are in the same job
         this could produce odd results. Careful filtering of the
-        output will be required (it will return one result for each observation,
-        so multiple identical times for a single job).
+        output will be required (it will return one result for each
+        observation, so multiple identical times for a single job).
         """
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
                      " LEFT JOIN obs ON job.id = obs.job_id "
 
         select_query = " SELECT job.id, MAX(log.datetime) AS maxdt, " + \
-                       "obs.obstype, obs.scanmode, obs.project, obs.survey, obs.instrument "
+                       "obs.obstype, obs.scanmode, obs.project, " + \
+                       "obs.survey, obs.instrument "
 
         where = ['log.state_new=%s']
 
@@ -1102,10 +1106,10 @@ class JSAProcDB:
             param += obsparam
 
         if not jobdict:
-            jobdict={}
-        if not jobdict.has_key('location'):
+            jobdict = {}
+        if 'location' not in jobdict:
             jobdict['location'] = "JAC"
-        if not jobdict.has_key('state'):
+        if 'state' not in jobdict:
             jobdict['state'] = JSAProcState.STATE_POST_RUN
 
         jobquery, jobparam = _dict_query_where_clause('job', jobdict)
@@ -1115,17 +1119,21 @@ class JSAProcDB:
         query = select_query + from_query + \
             ' WHERE ' + ' AND '.join(where) + \
             group_query
-        where = [ 'log.state_prev=%s' ] + where
+
+        where = ['log.state_prev=%s'] + where
+
         query_processed = select_query + from_query + \
-                          ' WHERE ' + ' AND '.join(where) + \
-                          group_query
+            ' WHERE ' + ' AND '.join(where) + \
+            group_query
+
         with self.db as c:
             c.execute(query, [JSAProcState.RUNNING] + param)
             startresults = c.fetchall()
             columns = c.description
 
         with self.db as c:
-            c.execute(query_processed, [JSAProcState.RUNNING, JSAProcState.PROCESSED] + param)
+            c.execute(query_processed,
+                      [JSAProcState.RUNNING, JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
 
         job_ids_starts = [i[0] for i in startresults]
@@ -1188,7 +1196,7 @@ class JSAProcDB:
             c.execute(query, params)
             row = c.fetchall()
         if len(row) == 0:
-            raise NoRowsError('No task found!', query %  tuple(params))
+            raise NoRowsError('No task found!', query % tuple(params))
         return row[0][0]
 
     def add_task(self, taskname, etransfer):
@@ -1268,7 +1276,6 @@ class JSAProcDB:
 
         return job_id
 
-
     def _delete_all_parents(self, job_id, c):
 
         c.execute('DELETE FROM parent WHERE job_id = %s',
@@ -1278,8 +1285,8 @@ class JSAProcDB:
 
         for parent, filt in zip(parents, filters):
             c.execute('INSERT INTO parent (job_id, parent, filter) '
-                              'VALUES (%s, %s, %s)',
-                              (job_id, parent, filt))
+                      'VALUES (%s, %s, %s)',
+                      (job_id, parent, filt))
 
     def delete_some_parents(self, job_id, parents):
         """
@@ -1300,8 +1307,9 @@ class JSAProcDB:
         # Update table
         with self.db as c:
             for parent in parents:
-                c.execute('DELETE FROM parent WHERE job_id =%s and parent = %s ',
-                          (job_id, parent))
+                c.execute(
+                    'DELETE FROM parent WHERE job_id =%s and parent = %s ',
+                    (job_id, parent))
 
         return job_id
 
@@ -1322,6 +1330,7 @@ class JSAProcDB:
         with self.db as c:
             self._delete_all_parents(job_id, c)
 
+
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
     and allowed options, and turns them into a string that can be added
@@ -1339,8 +1348,8 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
     A dictionary where the field names are columns in a table, and the
     values are allowed values for those columns in a mysql WHERE query.
 
-    If the value for a single column is a list, then a row that matches any of
-    the values will be returned when the query is used.  If the value
+    If the value for a single column is a list, then a row that matches
+    any of the values will be returned when the query is used.  If the value
     or list is wrapped in a "Not" object, then the condition will
     be inverted (the column does not match the given value, or the
     column's value is not in the given list of values).  If the value
@@ -1460,12 +1469,13 @@ def _validate_parents(job_id, parents, filters=None):
     else:
         if not len(filters) == len(parents):
             raise JSAProcError(
-                'If more than one filter is given '+ \
+                'If more than one filter is given ' +
                 'len(filters) should match len(parents)')
 
     return job_id, parents, filters
 
-def _validate_parents_to_remove(job_id, parents,db):
+
+def _validate_parents_to_remove(job_id, parents, db):
     """
     Check all the parents are in the parents table
     for child job_id.
@@ -1480,10 +1490,11 @@ def _validate_parents_to_remove(job_id, parents,db):
         results = c.fetchall()
 
     if len(results) == 0:
-        raise JSAProcError('job %s has no entries in parent table' % job_id )
+        raise JSAProcError('job %s has no entries in parent table' % job_id)
     results = [i[0] for i in results]
 
     isvalid = set(parents) <= set(results)
     if not isvalid:
-        raise JSAProcError('Not all parent-jobs to be removed are present in parent table for child %s' % job_id)
+        raise JSAProcError('Not all parent-jobs to be removed are ' +
+                           "present in parent table for child %s" % job_id)
     return isvalid

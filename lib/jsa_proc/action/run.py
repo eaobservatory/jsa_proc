@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Regular expression to match tasks that produce hpx output
 hpx_task = re.compile('^hpx-')
 
+
 def run_job(job_id=None, db=None, force=False):
     """
     Run the JSA processing of the next job. This will select the highest
@@ -110,42 +111,43 @@ def run_a_job(job_id, db=None, force=False):
         raise JSAProcError('Input file list %s not found for job_id %i'
                            % (input_file_list_path, job_id))
 
-
-
     # Check every file on input_file list exists.
     inputfl = open(input_file_list_path, 'r')
 
     for input_file in inputfl:
         input_file = input_file.strip()
-        if os.path.isfile(input_file)  is False:
+        if os.path.isfile(input_file) is False:
 
             # If a file is missing, get log.
-            logstring = 'Input file %s for job %i has gone missing' % (input_file, job_id)
+            logstring = 'Input file %s for job %i has gone missing' % (
+                input_file, job_id)
             logger.error(logstring)
             logs = db.get_logs(job_id)
             states = [i.state_new for i in logs]
 
-            # If it has only been in the state MISSING twice before, then try again.
+            # If it has only been in the state MISSING twice before, then try
+            # again.
             if states.count(JSAProcState.MISSING) <= 2:
                 logstring += ': moving to missing.'
-                logger.warning('Moving job %i to state MISSING due to missing file(s) %s',
-                            job_id, input_file)
+                logger.warning('Moving job %i to state MISSING due to ' +
+                               'missing file(s) %s',
+                               job_id, input_file)
                 db.change_state(job_id, JSAProcState.MISSING,
-                                logstring, state_prev = JSAProcState.RUNNING)
+                                logstring, state_prev=JSAProcState.RUNNING)
                 return job_id
 
             else:
-                # If it has been in the missing STATE more than two times, give up and
-                # move it into ERROR state to be fixed manually.
+                # If it has been in the missing STATE more than two times,
+                # give up and move it into ERROR state to be fixed manually.
                 logstring += ': moving to error.'
-                logger.info('Moving job %s to state ERROR due to missing file(s).', job_id)
+                logger.info('Moving job %s to state ERROR due to missing' +
+                            ' file(s).', job_id)
                 inputfl.close()
                 raise JSAProcError('Input file %s for job %i has gone missing.'
-                                       % (input_file, job_id))
+                                   % (input_file, job_id))
 
     inputfl.close()
     logger.debug('All input files found for job %s.', job_id)
-
 
     # Get the mode and drparameters of the job.
     job = db.get_job(id_=job_id)
@@ -174,7 +176,7 @@ def run_a_job(job_id, db=None, force=False):
         logger.debug('Storing list of output tiles for HPX job ' + str(job_id))
         tiles = hpx_tiles_from_filenames(output_files)
         db.set_tilelist(job_id, tiles)
-        logger.debug('Job ' + str(job_id) + ' produced output on tiles ' + \
+        logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
                      ', '.join(str(i) for i in tiles))
 
     # Change state of job.

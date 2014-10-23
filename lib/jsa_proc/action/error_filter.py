@@ -27,24 +27,24 @@ class JSAProcErrorFilter():
 
     filters = {
         'unauthorized': {
-            'include':['401 Client Error'],
-            },
+            'include': ['401 Client Error'],
+        },
         'network': {
-            'include': ['503 Server Error','fails hds validation']
-            },
+            'include': ['503 Server Error', 'fails hds validation']
+        },
         'jsawrapdr': {
             'include': ['jsawrapdr exited'],
             'exclude': ['ORAC ERROR']
-            },
+        },
         'oracdr': {
             'include': ['ORAC ERROR'],
-            },
+        },
         'e-transfer': {
             'include': ['e-transfer'],
-            },
+        },
         'No output files': {
             'include': ['Job failed output: no output files'],
-            },
+        },
     }
 
     filter_names = sorted(filters.keys()) + ['uncategorized']
@@ -88,8 +88,8 @@ class JSAProcErrorFilter():
         for (job, log) in list(job_logs.items()):
             if self.include == []:
                 self.include = log[0].message
-            if not (any([i in log[0].message for i in self.include]) and not any(
-                    [i in log[0].message for i in self.exclude])):
+            if not (any([i in log[0].message for i in self.include])
+                    and not any([i in log[0].message for i in self.exclude])):
                 job_logs.pop(job)
 
         for (job, log) in list(job_logs.items()):

@@ -17,7 +17,8 @@ import logging
 
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.datafile_handling \
-    import assemble_input_data_for_job, filter_file_list, assemble_parent_data_for_job, write_input_list
+    import assemble_input_data_for_job, filter_file_list, \
+    assemble_parent_data_for_job, write_input_list
 from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.files import get_input_dir_space
@@ -48,7 +49,7 @@ def fetch(job_id=None, db=None, force=False):
 
     if input_space < required_space:
         logger.warning('Insufficient disk space: %f / %f GiB required',
-                        input_space, required_space)
+                       input_space, required_space)
         return
 
     # Get the database.
@@ -110,11 +111,11 @@ def fetch_a_job(job_id, db=None, force=False):
                      job_id)
         return
 
-
     # Assemble any files listed in the input files tree
     try:
         input_files = db.get_input_files(job_id)
-        input_files_with_paths = assemble_input_data_for_job(job_id, input_files)
+        input_files_with_paths = assemble_input_data_for_job(job_id,
+                                                             input_files)
     except NoRowsError:
         input_files_with_paths = []
 
@@ -125,7 +126,8 @@ def fetch_a_job(job_id, db=None, force=False):
         for p, f in parents:
             outputs = db.get_output_files(p)
             parent_files = filter_file_list(outputs, f)
-            parent_files_with_paths+=assemble_parent_data_for_job(job_id, p, parent_files)
+            parent_files_with_paths += assemble_parent_data_for_job(
+                job_id, p, parent_files)
     except NoRowsError:
         parent_files_with_paths = []
 

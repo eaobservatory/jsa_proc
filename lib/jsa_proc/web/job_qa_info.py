@@ -71,7 +71,8 @@ def prepare_job_qa_info(db, job_id, query):
         output_files = db.get_output_files(job.id)
 
         for i in output_files:
-            if re.search('preview_1024.png', i) and (re.search('_reduced-', i) or re.search('_healpix-', i)):
+            if re.search('preview_1024.png', i) and \
+                    (re.search('_reduced-', i) or re.search('_healpix-', i)):
                 previews1024.append(i)
 
     except NoRowsError:
@@ -88,8 +89,6 @@ def prepare_job_qa_info(db, job_id, query):
     if previews1024:
         previews1024 = [url_for('job_preview', job_id=job.id, preview=i)
                         for i in previews1024]
-
-
 
     # Get the log files on disk (if any)
     log_files = get_log_files(job_id)
@@ -119,10 +118,10 @@ def prepare_job_qa_info(db, job_id, query):
         'output_files': output_files,
         'parents': parents,
         'log_files': log_files,
-        'previews': zip(previews1024,previews1024),
+        'previews': zip(previews1024, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
-        'parent_obs':parent_obs,
-        'qa_states':JSAQAState.STATE_ALL,
+        'parent_obs': parent_obs,
+        'qa_states': JSAQAState.STATE_ALL,
         'pagination': pagination,
     }
