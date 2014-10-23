@@ -962,7 +962,7 @@ class JSAProcDB:
                 query += ', %s'
                 param.append(offset)
 
-            param.append(number)
+            param.append(int(number))
 
         result = []
 
