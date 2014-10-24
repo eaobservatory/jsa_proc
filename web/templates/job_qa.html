@@ -53,10 +53,14 @@
     {% if request.authorization and request.authorization.username %}
     <form method="POST" action="{{ url_for('job_change_qa')}}">
       <input type="hidden" name="job_id" value="{{ info.id }}" >
+      {% if pagination.next %}
       <input type="hidden" name="url" value="{{pagination.next}}">
+      {% else %}
+      <input type="hidden" name="url" value="{{url_for('job_qa', job_id=info.id)}}">
+      {% endif %}
       <input type="hidden" name="qa_state" value="G">
       <input type="hidden" name="message" value="">
-      <input type="submit" class="goodbutton" value="Good [go to next job]">
+      <input type="submit" class="goodbutton" value="Good {{ '[go to next job]' if pagination.next else '[no more jobs]'}}">
     </form>
 
     <h4> Set QA state for this job</h4>
