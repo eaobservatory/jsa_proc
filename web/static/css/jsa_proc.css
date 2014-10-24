@@ -37,19 +37,19 @@ div.pagination > * {
 }
 
 .page_first:before {
-    content: '<< ';
+    content: '↞ ';
 }
 
 .page_prev:before {
-    content: '< ';
+    content: '← ';
 }
 
 .page_next:after {
-    content: ' >';
+    content: ' →';
 }
 
 .page_last:after {
-    content: ' >>';
+    content: ' ↠';
 }
 
 div.pagination > .page_up {
@@ -57,7 +57,12 @@ div.pagination > .page_up {
 }
 
 .page_up:after {
-    content: ' ^';
+    content: ' ↑';
+}
+
+.pagination span {
+    padding-left:15px;
+    padding-right:15px;
 }
 
 ul.multicol {

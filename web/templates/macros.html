@@ -69,7 +69,7 @@
                 <option value="{{ location }}" {{ 'selected="selected"' | safe if location == query.location }}>{{ location }}</option>
             {% endfor %}
         </select>
-        <select multiple="multiple" name="state" size="{{ states | length }}">
+        <select multiple="multiple" name="state" size="5">
             {% for state in states %}
                 <option value="{{ state }}" {{ 'selected="selected"' | safe if state in query.state }}>{{ state | state_name }}</option>
             {% endfor %}
