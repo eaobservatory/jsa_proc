@@ -24,7 +24,7 @@ import werkzeug.exceptions
 import werkzeug.routing
 import werkzeug.urls
 
-Pagination = namedtuple('Pagination', 'first prev next last up')
+Pagination = namedtuple('Pagination', 'first prev next last up count')
 
 url_for = flask.url_for
 
@@ -88,6 +88,7 @@ def calculate_pagination(count, default_number,
     """Process pagination options and create pagination links.
 
     Arguments:
+        count: total number of observations
         default_number: default number of items per page
         page_number: requested page number
                      (sanitized -- can be an HTTP parameter)
@@ -146,7 +147,9 @@ def calculate_pagination(count, default_number,
                 **url_args)
         if page_number < (page_max - 1) else None,
 
-        None
+        None,
+
+        count
     )
 
     return (number_per_page, page_number, pagination)

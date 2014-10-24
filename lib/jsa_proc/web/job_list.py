@@ -25,14 +25,16 @@ from jsa_proc.web.util import url_for, calculate_pagination
 def prepare_job_list(db, page, **kwargs):
     # Generate query objects based on the parameters.
     (query, job_query) = job_search(**kwargs)
-    (number, page, pagination) = calculate_pagination(
-        db.find_jobs(count=True,  **job_query),
+
+    # Identify number of jobs.
+    count = db.find_jobs(count=True, **job_query)
+    (number, page, pagination) = calculate_pagination(count,
         24, page, 'job_list', query)
 
     # If no number in kwargs, add in default.
     if 'number' not in job_query:
         job_query['number'] = number
-        print number
+
     jobs = []
 
     for job in db.find_jobs(outputs='%preview_64.png',
@@ -66,4 +68,5 @@ def prepare_job_list(db, page, **kwargs):
         'obsqueries': ObsQueryDict,
         'query': query,
         'mode': query['mode'],
+        'count': count,
     }

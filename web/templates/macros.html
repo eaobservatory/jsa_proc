@@ -26,6 +26,9 @@
 {% macro render_page_control(pagination, description='page', firstlast=True) %}
     {% if pagination is not none %}
         <div class="pagination">
+          {% if pagination.count is not none %}
+          <p> {{pagination.count}} jobs matching search criteria. </p>
+          {% endif %}
             {% if firstlast %}
                 {% if pagination.first is not none %}
                     <a class="page_first" href="{{ pagination.first }}">First {{ description }}</a>

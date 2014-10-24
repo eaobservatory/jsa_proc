@@ -108,12 +108,14 @@ def prepare_job_qa_info(db, job_id, query):
             pnquery.pop('number')
 
         (prev, next) = db.job_prev_next(job_id, **pnquery)
+        count = db.find_jobs(count=True, **job_query)
         pagination = Pagination(
             None,
             None if prev is None else url_for('job_qa', job_id=prev),
             None if next is None else url_for('job_qa', job_id=next),
             None,
-            url_for('job_list', **url_query))
+            url_for('job_list', **url_query),
+            count,)
     else:
         pagination = None
 
