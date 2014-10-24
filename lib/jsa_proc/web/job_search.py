@@ -27,12 +27,16 @@ def job_search(location, state, task,
     # If number is None, reset to default
     if not number or number is None:
         number = 24
+    # check on keyword tiles
+    tiles = kwargs.get('tiles', None)
+
     # Initialize entries which the job and URL queries have in common.
     job_query = {
         'location': location,
         'task': task,
         'qa_state': qa_state,
         'number': number,
+        'tiles': tiles,
     }
 
     # Initialize the URL query / template context with a copy of the common

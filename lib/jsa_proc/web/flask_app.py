@@ -110,6 +110,7 @@ def create_web_app():
         kwargs = {
             'state': request.args.getlist('state'),
             'mode': request.args.get('mode', 'JSAProc'),
+            'tiles': request.args.get('tiles')
         }
 
         # Now add regular string parameters, including those from
