@@ -59,7 +59,7 @@ class CADCFiles():
                     '(_[0-9]{3})\.fits$'),
          '{0}%{1}'),
         # CAOM-2 preview for ACSIS/DAS reduced observation file.
-        (re.compile('^(jcmt_(acsis|das)_[0-9]{5}_[0-9t]{15}_)'
+        (re.compile('^(jcmt_(acsis|das)_[0-9]{1,5}_[0-9t]{15}_)'
                     '[-_a-z0-9]+_preview_[0-9]{2,4}\.png$'),
          '{0}%'),
         # CAOM-2 preview for nightly group file.
