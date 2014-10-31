@@ -129,7 +129,7 @@ def run_a_job(job_id, db=None, force=False):
             # again.
             if states.count(JSAProcState.MISSING) <= 2:
                 logstring += ': moving to missing.'
-                logger.warning('Moving job %i to state MISSING due to ' +
+                logger.warning('Moving job %i to state MISSING due to ' \
                                'missing file(s) %s',
                                job_id, input_file)
                 db.change_state(job_id, JSAProcState.MISSING,
@@ -140,7 +140,7 @@ def run_a_job(job_id, db=None, force=False):
                 # If it has been in the missing STATE more than two times,
                 # give up and move it into ERROR state to be fixed manually.
                 logstring += ': moving to error.'
-                logger.info('Moving job %s to state ERROR due to missing' +
+                logger.info('Moving job %s to state ERROR due to missing' \
                             ' file(s).', job_id)
                 inputfl.close()
                 raise JSAProcError('Input file %s for job %i has gone missing.'

@@ -91,9 +91,8 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
             tile, oldjob.id))
         if never_update:
             raise JSAProcError(
-                'Cannot add coadd for tile %i task %s. It already exists ' +
-                'in job %i and updating is turned off!'
-                % (tile, parenttask, oldjob.id))
+                'Cannot add coadd for tile %i task %s. It already exists ' \
+                'in job %i and updating is turned off!' % (tile, parenttask, oldjob.id))
     except NoRowsError:
         logger.debug('Coadd for tile %i task %s is not already in database' % (
             tile, parenttask))
@@ -113,7 +112,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
         pars, filts = zip(*parents)
         if set(pars) != set(oldspars) or set(oldfilts) != set(filts):
             logger.info(
-                'Parent/filter list for job %i has changed from ' +
+                'Parent/filter list for job %i has changed from '
                 'previous state' % oldjob.id)
 
             # Get lists of added and removed jobs.
@@ -129,14 +128,14 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
             if not dryrun:
                 db.replace_parents(oldjob.id, pars, filters=filts)
                 db.change_state(oldjob.id, JSAProcState.QUEUED,
-                                'Parent job list has been updated;' +
+                                'Parent job list has been updated;' \
                                 ' job reset to QUEUED')
                 job_id = oldjob.id
                 logger.info(
                     'Coadd job %i updated and reset to QUEUED' % job_id)
             else:
                 logger.info(
-                    'DRYRUN: coadd for tile %i has not been' +
+                    'DRYRUN: coadd for tile %i has not been'
                     ' updated nor status changed' % tile)
                 job_id = 0
         else:
@@ -234,9 +233,8 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
     # TODO: check what logger level is being used before going through for
     # loops.
     logger.info(
-        '%i jobs in task %s fall on tile %i with appropriate QA States,' +
-        ' OMP States and obstype states'
-        % (len(parentjobs), parenttask, tile))
+        '%i jobs in task %s fall on tile %i with appropriate QA States' \
+        ', OMP States and obstype states' %(len(parentjobs), parenttask, tile))
 
     if len(excludedjobs_ompstatus) > 0:
         logger.info('%i jobs were excluded due to wrong OMP status' % (
