@@ -15,9 +15,10 @@
 
 from __future__ import absolute_import, division
 
-from collections import OrderedDict
+from collections import namedtuple, OrderedDict
 import re
 
+from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
@@ -25,6 +26,7 @@ from jsa_proc.web.job_search import job_search
 from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
+FileInfo = namedtuple('FileInfo', ['name', 'url'])
 
 def prepare_job_qa_info(db, job_id, query):
     # Fetch job and qa information from the database.
@@ -57,23 +59,39 @@ def prepare_job_qa_info(db, job_id, query):
         pjobs = parents.keys()
         pjobs.sort()
         for i in pjobs:
-            obsinfo = [o._asdict() for o in db.get_obs_info(i)]
-            qa_state = db.get_job(i).qa_state
-            for o in obsinfo:
-                o['qa_state'] = qa_state
-            parent_obs[i] = obsinfo
+            obsinfo = db.get_obs_info(i)
+            if obsinfo != []:
+                obsinfo = [o._asdict() for o in db.get_obs_info(i)]
+                qa_state = db.get_job(i).qa_state
+                for o in obsinfo:
+                    o['qa_state'] = qa_state
+
+                parent_obs[i] = obsinfo
+        if parent_obs.keys() == []:
+            parent_obs = None
     except NoRowsError:
         parents = None
         parent_obs = None
 
+    # See if there are any child jobs.
+    try:
+        children = db.get_children(job_id)
+    except NoRowsError:
+        children = None
     previews1024 = []
     try:
-        output_files = db.get_output_files(job.id)
+        output_files = []
 
-        for i in output_files:
+        for i in db.get_output_files(job.id):
             if re.search('preview_1024.png', i) and \
-                    (re.search('_reduced-', i) or re.search('_healpix-', i)):
+                    (re.search('_reduced-', i) or re.search('_healpix-', i) or re.search('_extent-', i) or re.search('_peak-', i)):
                 previews1024.append(i)
+            if i.endswith('.fits'):
+                url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
+            else:
+                url = None
+
+            output_files.append(FileInfo(i, url))
 
     except NoRowsError:
         output_files = []
@@ -125,6 +143,7 @@ def prepare_job_qa_info(db, job_id, query):
         'qalog': qalog,
         'output_files': output_files,
         'parents': parents,
+        'children': children,
         'log_files': log_files,
         'previews': zip(previews1024, previews1024),
         'states': JSAProcState.STATE_ALL,

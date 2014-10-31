@@ -424,10 +424,14 @@ p.large_warning {
 }
 
 
-.goodbutton {
+.bigbutton {
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.1));
     width:90%;
     height: 3em;
     font-size: large;
-    border-radius: 10px;
-    background-image: linear-gradient(to bottom, #C9DEF6 30%, #80A0C5 110%)
+    border-radius: 5px;
+}
+
+.good {
+    background-color: #C9DEF6;
 }

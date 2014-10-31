@@ -225,10 +225,13 @@ def create_web_app():
     def job_change_qa():
 
         # Get the variables from POST
+        if "action_next" in request.form:
+            url = request.form['url-next']
+        else:
+            url = request.form['url']
         qa_state = request.form['qa_state']
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
-        url = request.form['url']
         username = request.authorization['username']
 
         # Change the state.
