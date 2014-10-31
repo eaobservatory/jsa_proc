@@ -15,16 +15,15 @@
 
 from __future__ import absolute_import, division
 
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
+import re
 
-from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
+from jsa_proc.web.component.files import make_output_file_list
 from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
-
-FileInfo = namedtuple('FileInfo', ['name', 'url'])
 
 
 def prepare_job_info(db, job_id, query):
@@ -77,29 +76,9 @@ def prepare_job_info(db, job_id, query):
         children = db.get_children(job_id)
     except NoRowsError:
         children = None
-    previews256 = []
-    previews1024 = []
-    try:
-        output_files = []
 
-        for i in db.get_output_files(job.id):
-            s = i.find('preview_256.png')
-            if s != -1:
-                previews256.append(i)
-            s = i.find('preview_1024.png')
-            if s != -1:
-                previews1024.append(i)
-
-            if i.endswith('.fits'):
-                url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
-
-            else:
-                url = None
-
-            output_files.append(FileInfo(i, url))
-
-    except NoRowsError:
-        output_files = []
+    (output_files, previews1024, previews256) = \
+        make_output_file_list(db, job.id)
 
     obs_info = db.get_obs_info(job.id)
 
@@ -108,13 +87,6 @@ def prepare_job_info(db, job_id, query):
 
     else:
         obs_info = None
-
-    if previews256:
-        previews256 = [url_for('job_preview', job_id=job.id, preview=i)
-                       for i in previews256]
-    if previews1024:
-        previews1024 = [url_for('job_preview', job_id=job.id, preview=i)
-                        for i in previews1024]
 
     # Logged entries in the database (newest first).
     log = db.get_logs(job_id)

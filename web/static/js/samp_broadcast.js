@@ -11,7 +11,7 @@ $(document).ready(function () {
     });
 
     $('[id^="broadcast_"]').click(function (event) {
-        var message = new samp.Message('image.load.fits', {
+        var message = new samp.Message($(event.target).data('mtype'), {
             'url': $(event.target).data('url'),
         });
 

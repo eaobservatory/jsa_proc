@@ -188,8 +188,8 @@
 {% for file in output_files %}
     <li>
         {{ file.name }}
-        {% if file.url %}
-            <button disabled="disabled" id="broadcast_output_{{ loop.index }}" data-url="{{ file.url }}">
+        {% if file.url is not none and file.mtype is not none %}
+            <button disabled="disabled" id="broadcast_output_{{ loop.index }}" data-url="{{ file.url }}" data-mtype="{{ file.mtype }}">
                 broadcast
             </button>
         {% endif %}

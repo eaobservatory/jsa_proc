@@ -16,17 +16,15 @@
 from __future__ import absolute_import, division
 
 from collections import namedtuple, OrderedDict
-import re
 
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
+from jsa_proc.web.component.files import make_output_file_list
 from jsa_proc.web.job_search import job_search
 from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
-
-FileInfo = namedtuple('FileInfo', ['name', 'url'])
 
 def prepare_job_qa_info(db, job_id, query):
     # Fetch job and qa information from the database.
@@ -78,23 +76,10 @@ def prepare_job_qa_info(db, job_id, query):
         children = db.get_children(job_id)
     except NoRowsError:
         children = None
-    previews1024 = []
-    try:
-        output_files = []
 
-        for i in db.get_output_files(job.id):
-            if re.search('preview_1024.png', i) and \
-                    (re.search('_reduced-', i) or re.search('_healpix-', i) or re.search('_extent-', i) or re.search('_peak-', i)):
-                previews1024.append(i)
-            if i.endswith('.fits'):
-                url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
-            else:
-                url = None
-
-            output_files.append(FileInfo(i, url))
-
-    except NoRowsError:
-        output_files = []
+    (output_files, previews1024, _) = \
+        make_output_file_list(db, job.id, preview_filter=[
+            '_reduced-', '_healpix-', '_extent-', '_peak-'])
 
     obs_info = db.get_obs_info(job.id)
 
@@ -103,10 +88,6 @@ def prepare_job_qa_info(db, job_id, query):
 
     else:
         obs_info = None
-
-    if previews1024:
-        previews1024 = [url_for('job_preview', job_id=job.id, preview=i)
-                        for i in previews1024]
 
     # Get the log files on disk (if any)
     log_files = get_log_files(job_id)
