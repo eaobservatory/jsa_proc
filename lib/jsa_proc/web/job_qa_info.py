@@ -16,6 +16,7 @@
 from __future__ import absolute_import, division
 
 from collections import namedtuple, OrderedDict
+import os
 
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
@@ -118,6 +119,23 @@ def prepare_job_qa_info(db, job_id, query):
     else:
         pagination = None
 
+    # In the case of task='*-cat' and there are no output preview
+    # images, show the preview image from the 1st parent job.
+    if '-cat' in info['task'] and previews1024 == []:
+        (_, previews1024,_) = make_output_file_list(db, parents.keys()[0], preview_filter='previews_1024.png')
+        nopreview = True
+    else:
+        nopreview = False
+
+    # Get parent output .fits files.
+    parent_fits = []
+    for i in  parents.keys():
+        (parent_outputs, _, _) = make_output_file_list(db, i)
+        # remove everything that isn't a .fits file from output list.
+        [parent_fits.append(i) for i in parent_outputs if '.fits' in i.name]
+
+
+
     return {
         'title': 'Job {}'.format(job_id),
         'info': info,
@@ -132,4 +150,6 @@ def prepare_job_qa_info(db, job_id, query):
         'parent_obs': parent_obs,
         'qa_states': JSAQAState.STATE_ALL,
         'pagination': pagination,
+        'nopreview': nopreview,
+        'parent_fits':parent_fits,
     }
