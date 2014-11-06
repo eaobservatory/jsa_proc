@@ -129,12 +129,11 @@ def prepare_job_qa_info(db, job_id, query):
 
     # Get parent output .fits files.
     parent_fits = []
-    for i in  parents.keys():
-        (parent_outputs, _, _) = make_output_file_list(db, i)
-        # remove everything that isn't a .fits file from output list.
-        [parent_fits.append(i) for i in parent_outputs if '.fits' in i.name]
-
-
+    if parents:
+        for i in  parents.keys():
+            (parent_outputs, _, _) = make_output_file_list(db, i)
+            # remove everything that isn't a .fits file from output list.
+            [parent_fits.append(i) for i in parent_outputs if '.fits' in i.name]
 
     return {
         'title': 'Job {}'.format(job_id),
