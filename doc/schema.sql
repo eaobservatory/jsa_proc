@@ -57,6 +57,7 @@ CREATE TABLE log (
 );
 
 CREATE INDEX log_job_id ON log (job_id);
+CREATE INDEX log_state_new ON log (state_new);
 
 CREATE TABLE obs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
