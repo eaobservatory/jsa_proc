@@ -27,7 +27,7 @@ from jsa_proc.error import JSAProcError, NoRowsError
 logger = logging.getLogger(__name__)
 
 
-def fetch(job_id=None, db=None, force=False):
+def fetch(job_id=None, db=None, force=False, replaceparent=False):
     """
     Assemble the files required to process a job.
 
@@ -72,11 +72,11 @@ def fetch(job_id=None, db=None, force=False):
             logger.warning('Did not find a job to fetch!')
             return
 
-    fetch_a_job(job_id, db=db, force=force)
+    fetch_a_job(job_id, db=db, force=force,replaceparent=replaceparent)
 
 
 @ErrorDecorator
-def fetch_a_job(job_id, db=None, force=False):
+def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
     """
     Assemble the files required to process a job.
 
@@ -84,6 +84,9 @@ def fetch_a_job(job_id, db=None, force=False):
 
     Optionally allows a db to be given, for testing purposes. Otherwise
     uses usual database from config file.
+
+    Option 'replace' will force it to overwrite parent data already in the
+    input directory.
 
     This will raise an error if job is not in MISSING state to start with.
     This will advance the state of the job to WAITING on completion.
@@ -127,7 +130,7 @@ def fetch_a_job(job_id, db=None, force=False):
             outputs = db.get_output_files(p)
             parent_files = filter_file_list(outputs, f)
             parent_files_with_paths += assemble_parent_data_for_job(
-                job_id, p, parent_files)
+                job_id, p, parent_files, force_new=replaceparent)
     except NoRowsError:
         parent_files_with_paths = []
 

@@ -177,7 +177,7 @@ def setup_input_directory(job_id):
     return input_directory
 
 
-def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
+def assemble_parent_data_for_job(job_id, parent_job_id, parent_files, force_new=False):
     """
     This routine ensures that all the input data from parent jobs is
     available for running a job.
@@ -185,6 +185,9 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
     It takes in the current job_id, the job_id of the parent job
     it is assembling data for, and the list of parent_files it
     needs to find for that job.
+
+    option 'force_new' will force this function to ignore data already in the
+    input file directory
 
     It will first of look in the output data directory for the parent job,
     and if not there it will download the file from CADC.
@@ -201,7 +204,7 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files):
 
         # First of all check if file is already in input directory.
         filepath = is_file_in_a_dir(f, input_directory)
-        if filepath:
+        if filepath and not force_new:
             files_list.append(filepath)
         else:
 

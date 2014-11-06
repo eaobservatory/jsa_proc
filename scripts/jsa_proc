@@ -21,7 +21,7 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] (input) [--count <number>]
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
-    jsa_proc fetch [-v | -q] [--job-id <id>] [--force]
+    jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc ingest [-v | -q] [--dry-run] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
@@ -44,6 +44,7 @@ Options:
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
     --force, -f                Skip initial state check.
+    --replaceparent            Force recopying parent jobs into input folder
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
     --tag <tag>                Select jobs by tag.
@@ -171,7 +172,7 @@ def fetch_(args):
 
     from jsa_proc.action.fetch import fetch
 
-    fetch(job_id=args['--job-id'], force=args['--force'])
+    fetch(job_id=args['--job-id'], force=args['--force'], replaceparent=args['--replaceparent'])
 
 
 @command
