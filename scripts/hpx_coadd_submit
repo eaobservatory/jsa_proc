@@ -153,7 +153,7 @@ def all(args):
     total = len(tiles)
     count = 0
     for t in tiles:
-        logger.info('Processing tile %i (%i of %i)' % (t, count, total))
+        logger.debug('Processing tile %i (%i of %i)' % (t, count, total))
         try:
             submit_one_coadd_job(t, parenttask, mode, parameters, location,
                                  exclude_pointing_jobs=exclude_pointing_jobs,

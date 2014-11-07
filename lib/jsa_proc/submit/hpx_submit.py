@@ -99,9 +99,27 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
         oldjob = None
         oldparents = None
     # Check what current parent values should be.
-    parent_jobs = get_parents(tile, parenttask,
-                              exclude_pointing_jobs=exclude_pointing_jobs,
-                              science_obs_only=science_obs_only)
+    try:
+        parent_jobs = get_parents(tile, parenttask,
+                                  exclude_pointing_jobs=exclude_pointing_jobs,
+                                  science_obs_only=science_obs_only)
+    except JSAProcError:
+        # If no parent jobs could be found, then the job should marked
+        # as deleted if it already exists
+        if oldjob and not dryrun:
+            db.change_state(oldjob.id, JSAProcState.DELETED,
+               'No valid parent jobs found for tile %i; marking job as DELETED' % (tile))
+            logger.info('Job %i on tile %i marked as deleted (no valid input jobs)' %
+                        (oldjob.id, tile))
+        if oldjob and dryrun:
+            logger.info('DRYRUN: Job %i on tile %s would be marked as DELETED' %
+                        (oldjob.id, tile))
+        if oldjob:
+            job_id = oldjob.id
+        else:
+            job_id = None
+        return job_id
+
 
     parents = zip(parent_jobs, [filt] * len(parent_jobs))
 
@@ -111,7 +129,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
         oldspars, oldfilts = zip(*oldparents)
         pars, filts = zip(*parents)
         if set(pars) != set(oldspars) or set(oldfilts) != set(filts):
-            logger.info(
+            logger.debug(
                 'Parent/filter list for job %i has changed from '
                 'previous state' % oldjob.id)
 
@@ -132,15 +150,17 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                                 ' job reset to QUEUED')
                 job_id = oldjob.id
                 logger.info(
-                    'Coadd job %i updated and reset to QUEUED' % job_id)
+                    'Coadd job %i towards tile %i updated and reset to QUEUED' %
+                    (job_id, tile))
             else:
                 logger.info(
-                    'DRYRUN: coadd for tile %i has not been'
-                    ' updated nor status changed' % tile)
+                    'DRYRUN: job % i towards tile %i would have been'
+                    ' updated and status changed' % (oldjob.id, tile))
                 job_id = 0
         else:
-            logger.info(
-                'Parent/filter list for job %i is unchanged' % oldjob.id)
+            logger.debug(
+                'Parent/filter list for job %i towards tile %i is unchanged' %
+                (oldjob.id, tile))
             job_id = oldjob.id
             # Check if last changed time of each parent job is < last
             # processed time of old job If nothing has changed, check
@@ -156,8 +176,10 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                                 parent_jobs=pars, filters=filts,
                                 priority=priority,
                                 tilelist=[tile])
+            logger.info('coadd job %i towards tile %i has been created' %
+                        (job_id, tile))
         else:
-            logger.info('DRYRUN: coadding job for tile %i has not been created'
+            logger.info('DRYRUN: coadding job for tile %i would have been created'
                         % tile)
             job_id = 0
     return job_id
@@ -226,18 +248,18 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
         # If it was requested to exclude entirely any job containing a
         # pointing:
         if exclude_pointing_jobs and len(excludedjobs_pointings) > 0:
-            logger.info('Tile %i contains pointing obs.' % tile)
+            logger.debug('Tile %i contains pointing obs.' % tile)
             raise JSAProcError('Pointings fall on this tile.')
 
     # Log information about which tasks where excluded.
     # TODO: check what logger level is being used before going through for
     # loops.
-    logger.info(
+    logger.debug(
         '%i jobs in task %s fall on tile %i with appropriate QA States' \
         ', OMP States and obstype states' %(len(parentjobs), parenttask, tile))
 
     if len(excludedjobs_ompstatus) > 0:
-        logger.info('%i jobs were excluded due to wrong OMP status' % (
+        logger.debug('%i jobs were excluded due to wrong OMP status' % (
             len(excludedjobs_ompstatus)))
         for i in excludedjobs_ompstatus:
             omp_status = db.get_obs_info(i.id)[0].omp_status
@@ -246,13 +268,14 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
 
     if science_obs_only:
         if len(excludedjobs_pointings) > 0:
-            logger.info('%i additional jobs were excluded as pointings' % (
+            logger.debug('%i additional jobs were excluded as pointings' % (
                 len(excludedjobs_pointings)))
             for i in excludedjobs_pointings:
                 logger.debug('Job %i NOT INCLUDED (pointing)' % (i.id))
 
     if len(parentjobs) == 0:
-        logger.info('Tile %i has no acceptable parent jobs' % tile)
+        logger.debug('Tile %i has no acceptable parent jobs' % tile)
+
         raise JSAProcError('No acceptable observations.')
 
     # Return the parent jobs
