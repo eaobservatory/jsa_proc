@@ -835,10 +835,10 @@ class JSAProcDB:
         (i.e. newest first).
         """
 
-        param = []
         query = 'SELECT job.id, log.datetime, log.message, log.state_new, ' \
                 'job.location  FROM job JOIN log ON job.id=log.job_id'
-        query += ' WHERE job.state="E"'
+        query += ' WHERE job.state=%s'
+        param = [JSAProcState.ERROR]
 
         if location is not None:
             query += ' AND job.location=%s '

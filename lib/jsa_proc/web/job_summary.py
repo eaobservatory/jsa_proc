@@ -210,8 +210,8 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None,
 
                 # Add on the totals for Raw and Deleted jobs to the dayresults
                 dayresults['Deleted'] = {
-                    'total': db.find_jobs(task=t, state='X', count=True,
-                                          obsquery=obsquery)}
+                    'total': db.find_jobs(task=t, state=JSAProcState.DELETED,
+                                          count=True, obsquery=obsquery)}
                 dayresults['Raw'] = {
                     'total': db.find_jobs(task=t, state=qa_raw_state,
                                           count=True, obsquery=obsquery)}
