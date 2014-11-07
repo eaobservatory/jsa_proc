@@ -66,6 +66,7 @@
   </p>
 
   <input type="hidden" name="url" value="{{url_for('error_summary')}}">
+  <input type="hidden" name="state_prev" value="{{ state_prev }}" />
   <input type="submit" value="submit">
   {% else %}
       <p>

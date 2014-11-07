@@ -20,15 +20,17 @@ from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.util import url_for
 
 
-def prepare_change_state(db, job_ids, newstate, message, username):
+def prepare_change_state(db, job_ids, newstate, state_prev, message, username):
     if not JSAProcState.is_valid(newstate):
         raise Exception('Unknown state %s' % (newstate))
+
+    if not JSAProcState.is_valid(state_prev):
+        raise Exception('Unknown (previous) state %s' % (newstate))
+
     if message == '':
         raise Exception('You must provide a message to change state!')
 
     for job_id in job_ids:
-        state_prev = db.get_job(id_=job_id).state
-
         db.change_state(job_id, newstate, message, state_prev=state_prev,
                         username=username)
 

@@ -204,6 +204,7 @@ def create_web_app():
 
         # Get the variables from POST
         newstate = request.form['newstate']
+        state_prev = request.form['state_prev']
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
         url = request.form['url']
@@ -212,6 +213,7 @@ def create_web_app():
         # Change the state.
         prepare_change_state(db, job_ids,
                              newstate,
+                             state_prev,
                              message,
                              username)
 

@@ -219,6 +219,7 @@
 <form method="POST" action="{{ url_for('job_change_state')}}">
   <input type="hidden" name="job_id" value="{{ info.id }}" >
   <input type="hidden" name="url" value="{{url_for('job_info', job_id=info.id)}}">
+  <input type="hidden" name="state_prev" value="{{ info.state }}" />
   <select name="newstate">
     <option value=""{{ 'selected="selected"' if selected_new_state is none}}>New State</option>
     {% for state in states %}
