@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 hpx_task = re.compile('^hpx-')
 
 
-def run_job(job_id=None, db=None, force=False):
+def run_job(job_id=None, db=None, force=False, task=None):
     """
     Run the JSA processing of the next job. This will select the highest
     priority job in state 'WAITING' with location 'JAC'.
@@ -57,7 +57,7 @@ def run_job(job_id=None, db=None, force=False):
         logger.debug('Looking for a job to run')
 
         jobs = db.find_jobs(state=JSAProcState.WAITING, location='JAC',
-                            prioritize=True, number=1, sort=True)
+                            prioritize=True, number=1, sort=True, task=task)
 
         if jobs:
             job_id = jobs[0].id

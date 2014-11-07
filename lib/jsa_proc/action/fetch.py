@@ -27,7 +27,7 @@ from jsa_proc.error import JSAProcError, NoRowsError
 logger = logging.getLogger(__name__)
 
 
-def fetch(job_id=None, db=None, force=False, replaceparent=False):
+def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
     """
     Assemble the files required to process a job.
 
@@ -63,7 +63,7 @@ def fetch(job_id=None, db=None, force=False, replaceparent=False):
         logger.debug('Looking for a job for which to fetch data')
 
         jobs = db.find_jobs(state=JSAProcState.MISSING, location='JAC',
-                            prioritize=True, number=1, sort=True)
+                            prioritize=True, number=1, sort=True, task=task)
 
         if jobs:
             job_id = jobs[0].id

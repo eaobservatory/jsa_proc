@@ -21,7 +21,7 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] (input) [--count <number>]
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
-    jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent]
+    jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc ingest [-v | -q] [--dry-run] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
@@ -29,7 +29,7 @@ Usage:
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
-    jsa_proc run [-v | -q] [--job-id <id>] [--force]
+    jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
 
 Options:
@@ -172,7 +172,7 @@ def fetch_(args):
 
     from jsa_proc.action.fetch import fetch
 
-    fetch(job_id=args['--job-id'], force=args['--force'], replaceparent=args['--replaceparent'])
+    fetch(job_id=args['--job-id'], force=args['--force'], replaceparent=args['--replaceparent'], task=args['--task'])
 
 
 @command
@@ -279,7 +279,7 @@ def run(args):
 
     from jsa_proc.action.run import run_job
 
-    run_job(job_id=args['--job-id'], force=args['--force'])
+    run_job(job_id=args['--job-id'], force=args['--force'], task=args['--task'])
 
 
 @command
