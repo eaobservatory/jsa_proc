@@ -23,7 +23,7 @@ Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
-    jsa_proc ingest [-v | -q] [--dry-run] --job-id <id>
+    jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
@@ -200,7 +200,8 @@ def ingest(args):
     ingest_output(args['--job-id'],
                   location='JAC',
                   task=args['--task'],
-                  dry_run=args['--dry-run'])
+                  dry_run=args['--dry-run'],
+                  force=args['--force'])
 
 
 @command

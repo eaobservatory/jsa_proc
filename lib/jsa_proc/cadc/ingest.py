@@ -29,7 +29,7 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def ingest_output(job_id, location=None, task=None, dry_run=False):
+def ingest_output(job_id, location=None, task=None, dry_run=False, force=False):
     """High-level output ingestion function for use from scripts."""
 
     logger.debug('Connecting to JSA processing database')
@@ -50,7 +50,8 @@ def ingest_output(job_id, location=None, task=None, dry_run=False):
                 # error if the job was not already in that state.
                 db.change_state(job_id, JSAProcState.INGESTING,
                                 'Job output is being ingested into CAOM-2',
-                                state_prev=JSAProcState.INGESTION)
+                                state_prev=(None if force else
+                                            JSAProcState.INGESTION))
 
             except NoRowsError:
                 logger.error('Job %i can not be ingested as it is not ready',
