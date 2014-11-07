@@ -21,7 +21,7 @@ from jsa_proc.web.util import url_for
 
 
 def prepare_change_state(db, job_ids, newstate, message, username):
-    if not JSAProcState.get_name(newstate):
+    if not JSAProcState.is_valid(newstate):
         raise Exception('Unknown state %s' % (newstate))
     if message == '':
         raise Exception('You must provide a message to change state!')
