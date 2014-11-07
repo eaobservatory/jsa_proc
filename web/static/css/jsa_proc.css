@@ -60,11 +60,6 @@ div.pagination > .page_up {
     content: ' ↑';
 }
 
-.pagination span {
-    padding-left:15px;
-    padding-right:15px;
-}
-
 ul.multicol {
     columns: auto;
     -moz-columns: auto;
