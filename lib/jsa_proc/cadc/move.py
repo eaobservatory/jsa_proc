@@ -18,7 +18,6 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 from jsa_proc.action.decorators import ErrorDecorator
-from jsa_proc.cadc.submission import CADCDPSubmission
 from jsa_proc.config import get_database
 
 logger = logging.getLogger(__name__)
@@ -33,18 +32,17 @@ def move_from_cadc(job_ids, dry_run=False):
     """
 
     db = get_database()
-    dpsub = CADCDPSubmission()
 
     logger.info('Starting move of jobs from CADC to JAC')
 
     for job_id in job_ids:
-        _move_job_from(job_id, db=db, dpsub=dpsub, dry_run=dry_run)
+        _move_job_from(job_id, db=db, dry_run=dry_run)
 
     logger.info('Done moving jobs')
 
 
 @ErrorDecorator
-def _move_job_from(job_id, db, dpsub, dry_run):
+def _move_job_from(job_id, db, dry_run):
     """Move a single job from CADC to JAC."""
 
     logger.debug('Moving job %i', job_id)
@@ -58,8 +56,3 @@ def _move_job_from(job_id, db, dpsub, dry_run):
         db.set_location(job_id, 'JAC', None,
                         message='Location changed to JAC from CADC, '
                                 'recipe instance was: ' + job.foreign_id)
-
-    rc_instance = job.foreign_id
-    logger.debug('Deleting recipe instance %s at CADC', rc_instance)
-    if not dry_run:
-        dpsub.remove_rc_instances((rc_instance,))
