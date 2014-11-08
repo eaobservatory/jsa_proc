@@ -30,7 +30,8 @@ from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.omp.auth import check_staff_password
 from jsa_proc.web.util import \
     url_for, url_for_omp, url_for_omp_comment, templated, HTTPError, \
-    HTTPNotFound, HTTPRedirect, HTTPUnauthorized
+    HTTPNotFound, HTTPRedirect, HTTPUnauthorized, \
+    ErrorPage, error_page_response
 
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_change_state import prepare_change_state, \
@@ -210,17 +211,21 @@ def create_web_app():
         url = request.form['url']
         username = request.authorization['username']
 
-        # Change the state.
-        prepare_change_state(db, job_ids,
-                             newstate,
-                             state_prev,
-                             message,
-                             username)
+        try:
+            # Change the state.
+            prepare_change_state(db, job_ids,
+                                 newstate,
+                                 state_prev,
+                                 message,
+                                 username)
 
-        # Redirect the page to correct info.
-        flash('The status has been changed to %s.' % JSAProcState.get_name(
-            newstate))
-        raise HTTPRedirect(url)
+            # Redirect the page to correct info.
+            flash('The status has been changed to %s.' % JSAProcState.get_name(
+                newstate))
+            raise HTTPRedirect(url)
+
+        except ErrorPage as err:
+            return error_page_response(err)
 
     @app.route('/job_change_qa', methods=['POST'])
     @requires_auth
@@ -236,26 +241,22 @@ def create_web_app():
         job_ids = request.form.getlist('job_id')
         username = request.authorization['username']
 
-        # Change the state.
-        if message == '' and qa_state in JSAQAState.STATE_IFFY:
-            flash('You must provide a message to change QA state to ' +
-                  ' or '.join((JSAQAState.get_name(x)
-                               for x in JSAQAState.STATE_IFFY)) + '.')
-        else:
-            try:
-                prepare_change_qa(db, job_ids,
-                                  qa_state,
-                                  message,
-                                  username,
-                                  )
-                # Redirect the page to correct info.
-                flash(
-                    'The QA status of job %s has been changed to %s.' %
-                    (str(' '.join(job_ids)),JSAQAState.get_name(qa_state))
-                )
-            except:
-                flash('UNSUCCESSFUL attempt to update qa status!')
-        raise HTTPRedirect(url)
+        try:
+            # Change the state.
+            prepare_change_qa(db, job_ids,
+                              qa_state,
+                              message,
+                              username,
+                              )
+            # Redirect the page to correct info.
+            flash(
+                'The QA status of job %s has been changed to %s.' %
+                (str(' '.join(job_ids)),JSAQAState.get_name(qa_state))
+            )
+            raise HTTPRedirect(url)
+
+        except ErrorPage as err:
+            return error_page_response(err)
 
     # QA Nightly Summary pages
     @app.route('/qa-nightly')
