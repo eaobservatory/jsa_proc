@@ -36,7 +36,7 @@ def prepare_change_state(db, job_ids, newstate, state_prev, message, username):
 
 
 def prepare_change_qa(db, job_ids, qa_state, message, username):
-    if not JSAQAState.get_name(qa_state):
+    if not JSAQAState.is_valid(qa_state):
         raise Exception('Unknown state %s' % (newstate))
 
     for job_id in job_ids:
