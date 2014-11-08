@@ -62,25 +62,50 @@ class HTTPRedirect(werkzeug.routing.RequestRedirect):
     pass
 
 
+class ErrorPage(Exception):
+    """Exception class where an error page should be shown."""
+
+    pass
+
+
 def templated(template):
     """Template application decorator.
 
     Based on the example in the Flask documentation at:
     http://flask.pocoo.org/docs/patterns/viewdecorators/
+
+    The ErrorPage exception is caught, and rendered using
+    the error_page_repsonse method.
     """
 
     def decorator(f):
         @functools.wraps(f)
         def decorated_function(*args, **kwargs):
-            result = f(*args, **kwargs)
-            resp = flask.make_response(
-                flask.render_template(template, **result))
-            resp.headers['Content-Language'] = 'en'
-            return resp
+            try:
+                return _make_response(template, f(*args, **kwargs))
+
+            except ErrorPage as err:
+                return error_page_response(err)
 
         return decorated_function
 
     return decorator
+
+
+def error_page_response(err):
+    """Prepare flask response for an error page."""
+
+    return _make_response('error.html',
+                          {'title': 'Error', 'message': err.message})
+
+
+def _make_response(template, result):
+    """Prepare flask repsonse via a template."""
+
+    resp = flask.make_response(flask.render_template(template, **result))
+    resp.headers['Content-Language'] = 'en'
+
+    return resp
 
 
 def calculate_pagination(count, default_number,
