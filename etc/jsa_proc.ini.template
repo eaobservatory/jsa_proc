@@ -19,6 +19,7 @@ log=/net/kamaka/export/data/jsa_proc/log
 # occur.
 [disk_limit]
 fetch_min_space=1000
+etransfer_min_space=500
 
 [job_run]
 starpath=/net/kamaka/export/data/stardev-stable

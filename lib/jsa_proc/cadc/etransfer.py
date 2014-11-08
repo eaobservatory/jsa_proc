@@ -28,6 +28,7 @@ from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
+from jsa_proc.files import get_space
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
@@ -131,9 +132,11 @@ def etransfer_send_output(job_id, dry_run):
     logger.debug('Preparing to e-transfer output for job {0}'.format(job_id))
 
     # When not in dry run mode, check that etransfer is being
-    # run on the correct machine by the correct user.
+    # run on the correct machine by the correct user and with
+    # sufficient available disk space.
     if not dry_run:
         _etransfer_check_config()
+        _etransfer_check_space()
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
@@ -282,6 +285,22 @@ def _etransfer_check_config(any_user=False):
     if gethostname().partition('.')[0] != etransfermachine:
         raise CommandError('etransfer should only be run on {0}'.
                            format(etransfermachine))
+
+
+def _etransfer_check_space():
+    """Check that sufficient space is available for e-transfer.
+
+    Raises a CommandError if a problem is detected.
+    """
+
+    config = get_config()
+    required_space = float(config.get('disk_limit', 'etransfer_min_space'))
+    etransfer_space = get_space(config.get('etransfer', 'transdir'))
+
+    if etransfer_space < required_space:
+        raise CommandError(
+            'Insufficient disk space: {0} / {1} GiB required'.format(
+                etransfer_space, required_space))
 
 
 def _etransfer_find_files():
