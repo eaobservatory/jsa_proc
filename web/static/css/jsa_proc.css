@@ -37,19 +37,19 @@ div.pagination > * {
 }
 
 .page_first:before {
-    content: '↞ ';
+    content: "\219E ";
 }
 
 .page_prev:before {
-    content: '← ';
+    content: "\2190 ";
 }
 
 .page_next:after {
-    content: ' →';
+    content: " \2192";
 }
 
 .page_last:after {
-    content: ' ↠';
+    content: " \21A0";
 }
 
 div.pagination > .page_up {
