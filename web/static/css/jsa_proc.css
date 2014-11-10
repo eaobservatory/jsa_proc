@@ -57,7 +57,7 @@ div.pagination > .page_up {
 }
 
 .page_up:after {
-    content: ' ↑';
+    content: ' \2191';
 }
 
 ul.multicol {
