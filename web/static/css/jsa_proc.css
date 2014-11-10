@@ -37,11 +37,11 @@ div.pagination > * {
 }
 
 .page_first:before {
-    content: "\219E ";
+    content: "\219E  ";
 }
 
 .page_prev:before {
-    content: "\2190 ";
+    content: "\2190  ";
 }
 
 .page_next:after {
