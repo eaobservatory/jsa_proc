@@ -117,6 +117,7 @@ class JSAProcMySQL(JSAProcDB):
 
     def job_prev_next(self, job_id,
                       state=None, location=None, task=None, qa_state=None,
+                      tag=None,
                       prioritize=False, sort=False, sortdir='ASC',
                       obsquery=None, tiles=None):
         """MySQL-specific previous and next job query.
@@ -127,7 +128,7 @@ class JSAProcMySQL(JSAProcDB):
         # Prepare the same kind of query which find_jobs would use, but
         # select only the job identifier.
         (where, param) = self._find_jobs_where(
-            state, location, task, qa_state, obsquery, tiles)
+            state, location, task, qa_state, tag, obsquery, tiles)
 
         order = self._find_jobs_order(prioritize, sort, sortdir)
 
