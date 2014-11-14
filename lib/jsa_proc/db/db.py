@@ -64,10 +64,11 @@ class Fuzzy:
     """Class for fuzzy string match conditions.
     """
 
-    def __init__(self, value):
+    def __init__(self, value, wildcards=True):
         """Construct new fuzzy string match object."""
 
         self.value = value
+        self.wildcards = wildcards
 
 
 class Range:
@@ -1430,7 +1431,10 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
                 if logic_not else
                 '{0}.`{1}` LIKE %s'
                 ).format(table, key))
-            params.append('%{0}%'.format(value.value))
+            params.append(
+                '%{0}%'.format(value.value)
+                if value.wildcards else
+                value.value)
 
         elif isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
