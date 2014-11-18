@@ -31,7 +31,10 @@ def clean_input(count=None, dry_run=False):
 
     db = get_database()
     jobs = db.find_jobs(location='JAC',
-                        state=[JSAProcState.INGESTION, JSAProcState.COMPLETE])
+                        state=[
+                            JSAProcState.INGESTION,
+                            JSAProcState.COMPLETE,
+                            JSAProcState.DELETED])
 
     n = 0
     for job in jobs:
