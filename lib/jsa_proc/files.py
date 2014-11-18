@@ -20,10 +20,28 @@ Functions for examining the files and disks.
 
 from __future__ import absolute_import, division, print_function
 
+from hashlib import md5
 import os
 import subprocess
 
 from jsa_proc.config import get_config
+
+
+def get_md5sum(filename):
+    """Return the MD5 sum of a file."""
+
+    sum = md5()
+
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(1024)
+
+            if data == '':
+                break
+
+            sum.update(data)
+
+    return sum.hexdigest()
 
 
 def get_size(path):
