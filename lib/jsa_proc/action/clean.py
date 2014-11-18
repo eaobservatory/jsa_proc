@@ -17,7 +17,7 @@ import logging
 import os.path
 import shutil
 
-from jsa_proc.admin.directories import get_input_dir
+from jsa_proc.admin.directories import get_input_dir, get_scratch_dir
 from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 
@@ -29,22 +29,51 @@ def clean_input(count=None, dry_run=False):
 
     logger.debug('Beginning input clean')
 
+    _clean_job_directories(
+        get_input_dir,
+        [
+            JSAProcState.INGESTION,
+            JSAProcState.COMPLETE,
+            JSAProcState.DELETED,
+        ],
+        count=count,
+        dry_run=dry_run)
+
+    logger.debug('Done cleaning input directories')
+
+
+def clean_scratch(count=None, dry_run=False):
+    """Delete scratch directories for processed jobs."""
+
+    logger.debug('Beginning scratch clean')
+
+    _clean_job_directories(
+        get_scratch_dir,
+        [
+            JSAProcState.COMPLETE,
+            JSAProcState.DELETED,
+        ],
+        count=count,
+        dry_run=dry_run)
+
+    logger.debug('Done cleaning scratch directories')
+
+
+def _clean_job_directories(dir_function, state, count=None, dry_run=False):
+    """Generic directory deletion function."""
+
     db = get_database()
-    jobs = db.find_jobs(location='JAC',
-                        state=[
-                            JSAProcState.INGESTION,
-                            JSAProcState.COMPLETE,
-                            JSAProcState.DELETED])
+    jobs = db.find_jobs(location='JAC', state=state)
 
     n = 0
     for job in jobs:
-        directory = get_input_dir(job.id)
+        directory = dir_function(job.id)
 
         if not os.path.exists(directory):
-            logger.debug('Input directory for job %i does not exist', job.id)
+            logger.debug('Directory for job %i does not exist', job.id)
             continue
 
-        logger.info('Removing input for job %i: %s', job.id, directory)
+        logger.info('Removing directory for job %i: %s', job.id, directory)
 
         if not dry_run:
             shutil.rmtree(directory)
@@ -52,5 +81,3 @@ def clean_input(count=None, dry_run=False):
         n += 1
         if (count is not None) and not (n < count):
             break
-
-    logger.debug('Done cleaning input directories')

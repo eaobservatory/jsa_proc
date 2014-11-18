@@ -18,7 +18,7 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
-    jsa_proc clean [-v | -q] [--dry-run] (input) [--count <number>]
+    jsa_proc clean [-v | -q] [--dry-run] (input | scratch) [--count <number>]
     jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
@@ -145,6 +145,10 @@ def clean(args):
     if args['input']:
         from jsa_proc.action.clean import clean_input
         clean_input(count=args['--count'], dry_run=args['--dry-run'])
+
+    elif args['scratch']:
+        from jsa_proc.action.clean import clean_scratch
+        clean_scratch(count=args['--count'], dry_run=args['--dry-run'])
 
     else:
         raise CommandError('Did not recognise clean type')
