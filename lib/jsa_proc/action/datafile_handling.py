@@ -25,6 +25,7 @@ from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError
 from jsa_proc.config import get_config
+from jsa_proc.files import get_md5sum
 
 """
 Routines for handling input and output files when running jobs.
@@ -334,8 +335,8 @@ def get_output_files(job_id):
     # Get list of files in directory:
     contents = os.listdir(output_dir)
 
-    # TODO: include real MD5 sums.
-    return [JSAProcFileInfo(x, None) for x in contents]
+    return [JSAProcFileInfo(x, get_md5sum(os.path.join(output_dir, x)))
+            for x in contents]
 
 
 def valid_hds(filepath):
