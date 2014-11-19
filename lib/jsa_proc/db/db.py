@@ -40,6 +40,9 @@ JSAProcJobInfo = namedtuple(
 JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
     'id time message state location')
+JSAProcFileInfo = namedtuple(
+    'FileInfo',
+    'filename md5')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -766,7 +769,7 @@ class JSAProcDB:
 
         return times
 
-    def get_output_files(self, job_id):
+    def get_output_files(self, job_id, with_info=False):
         """
         Get the output file list for a job.
 
@@ -774,14 +777,18 @@ class JSAProcDB:
         job_id, (required), integer.
         Identify which job to get the output file list from.
 
+        with_info: choose whether to retrieve full information
+        or just the file names (which is the default).
+
         Returns:
-        list of output files.
+        list of output files unless with_info is enabled, in which
+        case a list of JSAProcFileInfo namedtuples is returned.
 
         Will raise an NoRowsError if there are no output files found.
         """
 
         with self.db as c:
-            c.execute('SELECT filename FROM output_file WHERE job_id = %s',
+            c.execute('SELECT filename, md5 FROM output_file WHERE job_id = %s',
                       (job_id,))
             output_files = c.fetchall()
             if len(output_files) == 0:
@@ -790,10 +797,12 @@ class JSAProcDB:
                     'SELECT filename FROM output_file WHERE job_id = ' +
                     (str(job_id)))
 
-        # Turn list of tuples into single list of strings.
-        output_files = [file for i in output_files for file in i]
+        if with_info:
+            return [JSAProcFileInfo(*row) for row in output_files]
 
-        return output_files
+        else:
+            # Turn list of tuples into single list of strings.
+            return [row[0] for row in output_files]
 
     def set_output_files(self, job_id, output_files):
 
@@ -807,9 +816,11 @@ class JSAProcDB:
         job_id, required, integer
         Identify which job to change/set the output file list from.
 
-        output_files, required, list of strings.
-        List of output files for the job (can be any iterable of strings,
-        e.g. tuple etc.)
+        output_files, required, list of JSAProcFileInfo objects.
+        List of output files for the job (can be any iterable,
+        e.g. tuple etc., and the object could be any object which
+        has the requred attributes, which currently are
+        filename and md5).
 
         """
 
@@ -819,9 +830,9 @@ class JSAProcDB:
 
             for f in output_files:
                 # Now add in the new output files, one at a time.
-                c.execute('INSERT INTO output_file (job_id, filename) '
-                          'VALUES (%s, %s)',
-                          (job_id, f))
+                c.execute('INSERT INTO output_file (job_id, filename, md5) '
+                          'VALUES (%s, %s, %s)',
+                          (job_id, f.filename, f.md5))
 
     def find_errors_logs(self, location=None, task=None):
         """

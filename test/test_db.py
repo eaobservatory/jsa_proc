@@ -18,7 +18,8 @@ from datetime import date
 from socket import gethostname
 from unittest import TestCase
 
-from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range
+from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range, \
+        JSAProcFileInfo
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -341,24 +342,28 @@ class InterfaceDBTest(DBTestCase):
                                  input_file_names=input_file_names)
 
         # Values used in updating.
-        output_files1 = ['myoutputfile1',
-                         'myoutputfile2']
+        output_files1 = [JSAProcFileInfo('myoutputfile1',
+                                         '615371394d2240f49c3553a172d4e5fd'),
+                         JSAProcFileInfo('myoutputfile2',
+                                         '16e3adef1598a3dd36703e488c958e2d')]
 
-        output_files2 = ['myoutputfile3',
-                         'myoutputfile4']
+        output_files2 = [JSAProcFileInfo('myoutputfile3',
+                                         '1e9c97b58f65509464a61cc689ea5ce2'),
+                         JSAProcFileInfo('myoutputfile4',
+                                         'c10a05bfd8cd7a1d0c1aae71a351b4ad')]
 
         # Update the output files for this job.
         self.db.set_output_files(job_id, output_files1)
 
         # Check the values
-        out_f = self.db.get_output_files(job_id)
+        out_f = self.db.get_output_files(job_id, with_info=True)
         self.assertEqual(set(out_f), set(output_files1))
 
         # Re update to check it works when there are already files written in.
         self.db.set_output_files(job_id, output_files2)
 
         # Check new values
-        out_f = self.db.get_output_files(job_id)
+        out_f = self.db.get_output_files(job_id, with_info=True)
         self.assertEqual(set(out_f), set(output_files2))
 
     def test_output_files(self):
@@ -372,7 +377,9 @@ class InterfaceDBTest(DBTestCase):
 
         # Add an output file
         outputfiles = ['test.sdf', 'test.png', 'longfilenametahtisrandom.log']
-        self.db.set_output_files(1, outputfiles)
+        self.db.set_output_files(
+            1,
+            [JSAProcFileInfo(x, None) for x in outputfiles])
 
         addfiles = self.db.get_output_files(1)
 
@@ -470,7 +477,8 @@ class InterfaceDBTest(DBTestCase):
 
         # Test the return preview files option..
         outfiles = ['1.sdf', '2.sdf', 'name_preview_64.png']
-        self.db.set_output_files(1, outfiles)
+        self.db.set_output_files(1,
+                                 [JSAProcFileInfo(x, None) for x in outfiles])
         self.assertEqual(
             [x.outputs for x in self.db.find_jobs(number=1, outputs='%')][0],
             outfiles)

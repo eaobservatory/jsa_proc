@@ -20,6 +20,7 @@ import subprocess
 import shutil
 
 from jsa_proc.admin.directories import get_input_dir, get_output_dir
+from jsa_proc.db.db import JSAProcFileInfo
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError
@@ -317,8 +318,8 @@ def get_output_files(job_id):
     parameter:
     job_id, integer
 
-    returns: list of strings.
-    Each string is just a filename, with no path attached.
+    returns: list of JSAProcFileInfo objects.
+    Each object contains a plain filename, with no path attached.
     """
 
     # find output_dir
@@ -333,7 +334,8 @@ def get_output_files(job_id):
     # Get list of files in directory:
     contents = os.listdir(output_dir)
 
-    return contents
+    # TODO: include real MD5 sums.
+    return [JSAProcFileInfo(x, None) for x in contents]
 
 
 def valid_hds(filepath):

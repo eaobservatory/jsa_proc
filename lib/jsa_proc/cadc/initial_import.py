@@ -21,6 +21,7 @@ from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.param import parse_cadc_param
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.config import get_database
+from jsa_proc.db.db import JSAProcFileInfo
 from jsa_proc.error import JSAProcError
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,9 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
 
                 if output is not None:
                     logger.debug('Storing output file list.')
-                    db.set_output_files(job_id, [f.lower() for f in output])
+                    db.set_output_files(
+                            job_id,
+                            [JSAProcFileInfo(f.lower(), None) for f in output])
 
                     if fetch_previews:
                         logger.debug('Attempting to download preview files.')

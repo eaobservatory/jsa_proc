@@ -174,7 +174,7 @@ def run_a_job(job_id, db=None, force=False):
     # and write to tile table in db.
     if hpx_task.search(job.task):
         logger.debug('Storing list of output tiles for HPX job ' + str(job_id))
-        tiles = hpx_tiles_from_filenames(output_files)
+        tiles = hpx_tiles_from_filenames([x.filename for x in output_files])
         db.set_tilelist(job_id, tiles)
         logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
                      ', '.join(str(i) for i in tiles))
