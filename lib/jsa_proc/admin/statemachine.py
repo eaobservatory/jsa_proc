@@ -46,7 +46,6 @@ class JSAProcStateMachine:
 
     def poll(self):
         self.poll_jac_jobs(self)
-        self.poll_cadc_jobs(self)
 
     def poll_jac_jobs(self, etransfer=True):
         """Try to update status of all JAC jobs.
@@ -168,93 +167,5 @@ class JSAProcStateMachine:
                 n_err += 1
 
         logger.info('Done updating JAC job status')
-
-        return False if n_err else True
-
-    def poll_cadc_jobs(self, fetch_previews=True):
-        """Update status of all CADC jobs.
-
-        Fetches the status of all relevant jobs from CADC.  Then loops
-        through them and updates the status in our database.
-
-        Returns true if there were no errors.
-        """
-
-        # Made a dictionary mapping tags to job identifiers.
-        logger.info('Preparing list of job IDs for CADC jobs')
-        id_ = {}
-        states = {}
-        for job in self.db.find_jobs(location='CADC'):
-            recipe_instance = job.id
-            id_[job.foreign_id] = recipe_instance
-            states[job.foreign_id] = job.state
-
-        # Check all CADC jobs (this call can be slow).
-        logger.info('Retrieving recipe instance information from CADC')
-        jobs = self.cadc.get_recipe_info()
-
-        # Loop over jobs and update status.
-        logger.info('Starting update of CADC job status')
-        n_err = 0
-
-        for job in jobs:
-            recipe_instance = job.id
-            logger.debug('Checking state of %s, tag: %s',
-                         recipe_instance, job.tag)
-
-            # If we do not have this job in our database, issue a warning
-            # and continue to the next job.
-            if recipe_instance not in id_:
-                logger.warning('Foreign ID %s is unknown', recipe_instance)
-                continue
-
-            # Pop the job ID out of the dictionary so that we can tell if
-            # any jobs were not updated.
-            job_id = id_.pop(recipe_instance)
-
-            try:
-                # See if the state is the same, in which case we don't need
-                # to do anything for this job.
-                state = CADCDPState.jsaproc_state(job.state)
-                if state == states[recipe_instance]:
-                    logger.debug('Job state has not changed')
-                    continue
-
-                # Retrieve the job ID and use it to update the state.
-                logger.debug('Changing state of job %i to %s', job_id, state)
-                self.db.change_state(job_id, state,
-                                     'State at CADC changed to {0}'.format(
-                                         CADCDPState.get_name(job.state)))
-
-                # Is the (new) state COMPLETE?  If so, fetch the list of
-                # output files.
-                if job.state == CADCDPState.COMPLETE:
-                    logger.debug('Job is complete: fetching output files.')
-                    output = self.cadc.get_recipe_output_files(recipe_instance)
-
-                    # Ensure output filenames are lower case.
-                    output = [f.lower() for f in output]
-
-                    logger.debug('Storing list of output files.')
-                    self.db.set_output_files(job_id, output)
-
-                    if fetch_previews:
-                        logger.debug('Attempting to download preview files.')
-                        fetch_cadc_previews(output, get_output_dir(job_id))
-
-            except Exception:
-                logger.exception('Error while updating state of job %i',
-                                 recipe_instance)
-
-                n_err += 1
-
-        # Issue warnings for any jobs which we did not find at CADC.
-        for (ri, job_id) in id_.items():
-            logger.warning('CADC recipe instance %s (job %i) '
-                           'status was not received',
-                           ri, job_id)
-
-        # Log completion of the procedure.
-        logger.info('Done updating CADC job status')
 
         return False if n_err else True
