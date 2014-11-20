@@ -52,7 +52,7 @@ class CADCImportTestCase(DBTestCase):
             (CADCDPInfo(13, 'Q', 'tag-13', param2, -300),
                 ['f_13_01'], ['rf_13.fits']),
             (CADCDPInfo(14, 'Y', 'tag-14', param2, -400),
-                ['f_14_01', 'f_14_02'], ['rf_14.fits']),
+                ['f_14_01', 'f_14_02', 'f_14_02'], ['rf_14.fits']),
         ])
 
         # Check that dry-run mode really does nothing.

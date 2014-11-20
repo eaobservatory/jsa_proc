@@ -72,6 +72,11 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
                          recipe_instance)
             input = cadc.get_recipe_input_files(recipe_instance)
 
+            # Some existing CADC recipe instances have repeated input file
+            # names, which is an error in our system.  Therefore form a
+            # set to eliminate the duplicates.
+            input = set(input)
+
             # If the recipe instance is complete, also fetch the
             # list of output files.
             if job.state == CADCDPState.COMPLETE:
