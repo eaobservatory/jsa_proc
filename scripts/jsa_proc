@@ -23,6 +23,7 @@ Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
+    jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--foreign-id <foreign-id>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc poll [-v | -q] [--no-etransfer]
@@ -40,6 +41,7 @@ Options:
 
     --job-id, -j <id>          Identifier of job on which to work.
     --location, -l <location>  Job location, e.g. JAC, CADC.
+    --foreign-id <foreign-id>  Foreign ID (e.g. CADC recipe instance).
 
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
@@ -103,7 +105,7 @@ def main():
 
     try:
         # Process integer arguments.
-        for integer_argument in ('--job-id', '--count'):
+        for integer_argument in ('--job-id', '--count', '--foreign-id'):
             if args[integer_argument] is not None:
                 try:
                     args[integer_argument] = int(args[integer_argument])
@@ -188,7 +190,8 @@ def import_(args):
 
         if not import_from_cadcdp(dry_run=args['--dry-run'],
                                   task=args['--task'],
-                                  tag_pattern=args['--tag']):
+                                  tag_pattern=args['--tag'],
+                                  recipe_instance=args['--foreign-id']):
             raise CommandError('errors encountered during import')
 
     else:

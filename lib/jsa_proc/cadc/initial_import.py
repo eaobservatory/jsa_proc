@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
-                       fetch_previews=True, tag_pattern=None):
+                       fetch_previews=True, tag_pattern=None,
+                       recipe_instance=None):
     """Perform an initial import of existing jobs from CADC.
 
     Returns true on success.
@@ -52,7 +53,8 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
     logger.info('Beginning import from CADC' +
                 (' (DRY RUN)' if dry_run else ''))
 
-    for job in cadc.get_recipe_info(tag_pattern=tag_pattern):
+    for job in cadc.get_recipe_info(tag_pattern=tag_pattern,
+                                    recipe_instance=recipe_instance):
         recipe_instance = job.id
 
         logger.debug('Importing recipe instance %s', recipe_instance)
