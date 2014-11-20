@@ -15,6 +15,8 @@
 
 from .cadcdpdb import CADCDPDBTestCase
 
+from jsa_proc.cadc.dpdb import CADCDPInfo
+
 
 class BasicCADCPDPDBTest(CADCDPDBTestCase):
     def test_recipe(self):
@@ -49,6 +51,14 @@ class BasicCADCPDPDBTest(CADCDPDBTestCase):
             self.assertEqual(job.priority, priority)
             self.assertRegexpMatches(job.parameters,
                                      "-drparameters='[A-Z_]*'")
+
+    def test_recipe_instance_num(self):
+        """Test retrieval of recipe information by recipe instance."""
+
+        info = self.db.get_recipe_info(recipe_instance=1002)
+        self.assertEqual(info, [CADCDPInfo(
+            1002, 'Q', 'hpx-1002-850um',
+            '-drparameters=\'REDUCE_SCAN_JSA_PUBLIC\'', -300)])
 
     def test_recipe_instance_tag(self):
         """Test retrieval of recipe information by tag pattern."""

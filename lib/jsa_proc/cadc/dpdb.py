@@ -60,12 +60,15 @@ class CADCDP:
 
         self.db.close()
 
-    def get_recipe_info(self, tag_pattern=None):
+    def get_recipe_info(self, tag_pattern=None, recipe_instance=None):
         """Fetch info for all JSA recipes in the CADC DP database.
 
         Returns a list of CADCDPInfo named tuples.
 
-        By default, fetch JSA HEALPix tile generation recipe
+        If a recipe instance number is specified, search only
+        for that job.
+
+        Otherwise, by default, fetch JSA HEALPix tile generation recipe
         instances, based on the recipe name in the parameters
         column.  Otherwise, if a tag pattern is specified,
         fetch recipes matching that pattern.
@@ -76,7 +79,12 @@ class CADCDP:
 
         result = []
 
-        if tag_pattern is None:
+        if recipe_instance is not None:
+            # A specific recipe instance has been requested.
+            where = 'identity_instance_id=@r'
+            param = {'@r': recipe_instance}
+
+        elif tag_pattern is None:
             # By default, import the HEALPix tile generation
             # recipe instances.
             where = '(' + ' OR '.join((
