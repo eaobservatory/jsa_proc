@@ -21,6 +21,7 @@ class CADCDPState:
     """Class for handling CADC data processing states.
     """
 
+    UNASSIGNED = ' '
     QUEUED = 'Q'
     DRM_QUEUED = 'D'
     RETRIEVE_STARTED = 'S'
@@ -38,9 +39,11 @@ class CADCDPState:
     STATE_COMPLETE = set((COMPLETE,))
     STATE_ERROR = set((ERROR, UNDOABLE))
 
-    STATE_ALL = STATE_QUEUED | STATE_RUNNING | STATE_COMPLETE | STATE_ERROR
+    STATE_ALL = set((UNASSIGNED,)) | STATE_QUEUED | STATE_RUNNING \
+        | STATE_COMPLETE | STATE_ERROR
 
     _info = {
+        UNASSIGNED: 'Unassigned',
         QUEUED: 'Queued',
         DRM_QUEUED: 'DRM Queued',
         RETRIEVE_STARTED: 'Retrieve started',
@@ -66,6 +69,9 @@ class CADCDPState:
 
         elif state in cls.STATE_ERROR:
             return JSAProcState.ERROR
+
+        elif state == cls.UNASSIGNED:
+            return JSAProcState.UNKNOWN
 
         else:
             raise JSAProcError('Unknown CADC DP state: ' + state)

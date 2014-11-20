@@ -35,6 +35,7 @@ class StateTestCase(TestCase):
             'E': 'E',
             'R': 'Q',
             'U': 'E',
+            ' ': '?',
         }
 
         for (cadc, jsa) in states.items():
