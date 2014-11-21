@@ -369,11 +369,10 @@ def valid_hds(filepath):
     myenv['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
 
     # Run hdstrace.
-    with open('/dev/null', 'w') as null:
-        returncode = subprocess.call([com_path, filepath, 'QUIET'],
-                                     env=myenv,
-                                     stdout=null, stderr=subprocess.STDOUT,
-                                     shell=False)
+    returncode = subprocess.call([com_path, filepath, 'QUIET'],
+                                 env=myenv,
+                                 stderr=subprocess.STDOUT,
+                                 shell=False)
 
     # Status is True for returncode=0, False otherwise.
     return returncode == 0
