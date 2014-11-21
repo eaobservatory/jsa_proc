@@ -5,6 +5,12 @@
 {% block content%}
 
 <form>
+  <select name="state_prev">
+    <option value="" {{ 'selected="selected"' | safe if chosen_state_prev is none }}>Any previous state</option>
+    {% for s in states %}
+    <option value="{{ s }}" {{ 'selected="selected"' | safe if chosen_state_prev == s }}>{{ s | state_name }}</option>
+    {% endfor %}
+  </select>
   <select name="filtering">
     <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any error type</option>
     {% for f in filtering_options %}

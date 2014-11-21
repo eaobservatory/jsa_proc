@@ -187,6 +187,7 @@ def create_web_app():
             filtering=request.args.get('filtering', None),
             chosentask=request.args.get('chosentask', None),
             extrafilter=request.args.get('extrafilter', None),
+            state_prev=request.args.get('state_prev', None),
         )
 
     @app.route('/job/<int:job_id>', methods=['GET'])
