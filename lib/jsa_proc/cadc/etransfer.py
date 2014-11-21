@@ -25,6 +25,7 @@ import logging
 
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.admin.directories import get_output_dir
+from jsa_proc.cadc.fetch import fetch_cadc_file_info
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
@@ -172,7 +173,8 @@ def _etransfer_send(job_id, dry_run, db):
 
     logger.debug('Retrieving list of output files')
     try:
-        files = db.get_output_files(job_id)
+        file_info = db.get_output_files(job_id, with_info=True)
+        files = [x.filename for x in file_info]
 
     except NoRowsError:
         raise CommandError('No output files found for job {0}'.format(job_id))
@@ -204,8 +206,21 @@ def _etransfer_send(job_id, dry_run, db):
     logger.debug('Checking which files are already at CADC')
     present = ad.check_files(files)
 
-    for (file, replace) in zip(files, present):
+    for (info, replace) in zip(file_info, present):
+        file = info.filename
+
         if replace:
+            # We need to check whether the file is not, in fact, different
+            # from the current version, because in that case we are not
+            # allowed to "replace" it.
+            cadc_file_info = fetch_cadc_file_info(file)
+            cadc_file_md5 = cadc_file_info['content-md5']
+
+            if info.md5 == cadc_file_md5:
+                logger.info('File %s in unchanged, skipping replacement',
+                            file)
+                continue
+
             target_type = 'replace'
         else:
             target_type = 'new'
