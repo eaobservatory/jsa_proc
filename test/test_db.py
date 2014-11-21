@@ -274,7 +274,7 @@ class InterfaceDBTest(DBTestCase):
                              state_prev=JSAProcState.WAITING)
 
         with self.assertRaises(NoRowsError):
-            self.db.change_state(job_id, JSAProcState.RUNNING, 'test',
+            self.db.change_state(job_id, JSAProcState.FETCHING, 'test',
                                  state_prev=JSAProcState.WAITING)
 
         # Check that an error is raised if the new state is bad.
