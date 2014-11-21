@@ -844,13 +844,14 @@ class JSAProcDB:
                           'VALUES (%s, %s, %s)',
                           (job_id, f.filename, f.md5))
 
-    def find_errors_logs(self, location=None, task=None):
+    def find_errors_logs(self, location=None, task=None, state_prev=None):
         """
         Retrieve list of all jobs in an error state, together with their logs.
 
         Search is limited by:
              * location (default None, can be 'JAC' or 'CADC')
              * task (default None)
+             * state_prev
 
         Return: an ordered dictionary by job identifier.  This will be in
         reverse chronological order of the last entry for each job
@@ -868,6 +869,9 @@ class JSAProcDB:
         if task is not None:
             query += ' AND job.task=%s '
             param.append(task)
+        if state_prev is not None:
+            query += ' AND job.state_prev=%s '
+            param.append(state_prev)
 
         query += ' ORDER BY log.id DESC'
 
