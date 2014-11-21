@@ -143,6 +143,11 @@ class InterfaceDBTest(DBTestCase):
             self.db.add_job('tag3', 'CADC', 'night', 'REC', 'test', input_file_names=['test2'],
                             state='!')
 
+        # Check we can't give the same tag more than once.
+        with self.assertRaisesRegexp(JSAProcError,
+                                     'a job already exists with the same tag'):
+            self.db.add_job('tag2', 'JAC', 'obs', 'REC', 'test', input_file_names=['test1'])
+
         # Check we can't give the same file more than once (a database
         # constraint).
         with self.assertRaises(JSAProcError):

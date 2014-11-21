@@ -254,8 +254,18 @@ class JSAProcDB:
             job_id, parents, filters = _validate_parents(None, parent_jobs,
                                                          filters=filters)
 
-        # insert job into table
         with self.db as c:
+            # Check if the tag already exists.  The database constraints
+            # should already check for this, but with MySQL's InnoDB
+            # engine, a job number is allocated (and lost) if the
+            # insert constraint fails.
+            c.execute('SELECT COUNT(*) FROM job WHERE tag=%s', (tag,))
+            row = c.fetchone()
+            if row[0] != 0:
+                raise JSAProcError('a job already exists with the same tag: ' +
+                                   tag)
+
+            # Insert job into table
             c.execute(
                 'INSERT INTO job '
                 '(tag, state, location, mode, parameters, '
