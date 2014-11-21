@@ -22,6 +22,7 @@ import logging
 from pytz import UTC
 
 from jsa_proc.action.error_filter import JSAProcErrorFilter
+from jsa_proc.action.util import yes_or_no_question
 from jsa_proc.cadc.files import CADCFiles
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
@@ -168,16 +169,3 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                             job, JSAProcState.QUEUED,
                             'Resubmitting job after unauthorized error',
                             state_prev=JSAProcState.ERROR)
-
-
-def yes_or_no_question(question, default=False):
-    while True:
-        reply = raw_input('{0} ({1}): '.format(question,
-                                               'Y/n' if default else 'y/N'))
-
-        if reply == '':
-            return default
-        elif reply.lower() == 'y':
-            return True
-        elif reply.lower() == 'n':
-            return False

@@ -21,6 +21,7 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] (input | scratch) [--count <number>]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
+    jsa_proc etransfer [-v | -q] --query --job-id <id>
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--foreign-id <foreign-id>]
@@ -163,10 +164,13 @@ def etransfer(args):
     """
 
     from jsa_proc.cadc.etransfer import etransfer_poll_output, \
-        etransfer_send_output
+        etransfer_query_output, etransfer_send_output
 
     if args['--poll']:
         etransfer_poll_output(dry_run=args['--dry-run'])
+
+    elif args['--query']:
+        etransfer_query_output(args['--job-id'])
 
     else:
         etransfer_send_output(args['--job-id'], dry_run=args['--dry-run'],

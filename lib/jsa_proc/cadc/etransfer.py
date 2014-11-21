@@ -24,6 +24,7 @@ from socket import gethostname
 import logging
 
 from jsa_proc.action.decorators import ErrorDecorator
+from jsa_proc.action.util import yes_or_no_question
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file_info
 from jsa_proc.cadc.files import CADCFiles
@@ -255,6 +256,49 @@ def _etransfer_send(job_id, dry_run, db, force):
             state_prev=(None if force else JSAProcState.PROCESSED))
 
 
+def etransfer_query_output(job_id):
+    """Investigate the e-transfer status of the output of a job."""
+
+    db = get_database()
+    ad = CADCFiles()
+
+    config = get_config()
+    transdir = config.get('etransfer', 'transdir')
+
+    files = db.get_output_files(job_id)
+
+    problem_files = []
+
+    print('{0:110} {1:5} {2:12} {3:5}'.format('File', 'ET', 'Directory', 'AD'))
+
+    for file in zip(files, etransfer_file_status(files), ad.check_files(files)):
+        (filename, etransfer_status, ad_status) = file
+
+        if etransfer_status is None:
+            (ok, dir) = (True, '')
+        else:
+            (ok, dir) = etransfer_status
+
+        print('{0:110} {1:5} {2:12} {3:5}'.format(
+            filename, repr(ok), dir, repr(ad_status)))
+
+        if not ok:
+            problem_files.append(os.path.join(transdir, 'reject', dir, filename))
+
+    if problem_files:
+        if yes_or_no_question('Delete rejected files from e-transfer directories?'):
+            for file in problem_files:
+                logger.debug('Deleting file %s', file)
+                os.unlink(file)
+
+            if yes_or_no_question('Re-try e-transfer?'):
+                # Clear cache before attempting to e-transfer since we just
+                # removed the files from the e-transfer directories.
+                _etransfer_clear_cache()
+
+                etransfer_send_output(job_id, dry_run=False, force=True)
+
+
 def etransfer_file_status(files):
     """Determine the current e-transfer status of a given file.
 
@@ -283,6 +327,14 @@ def etransfer_file_status(files):
         status_cache = _etransfer_find_files()
 
     return [status_cache.get(file, None) for file in files]
+
+
+def _etransfer_clear_cache():
+    """Clears the e-transfer status cache."""
+
+    global status_cache
+
+    status_cache = None
 
 
 def _etransfer_check_config(any_user=False):
