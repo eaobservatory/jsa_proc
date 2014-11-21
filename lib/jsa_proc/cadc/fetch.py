@@ -26,6 +26,7 @@ from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
 
 jcmt_data_url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
+jcmt_data_auth = None
 
 
 def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
@@ -50,23 +51,18 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     Returns name of file with path
     """
 
-    # Data path.
-    data_path = jcmt_data_url + filename
-
-    # Get CADC login.
-    config = get_config()
-    cadc_username = config.get('cadc', 'username')
-    cadc_password = config.get('cadc', 'password')
-
     # Local name to save to (requests automatically decompresses, so
     # don't need the .gz).
     local_file = filename + suffix
     output_file_path = os.path.join(output_directory, local_file)
 
     try:
+        (args, kwargs) = _prepare_cadc_request(filename)
+
         # Connect with stream=True for large files.
-        r = requests.get(data_path, auth=(cadc_username, cadc_password),
-                         stream=True)
+        kwargs['stream'] = True
+
+        r = requests.get(*args, **kwargs)
 
         # Check if its worked. (raises error if not okay)
         r.raise_for_status()
@@ -80,3 +76,52 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
         raise JSAProcError('Error fetching CADC file: ' + str(e))
 
     return output_file_path
+
+
+def fetch_cadc_file_info(filename):
+    """Retrieve information about a file in the JCMT archive at CADC.
+
+    This routine works in the same way as fetch_cadc_file but makes
+    an HTTP HEAD request instead of an HTTP GET request.
+    """
+
+    try:
+        (args, kwargs) = _prepare_cadc_request(filename)
+
+        kwargs['allow_redirects'] = True
+
+        r = requests.head(*args, **kwargs)
+
+        if r.status_code == 404:
+            return None
+
+        # Check if its worked. (raises error if not okay)
+        r.raise_for_status()
+
+        return r.headers
+
+    except HTTPError as e:
+        raise JSAProcError('Error fetching CADC file info: ' + str(e))
+
+
+def _prepare_cadc_request(filename):
+    """Prepare request parameters for a CADC data web service
+    request.
+
+    Returns arguments and keyword arguments for the requests
+    library methods (get and head).
+    """
+
+    # Data path.
+    url = jcmt_data_url + filename
+
+
+    global jcmt_data_auth
+
+    # Get config for CADC account information.
+    if jcmt_data_auth is None:
+        config = get_config()
+        jcmt_data_auth = (config.get('cadc', 'username'),
+                          config.get('cadc', 'password'))
+
+    return ([url], {'auth': jcmt_data_auth})

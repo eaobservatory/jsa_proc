@@ -27,7 +27,7 @@ Usage:
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc poll [-v | -q] [--no-etransfer]
-    jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus) <search>
+    jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus | dws) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -254,6 +254,10 @@ def query(args):
         from jsa_proc.omp.db import OMPDB
         ompdb = OMPDB()
         print('Status: ' + repr(ompdb.get_status(search)))
+
+    elif args['dws']:
+        from jsa_proc.cadc.fetch import fetch_cadc_file_info
+        print(repr(fetch_cadc_file_info(search)))
 
     else:
         raise CommandError('Did not recognise query type')
