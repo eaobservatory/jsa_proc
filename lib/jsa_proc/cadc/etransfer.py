@@ -121,7 +121,7 @@ def etransfer_poll_output(dry_run):
         raise CommandError('Errors were encountered polling e-transfer')
 
 
-def etransfer_send_output(job_id, dry_run):
+def etransfer_send_output(job_id, dry_run, force=False):
     """High level e-transfer function for use from scripts.
 
     This function makes some basic checks and then launches
@@ -142,21 +142,22 @@ def etransfer_send_output(job_id, dry_run):
     logger.debug('Connecting to JSA processing database')
     db = get_database()
 
-    job = db.get_job(id_=job_id)
+    if not force:
+        job = db.get_job(id_=job_id)
 
-    if job.state != JSAProcState.PROCESSED:
-        message = 'Job {0} cannot be e-transferred as it is in ' \
-                  'state {1}'.format(job_id, JSAProcState.get_name(job.state))
-        logger.error(message)
-        raise CommandError(message)
+        if job.state != JSAProcState.PROCESSED:
+            message = 'Job {0} cannot be e-transferred as it is in ' \
+                      'state {1}'.format(job_id, JSAProcState.get_name(job.state))
+            logger.error(message)
+            raise CommandError(message)
 
-    _etransfer_send(job_id, dry_run=dry_run, db=db)
+    _etransfer_send(job_id, dry_run=dry_run, db=db, force=force)
 
     logger.debug('Done adding output for job {0} to e-transfer'.format(job_id))
 
 
 @ErrorDecorator
-def _etransfer_send(job_id, dry_run, db):
+def _etransfer_send(job_id, dry_run, db, force):
     """Private function to copy job output into the e-transfer
     directories.
 
@@ -251,7 +252,7 @@ def _etransfer_send(job_id, dry_run, db):
         db.change_state(
             job_id, JSAProcState.TRANSFERRING,
             'Output files have been copied into the e-transfer directories',
-            state_prev=JSAProcState.PROCESSED)
+            state_prev=(None if force else JSAProcState.PROCESSED))
 
 
 def etransfer_file_status(files):

@@ -19,7 +19,7 @@
 
 Usage:
     jsa_proc clean [-v | -q] [--dry-run] (input | scratch) [--count <number>]
-    jsa_proc etransfer [-v | -q] [--dry-run] --job-id <id>
+    jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
@@ -169,7 +169,8 @@ def etransfer(args):
         etransfer_poll_output(dry_run=args['--dry-run'])
 
     else:
-        etransfer_send_output(args['--job-id'], dry_run=args['--dry-run'])
+        etransfer_send_output(args['--job-id'], dry_run=args['--dry-run'],
+                              force=args['--force'])
 
 
 @command
