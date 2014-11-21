@@ -733,12 +733,19 @@ class JSAProcDB:
 
         with self.db as c:
             if foreign_id == ():
-                c.execute('UPDATE job SET location = %s WHERE id = %s',
-                          (location, job_id))
+                query = 'UPDATE job SET location = %s WHERE id = %s'
+                param = (location, job_id)
             else:
-                c.execute('UPDATE job SET location = %s, foreign_id = %s '
-                          'WHERE id = %s',
-                          (location, foreign_id, job_id))
+                query = 'UPDATE job SET location = %s, foreign_id = %s ' \
+                        'WHERE id = %s'
+                param = (location, foreign_id, job_id)
+
+            c.execute(query, param)
+
+            if c.rowcount == 0:
+                raise NoRowsError('job', query % param)
+            elif c.rowcount > 1:
+                raise ExcessRowsError('job', query % param)
 
             if state_new is not None:
                 if message is None:
