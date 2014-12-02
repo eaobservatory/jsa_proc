@@ -24,6 +24,10 @@ from jsa_proc.util import identifier_to_pattern
 logger = logging.getLogger(__name__)
 
 
+class LocCompatException():
+    """Exception class for exceptions raised by LogCompat."""
+
+
 class LogCompat():
     """Compatability class to provide a tools4caom2.logger-like
     interface."""
@@ -31,8 +35,14 @@ class LogCompat():
     def file(self, message, loglevel=logging.INFO):
         logger.log(loglevel, message)
 
-    def console(self, message, loglevel=logging.INFO):
+        if loglevel >= logging.ERROR:
+            raise LogCompatException(message)
+
+    def console(self, message, loglevel=logging.INFO, raise_exception=True):
         logger.log(loglevel, message)
+
+        if raise_exception and loglevel >= logging.ERROR:
+            raise LogCompatException(message)
 
 
 class CADCTap():
