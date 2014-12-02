@@ -498,7 +498,8 @@ class JSAProcDB:
             # requested state.  Check this now (rather than before since
             # we expect the state to be changing most times this method is
             # called).
-            if self._get_job(c, 'id', job_id).state == newstate:
+            if ((self._get_job(c, 'id', job_id).state == newstate) and
+                    ((state_prev is None) or (state_prev == newstate))):
                 logger.warning('Job %i already in state %s', job_id, newstate)
             else:
                 raise NoRowsError('job', query % tuple(param))
