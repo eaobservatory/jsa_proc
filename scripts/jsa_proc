@@ -29,7 +29,7 @@ Usage:
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc poll [-v | -q] [--no-etransfer]
-    jsa_proc query [-v | -q] (jcmtinfo | caom2 | ompstatus | dws) <search>
+    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -251,6 +251,11 @@ def query(args):
         caom2 = CADCTap()
         for obsid in sorted(caom2.obsids_by_pattern(search.lower())):
             print(obsid)
+
+    elif args['caom2file']:
+        from jsa_proc.cadc.tap import CADCTap
+        caom2 = CADCTap()
+        print(repr(caom2.check_file(search)))
 
     elif args['jcmtinfo']:
         from jsa_proc.cadc.files import CADCFiles

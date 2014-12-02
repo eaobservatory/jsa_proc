@@ -117,3 +117,28 @@ class CADCTap():
         """
 
         return identifier_to_pattern(obsid, self.patterns)
+
+    def check_file(self, filename):
+        """Check whether a file has been ingested into CAOM-2."""
+
+        # CADC uses file IDs without extension in the JCMT archive.
+        (base, dot, suffix) = filename.partition('.')
+
+        table = self.tap.query(
+            'SELECT COUNT(*) FROM caom2.Artifact '
+            'WHERE uri = \'ad:JCMT/{0}\''.format(base))
+
+        if table is None:
+            raise JSAProcError(
+                'Failed TAP query for file {0}'.format(base))
+
+        count = table[0][0]
+
+        if count == 0:
+            return False
+
+        elif count == 1:
+            return True
+
+        else:
+            raise JSAProcError('Received unexpected artifact count')
