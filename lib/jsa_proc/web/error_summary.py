@@ -22,7 +22,7 @@ from jsa_proc.state import JSAProcState
 from jsa_proc.web.util import url_for
 
 
-def prepare_error_summary(db, filtering=None, chosentask=None,
+def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
                           extrafilter=None, state_prev=None):
     """
     Prepare a summary of all jobs in error state.
@@ -81,4 +81,5 @@ def prepare_error_summary(db, filtering=None, chosentask=None,
         'chosentask': chosentask,
         'extrafilter': extrafilter,
         'chosen_state_prev': state_prev,
+        'redirect_url': redirect_url,
     }
