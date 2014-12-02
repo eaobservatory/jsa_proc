@@ -18,7 +18,8 @@
 """jsa_proc - JSA processing tracking system tool
 
 Usage:
-    jsa_proc clean [-v | -q] [--dry-run] (input | scratch) [--count <number>]
+    jsa_proc clean [-v | -q] [--dry-run] input [--count <number>]
+    jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -47,6 +48,7 @@ Options:
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
     --force, -f                Skip initial state check.
+    --include-error            Include jobs in the error state.
     --replaceparent            Force recopying parent jobs into input folder
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
@@ -151,7 +153,8 @@ def clean(args):
 
     elif args['scratch']:
         from jsa_proc.action.clean import clean_scratch
-        clean_scratch(count=args['--count'], dry_run=args['--dry-run'])
+        clean_scratch(count=args['--count'], dry_run=args['--dry-run'],
+                      include_error=args['--include-error'])
 
     else:
         raise CommandError('Did not recognise clean type')

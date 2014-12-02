@@ -42,17 +42,24 @@ def clean_input(count=None, dry_run=False):
     logger.debug('Done cleaning input directories')
 
 
-def clean_scratch(count=None, dry_run=False):
+def clean_scratch(count=None, dry_run=False, include_error=False):
     """Delete scratch directories for processed jobs."""
 
     logger.debug('Beginning scratch clean')
 
-    _clean_job_directories(
-        get_scratch_dir,
-        [
+    states = [
             JSAProcState.COMPLETE,
             JSAProcState.DELETED,
-        ],
+    ]
+
+    if include_error:
+        states.append(JSAProcState.ERROR)
+
+    logger.debug('Cleaning jobs in states: %s', ', '.join(states))
+
+    _clean_job_directories(
+        get_scratch_dir,
+        states,
         count=count,
         dry_run=dry_run)
 
