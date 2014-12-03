@@ -19,6 +19,7 @@
 
 Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>]
+    jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>]
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
@@ -150,6 +151,11 @@ def clean(args):
     if args['input']:
         from jsa_proc.action.clean import clean_input
         clean_input(count=args['--count'], dry_run=args['--dry-run'])
+
+    elif args['output']:
+        from jsa_proc.action.clean import clean_output
+        clean_output(count=args['--count'], dry_run=args['--dry-run'],
+                     task=args['--task'])
 
     elif args['scratch']:
         from jsa_proc.action.clean import clean_scratch
