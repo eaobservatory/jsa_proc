@@ -140,5 +140,9 @@ class CADCTap():
         elif count == 1:
             return True
 
+        elif count > 1:
+            logger.warning('Received unexpected artifact count')
+            return True
+
         else:
             raise JSAProcError('Received unexpected artifact count')
