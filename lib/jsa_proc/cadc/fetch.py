@@ -22,11 +22,11 @@ import requests
 from requests.exceptions import HTTPError
 import os.path
 
-from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
 
-jcmt_data_url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
-jcmt_data_auth = None
+jcmt_data_url = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
+
+proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
 
 def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
@@ -115,13 +115,4 @@ def _prepare_cadc_request(filename):
     # Data path.
     url = jcmt_data_url + filename
 
-
-    global jcmt_data_auth
-
-    # Get config for CADC account information.
-    if jcmt_data_auth is None:
-        config = get_config()
-        jcmt_data_auth = (config.get('cadc', 'username'),
-                          config.get('cadc', 'password'))
-
-    return ([url], {'auth': jcmt_data_auth})
+    return ([url], {'cert': proxy_certificate})

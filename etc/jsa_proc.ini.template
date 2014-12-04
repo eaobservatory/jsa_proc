@@ -4,10 +4,6 @@ database=jsa_proc_test
 user=jsa_proc_test
 password=jsa_proc_test
 
-[cadc]
-username=DummyCADCName
-password=DummyCADCPassword
-
 [directories]
 input=/net/kamaka/export/data/jsa_proc/input
 output=/net/kamaka/export/data/jsa_proc/output

@@ -43,13 +43,6 @@ class ConfigTestCase(TestCase):
         self.assertTrue(config.has_option('database', 'user'))
         self.assertTrue(config.has_option('database', 'password'))
 
-    def test_cadc_config(self):
-        config = get_config()
-
-        self.assertTrue(config.has_section('cadc'))
-        self.assertTrue(config.has_option('cadc', 'username'))
-        self.assertTrue(config.has_option('cadc', 'password'))
-
     def test_home_var(self):
         """Test that we get an error if the file doesn't exists.
 
