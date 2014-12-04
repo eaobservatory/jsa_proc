@@ -19,6 +19,8 @@ log=/net/kamaka/export/data/jsa_proc/log
 # occur.
 [disk_limit]
 fetch_min_space=1000
+run_min_scratch_space=500
+run_min_output_space=200
 etransfer_min_space=500
 
 [job_run]

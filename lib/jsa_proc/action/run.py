@@ -19,12 +19,13 @@ import re
 from socket import gethostname
 
 from jsa_proc.admin.directories import get_input_dir
-from jsa_proc.config import get_database
+from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.datafile_handling import get_output_files, input_list_name
 from jsa_proc.action.job_running import jsawrapdr_run
+from jsa_proc.files import get_output_dir_space, get_scratch_dir_space
 from jsa_proc.jac.file import hpx_tiles_from_filenames
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,28 @@ def run_job(job_id=None, db=None, force=False, task=None):
     Optionally a database object can be given for testing purposes.
 
     Any errors raised will be logged in the 'log' table for the job_id.
+
+    If insufficient disk space is available (as configured by the disk_limit
+    section of the configuration file) then this function returns without
+    doing anything.
     """
+
+    # Check we have sufficient disk space for running to occur.
+    config = get_config()
+    output_limit = float(config.get('disk_limit', 'run_min_output_space'))
+    scratch_limit = float(config.get('disk_limit', 'run_min_scratch_space'))
+    output_space = get_output_dir_space()
+    scratch_space = get_scratch_dir_space()
+
+    if output_space < output_limit:
+        logger.warning('Insufficient output disk space: %f / %f GiB required',
+                       output_space, output_limit)
+        return
+
+    if scratch_space < scratch_limit:
+        logger.warning('Insufficient scratch disk space: %f / %f GiB required',
+                        scratch_space, scratch_limit)
+        return
 
     # Get a link to the database.
     if not db:
