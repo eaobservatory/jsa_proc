@@ -144,22 +144,25 @@ def _clean_output_dir(directory, job_id, db, dry_run):
     caom2 = CADCTap()
     deletable = []
 
-    for file in db.get_output_files(job_id, with_info=True):
-        if file.filename not in non_preview:
-            # The file is either a preview or not under consideration
-            # for deletion.
-            continue
+    # Consider files other than those which are either a preview or not under
+    # consideration for deletion.
+    output_files = filter(
+        (lambda x: x.filename in non_preview),
+        db.get_output_files(job_id, with_info=True))
+
+    files_in_caom2 = caom2.check_files([x.filename for x in output_files])
+
+    for (file, in_caom2) in zip(output_files, files_in_caom2):
+        # Check whether the file has been ingested into CAOM-2.
+        if not in_caom2:
+            logger.warning('File %s is not in CAOM-2', file.filename)
+            break
 
         # Check whether the file is identical to what CADC have in AD.
         cadc_md5 = fetch_cadc_file_info(file.filename)['content-md5']
 
         if file.md5 != cadc_md5:
             logger.warning('File %s has MD5 mismatch', file.filename)
-            break
-
-        # Check whether the file has been ingested into CAOM-2.
-        if not caom2.check_file(file.filename):
-            logger.warning('File %s is not in CAOM-2', file.filename)
             break
 
         deletable.append(file.filename)

@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import os.path
 import re
 
 from tools4caom2.tapclient import tapclient
@@ -23,6 +24,7 @@ from jsa_proc.util import identifier_to_pattern
 
 logger = logging.getLogger(__name__)
 
+valid_fileid = re.compile('^[-_a-z0-9]+$')
 
 
 class LogCompatException():
@@ -119,31 +121,66 @@ class CADCTap():
 
         return identifier_to_pattern(obsid, self.patterns)
 
-    def check_file(self, filename):
-        """Check whether a file has been ingested into CAOM-2."""
+    def check_files(self, filenames):
+        """Check whether the given files have been ingested into CAOM-2.
 
-        # CADC uses file IDs without extension in the JCMT archive.
-        (base, dot, suffix) = filename.partition('.')
+        Returns a boolean list corresponding to the input list.
+        """
+
+        uris = {}
+
+        for filename in filenames:
+            # CADC uses file IDs without extension in the JCMT archive.
+            fileid = os.path.splitext(filename)[0]
+
+            if not valid_fileid.match(fileid):
+                raise JSAProcError('Invalid file ID {0}'.format(fileid))
+
+            uris[filename] = 'ad:JCMT/{0}'.format(fileid)
+
+        logger.debug(            'SELECT uri, COUNT(*) FROM caom2.Artifact '
+            'WHERE uri IN ('
+                + ', '.join(['\'{0}\''.format(x) for x in uris.values()])
+                + ') GROUP BY uri')
 
         table = self.tap.query(
-            'SELECT COUNT(*) FROM caom2.Artifact '
-            'WHERE uri = \'ad:JCMT/{0}\''.format(base))
+            'SELECT uri, COUNT(*) FROM caom2.Artifact '
+            'WHERE uri IN ('
+                + ', '.join(['\'{0}\''.format(x) for x in uris.values()])
+                + ') GROUP BY uri')
 
         if table is None:
             raise JSAProcError(
-                'Failed TAP query for file {0}'.format(base))
+                'Failed TAP query for files in CAOM-2')
 
-        count = table[0][0]
+        counts = {}
 
-        if count == 0:
-            return False
+        for row in table:
+            counts[row[0]] = row[1]
 
-        elif count == 1:
-            return True
 
-        elif count > 1:
-            logger.warning('Received unexpected artifact count')
-            return True
+        result = []
 
-        else:
-            raise JSAProcError('Received unexpected artifact count')
+        for filename in filenames:
+            uri = uris[filename]
+
+            if uri not in counts:
+                result.append(False)
+                continue
+
+            count = counts[uri]
+
+            if count == 0:
+                result.append(False)
+
+            elif count == 1:
+                result.append(True)
+
+            elif count > 1:
+                logger.warning('Received unexpected artifact count')
+                result.append(True)
+
+            else:
+                raise JSAProcError('Received unexpected artifact count')
+
+        return result

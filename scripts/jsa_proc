@@ -261,7 +261,7 @@ def query(args):
     elif args['caom2file']:
         from jsa_proc.cadc.tap import CADCTap
         caom2 = CADCTap()
-        print(repr(caom2.check_file(search)))
+        print(repr(caom2.check_files([search])))
 
     elif args['jcmtinfo']:
         from jsa_proc.cadc.files import CADCFiles
