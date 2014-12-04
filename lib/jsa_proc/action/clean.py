@@ -172,10 +172,13 @@ def _clean_output_dir(directory, job_id, db, dry_run):
 
         for file in deletable:
             filepath = os.path.join(directory, file)
-            logger.debug('Deleting file %s', filepath)
 
             if not dry_run:
+                logger.debug('Deleting file %s', filepath)
                 os.unlink(filepath)
+
+            else:
+                logger.debug('Skipping deletion of file %s (DRY RUN)', filepath)
 
         return True
 
