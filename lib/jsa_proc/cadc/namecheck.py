@@ -28,6 +28,24 @@ namecheck_section = set(('RAW', 'PROCESSED'))
 namecheck_pattern = None
 
 
+def check_file_name(filename):
+    """Test whether the file name has an acceptable name.
+
+    The upper-cased suffix-removed file name is matched against
+    all of the namecheck patterns.  If a match is found, True
+    is returned.  Otherwise False is returned.
+    """
+
+    (base, ext) = os.path.splitext(filename)
+    base = base.upper()
+
+    for pattern in _get_namecheck_pattern():
+        if pattern.match(base):
+            return True
+
+    return False
+
+
 def _get_namecheck_pattern():
     """Get a list of namecheck patterns.
 
