@@ -24,7 +24,8 @@ from jsa_proc.util import identifier_to_pattern
 logger = logging.getLogger(__name__)
 
 
-class LocCompatException():
+
+class LogCompatException():
     """Exception class for exceptions raised by LogCompat."""
 
 
