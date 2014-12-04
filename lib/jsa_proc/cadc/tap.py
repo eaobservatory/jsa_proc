@@ -19,33 +19,13 @@ import re
 
 from tools4caom2.tapclient import tapclient
 
+from jsa_proc.cadc.logcompat import LogCompat
 from jsa_proc.error import JSAProcError
 from jsa_proc.util import identifier_to_pattern
 
 logger = logging.getLogger(__name__)
 
 valid_fileid = re.compile('^[-_a-z0-9]+$')
-
-
-class LogCompatException():
-    """Exception class for exceptions raised by LogCompat."""
-
-
-class LogCompat():
-    """Compatability class to provide a tools4caom2.logger-like
-    interface."""
-
-    def file(self, message, loglevel=logging.INFO):
-        logger.log(loglevel, message)
-
-        if loglevel >= logging.ERROR:
-            raise LogCompatException(message)
-
-    def console(self, message, loglevel=logging.INFO, raise_exception=True):
-        logger.log(loglevel, message)
-
-        if raise_exception and loglevel >= logging.ERROR:
-            raise LogCompatException(message)
 
 
 class CADCTap():
