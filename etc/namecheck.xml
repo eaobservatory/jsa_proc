@@ -80,6 +80,12 @@
         <value>JCMT(|LS|USER)_(((ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9]))|(([\w]+)-([\w]+)))_(CUBE|RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-([\d]{6}MHZ)-(1000MHZX1024|1000MHZX2048|160MHZX1024|160MHZX128|160MHZX2048|160MHZX256|160MHZX512|1899MHZX1945|1948MHZX1995|1GHZX2048|250MHZX4096|250MHZX8192|450MHZX7371|490MHZX8027)-([\d])_PREVIEW_(64|256|1024)</value>
         <value>JCMT(|LS|USER)_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
         <value>JCMT(|LS|USER)_(ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9])_(CUBE|RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-(450|850)UM_PREVIEW_(64|256|1024)</value>
+        <!-- SCUBA-2 public products -->
+        <!-- template JCMTSSUBSYSNR_PRODUCTTILENUMBER_PUB_VERSION -->
+        <value>JCMTS([48]50)UM_(HEALPIX|TILE-MOC|EXTENT-MOC|EXTENT-MASK|EXTENT-CAT|PEAK-CAT)([\d]{6})_PUB_([\d]{3})</value>
+        <!-- SCUBA-2 public previews -->
+        <!-- template JCMT_SCUBA-2-049048_HEALPIX-850UM_PREVIEW_64 -->
+        <value>JCMT_SCUBA-2-([\d]{6})_(HEALPIX|EXTENT|PEAK)-([48]50)UM_PREVIEW_(64|256|1024)</value>
       </list>
     </struct>
   </list>
