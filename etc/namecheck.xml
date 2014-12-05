@@ -55,7 +55,7 @@
         <!-- -->
         <value>(MULTI|[MS][019]\d[AB][CHINU][\d]{2})_(199\d|20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{4})_(OBS|NIGHT|PROJECT|PUBLIC)_(LONG|SHORT|P2000|P1350|P1100)_(REB|IQU|CAT)</value>
         <!--  -->
-	<!-- ACSIS and SCUBA2 products -->
+	<!-- ACSIS/DAS and SCUBA2 products -->
 	<!-- template JCMT[HS]UTDATE_OBSNUM_SUBSYSNR_SUFFIX_ASNTYPE_VERSION -->
         <!-- e.g. JCMTH20070530_00055_01_REDUCED001_OBS_000 - simple cube from a single observation -->
 	<!-- e.g. JCMTH20070515_00021_01_REDUCED002_NIT_000 - tile 2 of a composite observation from a night product -->
@@ -66,9 +66,9 @@
 	   RIMG and RSP are only valid as ACSIS products.
 	   REDUCED files are produced for both ACSIS and SCUBA-2.
 	-->
-	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_0[0-4]_CUBE[\d]{3}_OBS_000</value>
-	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_0[0-4]_(RIMG|RSP)_(OBS|NIT|PRO)_([\d]{3})</value>
-	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_(0[0-4]|[48]50)_(REDUCED[\d]{3}|HEALPIX[\d]{6}|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})</value>
+	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_CUBE[\d]{3}_OBS_000</value>
+	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_(RIMG|RSP)_(OBS|NIT|PRO)_([\d]{3})</value>
+	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED[\d]{3}|HEALPIX[\d]{6}|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})</value>
 	<!-- ACSIS and SCUBA2 CAOM2 thumbnails -->
 	<!-- <collection>_<observationID>_<productID>_preview_(64|256|1024) -->
         <!-- e.g. JCMT_20140103-0a3e07ab157c42d36c8ed2414ea239d7_reduced_2_preview_1024 -->
