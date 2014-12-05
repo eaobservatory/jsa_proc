@@ -29,6 +29,7 @@ Usage:
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--foreign-id <foreign-id>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
+    jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
@@ -51,6 +52,7 @@ Options:
     --force, -f                Skip initial state check.
     --include-error            Include jobs in the error state.
     --replaceparent            Force recopying parent jobs into input folder
+    --outfile <file>           File into which to write output.
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
     --tag <tag>                Select jobs by tag.
@@ -223,6 +225,19 @@ def ingest(args):
                   task=args['--task'],
                   dry_run=args['--dry-run'],
                   force=args['--force'])
+
+
+@command
+def namecheck(args):
+    """Sub-command to run a name check on all output files."""
+
+    if args['output']:
+        from jsa_proc.action.namecheck import namecheck_output
+
+        namecheck_output(task=args['--task'], outfile=args['--outfile'])
+
+    else:
+        raise CommandError('Did not recognise namecheck action')
 
 
 @command
