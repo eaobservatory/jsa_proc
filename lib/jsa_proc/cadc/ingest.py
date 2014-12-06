@@ -41,7 +41,7 @@ def ingest_output(job_id, location=None, task=None, dry_run=False, force=False):
     else:
         job_ids = [x.id for x in db.find_jobs(state=JSAProcState.INGESTION,
                                               location=location,
-                                              task=task)]
+                                              task=task, prioritize=True)]
 
     for job_id in job_ids:
         if not dry_run:
