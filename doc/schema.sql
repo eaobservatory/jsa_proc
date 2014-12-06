@@ -82,6 +82,9 @@ CREATE TABLE obs (
     association VARCHAR(80),
     omp_status INTEGER NOT NULL DEFAULT 0,
 
+    tau FLOAT DEFAULT NULL,
+    seeing FLOAT DEFAULT NULL,
+
     FOREIGN KEY (job_id) REFERENCES job(id)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );
