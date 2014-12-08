@@ -127,7 +127,7 @@ class CADCTap():
 
             uris[filename] = 'ad:JCMT/{0}'.format(fileid)
 
-        logger.debug(            'SELECT uri, COUNT(*) FROM caom2.Artifact '
+        logger.debug('SELECT uri, COUNT(*) FROM caom2.Artifact '
             'WHERE uri IN ('
                 + ', '.join(['\'{0}\''.format(x) for x in uris.values()])
                 + ') GROUP BY uri')
