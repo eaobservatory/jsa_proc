@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
                        fetch_previews=True, tag_pattern=None,
-                       recipe_instance=None):
+                       recipe_instance=None, prefix_rc_inst=False):
     """Perform an initial import of existing jobs from CADC.
 
     Returns true on success.
@@ -59,9 +59,14 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
 
         logger.debug('Importing recipe instance %s', recipe_instance)
 
-        if job.tag in tags:
+        tag = job.tag
+
+        if prefix_rc_inst:
+            tag = '{0}-{1}'.format(recipe_instance, tag)
+
+        if tag in tags:
             logger.warning('Tag %s already present (recipe instance %s)',
-                           job.tag, recipe_instance)
+                           tag, recipe_instance)
             n_already += 1
             continue
 
@@ -91,7 +96,7 @@ def import_from_cadcdp(dry_run=False, db=None, cadc=None, task='unknown',
             if not dry_run:
                 logger.debug('Inserting job for recipe instance %s',
                              recipe_instance)
-                job_id = db.add_job(tag=job.tag,
+                job_id = db.add_job(tag=tag,
                                     location='CADC',
                                     mode=info.mode,
                                     parameters=info.parameters,
