@@ -60,7 +60,8 @@ class CADCDP:
 
         self.db.close()
 
-    def get_recipe_info(self, tag_pattern=None, recipe_instance=None):
+    def get_recipe_info(self, tag_pattern=None, recipe_instance=None,
+                        dp_recipes=None):
         """Fetch info for all JSA recipes in the CADC DP database.
 
         Returns a list of CADCDPInfo named tuples.
@@ -72,10 +73,16 @@ class CADCDP:
         instances, based on the recipe name in the parameters
         column.  Otherwise, if a tag pattern is specified,
         fetch recipes matching that pattern.
+
+        If a dp_recipes number list is given then it is used in place of
+        the automatically determined set of JSA recipes.
         """
 
-        if self.recipe is None:
-            self._determine_jsa_recipe()
+        if dp_recipes is None:
+            if self.recipe is None:
+                self._determine_jsa_recipe()
+
+            dp_recipes = self.recipe
 
         result = []
 
@@ -102,7 +109,7 @@ class CADCDP:
                       'parameters, priority '
                       'FROM dp_recipe_instance '
                       'WHERE recipe_id IN (' +
-                      ', '.join((str(x) for x in self.recipe)) + ') '
+                      ', '.join((str(x) for x in dp_recipes)) + ') '
                       'AND ' + where,
                       param)
 
