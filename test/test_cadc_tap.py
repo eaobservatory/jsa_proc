@@ -15,8 +15,23 @@
 
 from unittest import TestCase
 
-from jsa_proc.cadc.tap import CADCTap
+from jsa_proc.cadc.tap import CADCTap, _partition_list
 from jsa_proc.error import JSAProcError
+
+
+class PartitionListTestCase(TestCase):
+    def test_partition(self):
+        self.assertEqual(_partition_list(['x', 'y', 'z'], 5),
+                         [['x', 'y', 'z']])
+
+        self.assertEqual(_partition_list([], 10), [[]])
+
+        self.assertEqual(_partition_list(list(range(0, 10)), 10),
+                         [list(range(0, 10))])
+
+        self.assertEqual(_partition_list(list(range(0, 25)), 10),
+                         [list(range(0, 10)), list(range(10, 20)),
+                          list(range(20, 25))])
 
 
 class CADCTapTestCase(TestCase):

@@ -107,6 +107,15 @@ class CADCTap():
         Returns a boolean list corresponding to the input list.
         """
 
+        # Do we have too many filenames to query at once?
+        if len(filenames) > 10:
+            result = []
+
+            for part in _partition_list(filenames, 10):
+                result.extend(self.check_files(part))
+
+            return result
+
         uris = {}
 
         for filename in filenames:
@@ -164,3 +173,21 @@ class CADCTap():
                 raise JSAProcError('Received unexpected artifact count')
 
         return result
+
+
+def _partition_list(xs, count):
+    """Partition list into a list of lists each containing  up to count
+    entries.
+    """
+
+    part = []
+    result = [part]
+
+    for x in xs:
+        if len(part) >= count:
+            part = []
+            result.append(part)
+
+        part.append(x)
+
+    return result
