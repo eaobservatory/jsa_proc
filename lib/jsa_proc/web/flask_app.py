@@ -126,6 +126,8 @@ def create_web_app():
             'obsnum',
             'project',
             'number',
+            'tau_min',
+            'tau_max',
         ]
 
         params.extend(ObsQueryDict.keys())

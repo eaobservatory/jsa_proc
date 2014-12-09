@@ -22,7 +22,7 @@ from jsa_proc.jcmtobsinfo import ObsQueryDict
 def job_search(location, state, task,
                date_min, date_max, qa_state,
                sourcename, obsnum, project,
-               mode, number, **kwargs):
+               mode, number, tau_min, tau_max,**kwargs):
 
     # If number is None, reset to default
     if not number or number is None:
@@ -52,6 +52,8 @@ def job_search(location, state, task,
         'obsnum': obsnum,
         'project': project,
         'state': state,
+        'tau_min': tau_min,
+        'tau_max': tau_max,
     })
 
     # Add non-common elements to job query:
@@ -65,6 +67,9 @@ def job_search(location, state, task,
 
     if (date_min is not None) or (date_max is not None):
         obsquery['utdate'] = Range(date_min, date_max)
+
+    if (tau_min is not None) or (tau_max is not None):
+        obsquery['tau'] = Range(tau_min, tau_max)
 
     if sourcename:
         obsquery['sourcename'] = Fuzzy(sourcename)
