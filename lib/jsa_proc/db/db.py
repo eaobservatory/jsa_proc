@@ -361,6 +361,23 @@ class JSAProcDB:
                       'VALUES (%s, %s)',
                       (job_id, tile))
 
+    def change_task(self, job_id, oldtask, newtask):
+        """
+        Move a job from one task (oldtask) to another (newtask).
+
+        This will raise an error if the job can't be found in oldtask.
+        """
+        if oldtask == newtask:
+            raise JSAProcError("Can't change task if oldtask (%s) is the same as newtask (%s)"
+                               % (oldtask, newtask));
+        with self.db as c:
+            query = 'UPDATE job SET task=%s WHERE id=%s AND task=%s'
+            params = (newtask, job_id, oldtask,)
+            c.execute(query, params)
+            if c.rowcount == 0:
+                raise NoRowsError('job', query % tuple(params))
+        logger.debug('Moved job %i from task %s to task %s' % (job_id, oldtask, newtask))
+
     def get_obs_info(self, job_id):
         """
         Get all entries in the obs table for a given job_id.
