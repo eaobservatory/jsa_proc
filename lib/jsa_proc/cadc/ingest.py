@@ -81,14 +81,14 @@ def _perform_ingestion(job_id, db):
 
     try:
         with open_log_file(job_id, 'ingestion') as log:
-            logger.debug('Invoking jcmt2caom2ingest, log file: %s', log.name)
+            logger.debug('Invoking jsaingest, log file: %s', log.name)
 
             subprocess.check_call(
                 [
-                    'jcmt2caom2ingest',
+                    'jsaingest',
                     '--ingest',
                     '--collection', 'JCMT',
-                    '--major', output_dir,
+                    '--indir', output_dir,
                 ],
                 shell=False,
                 cwd=scratch_dir,
