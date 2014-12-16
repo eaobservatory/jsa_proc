@@ -421,7 +421,7 @@ class JSAProcDB:
 
             query = ('UPDATE obs SET ' + column_query +
                       ' WHERE obsidss=%s ')
-            params = values + (job_id, obsidss)
+            params = values + (obsidss,)
             logging.debug(query % params)
             c.execute(query, params)
 
