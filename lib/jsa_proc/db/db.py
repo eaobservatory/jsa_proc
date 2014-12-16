@@ -402,10 +402,10 @@ class JSAProcDB:
 
         return results
 
-    def update_obs_info(self, job_id, obsidss, obsinfodict):
+    def update_obs_info(self, obsidss, obsinfodict):
         """
         update the columns and values given in the obsinfodict
-        for observations with give job_id and obsidss.
+        for all observations with a given obsidss.
         """
         columnnames, values = zip(*obsinfodict.items())
         for column in columnnames:
@@ -420,7 +420,7 @@ class JSAProcDB:
         with self.db as c:
 
             query = ('UPDATE obs SET ' + column_query +
-                      ' WHERE job_id=%s AND obsidss=%s ')
+                      ' WHERE obsidss=%s ')
             params = values + (job_id, obsidss)
             logging.debug(query % params)
             c.execute(query, params)
