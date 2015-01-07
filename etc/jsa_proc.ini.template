@@ -34,6 +34,9 @@ key=/home/jsaproc/.ssh/etransfer
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc
 
+[utilities]
+fitsverify=/local/progs/bin/fitsverify
+
 [web]
 key=insert-secret-key-here
 
