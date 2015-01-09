@@ -31,6 +31,7 @@ Usage:
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q] [--no-etransfer]
+    jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
@@ -55,6 +56,7 @@ Options:
     --outfile <file>           File into which to write output.
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
+    --stream <stream>          P-transfer stream ("new" or "replace").
     --tag <tag>                Select jobs by tag.
     --task, -t <task>          Select jobs for a particular task.
 
@@ -258,6 +260,18 @@ def poll(args):
     # Return a status of 1 if status is not True.
     if not status:
         raise CommandError('Errors were encountered during state poll')
+
+
+@command
+def ptransfer(args):
+    """Sub-command to put files from the e-transfer
+    directories into the archive at CADC.  It emulates the
+    behavior of CADC's e-transfer system.
+    """
+
+    from jsa_proc.cadc.ptransfer import ptransfer_poll
+
+    ptransfer_poll(stream=args['--stream'], dry_run=args['--dry-run'])
 
 
 @command

@@ -33,6 +33,9 @@ machine=kolea
 key=/home/jsaproc/.ssh/etransfer
 scratchdir=/export/jcmtdata/scratch/jsa_proc
 transdir=/export/jcmtdata/cadc
+max_files=10
+max_tries=3
+retry_delay=10
 
 [utilities]
 fitsverify=/local/progs/bin/fitsverify
