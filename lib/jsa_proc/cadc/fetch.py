@@ -104,6 +104,34 @@ def fetch_cadc_file_info(filename):
         raise JSAProcError('Error fetching CADC file info: ' + str(e))
 
 
+def put_cadc_file(filename, input_directory):
+    """Put the given file into the CADC archive.
+
+    Raises a JSAProcError on failure.
+    """
+
+    (args, kwargs) = _prepare_cadc_request(filename)
+
+    try:
+        with open(os.path.join(input_directory, filename), 'rb') as f:
+            kwargs['data'] = f
+            kwargs['headers'] = {'X-CADC-Stream': 'product'}
+
+            r = requests.put(*args, **kwargs)
+
+            r.raise_for_status()
+
+            if r.status_code in (200, 201):
+                return
+
+    except HTTPError as e:
+        raise JSAProcError('Error putting CADC file: {0}: {1}'
+                           .format(str(e), r.text))
+
+    raise JSAProcError('Putting CADC file gave bad status: {0}: {1}'
+                       .format(r.status_code, r.text))
+
+
 def _prepare_cadc_request(filename):
     """Prepare request parameters for a CADC data web service
     request.
