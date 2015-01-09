@@ -291,7 +291,12 @@ def query(args):
 
     elif args['dws']:
         from jsa_proc.cadc.fetch import fetch_cadc_file_info
-        print(repr(fetch_cadc_file_info(search)))
+        info = fetch_cadc_file_info(search)
+        if info is None:
+            print('Not found')
+        else:
+            for key in sorted(info.keys()):
+                print('{0}: {1}'.format(key, repr(info[key])))
 
     else:
         raise CommandError('Did not recognise query type')
