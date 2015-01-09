@@ -50,7 +50,7 @@ def etransfer_poll_output(dry_run):
     # When not in dry run mode, check that etransfer is being
     # run on the correct machine by the correct user.
     if not dry_run:
-        _etransfer_check_config(any_user=True)
+        etransfer_check_config(any_user=True)
 
     logger.debug('Connecting to JSA processing database')
     db = get_database()
@@ -137,7 +137,7 @@ def etransfer_send_output(job_id, dry_run, force=False):
     # run on the correct machine by the correct user and with
     # sufficient available disk space.
     if not dry_run:
-        _etransfer_check_config()
+        etransfer_check_config()
         _etransfer_check_space()
 
     logger.debug('Connecting to JSA processing database')
@@ -337,7 +337,7 @@ def _etransfer_clear_cache():
     status_cache = None
 
 
-def _etransfer_check_config(any_user=False):
+def etransfer_check_config(any_user=False):
     """Check the configuration is good for for e-transfer.
 
     Raises a CommandError if a problem is detected.
