@@ -39,9 +39,10 @@ def check_file_name(filename):
     (base, ext) = os.path.splitext(filename)
     base = base.upper()
 
-    for pattern in _get_namecheck_pattern():
-        if pattern.match(base):
-            return True
+    for (key, patterns) in _get_namecheck_pattern().items():
+        for pattern in patterns:
+            if pattern.match(base):
+                return True
 
     return False
 
@@ -61,7 +62,7 @@ def _get_namecheck_pattern():
         return namecheck_pattern
 
     # Otherwise read the namecheck XML file.
-    namecheck_pattern = []
+    namecheck_pattern = {}
 
     file = os.path.join(get_home(), namecheck_file)
     tree = etree.parse(file)
@@ -74,9 +75,10 @@ def _get_namecheck_pattern():
 
                 if key in namecheck_section:
                     logger.debug('Reading namecheck section %s', key)
+                    namecheck_pattern[key] = []
 
                     for value in list.iter('value'):
-                        namecheck_pattern.append(
+                        namecheck_pattern[key].append(
                             re.compile('^{0}$'.format(value.text)))
 
                 else:
