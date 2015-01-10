@@ -32,9 +32,30 @@ class NamecheckTestCase(TestCase):
             self.assertGreater(len(patterns), 0)
 
     def test_check_file_name(self):
-        self.assertTrue(check_file_name(
-            'jcmth20070101_00062_01_reduced001_nit_000.fits'))
-        self.assertFalse(check_file_name(
-            'jcmth20070101_00062_01_reduced001_not_000.fits'))
-        self.assertTrue(check_file_name('s8c20130401_00042_0001.sdf'))
-        self.assertFalse(check_file_name('s8z20130401_00042_0001.sdf'))
+        # Without section.
+        self.assertIs(check_file_name(
+            'jcmth20070101_00062_01_reduced001_nit_000.fits'),
+            True)
+        self.assertIs(check_file_name(
+            'jcmth20070101_00062_01_reduced001_not_000.fits'),
+            False)
+        self.assertIs(check_file_name(
+            's8c20130401_00042_0001.sdf'),
+            True)
+        self.assertIs(check_file_name(
+            's8z20130401_00042_0001.sdf'),
+            False)
+
+        # Asking for section name.
+        self.assertEqual(check_file_name(
+            'jcmth20070101_00062_01_reduced001_nit_000.fits', True),
+            'PROCESSED')
+        self.assertIs(check_file_name(
+            'jcmth20070101_00062_01_reduced001_not_000.fits', True),
+            None)
+        self.assertEqual(check_file_name(
+            's8c20130401_00042_0001.sdf', True),
+            'RAW')
+        self.assertIs(check_file_name(
+            's8z20130401_00042_0001.sdf', True),
+            None)
