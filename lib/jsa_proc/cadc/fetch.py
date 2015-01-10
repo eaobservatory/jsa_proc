@@ -104,8 +104,10 @@ def fetch_cadc_file_info(filename):
         raise JSAProcError('Error fetching CADC file info: ' + str(e))
 
 
-def put_cadc_file(filename, input_directory):
+def put_cadc_file(filename, input_directory, ad_stream):
     """Put the given file into the CADC archive.
+
+    The CADC AD "stream" for the PUT request must be given.
 
     Raises a JSAProcError on failure.
     """
@@ -115,7 +117,7 @@ def put_cadc_file(filename, input_directory):
     try:
         with open(os.path.join(input_directory, filename), 'rb') as f:
             kwargs['data'] = f
-            kwargs['headers'] = {'X-CADC-Stream': 'product'}
+            kwargs['headers'] = {'X-CADC-Stream': ad_stream}
 
             r = requests.put(*args, **kwargs)
 

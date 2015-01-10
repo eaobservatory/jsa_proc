@@ -36,6 +36,7 @@ transdir=/export/jcmtdata/cadc
 max_files=10
 max_tries=3
 retry_delay=10
+ad_stream=RAW:raw PROCESSED:product
 
 [utilities]
 fitsverify=/local/progs/bin/fitsverify

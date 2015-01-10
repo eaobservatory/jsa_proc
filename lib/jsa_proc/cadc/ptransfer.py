@@ -147,14 +147,16 @@ def ptransfer_poll(stream=None, dry_run=False):
         try:
             # Check the file.
             md5sum = get_md5sum(proc_file)
-            ptransfer_check(proc_dir, file.name, file.stream, md5sum)
+            ad_stream = ptransfer_check(
+                proc_dir, file.name, file.stream, md5sum)
 
             if dry_run:
-                logger.info('Accepted file %s (DRY RUN)', file.name)
+                logger.info('Accepted file %s (%s) (DRY RUN)',
+                            file.name, ad_stream)
 
             else:
                 # Transfer the file.
-                ptransfer_put(proc_dir, file.name, md5sum)
+                ptransfer_put(proc_dir, file.name, ad_stream, md5sum)
 
                 # Check it was transferred correctly.
                 cadc_file_info = fetch_cadc_file_info(file.name)
@@ -171,7 +173,7 @@ def ptransfer_poll(stream=None, dry_run=False):
                     raise PTransferFailure('MD5 sum wrong')
 
                 # On success, delete the file.
-                logger.info('Transferred file %s', file.name)
+                logger.info('Transferred file %s (%s)', file.name, ad_stream)
                 os.unlink(proc_file)
 
         except PTransferException as e:
@@ -217,7 +219,17 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
     Raises a PTransferException (including a rejection code) if a problem
     is detected.  No changes to the filesystem should be made, so this
     function should be safe to call in dry run mode.
+
+    Returns the CADC AD stream to be used for the file.  This is determined by
+    a mapping from namecheck section to stream name in the configuration file
+    entry etransfer.ad_stream.
     """
+
+    config = get_config()
+
+    ad_streams = dict(map(
+        lambda x: x.split(':'),
+        config.get('etransfer', 'ad_stream').split(' ')))
 
     proc_file = os.path.join(proc_dir, filename)
 
@@ -247,8 +259,13 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
         raise PTransferException('filetype')
 
     # Name-check.
-    if not check_file_name(filename):
+    namecheck_section = check_file_name(filename, True)
+    if namecheck_section is None:
         raise PTransferException('name')
+    if namecheck_section in ad_streams:
+        ad_stream = ad_streams[namecheck_section]
+    else:
+        raise PTransferException('stream')
 
     # Check correct new/replacement stream.
     cadc_file_info = fetch_cadc_file_info(filename)
@@ -264,8 +281,10 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
     else:
         raise Exception('unknown stream {0}'.format(stream))
 
+    return ad_stream
 
-def ptransfer_put(proc_dir, filename, md5sum):
+
+def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
     """Attempt to put the given file into the archive at CADC.
 
     Retries settings are given by the configuration file entries
@@ -279,7 +298,7 @@ def ptransfer_put(proc_dir, filename, md5sum):
 
     for i in range(0, max_retries):
         try:
-            put_cadc_file(filename, proc_dir)
+            put_cadc_file(filename, proc_dir, ad_stream)
 
             return
 
