@@ -21,6 +21,8 @@ from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.dpstate import CADCDPState
+from jsa_proc.cadc.etransfer \
+    import etransfer_check_config, etransfer_send_output
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.db.db import Not
 from jsa_proc.error import JSAProcError, NoRowsError, NotAtJACError
@@ -43,6 +45,14 @@ class JSAProcStateMachine:
 
             except NoRowsError:
                 pass
+
+        # Determine whether we are already the correct user
+        # on the correct machine for e-transfer or not.
+        try:
+            etransfer_check_config()
+            self.etransfer_needs_ssh = False
+        except:
+            self.etransfer_needs_ssh = True
 
     def poll(self):
         self.poll_jac_jobs(self)
@@ -127,8 +137,15 @@ class JSAProcStateMachine:
                         # (Only done if etransfer argument is True.)
 
                         if etransfer and validate_output(job.id, self.db):
-
-                            ssh_etransfer_send_output(job.id)
+                            # Only e-transfer via SSH if needed.
+                            if self.etransfer_needs_ssh:
+                                logger.debug('E-transferring output '
+                                        'of job %i via SSH', job.id)
+                                ssh_etransfer_send_output(job.id)
+                            else:
+                                logger.debug('E-transferring output '
+                                        'of job %i directly', job.id)
+                                etransfer_send_output(job.id)
 
                     else:
                         # If e-transfer is not required, then the job is now
