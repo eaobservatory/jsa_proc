@@ -122,7 +122,7 @@ def etransfer_poll_output(dry_run):
         raise CommandError('Errors were encountered polling e-transfer')
 
 
-def etransfer_send_output(job_id, dry_run, force=False):
+def etransfer_send_output(job_id, dry_run=False, force=False):
     """High level e-transfer function for use from scripts.
 
     This function makes some basic checks and then launches
