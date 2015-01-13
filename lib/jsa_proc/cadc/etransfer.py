@@ -275,14 +275,14 @@ def etransfer_query_output(job_id):
         (filename, etransfer_status, ad_status) = file
 
         if etransfer_status is None:
-            (ok, dir) = (True, '')
+            (ok, dir) = (None, '')
         else:
             (ok, dir) = etransfer_status
 
         print('{0:110} {1:5} {2:12} {3:5}'.format(
             filename, repr(ok), dir, repr(ad_status)))
 
-        if not ok:
+        if ok is False:
             problem_files.append(os.path.join(transdir, 'reject', dir, filename))
 
     if problem_files:
