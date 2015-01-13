@@ -54,7 +54,14 @@ def ingest_output(job_id, location=None, task=None, dry_run=False, force=False):
                                             JSAProcState.INGESTION))
 
             except NoRowsError:
-                logger.error('Job %i can not be ingested as it is not ready',
+                # This would normally be a "logger.error", but we routinely
+                # run multiple copies of this ingestion routine simultaneously
+                # and it is therefore expected that a lot of jobs will have
+                # already been moved out of the INGESTION state by other
+                # processes.  Therefore a warning or error should not be
+                # logged as these lead to unnecessary warnings in the cron
+                # job monitor.
+                logger.debug('Job %i can not be ingested as it is not ready',
                              job_id)
 
                 continue
