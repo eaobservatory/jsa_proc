@@ -159,7 +159,11 @@ def ptransfer_poll(stream=None, dry_run=False):
                 ptransfer_put(proc_dir, file.name, ad_stream, md5sum)
 
                 # Check it was transferred correctly.
-                cadc_file_info = fetch_cadc_file_info(file.name)
+                try:
+                    cadc_file_info = fetch_cadc_file_info(file.name)
+                except JSAProcError:
+                    raise PTransferFailure('Unable to check CADC file info')
+
                 if cadc_file_info is None:
                     # File doesn't seem to be there?
                     logger.error('File transferred but has no info')
@@ -268,7 +272,11 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
         raise PTransferException('stream')
 
     # Check correct new/replacement stream.
-    cadc_file_info = fetch_cadc_file_info(filename)
+    try:
+        cadc_file_info = fetch_cadc_file_info(filename)
+    except JSAProcError:
+        raise PTransferFailure('Unable to check CADC file info')
+
     if stream == 'new':
         if cadc_file_info is not None:
             raise PTransferException('not_new')
