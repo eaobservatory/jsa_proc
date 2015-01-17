@@ -205,6 +205,17 @@ def ptransfer_poll(stream=None, dry_run=False):
                     proc_file,
                     os.path.join(trans_dir, file.stream, file.name))
 
+        except:
+            # Catch any other exception and also put the file back.
+            logger.exception('Error while transferring file %s', file.name)
+
+            if not dry_run:
+                os.rename(
+                    proc_file,
+                    os.path.join(trans_dir, file.stream, file.name))
+
+
+
     # Finally clean up the processing directory.  It should have nothing
     # left in it by this point.
     if not dry_run:
