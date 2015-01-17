@@ -19,7 +19,7 @@ Routines for downloading data from CADC.
 """
 
 import requests
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 import os.path
 
 from jsa_proc.error import JSAProcError
@@ -72,7 +72,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
             for chunk in r.iter_content(chunk_size=1024):
                 f.write(chunk)
 
-    except HTTPError as e:
+    except RequestException as e:
         raise JSAProcError('Error fetching CADC file: ' + str(e))
 
     return output_file_path
@@ -100,7 +100,7 @@ def fetch_cadc_file_info(filename):
 
         return r.headers
 
-    except HTTPError as e:
+    except RequestException as e:
         raise JSAProcError('Error fetching CADC file info: ' + str(e))
 
 
@@ -126,7 +126,7 @@ def put_cadc_file(filename, input_directory, ad_stream):
             if r.status_code in (200, 201):
                 return
 
-    except HTTPError as e:
+    except RequestException as e:
         raise JSAProcError('Error putting CADC file: {0}: {1}'
                            .format(str(e), r.text))
 
