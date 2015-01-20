@@ -55,9 +55,6 @@ def etransfer_poll_output(dry_run):
     logger.debug('Connecting to JSA processing database')
     db = get_database()
 
-    logger.debug('Preparing CADC files object')
-    ad = CADCFiles()
-
     n_err = 0
 
     for job in db.find_jobs(location='JAC', state=JSAProcState.TRANSFERRING):
@@ -66,7 +63,8 @@ def etransfer_poll_output(dry_run):
 
         logger.debug('Retrieving list of output files')
         try:
-            files = db.get_output_files(job_id)
+            file_info = db.get_output_files(job_id, with_info=True)
+            files = [x.filename for x in file_info]
 
         except NoRowsError:
             logger.error('Did not find output files for job %i', job_id)
@@ -95,18 +93,32 @@ def etransfer_poll_output(dry_run):
                 continue
 
             logger.debug('Checking if all files are at CADC')
-            if all(ad.check_files(files)):
-                # All files reported as present by JCMT info.
+            lost = []
+            for info in file_info:
+                cadc_file_info = fetch_cadc_file_info(info.filename)
+
+                if cadc_file_info is None:
+                    logger.error('Job %i file %s gone from e-transfer '
+                                 'but not at CADC', job_id, info.filename)
+                    lost.append(info.filename)
+
+                if cadc_file_info['content-md5'] != info.md5:
+                    logger.error('Job %i file %s gone from e-transfer '
+                                 'but MD5 sum does not match',
+                                 job_id, info.filename)
+                    lost.append(info.filename)
+
+            if lost:
+                raise ETransferError('files lost or corrupt: {0}'.format(
+                                     ', '.join(lost)))
+            else:
+                # All files present and with correct MD5 sums.
                 logger.info('Job %i appears to have all files at CADC',
                             job_id)
                 if not dry_run:
                     db.change_state(job_id, JSAProcState.INGESTION,
                                     'Output files finished e-transfer',
                                     state_prev=JSAProcState.TRANSFERRING)
-
-            else:
-                logger.warning('Job %i files gone from e-transfer '
-                               'but not at CADC', job_id)
 
         except ETransferError as e:
             logger.error('Job %i failed e-transfer: %s', job_id, e.message)
