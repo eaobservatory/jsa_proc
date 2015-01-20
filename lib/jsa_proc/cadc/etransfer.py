@@ -84,7 +84,7 @@ def etransfer_poll_output(dry_run):
                         if not ok:
                             logger.error('File {0} was rejected, reason: {1}'.
                                          format(file, dir))
-                            rejection.append(file)
+                            rejection.append('{0} ({1})'.format(file, dir))
 
                 if rejection:
                     raise ETransferError('files rejected: {0}'.format(
