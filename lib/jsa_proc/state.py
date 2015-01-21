@@ -41,6 +41,7 @@ class JSAProcState:
     COMPLETE = 'Y'
     ERROR = 'E'
     DELETED = 'X'
+    WONTWORK = 'Z'
 
     PHASE_QUEUE = 'Q'
     PHASE_FETCH = 'F'
@@ -62,6 +63,7 @@ class JSAProcState:
         (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False, True)),
         (ERROR,        StateInfo('Error',        PHASE_ERROR,    False, None,  True)),
         (DELETED,      StateInfo('Deleted',      PHASE_ERROR,    False, None,  True)),
+        (WONTWORK,     StateInfo('Won\'t work',  PHASE_ERROR,    False, None,  True)),
     ))
 
     STATE_ALL = tuple(_info.keys())

@@ -61,6 +61,7 @@ class StateTestCase(TestCase):
             JSAProcState.COMPLETE: 'Complete',
             JSAProcState.ERROR: 'Error',
             JSAProcState.DELETED: 'Deleted',
+            JSAProcState.WONTWORK: 'Won\'t work',
         }
 
         for (state, name) in states.items():
