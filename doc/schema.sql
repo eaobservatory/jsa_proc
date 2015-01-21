@@ -145,3 +145,15 @@ CREATE TABLE parent (
 CREATE INDEX parent_parent on parent (parent);
 CREATE INDEX parent_job_id on parent (job_id);
 CREATE UNIQUE INDEX parent_parent_job ON parent (job_id, parent);
+
+CREATE TABLE note (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL,
+    datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message TEXT NOT NULL DEFAULT "",
+    username VARCHAR(80) NOT NULL DEFAULT "unknown",
+    FOREIGN KEY (job_id) REFERENCES job(id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE INDEX note_job_id ON note (job_id);

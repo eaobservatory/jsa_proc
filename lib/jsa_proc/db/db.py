@@ -43,6 +43,9 @@ JSAProcErrorInfo = namedtuple(
 JSAProcFileInfo = namedtuple(
     'FileInfo',
     'filename md5')
+JSAProcJobNote = namedtuple(
+    'JSAProcJobNote',
+    'id message username')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1418,6 +1421,45 @@ class JSAProcDB:
         with self.db as c:
             self._delete_all_parents(job_id, c)
 
+    def add_note(self, job_id, message, username=None):
+        """
+        Add a note about a job.
+
+        The given message will be inserted into the note table.
+        """
+
+        if username is None:
+            username = getuser();
+
+        with self.db as c:
+            c.execute('INSERT INTO note (job_id, message, username) '
+                      'VALUES (%s, %s, %s)',
+                      (job_id, message, username))
+
+    def get_notes(self, job_id):
+        """
+        Retrieve a list of notes for a given job.
+
+        Returns an empty list if there are no notes for the
+        job.  Otherwise the list contains JSAProcJobNote namedtuples.
+        Notes should be returned in reverse chronological order.
+        """
+
+        result = []
+
+        with self.db as c:
+            c.execute('SELECT id, message, username FROM note '
+                      'WHERE job_id=%s'
+                      'ORDER BY id DESC', (job_id,))
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                result.append(JSAProcJobNote(*row))
+
+        return result
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names

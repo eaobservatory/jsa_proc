@@ -42,7 +42,7 @@ class BasicDBTest(DBTestCase):
                     tables.add(name)
 
         self.assertEqual(tables, set((
-            'job', 'input_file', 'output_file', 'log',
+            'job', 'input_file', 'output_file', 'log', 'note',
             'obs', 'tile', 'qa', 'task', 'parent',
         )))
 
@@ -880,6 +880,22 @@ class InterfaceDBTest(DBTestCase):
                          (message4, newstate4, 'CANFAR', job_2))
         with self.assertRaises(KeyError):
             ej1 = elog_test1[job_1]
+
+    def test_note(self):
+        job_id = self.db.add_job('noteTest', 'JAC', 'obs', '', 'test',
+                                 input_file_names=['file1'])
+
+        self.db.add_note(job_id, 'Note 1', 'user1')
+        self.db.add_note(job_id, 'Note 2', 'user2')
+
+        notes = self.db.get_notes(job_id)
+
+        self.assertEqual(len(notes), 2)
+        self.assertEqual(notes[0].message, 'Note 2')
+        self.assertEqual(notes[0].username, 'user2')
+        self.assertEqual(notes[1].message, 'Note 1')
+        self.assertEqual(notes[1].username, 'user1')
+
 
 class DBUtilityTestCase(TestCase):
     def test_dict_query(self):
