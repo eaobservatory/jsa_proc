@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2014-2015 Science and Technology Facilities Council.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class OMPDB:
 
     OBS_JUNK = 4
 
-    def __init__(self):
+    def __init__(self, write_access=False):
         """Construct new OMP and JCMT database object.
 
         Connects to the JAC Sybase server.
@@ -46,11 +46,12 @@ class OMPDB:
 
         # Connect using the "hdr_database" set of credentials, which is
         # the "staff" user (supposed to be read only) at the time of
-        # writing.
+        # writing, unless the write_access option is enabled.
+        credentials = 'database' if write_access else 'hdr_database'
         conn = Sybase.connect(
-            config.get('hdr_database', 'server'),
-            config.get('hdr_database', 'user'),
-            config.get('hdr_database', 'password'),
+            config.get(credentials, 'server'),
+            config.get(credentials, 'user'),
+            config.get(credentials, 'password'),
             auto_commit=0)
 
         self.db = JSAProcSybaseLock(conn)
