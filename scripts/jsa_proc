@@ -33,6 +33,7 @@ Usage:
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
+    jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -55,6 +56,7 @@ Options:
     --include-error            Include jobs in the error state.
     --replaceparent            Force recopying parent jobs into input folder
     --outfile <file>           File into which to write output.
+    --obsid <obsid>            Observation identifier (OBSID header).
     --no-etransfer             Skip e-transfer steps.
     --poll                     Poll a system for state updates.
     --stream <stream>          P-transfer stream ("new" or "replace").
@@ -401,6 +403,19 @@ def query(args):
     else:
         raise CommandError('Did not recognise query type')
 
+
+@command
+def rawingest(args):
+    """
+    Ingest raw observations into CAOM-2.
+
+    Currently supports ingesting a single observation, the OBSID of
+    which must be given via the --obsid option.
+    """
+
+    from jsa_proc.cadc.rawingest import ingest_raw_observation
+
+    ingest_raw_observation(args['--obsid'], dry_run=args['--dry-run'])
 
 @command
 def revalidate(args):
