@@ -129,6 +129,7 @@ def put_cadc_file(filename, input_directory, ad_stream):
     """
 
     (args, kwargs) = _prepare_cadc_request(filename)
+    r = None
 
     try:
         with open(os.path.join(input_directory, filename), 'rb') as f:
@@ -143,8 +144,9 @@ def put_cadc_file(filename, input_directory, ad_stream):
                 return
 
     except RequestException as e:
+        text = 'no text received' if r is None else r.text
         raise JSAProcError('Error putting CADC file: {0}: {1}'
-                           .format(str(e), r.text))
+                           .format(str(e), text))
 
     raise JSAProcError('Putting CADC file gave bad status: {0}: {1}'
                        .format(r.status_code, r.text))
