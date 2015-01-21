@@ -47,11 +47,36 @@ def get_log_dir(job_id):
     return _get_dir('log', job_id)
 
 
+def get_misc_log_dir(name):
+    """Get a miscellaneous log directory."""
+
+    config = get_config()
+    return os.path.join(config.get('directories', 'log'), name)
+
+
 def make_temp_scratch_dir(job_id):
     """Create and return path to a temporary working directory inside
     of a job's scratch directory."""
 
-    scratch_base_dir = get_scratch_dir(job_id)
+    return _make_scratch_dir(get_scratch_dir(job_id))
+
+
+def make_misc_scratch_dir(name):
+    """Create a non-job-based scratch directory.
+
+    A name should be given to set the top level directory within
+    "scratch".
+    """
+
+    config = get_config()
+    return _make_scratch_dir(os.path.join(
+        config.get('directories', 'scratch'), name))
+
+
+def _make_scratch_dir(scratch_base_dir):
+    """Make a scratch directory in the given base directory and return
+    the path to it."""
+
     if not os.path.exists(scratch_base_dir):
         os.makedirs(scratch_base_dir)
 
