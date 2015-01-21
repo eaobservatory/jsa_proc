@@ -23,7 +23,7 @@ from pytz import UTC
 
 from jsa_proc.action.error_filter import JSAProcErrorFilter
 from jsa_proc.action.util import yes_or_no_question
-from jsa_proc.cadc.files import CADCFiles
+from jsa_proc.cadc.fetch import check_cadc_files
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
@@ -46,9 +46,6 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
 
     logger.debug('Connecting to OMP/JCMT database')
     ompdb = OMPDB()
-
-    logger.debug('Preparing CADC files object')
-    ad = CADCFiles()
 
     logger.debug('Preparing CADC TAP object')
     caom2 = CADCTap()
@@ -115,7 +112,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                 files = db.get_input_files(job_id)
 
                 logger.debug('Checking for files at CADC')
-                found = ad.check_files(files)
+                found = check_cadc_files(files)
 
                 if not all(found):
                     raise IdentifiedProblem(

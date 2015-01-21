@@ -26,8 +26,7 @@ import logging
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.action.util import yes_or_no_question
 from jsa_proc.admin.directories import get_output_dir
-from jsa_proc.cadc.fetch import fetch_cadc_file_info
-from jsa_proc.cadc.files import CADCFiles
+from jsa_proc.cadc.fetch import fetch_cadc_file_info, check_cadc_files
 from jsa_proc.config import get_config, get_database
 from jsa_proc.error import CommandError, NoRowsError
 from jsa_proc.files import get_space
@@ -182,9 +181,6 @@ def _etransfer_send(job_id, dry_run, db, force):
     transdir = config.get('etransfer', 'transdir')
     group_id = grp.getgrnam(config.get('etransfer', 'group')).gr_gid
 
-    logger.debug('Preparing CADC files object')
-    ad = CADCFiles()
-
     logger.debug('Retrieving list of output files')
     try:
         file_info = db.get_output_files(job_id, with_info=True)
@@ -217,17 +213,14 @@ def _etransfer_send(job_id, dry_run, db, force):
                              format(file, dir))
         raise CommandError('Some files are already in e-transfer directories')
 
-    logger.debug('Checking which files are already at CADC')
-    present = ad.check_files(files)
-
-    for (info, replace) in zip(file_info, present):
+    for info in file_info:
         file = info.filename
+        cadc_file_info = fetch_cadc_file_info(file)
 
-        if replace:
+        if cadc_file_info is not None:
             # We need to check whether the file is not, in fact, different
             # from the current version, because in that case we are not
             # allowed to "replace" it.
-            cadc_file_info = fetch_cadc_file_info(file)
             cadc_file_md5 = cadc_file_info['content-md5']
 
             if info.md5 == cadc_file_md5:
@@ -272,7 +265,6 @@ def etransfer_query_output(job_id):
     """Investigate the e-transfer status of the output of a job."""
 
     db = get_database()
-    ad = CADCFiles()
 
     config = get_config()
     transdir = config.get('etransfer', 'transdir')
@@ -283,7 +275,7 @@ def etransfer_query_output(job_id):
 
     print('{0:110} {1:5} {2:12} {3:5}'.format('File', 'ET', 'Directory', 'AD'))
 
-    for file in zip(files, etransfer_file_status(files), ad.check_files(files)):
+    for file in zip(files, etransfer_file_status(files), check_cadc_files(files)):
         (filename, etransfer_status, ad_status) = file
 
         if etransfer_status is None:

@@ -104,6 +104,22 @@ def fetch_cadc_file_info(filename):
         raise JSAProcError('Error fetching CADC file info: ' + str(e))
 
 
+def check_cadc_files(files):
+    """Check whether the given files are at CADC.
+
+    Returns a boolean list of the same length as the input list,
+    with true values corresponding only to the files which
+    are present.
+    """
+
+    result = []
+
+    for filename in files:
+        result.append(fetch_cadc_file_info(filename) is not None)
+
+    return result
+
+
 def put_cadc_file(filename, input_directory, ad_stream):
     """Put the given file into the CADC archive.
 
