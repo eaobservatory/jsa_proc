@@ -133,6 +133,71 @@ class OMPDB:
 
         return UTC.localize(datetime.strptime(str(dt), '%b %d %Y %I:%M%p'))
 
+    def find_obs_for_ingestion(self, utdate_start, utdate_end=None):
+        """Find (raw) observations which are due for ingestion into CAOM-2.
+
+        This method searches for observations matching these criteria:
+
+            * utdate within the given range
+            * date_obs at least 4 hours ago
+            * last_caom_mod NULL or older than last comment
+            * no files still in the process of being transferred
+
+        Arguments:
+            utdate_start: start date (observation's UT date must be >= this)
+                          as a "YYYYMMDD" string.  Can also be None to remove
+                          the restriction, but this is not advisable for the
+                          start date.
+            utdate_end:   similar to utdate_end but for the end of the date
+                          range (default: None).
+
+        Returns:
+            A list of OBSID strings.
+        """
+
+        where = []
+        args = {}
+
+        # Consider date range limits.
+        if utdate_start is not None:
+            args['@us'] = int(utdate_start)
+            where.append('utdate >= @us')
+        if utdate_end is not None:
+            args['@ue'] = int(utdate_end)
+            where.append('utdate <= @ue')
+
+        # Check the observation is finished.  (Started >= 4 hours ago.)
+        where.append('DATEDIFF(hh, date_obs, GETUTCDATE()) >= 4')
+
+        # Look for comment newer than last_caom_mod.
+        where.append('((last_caom_mod IS NULL)'
+                        'OR (last_caom_mod < (SELECT MAX(commentdate)'
+                            ' FROM omp..ompobslog'
+                            ' WHERE omp..ompobslog.obsid=COMMON.obsid)))')
+
+        # Check that all files have been transferred.
+        where.append('(SELECT COUNT(*) FROM FILES'
+                        ' JOIN transfer ON FILES.file_id=transfer.file_id'
+                        ' WHERE FILES.obsid=COMMON.obsid'
+                            ' AND transfer.status NOT IN ("t", "d", "D", "z"))'
+                        ' = 0')
+
+        result = []
+
+        with self.db as c:
+            c.execute('use jcmt')
+            c.execute('SELECT obsid FROM COMMON WHERE ' +
+                      ' AND '.join(where), args)
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                result.append(row[0])
+
+        return result
+
     def set_last_caom_mod(self, obsid):
         """Set the "COMMON.last_caom_mod" column to the current date
         and time for the given observation.
