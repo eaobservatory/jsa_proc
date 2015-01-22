@@ -22,7 +22,7 @@ import shutil
 import subprocess
 
 from jsa_proc.admin.directories import get_misc_log_dir, make_misc_scratch_dir
-from jsa_proc.error import JSAProcError, CommandError
+from jsa_proc.error import JSAProcError, CommandError, NoRowsError
 from jsa_proc.omp.db import OMPDB
 from jsa_proc.util import restore_signals
 
@@ -39,10 +39,18 @@ def ingest_raw_observation(obsid, dry_run=False):
     function.
     """
 
-    db = OMPDB(write_access='jcmt')
+    if not dry_run:
+        db = OMPDB(write_access='jcmt')
+    else:
+        db = OMPDB()
+
+    try:
+        info = db.get_common(obsid)
+    except NoRowsError:
+        raise CommandError('Observation {0} does not exist'.format(obsid))
 
     if not _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
-        raise CommandException("Ingestion failed")
+        raise CommandError("Ingestion failed")
 
 
 def _ingest_raw_observation(obsid, db, dry_run=False):
