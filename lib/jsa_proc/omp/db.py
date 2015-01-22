@@ -214,11 +214,13 @@ class OMPDB:
                 c.execute('USE jcmt')
                 c.execute(query, args)
 
-                # Check that exactly one row was  updated.
-                if c.rowcount == 0:
-                    raise NoRowsError('COMMON', query, args)
-                elif c.rowcount > 1:
-                    raise ExcessRowsError('COMMON', query, args)
+                # Check that exactly one row was updated.
+                # TODO: reinstate this check if/when we migrate to a
+                # database where rowcount works.
+                # if c.rowcount == 0:
+                #     raise NoRowsError('COMMON', query, args)
+                # elif c.rowcount > 1:
+                #     raise ExcessRowsError('COMMON', query, args)
 
                 # The Sybase DB lock object (JSAProcSybaseLock) was designed
                 # for read-only access.  Since this is the only case (so far)
