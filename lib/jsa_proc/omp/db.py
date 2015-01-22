@@ -145,7 +145,7 @@ class OMPDB:
 
         Arguments:
             utdate_start: start date (observation's UT date must be >= this)
-                          as a "YYYYMMDD" string.  Can also be None to remove
+                          as a "YYYYMMDD" integer.  Can also be None to remove
                           the restriction, but this is not advisable for the
                           start date.
             utdate_end:   similar to utdate_end but for the end of the date
@@ -160,10 +160,10 @@ class OMPDB:
 
         # Consider date range limits.
         if utdate_start is not None:
-            args['@us'] = int(utdate_start)
+            args['@us'] = utdate_start
             where.append('utdate >= @us')
         if utdate_end is not None:
-            args['@ue'] = int(utdate_end)
+            args['@ue'] = utdate_end
             where.append('utdate <= @ue')
 
         # Check the observation is finished.  (Started >= 4 hours ago.)
