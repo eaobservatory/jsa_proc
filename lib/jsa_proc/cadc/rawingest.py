@@ -22,7 +22,7 @@ import shutil
 import subprocess
 
 from jsa_proc.admin.directories import get_misc_log_dir, make_misc_scratch_dir
-from jsa_proc.error import JSAProcError
+from jsa_proc.error import JSAProcError, CommandError
 from jsa_proc.omp.db import OMPDB
 from jsa_proc.util import restore_signals
 
@@ -41,7 +41,8 @@ def ingest_raw_observation(obsid, dry_run=False):
 
     db = OMPDB(write_access='jcmt')
 
-    _ingest_raw_observation(obsid, db=db, dry_run=dry_run)
+    if not _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
+        raise CommandException("Ingestion failed")
 
 
 def _ingest_raw_observation(obsid, db, dry_run=False):
@@ -51,6 +52,8 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
     access to the JCMT database.  If the ingestion is successful then
     the "last_caom_mod" timestamp for the observation will be updated
     in the COMMON table of the JCMT database.
+
+    Returns True on success, False on failure.
     """
 
     logger.debug('Starting raw ingestion of OBSID %s', obsid)
@@ -117,7 +120,11 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
 
     except subprocess.CalledProcessError as e:
         logger.exception('Error during CAOM-2 ingestion')
+        return False
 
-    if not dry_run:
-        logger.debug('Deleting scratch directory')
-        shutil.rmtree(scratch_dir)
+    finally:
+        if not dry_run:
+            logger.debug('Deleting scratch directory')
+            shutil.rmtree(scratch_dir)
+
+    return True
