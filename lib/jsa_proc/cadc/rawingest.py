@@ -31,6 +31,32 @@ logger = logging.getLogger(__name__)
 obsid_date = re.compile('_(\d{8})T')
 
 
+def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
+    logger.debug('Connecting to database with read-only access')
+    db = OMPDB()
+
+    logger.info('Searching for observations to ingest')
+    obsids = db.find_obs_for_ingestion(date_start, date_end,
+                                       no_status_check=quick)
+    logger.info('Found %i observations', len(obsids))
+
+    if not dry_run:
+        logger.debug('Re-connecting to database with write access')
+        db = OMPDB(write_access='jcmt')
+
+    n_ok = n_err = 0
+    for obsid in obsids:
+        if _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
+            n_ok += 1
+        else:
+            nerr += 1
+
+    logger.info('Ingestion complete: %i successful, %i errors', n_ok, n_err)
+
+    if n_err:
+        raise CommandError('Errors encountered during ingestion')
+
+
 def ingest_raw_observation(obsid, dry_run=False):
     """Perform raw ingestion of an observation.
 

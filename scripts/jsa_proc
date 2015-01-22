@@ -34,6 +34,7 @@ Usage:
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
+    jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -52,6 +53,8 @@ Options:
 
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
+    --date-start <ut-date>     Date at which to start.
+    --date-end <ut-date>       Date at which to end.
     --force, -f                Skip initial state check.
     --include-error            Include jobs in the error state.
     --replaceparent            Force recopying parent jobs into input folder
@@ -62,6 +65,7 @@ Options:
     --stream <stream>          P-transfer stream ("new" or "replace").
     --tag <tag>                Select jobs by tag.
     --task, -t <task>          Select jobs for a particular task.
+    --quick                    Use simpler but less thorough database query.
 
 For more information about a particular command, please use:
 
@@ -85,6 +89,11 @@ script_name = 'jsa_proc'
 commands = {}
 logger = logging.getLogger(script_name)
 
+integer_arguments = (
+    '--job-id', '--count', '--foreign-id',
+    '--date-start', '--date-end',
+)
+
 
 def main():
     """Main routine for the jsa_proc tool."""
@@ -103,7 +112,7 @@ def main():
 
     try:
         # Process integer arguments.
-        for integer_argument in ('--job-id', '--count', '--foreign-id'):
+        for integer_argument in integer_arguments:
             if args[integer_argument] is not None:
                 try:
                     args[integer_argument] = int(args[integer_argument])
@@ -413,13 +422,33 @@ def rawingest(args):
     """
     Ingest raw observations into CAOM-2.
 
-    Currently supports ingesting a single observation, the OBSID of
-    which must be given via the --obsid option.
+    Supports the following modes:
+
+        * Ingesting a single observation, the OBSID of
+          which must be given via the --obsid option.
+
+        * Searching for observations in a given date range
+          (--date-start to optional --date-end) via the --poll
+          option.  The --quick option can be used in this case
+          to perform a simpler check for only observations which
+          have not be ingested successfully before.
     """
 
-    from jsa_proc.cadc.rawingest import ingest_raw_observation
+    from jsa_proc.cadc.rawingest import ingest_raw_observation, \
+        poll_raw_ingestion
 
-    ingest_raw_observation(args['--obsid'], dry_run=args['--dry-run'])
+    if args['--obsid']:
+        ingest_raw_observation(args['--obsid'], dry_run=args['--dry-run'])
+
+    elif args['--poll']:
+        poll_raw_ingestion(date_start=args['--date-start'],
+                           date_end=args['--date-end'],
+                           quick=args['--quick'],
+                           dry_run=args['--dry-run'])
+
+    else:
+        raise CommandError('Unknown raw ingestion operation')
+
 
 @command
 def revalidate(args):
