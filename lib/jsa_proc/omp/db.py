@@ -133,15 +133,16 @@ class OMPDB:
 
         return UTC.localize(datetime.strptime(str(dt), '%b %d %Y %I:%M%p'))
 
-    def find_obs_for_ingestion(self, utdate_start, utdate_end=None):
+    def find_obs_for_ingestion(self, utdate_start, utdate_end=None,
+                               no_status_check=False):
         """Find (raw) observations which are due for ingestion into CAOM-2.
 
         This method searches for observations matching these criteria:
 
-            * utdate within the given range
-            * date_obs at least 4 hours ago
-            * last_caom_mod NULL or older than last comment
-            * no files still in the process of being transferred
+            1. utdate within the given range
+            2. date_obs at least 4 hours ago
+            3. last_caom_mod NULL or older than last comment
+            4. no files still in the process of being transferred
 
         Arguments:
             utdate_start: start date (observation's UT date must be >= this)
@@ -150,6 +151,8 @@ class OMPDB:
                           start date.
             utdate_end:   similar to utdate_end but for the end of the date
                           range (default: None).
+            no_status_check: disable criterion 3, and instead only look for
+                             observations with NULL last_caom_mod
 
         Returns:
             A list of OBSID strings.
@@ -161,19 +164,23 @@ class OMPDB:
         # Consider date range limits.
         if utdate_start is not None:
             args['@us'] = utdate_start
-            where.append('utdate >= @us')
+            where.append('(utdate >= @us)')
         if utdate_end is not None:
             args['@ue'] = utdate_end
-            where.append('utdate <= @ue')
+            where.append('(utdate <= @ue)')
 
         # Check the observation is finished.  (Started >= 4 hours ago.)
-        where.append('DATEDIFF(hh, date_obs, GETUTCDATE()) >= 4')
+        where.append('(DATEDIFF(hh, date_obs, GETUTCDATE()) >= 4)')
 
-        # Look for comment newer than last_caom_mod.
-        where.append('((last_caom_mod IS NULL)'
-                        'OR (last_caom_mod < (SELECT MAX(commentdate)'
-                            ' FROM omp..ompobslog'
-                            ' WHERE omp..ompobslog.obsid=COMMON.obsid)))')
+        # Look for last_caom_mod NULL or (optionally) comment newer than
+        # last_caom_mod.
+        if no_status_check:
+            where.append('(last_caom_mod IS NULL)')
+        else:
+            where.append('((last_caom_mod IS NULL)'
+                            ' OR (last_caom_mod < (SELECT MAX(commentdate)'
+                                ' FROM omp..ompobslog'
+                                ' WHERE omp..ompobslog.obsid=COMMON.obsid)))')
 
         # Check that all files have been transferred.
         where.append('(SELECT COUNT(*) FROM FILES'
@@ -182,12 +189,12 @@ class OMPDB:
                             ' AND transfer.status NOT IN ("t", "d", "D", "z"))'
                         ' = 0')
 
+        query = 'SELECT obsid FROM COMMON WHERE ' + ' AND '.join(where)
         result = []
 
         with self.db as c:
             c.execute('use jcmt')
-            c.execute('SELECT obsid FROM COMMON WHERE ' +
-                      ' AND '.join(where), args)
+            c.execute(query, args)
 
             while True:
                 row = c.fetchone()
