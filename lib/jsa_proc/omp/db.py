@@ -132,3 +132,34 @@ class OMPDB:
         """
 
         return UTC.localize(datetime.strptime(str(dt), '%b %d %Y %I:%M%p'))
+
+    def set_last_caom_mod(self, obsid):
+        """Set the "COMMON.last_caom_mod" column to the current date
+        and time for the given observation.
+
+        This is to be used to mark an observation as successfully ingested
+        into CAOM-2 (raw data only).
+        """
+
+        query = 'UPDATE COMMON SET last_caom_mod=getdate() WHERE obsid=@o'
+        args = {'@o': obsid}
+
+        with self.db as c:
+            try:
+                c.execute('USE jcmt')
+                c.execute(query, args)
+
+                # Check that exactly one row was  updated.
+                if c.rowcount == 0:
+                    raise NoRowsError('COMMON', query, args)
+                elif c.rowcount > 1:
+                    raise ExcessRowsError('COMMON', query, args)
+
+                # The Sybase DB lock object (JSAProcSybaseLock) was designed
+                # for read-only access.  Since this is the only case (so far)
+                # where we need to write to the database, handle commit and
+                # rollback explicitly here for now.
+                self.db._conn.commit()
+            except:
+                self.db._conn.rollback()
+                raise
