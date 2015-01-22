@@ -22,6 +22,7 @@ from keyword import iskeyword
 import Sybase
 from pytz import UTC
 
+from jsa_proc.config import get_config
 from omp.siteconfig import get_omp_siteconfig
 
 from jsa_proc.db.sybase import JSAProcSybaseLock
@@ -36,18 +37,33 @@ class OMPDB:
 
     OBS_JUNK = 4
 
-    def __init__(self, write_access=False):
+    def __init__(self, write_access=None):
         """Construct new OMP and JCMT database object.
 
         Connects to the JAC Sybase server.
-        """
 
-        config = get_omp_siteconfig()
+        Write access can either be None (the default), "omp"
+        or "jcmt".  Read-only and OMP credentials come from
+        the OMP siteconfig file.  JCMT database write permissions
+        come from the JSA Proc configuration system.
+        """
 
         # Connect using the "hdr_database" set of credentials, which is
         # the "staff" user (supposed to be read only) at the time of
-        # writing, unless the write_access option is enabled.
-        credentials = 'database' if write_access else 'hdr_database'
+        # writing, unless the write_access option is specified.
+        if write_access is None:
+            config = get_omp_siteconfig()
+            credentials = 'hdr_database'
+        elif write_access == 'omp':
+            config = get_omp_siteconfig()
+            credentials = 'database'
+        elif write_access == 'jcmt':
+            config = get_config()
+            credentials = 'database_jcmt'
+        else:
+            raise JSAProcError('Unknown write_access request {0}'
+                               .format(write_access))
+
         conn = Sybase.connect(
             config.get(credentials, 'server'),
             config.get(credentials, 'user'),
