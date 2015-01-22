@@ -219,7 +219,10 @@ def fetch_(args):
 
     from jsa_proc.action.fetch import fetch
 
-    fetch(job_id=args['--job-id'], force=args['--force'], replaceparent=args['--replaceparent'], task=args['--task'])
+    fetch(job_id=args['--job-id'], force=args['--force'],
+          replaceparent=args['--replaceparent'],
+          task=args['--task'])
+
 
 def help(args):
     """Display usage and help information.
@@ -253,6 +256,7 @@ def help(args):
 
         else:
             raise CommandError('No help available for {0}'.format(topic))
+
 
 @command
 def import_(args):
@@ -453,7 +457,8 @@ def run(args):
 
     from jsa_proc.action.run import run_job
 
-    run_job(job_id=args['--job-id'], force=args['--force'], task=args['--task'])
+    run_job(job_id=args['--job-id'], force=args['--force'],
+            task=args['--task'])
 
 
 @command
