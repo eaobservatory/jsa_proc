@@ -205,15 +205,20 @@ class OMPDB:
 
         return result
 
-    def set_last_caom_mod(self, obsid):
+    def set_last_caom_mod(self, obsid, set_null=False):
         """Set the "COMMON.last_caom_mod" column to the current date
         and time for the given observation.
 
         This is to be used to mark an observation as successfully ingested
         into CAOM-2 (raw data only).
+
+        If the set_null option is given then last_caom_mod is nulled rather
+        than being set to the current date and time.
         """
 
-        query = 'UPDATE COMMON SET last_caom_mod=getdate() WHERE obsid=@o'
+        query = 'UPDATE COMMON SET last_caom_mod = ' + \
+            ('NULL' if set_null else 'getdate()') + \
+            ' WHERE obsid=@o'
         args = {'@o': obsid}
 
         with self.db as c:
