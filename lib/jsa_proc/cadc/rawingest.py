@@ -23,6 +23,7 @@ import subprocess
 
 from jsa_proc.admin.directories import get_misc_log_dir, make_misc_scratch_dir
 from jsa_proc.error import JSAProcError
+from jsa_proc.omp.db import OMPDB
 from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,26 @@ obsid_date = re.compile('_(\d{8})T')
 
 
 def ingest_raw_observation(obsid, dry_run=False):
-    """Perform raw ingestion of an observation."""
+    """Perform raw ingestion of an observation.
+
+    This function connects to Sybase and then performs the raw
+    data ingestion via the _ingest_raw_observation private
+    function.
+    """
+
+    db = OMPDB(write_access='jcmt')
+
+    _ingest_raw_observation(obsid, db=db, dry_run=dry_run)
+
+
+def _ingest_raw_observation(obsid, db, dry_run=False):
+    """Perform raw ingestion of an observation.
+
+    This internal function requires an OMP database object with write
+    access to the JCMT database.  If the ingestion is successful then
+    the "last_caom_mod" timestamp for the observation will be updated
+    in the COMMON table of the JCMT database.
+    """
 
     logger.debug('Starting raw ingestion of OBSID %s', obsid)
 
@@ -87,6 +107,11 @@ def ingest_raw_observation(obsid, dry_run=False):
                     stdout=log,
                     stderr=subprocess.STDOUT,
                     preexec_fn=restore_signals)
+
+                # On success (check_call didn't raise an exception), set the
+                # "last_caom_mod" timestamp in the database.
+                db.set_last_caom_mod(obsid)
+
         else:
             logger.info('Would have run: "%s" (DRY RUN)', ' '.join(command))
 
