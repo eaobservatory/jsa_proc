@@ -121,6 +121,7 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
 
                 # On success (check_call didn't raise an exception), set the
                 # "last_caom_mod" timestamp in the database.
+                logger.info('Updating ingestion timestamp in the database')
                 db.set_last_caom_mod(obsid)
 
         else:
@@ -128,6 +129,18 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
 
     except subprocess.CalledProcessError as e:
         logger.exception('Error during CAOM-2 ingestion')
+
+        try:
+            logger.info('Anulling ingestion timestamp in the database')
+            db.set_last_caom_mod(obsid, set_null=True)
+        except:
+            logger.exception('Error marking ingestion date as NULL')
+
+        return False
+
+    except:
+        logger.exception('Error marking ingestion date')
+
         return False
 
     finally:
