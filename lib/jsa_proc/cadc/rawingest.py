@@ -122,12 +122,16 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
     else:
         log_file = 'DRY_RUN_MODE'
 
-    # Attempt to run ingestion command.
+    # Attempt to run ingestion command.  jsaraw appends to its log file if
+    # it already exists, so delete it first.
+    log_file_full = log_file + '.full'
+    if os.path.exists(log_file_full):
+        os.unlink(log_file_full)
     command = [
         'jsaraw',
         '--collection', 'JCMT',
         '--key', obsid,
-        '--log', log_file + '.full',
+        '--log', log_file_full,
         '--debug',
     ]
 
