@@ -217,7 +217,7 @@ class OMPDB:
         """
 
         query = 'UPDATE COMMON SET last_caom_mod = ' + \
-            ('NULL' if set_null else 'getdate()') + \
+            ('NULL' if set_null else 'GETUTCDATE()') + \
             ' WHERE obsid=@o'
         args = {'@o': obsid}
 
