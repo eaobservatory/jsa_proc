@@ -195,10 +195,10 @@ def ptransfer_poll(stream=None, dry_run=False):
                 logger.debug('Moving file to: %s', reject_dir)
                 os.rename(proc_file, os.path.join(reject_dir, file.name))
 
-        except PTransferFailure:
+        except PTransferFailure as e:
             # In the event of failure to transfer, put the file back into
             # its original stream directory.
-            logger.error('Failed to transfer file %s', file.name)
+            logger.error('Failed to transfer file %s (%s)', file.name, e.message)
 
             if not dry_run:
                 os.rename(
