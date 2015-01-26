@@ -86,8 +86,8 @@ def _perform_ingestion(job_id, db):
     scratch_dir = make_temp_scratch_dir(job_id)
     logger.debug('Using scratch directory %s', scratch_dir)
 
-    try:
-        with open_log_file(job_id, 'ingestion') as log:
+    with open_log_file(job_id, 'ingestion') as log:
+        try:
             logger.debug('Invoking jsaingest, log file: %s', log.name)
 
             subprocess.check_call(
@@ -109,8 +109,16 @@ def _perform_ingestion(job_id, db):
 
             logger.info('Done ingesting ouput for job {0}'.format(job_id))
 
-    except subprocess.CalledProcessError as e:
-        db.change_state(job_id, JSAProcState.ERROR,
-                        'CAOM-2 ingestion failed')
+        except subprocess.CalledProcessError as e:
+            # Attempt to get the first message beginning with ERROR from
+            # the log file.
 
-        logger.exception('Error during CAOM-2 ingestion of job %i', job_id)
+            # Go back to the start of the log and read in the data.
+            log.seek(0)
+            content = '\n'.join(log.readlines())
+            errorline = content[content.find('\nERROR '):].split('\n')[1]
+
+            db.change_state(job_id, JSAProcState.ERROR,
+                            'CAOM-2 ingestion failed\n' + errorline)
+
+            logger.exception('Error during CAOM-2 ingestion of job %i', job_id)

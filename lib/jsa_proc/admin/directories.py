@@ -115,7 +115,7 @@ def open_log_file(job_id, log_name):
             dir=log_dir, suffix='.log',
             delete=False)
     else:
-        log = open(logfile, 'w')
+        log = open(logfile, 'w+')
 
     # Provide the log file handle to the calling with statement.
     try:
