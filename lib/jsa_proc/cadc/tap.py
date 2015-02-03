@@ -19,7 +19,6 @@ import re
 
 from tools4caom2.tapclient import tapclient
 
-from jsa_proc.cadc.logcompat import LogCompat
 from jsa_proc.error import JSAProcError
 from jsa_proc.util import identifier_to_pattern
 
@@ -38,7 +37,7 @@ class CADCTap():
     ]
 
     def __init__(self):
-        self.tap = tapclient(log=LogCompat())
+        self.tap = tapclient()
 
         self.obsids_found = {}
 
