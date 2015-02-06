@@ -36,6 +36,8 @@ class JSAProcState:
     RUNNING = 'S'
     PROCESSED = 'P'
     TRANSFERRING = 'T'
+    INGEST_QUEUE = 'G'
+    INGEST_FETCH = 'H'
     INGESTION = 'I'
     INGESTING = 'J'
     COMPLETE = 'Y'
@@ -58,6 +60,8 @@ class JSAProcState:
         (RUNNING,      StateInfo('Running',      PHASE_RUN,      True,  None,  False)),
         (PROCESSED,    StateInfo('Processed',    PHASE_RUN,      False, False, False)),
         (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,      False, False, False)),
+        (INGEST_QUEUE, StateInfo('Queued to reingest',   PHASE_RUN,      False, False, False)),
+        (INGEST_FETCH, StateInfo('Fetching to reingest', PHASE_RUN,      True,  False, False)),
         (INGESTION,    StateInfo('Ingestion',    PHASE_RUN,      False, False, False)),
         (INGESTING,    StateInfo('Ingesting',    PHASE_RUN,      True,  False, False)),
         (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE, False, False, True)),
