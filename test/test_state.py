@@ -58,7 +58,7 @@ class StateTestCase(TestCase):
             JSAProcState.TRANSFERRING: 'Transferring',
             JSAProcState.INGEST_QUEUE: 'Queued to reingest',
             JSAProcState.INGEST_FETCH: 'Fetching to reingest',
-            JSAProcState.INGESTION: 'Ingestion',
+            JSAProcState.INGESTION: 'Waiting to ingest',
             JSAProcState.INGESTING: 'Ingesting',
             JSAProcState.COMPLETE: 'Complete',
             JSAProcState.ERROR: 'Error',
