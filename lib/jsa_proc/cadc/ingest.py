@@ -16,13 +16,14 @@
 from __future__ import print_function, division, absolute_import
 
 import logging
+import os.path
 import subprocess
 
 from jsa_proc.action.decorators import ErrorDecorator
 from jsa_proc.admin.directories import get_output_dir, \
     open_log_file, make_temp_scratch_dir
 from jsa_proc.config import get_database
-from jsa_proc.error import CommandError, NoRowsError
+from jsa_proc.error import JSAProcError, CommandError, NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.util import restore_signals
 
@@ -83,6 +84,17 @@ def _perform_ingestion(job_id, db):
     logger.debug('Preparing to ingest ouput for job {0}'.format(job_id))
 
     output_dir = get_output_dir(job_id)
+
+    logger.debug('Checking that output files are present for ingestion')
+    try:
+        output_files = db.get_output_files(job_id)
+        for filename in output_files:
+            if not os.path.exists(os.path.join(output_dir, filename)):
+                raise JSAProcError(
+                    'Output file {0} is missing'.format(filename))
+    except NoRowsError:
+        raise JSAProcError('Job has no output files to ingest')
+
     scratch_dir = make_temp_scratch_dir(job_id)
     logger.debug('Using scratch directory %s', scratch_dir)
 
