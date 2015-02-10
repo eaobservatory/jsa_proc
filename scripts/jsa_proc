@@ -25,6 +25,8 @@ Usage:
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
+    jsa_proc fetch [-v | -q] [--dry-run] output [--force] --job-id <id>
+    jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>] [--location <location>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
     jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--foreign-id <foreign-id>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
@@ -218,19 +220,32 @@ def etransfer(args):
 @command
 def fetch_(args):
     """
+    Fetch input or output data for a job.
+
+    Without the "output" option:
     Looks at a job in the queued state, assembles the data for it,
     and then advances the job to the waiting state.
 
     If the --job-id command line argument is not used, this will run on
     the highest priority job labelled to be reduced at the JAC and in the
     missing state.
+
+    With the "output" option:
+    Retrieves output data files for the given job, or the highest
+    priority job found with the given search criteria.
     """
 
-    from jsa_proc.action.fetch import fetch
+    from jsa_proc.action.fetch import fetch, fetch_output
 
-    fetch(job_id=args['--job-id'], force=args['--force'],
-          replaceparent=args['--replaceparent'],
-          task=args['--task'])
+    if args['output']:
+        fetch_output(job_id=args['--job-id'],
+                     location=args['--location'], task=args['--task'],
+                     dry_run=args['--dry-run'], force=args['--force'])
+    else:
+
+        fetch(job_id=args['--job-id'], force=args['--force'],
+              replaceparent=args['--replaceparent'],
+              task=args['--task'])
 
 
 def help(args):
