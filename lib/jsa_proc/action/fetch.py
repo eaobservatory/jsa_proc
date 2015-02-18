@@ -51,7 +51,7 @@ def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
     input_space = get_input_dir_space()
     required_space = float(get_config().get('disk_limit', 'fetch_min_space'))
 
-    if input_space < required_space:
+    if input_space < required_space and not force:
         logger.warning('Insufficient disk space: %f / %f GiB required',
                        input_space, required_space)
         return
@@ -189,7 +189,7 @@ def _fetch_job_output(job_id, db, force=False, dry_run=False):
     output_space = get_output_dir_space()
     required_space = float(get_config().get('disk_limit', 'fetch_min_space'))
 
-    if output_space < required_space:
+    if output_space < required_space and not force:
         logger.warning('Insufficient disk space: %f / %f GiB required',
                        output_space, required_space)
         return
