@@ -45,7 +45,7 @@ def clean_input(count=None, dry_run=False):
     logger.debug('Done cleaning input directories')
 
 
-def clean_output(count=None, dry_run=False, task=None):
+def clean_output(count=None, dry_run=False, task=None, **kwargs):
     """Delete files other than previews from job output directories."""
 
     logger.debug('Beginning output clean')
@@ -58,7 +58,8 @@ def clean_output(count=None, dry_run=False, task=None):
         task=task,
         count=count,
         clean_function=_clean_output_dir,
-        dry_run=dry_run)
+        dry_run=dry_run,
+        clean_function_kwargs=kwargs)
 
     logger.debug('Done cleaning output directories')
 
@@ -88,11 +89,13 @@ def clean_scratch(count=None, dry_run=False, include_error=False):
 
 
 def _clean_job_directories(dir_function, state, task=None, count=None,
-                           clean_function=None, dry_run=False):
+                           clean_function=None, dry_run=False,
+                           clean_function_kwargs={}):
     """Generic directory deletion function.
 
     If a clean_function is given, it should return True when it is
-    able to clean a directory and False otherwise.
+    able to clean a directory and False otherwise.  It will
+    be passed the extra clean_function_kwargs keyword arguments.
     """
 
     db = get_database()
@@ -115,19 +118,24 @@ def _clean_job_directories(dir_function, state, task=None, count=None,
             n += 1
 
         else:
-            if clean_function(directory, job_id=job.id, db=db, dry_run=dry_run):
+            if clean_function(directory, job_id=job.id, db=db, dry_run=dry_run,
+                              **clean_function_kwargs):
                 n += 1
 
         if (count is not None) and not (n < count):
             break
 
 
-def _clean_output_dir(directory, job_id, db, dry_run):
+def _clean_output_dir(directory, job_id, db, dry_run, no_cadc_check=False):
     """Clean non-previews from an output file after double-checking
     everything is present at CADC.
 
     As required for _clean_job_directories, returns True if it cleaned up
     the directory, and False otherwise.
+
+    CADC checking can be skipped by setting no_cadc_check=True.  Note that
+    this is potentially dangerous and removes the check that the output files
+    really are at CADC and have been ingested into CAOM-2.
     """
 
     # Get a list of the non-preview files in the directory.
@@ -140,8 +148,6 @@ def _clean_output_dir(directory, job_id, db, dry_run):
         logger.debug('Directory for job %i has no non-preview files', job_id)
         return False
 
-    # Prepare CADC tap client.
-    caom2 = CADCTap()
     deletable = []
 
     # Consider files other than those which are either a preview or not under
@@ -150,7 +156,15 @@ def _clean_output_dir(directory, job_id, db, dry_run):
         (lambda x: x.filename in non_preview),
         db.get_output_files(job_id, with_info=True))
 
-    files_in_caom2 = caom2.check_files([x.filename for x in output_files])
+    if no_cadc_check:
+        # When skipping CADC checks, assume files are all in CAOM-2.
+        files_in_caom2 = [True for x in output_files]
+    else:
+        # Prepare CADC tap client.
+        caom2 = CADCTap()
+
+        # Query for files in CAOM-2.
+        files_in_caom2 = caom2.check_files([x.filename for x in output_files])
 
     for (file, in_caom2) in zip(output_files, files_in_caom2):
         # Check whether the file has been ingested into CAOM-2.
@@ -158,12 +172,13 @@ def _clean_output_dir(directory, job_id, db, dry_run):
             logger.warning('File %s is not in CAOM-2', file.filename)
             break
 
-        # Check whether the file is identical to what CADC have in AD.
-        cadc_md5 = fetch_cadc_file_info(file.filename)['content-md5']
+        if not no_cadc_check:
+            # Check whether the file is identical to what CADC have in AD.
+            cadc_md5 = fetch_cadc_file_info(file.filename)['content-md5']
 
-        if file.md5 != cadc_md5:
-            logger.warning('File %s has MD5 mismatch', file.filename)
-            break
+            if file.md5 != cadc_md5:
+                logger.warning('File %s has MD5 mismatch', file.filename)
+                break
 
         deletable.append(file.filename)
 

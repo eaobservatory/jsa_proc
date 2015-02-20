@@ -19,7 +19,7 @@
 
 Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>]
-    jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>]
+    jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>] [--no-cadc-check]
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
@@ -63,6 +63,7 @@ Options:
     --outfile <file>           File into which to write output.
     --obsid <obsid>            Observation identifier (OBSID header).
     --no-etransfer             Skip e-transfer steps.
+    --no-cadc-check            Skip checks for files being at CADC.
     --poll                     Poll a system for state updates.
     --stream <stream>          P-transfer stream ("new" or "replace").
     --tag <tag>                Select jobs by tag.
@@ -179,7 +180,7 @@ def clean(args):
     elif args['output']:
         from jsa_proc.action.clean import clean_output
         clean_output(count=args['--count'], dry_run=args['--dry-run'],
-                     task=args['--task'])
+                     task=args['--task'], no_cadc_check=args['--no-cadc-check'])
 
     elif args['scratch']:
         from jsa_proc.action.clean import clean_scratch
