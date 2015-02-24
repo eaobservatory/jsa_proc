@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 import os.path
 import re
@@ -31,6 +32,8 @@ from jsa_proc.files import get_md5sum
 Routines for handling input and output files when running jobs.
 
 """
+
+logger = logging.getLogger(__name__)
 
 # Name of .lis file containing each input file with full path.
 input_list_name = 'input_files_job.lis'
@@ -148,7 +151,7 @@ def write_input_list(job_id, input_file_list):
     fname = os.path.join(input_directory, input_list_name)
     f = open(fname, 'w')
     for i in input_file_list:
-        print i
+        logger.debug('Writing to input list: %s', i)
         f.write(i + os.linesep)
     f.close()
     return fname
@@ -212,10 +215,10 @@ def assemble_parent_data_for_job(job_id, parent_job_id, parent_files, force_new=
 
             # Then check if file is in parent output directory, copy
             # it in if so.
-            print f
-            print dirpath
+            logger.debug('Parent file: %s', f)
+            logger.debug('dirpath = %s', dirpath)
             filepath = is_file_in_a_dir(f, dirpath)
-            print filepath
+            logger.debug('filepath = %s', filepath)
             if filepath:
                 shutil.copy(filepath, input_directory)
                 filepath = os.path.join(input_directory,
