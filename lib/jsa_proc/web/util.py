@@ -28,7 +28,7 @@ Pagination = namedtuple('Pagination', 'first prev next last up count')
 
 url_for = flask.url_for
 
-url_for_omp = werkzeug.urls.Href('http://omp.jach.hawaii.edu/cgi-bin')
+url_for_omp = werkzeug.urls.Href('http://omp.eao.hawaii.edu/cgi-bin')
 
 
 def url_for_omp_comment(obsid, instrument, obsnum, date_obs):
