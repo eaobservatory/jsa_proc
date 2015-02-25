@@ -26,9 +26,8 @@ logger = logging.getLogger(__name__)
 def move_from_cadc(job_ids, dry_run=False):
     """Move a list of jobs from CADC to JAC.
 
-    This sets up a database connection and CADC DP submission
-    object, and then passes these to _move_job_from to move
-    each job individually.
+    This sets up a database connection and then passes it to _move_job_from
+    to move each job individually.
     """
 
     db = get_database()
