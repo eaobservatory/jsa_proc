@@ -27,8 +27,6 @@ Usage:
     jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>]
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] --job-id <id>
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>] [--location <location>]
-    jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--tag <tag>]
-    jsa_proc import [-v | -q] [--dry-run] --location <location> --task <task> [--foreign-id <foreign-id>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task>
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
@@ -281,27 +279,6 @@ def help(args):
 
         else:
             raise CommandError('No help available for {0}'.format(topic))
-
-
-@command
-def import_(args):
-    """
-    Perform an initial import of jobs from another location.
-
-    Currently the only supported location is CADC.
-    """
-
-    if args['--location'] == 'CADC':
-        from jsa_proc.cadc.initial_import import import_from_cadcdp
-
-        if not import_from_cadcdp(dry_run=args['--dry-run'],
-                                  task=args['--task'],
-                                  tag_pattern=args['--tag'],
-                                  recipe_instance=args['--foreign-id']):
-            raise CommandError('errors encountered during import')
-
-    else:
-        raise CommandError('unknown location: {0}'.format(args['--location']))
 
 
 @command
