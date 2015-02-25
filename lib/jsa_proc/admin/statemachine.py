@@ -20,7 +20,6 @@ from jsa_proc.action.datafile_handling \
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_job, validate_output
 from jsa_proc.admin.directories import get_output_dir
-from jsa_proc.cadc.dpstate import CADCDPState
 from jsa_proc.cadc.etransfer \
     import etransfer_check_config, etransfer_send_output
 from jsa_proc.cadc.preview import fetch_cadc_previews

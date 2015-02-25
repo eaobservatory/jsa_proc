@@ -17,33 +17,9 @@ from unittest import TestCase
 
 from jsa_proc.error import JSAProcError
 from jsa_proc.state import JSAProcState
-from jsa_proc.cadc.dpstate import CADCDPState
 
 
 class StateTestCase(TestCase):
-    def test_cadc_to_jsa_proc(self):
-        """Test mapping of CADC data processing states to local states."""
-
-        states = {
-            'Q': 'Q',
-            'D': 'Q',
-            'S': 'S',
-            'N': 'S',
-            'C': 'S',
-            'P': 'S',
-            'Y': 'Y',
-            'E': 'E',
-            'R': 'Q',
-            'U': 'E',
-            ' ': '?',
-        }
-
-        for (cadc, jsa) in states.items():
-            self.assertEqual(CADCDPState.jsaproc_state(cadc), jsa)
-
-        with self.assertRaises(JSAProcError):
-                CADCDPState.jsaproc_state('!')
-
     def test_state_name(self):
         """Test lookup of state names."""
 
@@ -96,25 +72,3 @@ class StateTestCase(TestCase):
                          False)
         self.assertEqual(JSAProcState.get_info(JSAProcState.DELETED).final,
                          True)
-
-    def test_cadc_state_name(self):
-        """Test lookup of CADC state names."""
-
-        states = {
-            CADCDPState.QUEUED: 'Queued',
-            CADCDPState.DRM_QUEUED: 'DRM Queued',
-            CADCDPState.RETRIEVE_STARTED: 'Retrieve started',
-            CADCDPState.RETRIEVE_ENDED: 'Retrieve ended',
-            CADCDPState.CAPTURE_STARTED: 'Capture started',
-            CADCDPState.CAPTURE_ENDED: 'Capture ended',
-            CADCDPState.COMPLETE: 'Complete',
-            CADCDPState.ERROR: 'Error',
-            CADCDPState.DO_AGAIN: 'Do again',
-            CADCDPState.UNDOABLE: 'Un-doable',
-        }
-
-        for (state, name) in states.items():
-            self.assertEqual(CADCDPState.get_name(state), name)
-
-        with self.assertRaises(JSAProcError):
-            CADCDPState.get_name('!')
