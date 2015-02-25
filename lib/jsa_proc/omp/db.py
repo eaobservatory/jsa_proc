@@ -35,8 +35,6 @@ class OMPDB:
 
     CommonInfo = None
 
-    OBS_JUNK = 4
-
     def __init__(self, write_access=None):
         """Construct new OMP and JCMT database object.
 

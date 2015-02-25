@@ -27,6 +27,7 @@ from jsa_proc.cadc.fetch import check_cadc_files
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.db import OMPDB
+from jsa_proc.omp_state import OMPState
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                 if status is not None:
                     logger.debug('Got obslog status: %i', status)
 
-                    if status == ompdb.OBS_JUNK:
+                    if status == OMPState.JUNK:
                         raise IdentifiedProblem('junk', 'observation is junk')
 
             # Check whether all of the files are at CADC.
