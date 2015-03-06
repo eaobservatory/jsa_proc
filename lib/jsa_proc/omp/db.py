@@ -25,7 +25,7 @@ from pytz import UTC
 from jsa_proc.config import get_config
 from omp.siteconfig import get_omp_siteconfig
 
-from jsa_proc.db.sybase import JSAProcSybaseLock
+from omp.db.backend.sybase import OMPSybaseLock
 from jsa_proc.error import NoRowsError, ExcessRowsError
 
 
@@ -68,7 +68,7 @@ class OMPDB:
             config.get(credentials, 'password'),
             auto_commit=0)
 
-        self.db = JSAProcSybaseLock(conn)
+        self.db = OMPSybaseLock(conn)
 
     def get_common(self, obsid):
         """Retrieve information for a given obsid from the COMMON table.
