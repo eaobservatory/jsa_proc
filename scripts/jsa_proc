@@ -49,7 +49,6 @@ Options:
 
     --job-id, -j <id>          Identifier of job on which to work.
     --location, -l <location>  Job location, e.g. JAC, CADC.
-    --foreign-id <foreign-id>  Foreign ID (e.g. CADC recipe instance).
 
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
@@ -91,7 +90,7 @@ commands = {}
 logger = logging.getLogger(script_name)
 
 integer_arguments = (
-    '--job-id', '--count', '--foreign-id',
+    '--job-id', '--count',
     '--date-start', '--date-end',
 )
 
