@@ -392,9 +392,9 @@ def query(args):
             print(file)
 
     elif args['ompstatus']:
-        from jsa_proc.omp.db import OMPDB
+        from jsa_proc.omp.config import get_omp_database
         from jsa_proc.omp.state import OMPState
-        ompdb = OMPDB()
+        ompdb = get_omp_database()
         state = ompdb.get_obsid_status(search)
         print('Status: ' +
               ('NULL' if state is None else OMPState.get_name(state)))

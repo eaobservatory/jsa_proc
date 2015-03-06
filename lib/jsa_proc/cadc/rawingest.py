@@ -23,7 +23,7 @@ import subprocess
 
 from jsa_proc.admin.directories import get_misc_log_dir, make_misc_scratch_dir
 from jsa_proc.error import JSAProcError, CommandError, NoRowsError
-from jsa_proc.omp.db import OMPDB
+from jsa_proc.omp.config import get_omp_database
 from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ obsid_date = re.compile('_(\d{8})T')
 
 def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
     logger.debug('Connecting to database with read-only access')
-    db = OMPDB()
+    db = get_omp_database()
 
     logger.info('Searching for observations to ingest')
     obsids = db.find_obs_for_ingestion(date_start, date_end,
@@ -42,7 +42,7 @@ def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
 
     if not dry_run:
         logger.debug('Re-connecting to database with write access')
-        db = OMPDB(write_access='jcmt')
+        db = get_omp_database(write_access='jcmt')
 
     n_ok = n_err = 0
     for obsid in obsids:
@@ -66,9 +66,9 @@ def ingest_raw_observation(obsid, dry_run=False):
     """
 
     if not dry_run:
-        db = OMPDB(write_access='jcmt')
+        db = get_omp_database(write_access='jcmt')
     else:
-        db = OMPDB()
+        db = get_omp_database()
 
     try:
         info = db.get_obsid_common(obsid)

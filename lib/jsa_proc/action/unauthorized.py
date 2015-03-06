@@ -26,7 +26,7 @@ from jsa_proc.action.util import yes_or_no_question
 from jsa_proc.cadc.fetch import check_cadc_files
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
-from jsa_proc.omp.db import OMPDB
+from jsa_proc.omp.config import get_omp_database
 from jsa_proc.omp.state import OMPState
 from jsa_proc.state import JSAProcState
 
@@ -46,7 +46,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
     db = get_database()
 
     logger.debug('Connecting to OMP/JCMT database')
-    ompdb = OMPDB()
+    ompdb = get_omp_database()
 
     logger.debug('Preparing CADC TAP object')
     caom2 = CADCTap()
