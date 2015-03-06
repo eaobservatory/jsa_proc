@@ -18,7 +18,7 @@ import logging
 from jsa_proc.config import get_database
 from jsa_proc.db.db import Not
 from jsa_proc.error import JSAProcError, NoRowsError
-from jsa_proc.omp_state import OMPState
+from jsa_proc.omp.state import OMPState
 from jsa_proc.qa_state import JSAQAState
 from jsa_proc.state import JSAProcState
 

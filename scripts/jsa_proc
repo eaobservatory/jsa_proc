@@ -393,7 +393,7 @@ def query(args):
 
     elif args['ompstatus']:
         from jsa_proc.omp.db import OMPDB
-        from jsa_proc.omp_state import OMPState
+        from jsa_proc.omp.state import OMPState
         ompdb = OMPDB()
         state = ompdb.get_status(search)
         print('Status: ' +
