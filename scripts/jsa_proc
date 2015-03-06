@@ -393,8 +393,11 @@ def query(args):
 
     elif args['ompstatus']:
         from jsa_proc.omp.db import OMPDB
+        from jsa_proc.omp_state import OMPState
         ompdb = OMPDB()
-        print('Status: ' + repr(ompdb.get_status(search)))
+        state = ompdb.get_status(search)
+        print('Status: ' +
+              ('NULL' if state is None else OMPState.get_name(state)))
 
     elif args['dws']:
         from jsa_proc.cadc.fetch import fetch_cadc_file_info
