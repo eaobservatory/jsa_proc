@@ -84,7 +84,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
             for obsid in obsids:
                 logger.debug('Fetching COMMON info for %s', obsid)
 
-                common = ompdb.get_common(obsid)
+                common = ompdb.get_obsid_common(obsid)
                 release_date = ompdb.parse_datetime(common.release_date)
 
                 # Keep the last release date inspected in the info dictionary
@@ -99,7 +99,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                         release_date.strftime('%Y-%m-%d'))
 
                 logger.debug('Fetching OMP obslog status for %s', obsid)
-                status = ompdb.get_status(obsid)
+                status = ompdb.get_obsid_status(obsid)
 
                 if status is not None:
                     logger.debug('Got obslog status: %i', status)

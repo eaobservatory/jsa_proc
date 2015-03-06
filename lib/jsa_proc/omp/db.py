@@ -70,7 +70,7 @@ class OMPDB:
 
         self.db = OMPSybaseLock(conn)
 
-    def get_common(self, obsid):
+    def get_obsid_common(self, obsid):
         """Retrieve information for a given obsid from the COMMON table.
         """
 
@@ -98,7 +98,7 @@ class OMPDB:
 
         return self.CommonInfo(*rows[0])
 
-    def get_status(self, obsid):
+    def get_obsid_status(self, obsid):
         """Retrieve the last comment status for a given obsid.
 
         Returns None if no status was found.

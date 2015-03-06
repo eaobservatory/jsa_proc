@@ -395,7 +395,7 @@ def query(args):
         from jsa_proc.omp.db import OMPDB
         from jsa_proc.omp.state import OMPState
         ompdb = OMPDB()
-        state = ompdb.get_status(search)
+        state = ompdb.get_obsid_status(search)
         print('Status: ' +
               ('NULL' if state is None else OMPState.get_name(state)))
 
