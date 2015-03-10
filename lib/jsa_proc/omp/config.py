@@ -4,7 +4,7 @@
 
 from jsa_proc.config import get_config
 from omp.siteconfig import get_omp_siteconfig
-from jsa_proc.omp.db import OMPDB
+from omp.db.db import OMPDB
 
 omp_database_access = {}
 
