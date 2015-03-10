@@ -70,9 +70,8 @@ def ingest_raw_observation(obsid, dry_run=False):
     else:
         db = get_omp_database()
 
-    try:
-        info = db.get_obsid_common(obsid)
-    except NoRowsError:
+    info = db.get_obsid_common(obsid)
+    if info is None:
         raise CommandError('Observation {0} does not exist'.format(obsid))
 
     if not _ingest_raw_observation(obsid, db=db, dry_run=dry_run):

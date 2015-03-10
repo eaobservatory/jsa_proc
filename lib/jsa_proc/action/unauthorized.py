@@ -85,6 +85,8 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                 logger.debug('Fetching COMMON info for %s', obsid)
 
                 common = ompdb.get_obsid_common(obsid)
+                if common is None:
+                    raise IdentifiedProblem('omp', 'obsid not in common table')
                 release_date = ompdb.parse_datetime(common.release_date)
 
                 # Keep the last release date inspected in the info dictionary

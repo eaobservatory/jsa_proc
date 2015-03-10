@@ -23,7 +23,7 @@ import Sybase
 from pytz import UTC
 
 from omp.db.backend.sybase import OMPSybaseLock
-from jsa_proc.error import NoRowsError, ExcessRowsError
+from jsa_proc.error import ExcessRowsError
 
 
 class OMPDB:
@@ -62,7 +62,7 @@ class OMPDB:
             cols = c.description
 
         if not rows:
-            raise NoRowsError('COMMON', query, args)
+            return None
 
         elif len(rows) > 1:
             raise ExcessRowsError('COMMON', query, args)
