@@ -41,6 +41,7 @@ def get_omp_database(write_access=None):
         omp_database_access[write_access] = OMPDB(
             server=config.get(credentials, 'server'),
             user=config.get(credentials, 'user'),
-            password=config.get(credentials, 'password'))
+            password=config.get(credentials, 'password'),
+            read_only=(write_access is None))
 
     return omp_database_access[write_access]
