@@ -32,7 +32,7 @@ Usage:
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
-    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | ompstatus | dws) <search>
+    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
@@ -366,6 +366,8 @@ def query(args):
 
     caom2file:  queries CAOM-2 via tap for a given filename.
 
+    common:     queries the COMMON table for the given obsid.
+
     ompstatus:  retrieves the status of an obsid from the OMP.
 
     dws:        retrieves information from the CADC data web service
@@ -398,6 +400,13 @@ def query(args):
         state = ompdb.get_obsid_status(search)
         print('Status: ' +
               ('NULL' if state is None else OMPState.get_name(state)))
+
+    elif args['common']:
+        from jsa_proc.omp.config import get_omp_database
+        ompdb = get_omp_database()
+        common = ompdb.get_obsid_common(search)
+        for field in sorted(common._fields):
+            print('{0}: {1!s}'.format(field, getattr(common, field)))
 
     elif args['dws']:
         from jsa_proc.cadc.fetch import fetch_cadc_file_info
