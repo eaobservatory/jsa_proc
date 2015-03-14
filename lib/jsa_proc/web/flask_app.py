@@ -21,8 +21,9 @@ from flask import Flask, flash, request, Response, render_template, \
 from functools import wraps
 import os.path
 
+from omp.obs.state import OMPState
+
 from jsa_proc.config import get_config, get_database, get_home
-from jsa_proc.omp.state import OMPState
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
 

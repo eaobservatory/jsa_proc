@@ -21,13 +21,14 @@ import logging
 
 from pytz import UTC
 
+from omp.obs.state import OMPState
+
 from jsa_proc.action.error_filter import JSAProcErrorFilter
 from jsa_proc.action.util import yes_or_no_question
 from jsa_proc.cadc.fetch import check_cadc_files
 from jsa_proc.cadc.tap import CADCTap
 from jsa_proc.config import get_database
 from jsa_proc.omp.config import get_omp_database
-from jsa_proc.omp.state import OMPState
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
