@@ -88,7 +88,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                 common = ompdb.get_obsid_common(obsid)
                 if common is None:
                     raise IdentifiedProblem('omp', 'obsid not in common table')
-                release_date = ompdb.parse_datetime(common.release_date)
+                release_date = common.release_date
 
                 # Keep the last release date inspected in the info dictionary
                 # so that if it's the one that causes a problem, we see
