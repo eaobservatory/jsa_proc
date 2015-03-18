@@ -70,7 +70,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                          science_obs_only=False,
                          never_update=False,
                          dryrun=True, priority=0,
-                         output_task=None, pointings_only=pointings_only):
+                         output_task=None, pointings_only=False):
     """
     Submit a single coadd job.
 
