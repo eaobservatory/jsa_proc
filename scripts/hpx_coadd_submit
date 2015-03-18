@@ -35,8 +35,10 @@ Options:
                                (e.g. no pointings)
     --never-update             Don't change an existing job, even if outdated.
     --exclude-pointing-jobs    If a coadd contains any pointing observations,
-                               don't submit it.
-
+                                don't submit it.
+    --pointing-jobs-only       Only include pointing jobs in coadds.
+    --output-task=<out-task>   A task name to put the coadd jobs into. If not
+                                given, defaults to <task>_coadd.
 Commands:
     all:
         Submit jobs for all tiles in the tile table for the requested task.
@@ -44,6 +46,7 @@ Commands:
         set with a state of BAD or JUNK and not include those. It will check the QA
         status in the JSA_processing system and only include those that are GOOD or
         QUESTIONABLE. All jobs will be created in a task that is named <task>_coadd
+        unless the option --output-task is given.
 
     one
         Submit a coadd job for the requested task and requested tile number. It will
@@ -85,6 +88,10 @@ def main():
     except KeyError:
         raise CommandError('Task must be supplied.')
 
+
+    if args['--pointing-jobs-only'] and (args['--only-science'] or args['--exclude-pointing-jobs']):
+        raise CommandError('Cannot specify both --pointing-jobs-only and either of --only-science' +
+                           ' --exclude-pointing-jobs.')
 
     logging.basicConfig(level=loglevel)
 
@@ -136,8 +143,11 @@ def all(args):
     science_obs_only = args.get('--only-science', False)
     never_update = args.get('--never-update', False)
     exclude_pointing_jobs = args.get('--exclude-pointing-jobs', False)
+    pointings_only = args.get('--pointing-jobs-only', False)
+    output_task = args.get('--output-task', None)
     dryrun = args.get('--dry-run', True)
     priority = args.get('--priority', 0)
+
     #Values that are unchanging.
     mode='public'
     parameters='COADD_JSA_TILES'
@@ -158,7 +168,8 @@ def all(args):
             submit_one_coadd_job(t, parenttask, mode, parameters, location,
                                  exclude_pointing_jobs=exclude_pointing_jobs,
                                  science_obs_only=science_obs_only,
-                                 never_update=never_update, dryrun=dryrun, priority=priority)
+                                 never_update=never_update, dryrun=dryrun, priority=priority,
+                                 output_task=output_task, pointings_only=pointings_only)
         except JSAProcError:
             pass
 
@@ -175,6 +186,8 @@ def one(args):
     science_obs_only = args.get('--only-science', False)
     never_update = args.get('--never-update', False)
     exclude_pointing_jobs = args.get('--exclude-pointing-jobs', False)
+    pointings_only = args.get('--pointing-jobs-only', False)
+    output_task = args.get('--output-task', None)
     dryrun = args.get('--dry-run', True)
     tile = args.get('--tile')
     priority = args.get('--priority', 0)
@@ -187,7 +200,8 @@ def one(args):
     job_id = submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                                   exclude_pointing_jobs=exclude_pointing_jobs,
                                   science_obs_only=science_obs_only,
-                                  never_update=never_update, dryrun=dryrun, priority=priority)
+                                  never_update=never_update, dryrun=dryrun, priority=priority,
+                                  output_task=output_task, pointings_only=pointings_only)
 
 
 

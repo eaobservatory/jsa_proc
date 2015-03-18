@@ -69,13 +69,18 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
                          exclude_pointing_jobs=False,
                          science_obs_only=False,
                          never_update=False,
-                         dryrun=True, priority=0):
+                         dryrun=True, priority=0,
+                         output_task=None, pointings_only=pointings_only):
     """
     Submit a single coadd job.
 
     """
     # Generate tag, task name, and filter.
-    coadd_task = generate_hpx_coadd_task(parenttask)
+    if not output_task:
+        coadd_task = generate_hpx_coadd_task(parenttask)
+    else:
+        coadd_task = output_task
+
     tag = generate_hpx_coadd_tag(tile, coadd_task)
     filt = create_hpx_filter(tile, parenttask)
 
@@ -103,6 +108,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
     try:
         parent_jobs = get_parents(tile, parenttask,
                                   exclude_pointing_jobs=exclude_pointing_jobs,
+                                  pointings_only=pointings_only,
                                   science_obs_only=science_obs_only)
     except JSAProcError:
         # If no parent jobs could be found, then the job should marked
@@ -187,7 +193,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
 
 
 def get_parents(tile, parenttask, exclude_pointing_jobs=False,
-                science_obs_only=False):
+                science_obs_only=False, pointings_only=False):
     """
     get parent jobs for the requested tile and coaddtask,
     using the parettask to look for jobs.
@@ -215,7 +221,8 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
     obsquery = {'omp_status': Not(list(OMPState.STATE_NO_COADD))}
     if science_obs_only:
         obsquery['obstype'] = {'science'}
-
+    if pointings_only:
+        obsquery['obstype'] = {'pointing'}
     # Get the parent jobs.
     parentjobs = db.find_jobs(tiles=[tile],
                               task=parenttask,
@@ -234,6 +241,7 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
         state=Not([JSAProcState.DELETED]),
         obsquery={'omp_status': OMPState.STATE_NO_COADD}
     )
+
     if science_obs_only or exclude_pointing_jobs:
         obsquery = {
             'obstype': 'pointing',
