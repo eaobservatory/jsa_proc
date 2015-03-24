@@ -164,6 +164,14 @@ class JSAProcStateMachine:
                     # TODO: implement check of e-transfer status
                     pass
 
+                elif job.state == JSAProcState.INGEST_QUEUE:
+                    # Wait for another process to fetch the data.
+                    pass
+
+                elif job.state == JSAProcState.INGEST_FETCH:
+                    # Another process is fetching the data.
+                    pass
+
                 elif job.state == JSAProcState.INGESTION:
                     # Wait for ingestion by a separate process.
                     pass
