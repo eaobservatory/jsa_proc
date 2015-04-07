@@ -35,6 +35,7 @@ Usage:
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
+    jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task> --date-start <ut-date> --date-end <ut-date> [--instrument <instrument>]
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -56,6 +57,7 @@ Options:
     --date-end <ut-date>       Date at which to end.
     --force, -f                Skip initial state check.
     --include-error            Include jobs in the error state.
+    --instrument <instrument>  Name of instrument.
     --replaceparent            Force recopying parent jobs into input folder
     --outfile <file>           File into which to write output.
     --obsid <obsid>            Observation identifier (OBSID header).
@@ -452,6 +454,26 @@ def rawingest(args):
 
     else:
         raise CommandError('Unknown raw ingestion operation')
+
+
+@command
+def reset(args):
+    """
+    Reset the status of a set of jobs.
+
+    Jobs are selected by task, date range and optional instrument name.
+    The state of matching jobs is reset to "Unknown".  Jobs in active
+    states are not reset unless the --force option is given.
+    """
+
+    from jsa_proc.action.reset import reset_jobs
+
+    reset_jobs(task=args['--task'],
+               date_start=args['--date-start'],
+               date_end=args['--date-end'],
+               instrument=args['--instrument'],
+               force=args['--force'],
+               dry_run=args['--dry-run'])
 
 
 @command
