@@ -49,7 +49,7 @@ def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
         if _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
             n_ok += 1
         else:
-            nerr += 1
+            n_err += 1
 
     logger.info('Ingestion complete: %i successful, %i errors', n_ok, n_err)
 
