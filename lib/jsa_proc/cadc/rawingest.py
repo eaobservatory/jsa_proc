@@ -124,8 +124,8 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
     command = [
         'jsaraw',
         '--collection', 'JCMT',
-        '--key', obsid,
-        '--debug',
+        '--obsid', obsid,
+        '--verbose',
     ]
 
     try:
