@@ -219,7 +219,9 @@ def _fetch_job_output(job_id, db, force=False, dry_run=False):
 
         if os.path.exists(filepath):
             # If we still have the file, check its MD5 sum is correct.
-            if file.md5 == get_md5sum(filepath):
+            if file.md5 is None:
+                logger.warning('PRESENT without MD5 sum: %s', filename)
+            elif file.md5 == get_md5sum(filepath):
                 logger.debug('PRESENT: %s', filename)
             else:
                 raise JSAProcError('MD5 sum mismatch for existing file {0}'
@@ -246,7 +248,9 @@ def _fetch_job_output(job_id, db, force=False, dry_run=False):
                 logger.info('Fetching file %s', filename)
                 fetch_cadc_file(filename, output_dir, suffix='')
 
-                if file.md5 == get_md5sum(filepath):
+                if file.md5 is None:
+                    logger.warning('MD5 sum missing: %s', filename)
+                elif file.md5 == get_md5sum(filepath):
                     logger.debug('MD5 sum OK: %s', filename)
                 else:
                     raise JSAProcError('MD5 sum mismatch for fetched file {0}'
