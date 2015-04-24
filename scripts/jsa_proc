@@ -28,7 +28,7 @@ Usage:
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] --job-id <id>
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>] [--location <location>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
-    jsa_proc ingest [-v | -q] [--dry-run] --task <task>
+    jsa_proc ingest [-v | -q] [--dry-run] --task <task> [--location <location>]
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
@@ -286,12 +286,15 @@ def help(args):
 def ingest(args):
     """
     Ingest a output from one or more jobs into CAOM-2.
+
+    Location is "JAC" by default.
     """
 
     from jsa_proc.cadc.ingest import ingest_output
 
     ingest_output(args['--job-id'],
-                  location='JAC',
+                  location=('JAC' if args['--location'] is None
+                            else args['--location']),
                   task=args['--task'],
                   dry_run=args['--dry-run'],
                   force=args['--force'])
