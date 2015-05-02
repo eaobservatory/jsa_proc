@@ -24,9 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 def reset_jobs(task, date_start, date_end, instrument=None,
-               force=False, dry_run=False):
+               state=None, force=False, dry_run=False):
     """Change the state of the specified jobs back to "Unknown".
 
+    If a state is specified, select only that state.
     Active jobs are skipped unless the force argument is set.
     """
 
@@ -39,9 +40,13 @@ def reset_jobs(task, date_start, date_end, instrument=None,
     if instrument is not None:
         obsquery['instrument'] = instrument
 
+    if state is not None:
+        state = JSAProcState.lookup_name(state)
+
     n_active = 0
 
-    for job in db.find_jobs(location='JAC', task=task, obsquery=obsquery):
+    for job in db.find_jobs(location='JAC', task=task, obsquery=obsquery,
+                            state=state):
         state_info = JSAProcState.get_info(job.state)
 
         # Check if the job is in an "active" state.

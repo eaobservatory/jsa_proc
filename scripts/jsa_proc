@@ -35,7 +35,7 @@ Usage:
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
-    jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task> --date-start <ut-date> --date-end <ut-date> [--instrument <instrument>]
+    jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task> --date-start <ut-date> --date-end <ut-date> [--instrument <instrument>] [--state <state>]
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
@@ -64,6 +64,7 @@ Options:
     --no-etransfer             Skip e-transfer steps.
     --no-cadc-check            Skip checks for files being at CADC.
     --poll                     Poll a system for state updates.
+    --state <state name>       Job state.
     --stream <stream>          P-transfer stream ("new" or "replace").
     --tag <tag>                Select jobs by tag.
     --task, -t <task>          Select jobs for a particular task.
@@ -464,7 +465,7 @@ def reset(args):
     """
     Reset the status of a set of jobs.
 
-    Jobs are selected by task, date range and optional instrument name.
+    Jobs are selected by task, state, date range and optional instrument name.
     The state of matching jobs is reset to "Unknown".  Jobs in active
     states are not reset unless the --force option is given.
     """
@@ -475,6 +476,7 @@ def reset(args):
                date_start=args['--date-start'],
                date_end=args['--date-end'],
                instrument=args['--instrument'],
+               state=args['--state'],
                force=args['--force'],
                dry_run=args['--dry-run'])
 
