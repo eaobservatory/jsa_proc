@@ -111,3 +111,20 @@ class JSAProcState:
         """
 
         return state in cls._info
+
+    @classmethod
+    def lookup_name(cls, name):
+        """Return the state code corresponding to the given name.
+
+        Raises JSAProcError if the state name is not recognised.
+
+        Names are compared in a case-insensitive manner.
+        """
+
+        lowername = name.lower()
+
+        for (state, info) in cls._info.items():
+            if lowername == info.name.lower():
+                return state
+
+        raise JSAProcError('Unknown state name {0}'.format(name))
