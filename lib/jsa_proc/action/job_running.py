@@ -32,13 +32,12 @@ from jsa_proc.util import restore_signals
 
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
-                  jsawrapdr=None,
-                  debug=False):
-    """Routine to execute jsawrapdr from python.
+                  jsawrapdr=None, debug=False):
+    """
+    Execute jsawrapdr script from python.
 
-    Takes in a job_id, input_file_list, mode and drparameters..
+    This function calls jsawrapdr with following options:
 
-    Calls jsawrapdr with following options
     jsawrapdr --outdir=configbase/scratch/$job_id
               --inputs=input_file_list
               --id = jac-$job_id
@@ -50,43 +49,39 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
          if persist is True, then it adds the flag:
               -persist
 
-    job_id, integer
-    job identifier from jsaproc database
+    Args:
 
-    input_file_list, string
-    list of files (with extensions and full path).
+      job_id (int): Job identifier from jsaproc database.
 
-    mode, string
-    'night', 'obs', 'public' or 'project'.
+      input_file_list (str): List of files (with extensions and full
+        path).
 
-    drparameters, string
+      mode (str): Can be 'night', 'obs', 'public' or 'project'.
+
+      drparameters (str):
+
+      cleanup (str, optional): Type of cleanup. Can be one of
+        'cadc'|'none'|'all', defaults to 'cadc'.
+
+      persist (bool, optional): Defaults to False If persist is turned
+        on, then dpCapture will copy acceptable products to the
+        default output directory. Otherwise it won't (used for
+        debugging purposes). The output directory is determined by
+        jsa_proc.admin.directories 'get_output_dir' for the given
+        job_id.
+
+      location (str, optional): One of |'cadc'|'JAC'| (NOT CURRENTLY
+        IMPLEMENTED, default is 'JAC')
 
 
-    cleanup, optional, string |'cadc'|'none'|'all'
+      jsawrapdr (str, optional): The path to jsawrapdr. If not given,
+        the one in configured starlink will be used.
 
-    The jsawrapdr clean option, default is 'cadc'.
+      debug (bool, optional): Turn on jsawrapdr debugging if true,
+        default is False.
 
-    persist, boolean, defaults to False
-
-    If persist is turned on, then dpCapture will copy acceptable
-    products to the default output directory. Otherwise it won't (used
-    for debugging purposes). The output directory is determined by
-    jsa_proc.admin.directories 'get_output_dir' for the given job_id.
-
-    # Location is not currently implemented!
-    location, string |'cadc'|'JAC'|
-
-    The default is 'JAC', others probably never used?
-
-    jsawrapdr, string, optional
-    path to jsawrapdr, otherwise uses one in configured starlink
-
-    debug, boolean, optional (default False)
-    turn on jsawrapdr debugging if true
-
-    Returns: logfilename, string
-
-    Returns the filename (including path) of the logfile (string).
+    Returns:
+      str: The filename (including path) of the logfile.
 
     """
 
