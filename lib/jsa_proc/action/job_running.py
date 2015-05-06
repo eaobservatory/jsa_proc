@@ -32,7 +32,7 @@ from jsa_proc.util import restore_signals
 
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
-                  jsawrapdr=None, debug=False):
+                  jsawrapdr=None, starlink_dir=None, debug=False):
     """
     Execute jsawrapdr script from python.
 
@@ -77,6 +77,10 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
       jsawrapdr (str, optional): The path to jsawrapdr. If not given,
         the one in configured starlink will be used.
 
+      starlink_dir (str, optional): The path of a starlink install to
+        use. If not given, the one found in the environ variable
+        'STARLINK_DIR' will be used.
+
       debug (bool, optional): Turn on jsawrapdr debugging if true,
         default is False.
 
@@ -107,7 +111,11 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # Find path to jsawrapdr and orac_dr
     config = get_config()
-    starpath = config.get('job_run', 'starpath')
+
+    if not starlink_dir:
+        starpath = config.get('job_run', 'starpath')
+    else:
+        starpath = starlink_dir
     if not jsawrapdr:
         jsawrapdr = os.path.join(starpath, 'Perl', 'bin', 'jsawrapdr')
     orac_dir = os.path.join(starpath, 'bin', 'oracdr', 'src')
