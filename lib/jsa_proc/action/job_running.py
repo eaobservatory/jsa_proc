@@ -144,8 +144,12 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     jsa_env['STARLINK_DIR'] = starpath
     jsa_env['PATH'] = os.path.join(starpath, 'bin') + os.pathsep + \
         jsa_env.get('PATH', '')
-    jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib') + os.pathsep + \
-        jsa_env.get('LD_LIBRARY_PATH', '')
+
+    if jsa_env.has_key('LD_LIBRARY_PATH'):
+        jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib', os.pathsep, jsa_env['LD_LIBRARY_PATH'])
+    else:
+        jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
+
     jsa_env['ORAC_DIR'] = orac_dir
     jsa_env['ORAC_LOGDIR'] = log_dir
     jsa_env['STAR_LOGIN'] = '1'
