@@ -33,9 +33,14 @@ def reset_jobs(task, date_start, date_end, instrument=None,
 
     db = get_database()
 
-    obsquery = {
-        'utdate': Range(date_start, date_end),
-    }
+    obsquery = {}
+
+    if date_start is not None and date_end is not None:
+        obsquery['utdate'] = Range(date_start, date_end)
+    elif date_start is None and date_end is None:
+        pass
+    else:
+        raise CommandError('only one of start and end date specified')
 
     if instrument is not None:
         obsquery['instrument'] = instrument
