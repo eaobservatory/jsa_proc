@@ -96,7 +96,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Prepare scratch directory.
     scratch_dir = make_temp_scratch_dir(job_id)
 
-    # Get output directory name
+    # Get output directory name.
     out_dir = get_output_dir(job_id)
 
     # If output dir currently exists, delete the directory.
@@ -109,7 +109,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         # directory because dpCapture will not do so in that case.
         os.makedirs(out_dir)
 
-    # Find path to jsawrapdr and orac_dr
+    # Find paths to starlink, jsawrapdr and orac_dr.
     config = get_config()
 
     if not starlink_dir:
@@ -120,10 +120,10 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         jsawrapdr = os.path.join(starpath, 'Perl', 'bin', 'jsawrapdr')
     orac_dir = os.path.join(starpath, 'bin', 'oracdr', 'src')
 
-    # jac recipe id
+    # Set thejac recipe id.
     jacid = 'jac-'+str(job_id)
 
-    # jsawrapdr arguments.
+    # Collect the jsawrapdr arguments.
     jsawrapdrcom = [jsawrapdr,
                     '--debugxfer',
                     '--outdir='+scratch_dir,
@@ -139,7 +139,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     if debug:
         jsawrapdrcom.append('-debug')
 
-    # environment
+    # Set up the environment for running jsawrapdr.
     jsa_env = os.environ.copy()
     jsa_env['STARLINK_DIR'] = starpath
     jsa_env['PATH'] = os.path.join(starpath, 'bin') + os.pathsep + \
@@ -154,22 +154,25 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     jsa_env['ORAC_LOGDIR'] = log_dir
     jsa_env['STAR_LOGIN'] = '1'
     jsa_env['CONVERT_DIR'] = os.path.join(starpath, 'bin', 'convert')
-    # Remainder of oracdr required environmental variables are set
-    # inside WrapDR.pm->run_pipeline
+    # The remainder of oracdr required environmental variables are set
+    # inside WrapDR.pm->run_pipeline.
 
+    # Open a log file and run jsawrapdr while saving output to log.
     with open_log_file(job_id, 'jsawrapdr') as log:
-        # Keep the log file name.
+
+        # Save the log file name.
         log_name = log.name
 
-        # Run jsawrapdr
+        # Run jsawrapdr.
         retcode = subprocess.call(jsawrapdrcom, env=jsa_env, bufsize=1,
                                   stdout=log, stderr=subprocess.STDOUT,
                                   preexec_fn=restore_signals)
 
+    # Handle jsawrapdr errors.
     if retcode != 0:
         errormessage = 'jsawrapdr exited with Retcode %i ' % (retcode)
 
-        # Find the first ORAC error message in the jsawrapdr log
+        # Find the first ORAC error message in the jsawrapdr log.
         jsalogfile = open(log_name, 'r')
         lines = jsalogfile.read()
         jsalogfile.close()
@@ -177,13 +180,12 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         if result:
             firsterror = result.group(1).split('\n')[1]
 
-            # Insert the ORAC error at the start of the error message
+            # Insert the ORAC error at the start of the error message.
             if firsterror:
                 errormessage = 'ORAC ERROR: ' + firsterror + '.\n' + \
                                errormessage
 
         # Raise the error.
         raise JSAProcError(errormessage)
-    # Need to return list of produced files in output directory?
 
     return log_name
