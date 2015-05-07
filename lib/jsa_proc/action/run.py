@@ -176,13 +176,17 @@ def run_a_job(job_id, db=None, force=False):
     mode = job.mode
     drparameters = job.parameters
 
+    # Get the starlink to be used from the task table.
+    task_info = db.get_task_info(job.task)
+    starpath = task_info.starlink_dir
+
     # Run the processing job.
     logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
                  mode, drparameters)
     log = jsawrapdr_run(
-        job_id, input_file_list_path, mode,
-        drparameters,
-        cleanup='cadc', location='JAC', persist=True)
+        job_id, input_file_list_path, mode,drparameters,
+        cleanup='cadc', location='JAC', starlink_dir=starpath,
+        persist=True)
 
     # Create list of output files.
     logger.debug('Preparing list of output files')
