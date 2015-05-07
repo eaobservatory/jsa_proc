@@ -125,7 +125,7 @@ CREATE INDEX qa_job_id ON qa (job_id);
 CREATE TABLE task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     taskname VARCHAR(80) NOT NULL,
-    etransfer BOOLEAN NOT NULL
+    etransfer BOOLEAN,
     starlink TEXT NOT NULL DEFAULT ""
 );
 

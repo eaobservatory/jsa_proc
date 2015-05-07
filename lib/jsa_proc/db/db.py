@@ -1302,7 +1302,7 @@ class JSAProcDB:
         Query the task table to find out if a task should
         be etransferred to CADC or not.
 
-        Returns a Boolean.
+        Returns a Boolean or Null.
         """
         query = 'SELECT etransfer FROM task WHERE taskname=%s'
         params = (task,)

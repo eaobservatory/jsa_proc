@@ -744,20 +744,22 @@ class InterfaceDBTest(DBTestCase):
     def test_etransfer_state(self):
         self.db.add_task('testtask', True)
         self.db.add_task('testtask2', False)
+        self.db.add_task('testtask3', None, 'mystarpath')
         self.assertEqual(self.db.get_etransfer_state('testtask'), int(True))
         self.assertEqual(self.db.get_etransfer_state('testtask2'), int(False))
-
+        self.assertEqual(self.db.get_etransfer_state('testtask3'), None)
         with self.assertRaises(NoRowsError):
             self.db.get_etransfer_state('notatask')
 
     def test_taskinfo(self):
         self.db.add_task('testtask', True, 'mystarpath')
         self.db.add_task('testtask2', False)
-
+        self.db.add_task('testtask3', None, 'mystarpath')
         self.assertEqual(self.db.get_task_info('testtask').starlink_dir, 'mystarpath')
         self.assertEqual(self.db.get_task_info('testtask').etransfer, True)
         self.assertEqual(self.db.get_task_info('testtask2').starlink_dir, '')
         self.assertEqual(self.db.get_task_info('testtask2').etransfer, False)
+        self.assertEqual(self.db.get_task_info('testtask3').etransfer, None)
 
         with self.assertRaises(NoRowsError):
             self.db.get_task_info('notatask')
