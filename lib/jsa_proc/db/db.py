@@ -46,6 +46,9 @@ JSAProcFileInfo = namedtuple(
 JSAProcJobNote = namedtuple(
     'JSAProcJobNote',
     'id message username')
+JSAProcTaskInfo = namedtuple(
+    'JSAProcTaskInfo',
+    'id taskname etransfer starlink_dir')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1274,6 +1277,26 @@ class JSAProcDB:
 
         return result
 
+    def get_task_info(self, task):
+        """
+        Get the values from task table for a given task.
+
+        Returns:
+        JSAProcJobNote namedtuple: contains the id, taskname,
+        etransfer and starlink values from the table.
+        """
+        query = 'SELECT id, taskname, etransfer, starlink FROM task WHERE taskname=%s'
+        params = (task,)
+
+        with self.db as c:
+            c.execute(query, params)
+            row = c.fetchall()
+        if len(row) == 0:
+            raise NoRowsError('No entry found for task %s' % task, query % tuple(params))
+
+        return JSAProcTaskInfo(*row[0])
+
+
     def get_etransfer_state(self, task):
         """
         Query the task table to find out if a task should
@@ -1290,17 +1313,20 @@ class JSAProcDB:
             raise NoRowsError('No task found!', query % tuple(params))
         return row[0][0]
 
-    def add_task(self, taskname, etransfer):
+    def add_task(self, taskname, etransfer, starlink=''):
         """
         Add a task to the task table.
 
-        taskname: string, name of task. (limited to 80 characters)
-        etransfer: Boolean, if jobs should be etransferred & ingested or not.
-
+        Args:
+          taskname: string, name of task. (limited to 80 characters)
+          etransfer: Boolean, if jobs should be etransferred &
+            ingested or not.
+          starlink (str, optional): Path to a STARLINK_DIR to be used
+            for this task. Default is '' (use value of $STARLINK_DIR).
         """
         with self.db as c:
-            c.execute('INSERT INTO task (taskname, etransfer) VALUES (%s, %s)',
-                      (taskname, etransfer,))
+            c.execute('INSERT INTO task (taskname, etransfer, starlink) VALUES (%s, %s, %s)',
+                      (taskname, etransfer, starlink))
 
     def get_parents(self, job_id):
         """

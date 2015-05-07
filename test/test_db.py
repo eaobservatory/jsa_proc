@@ -750,6 +750,18 @@ class InterfaceDBTest(DBTestCase):
         with self.assertRaises(NoRowsError):
             self.db.get_etransfer_state('notatask')
 
+    def test_taskinfo(self):
+        self.db.add_task('testtask', True, 'mystarpath')
+        self.db.add_task('testtask2', False)
+
+        self.assertEqual(self.db.get_task_info('testtask').starlink_dir, 'mystarpath')
+        self.assertEqual(self.db.get_task_info('testtask').etransfer, True)
+        self.assertEqual(self.db.get_task_info('testtask2').starlink_dir, '')
+        self.assertEqual(self.db.get_task_info('testtask2').etransfer, False)
+
+        with self.assertRaises(NoRowsError):
+            self.db.get_task_info('notatask')
+
     def test_tilelist(self):
         job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'])
 
