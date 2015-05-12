@@ -141,21 +141,10 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # Set up the environment for running jsawrapdr.
     jsa_env = os.environ.copy()
-    jsa_env['STARLINK_DIR'] = starpath
-    jsa_env['PATH'] = os.path.join(starpath, 'bin') + os.pathsep + \
-        jsa_env.get('PATH', '')
+    jsa_env = setup_starlink(starpath, jsa_env)
 
-    if jsa_env.has_key('LD_LIBRARY_PATH'):
-        jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib', os.pathsep, jsa_env['LD_LIBRARY_PATH'])
-    else:
-        jsa_env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
-
-    jsa_env['ORAC_DIR'] = orac_dir
+    # Add in the LOGDIR
     jsa_env['ORAC_LOGDIR'] = log_dir
-    jsa_env['STAR_LOGIN'] = '1'
-    jsa_env['CONVERT_DIR'] = os.path.join(starpath, 'bin', 'convert')
-    # The remainder of oracdr required environmental variables are set
-    # inside WrapDR.pm->run_pipeline.
 
     # Open a log file and run jsawrapdr while saving output to log.
     with open_log_file(job_id, 'jsawrapdr') as log:
@@ -189,3 +178,93 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         raise JSAProcError(errormessage)
 
     return log_name
+
+
+
+def setup_starlink(starpath, env):
+    """
+    Setup all the starlink paths form the profile script.
+
+    Args:
+      starpath (str) : path to STARLINK_DIR
+      env (dict) : initial environemntal variables.
+    Returns:
+      dictionary : containing environmental variables
+    """
+
+    env['STARLINK_DIR'] = starpath
+    if env.has_key('PATH'):
+        env['PATH']= os.path.join(starpath, 'bin') + os.pathsep + env['PATH']
+    else:
+        env['PATH']= os.path.join(starpath, 'bin')
+
+    env['PATH'] = os.path.join(starpath, 'java', 'jre', 'bin', os.pathsep,
+                               starpath, 'java', 'bin', os.pathsep, env['PATH'])
+
+    if env.has_key('LD_LIBRARY_PATH'):
+        env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib', os.pathsep, env['LD_LIBRARY_PATH'])
+    else:
+        env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
+
+    # ORAC_DR paths
+    orac_dir = os.path.join(starpath, 'bin', 'oracdr', 'src')
+    env['ORAC_DIR'] = orac_dir
+    env['ORAC_PERL5LIB'] = os.path.join(orac_dir, 'lib', 'perl5')
+    env['ORAC_CAL_ROOT'] = os.path.join(starpath, 'bin', 'oracdr', 'cal')
+
+    # Miscellaneous Starlink stuff
+    env['STAR_LOGIN'] = '1'
+    env['HDS_64BIT'] = '1'
+    env['ADAM_ABBREV'] = '1'
+
+    # This overwrites any existing PERL5LIB environ. Duplicating what the
+    # $STARLINK_DIR/etc/profile script does...
+    env['PERL5LIB'] = os.path.join(starpath, 'Perl', 'lib', 'perl5', 'site_perl')
+    env['PERL5LIB'] = os.path.join(starpath, 'Perl', 'lib', 'perl5', os.pathsep, env['PERL5LIB'])
+
+    # Setup the <packagename>_DIR environ variables. Not really sure
+    # why these are needed...
+    env['ATOOLS_DIR'] = os.path.join(starpath, 'bin', 'atools')
+    env['AUTOASTROM_DIR'] = os.path.join(starpath, 'Perl', 'bin')
+    env['CCDPACK_DIR'] = os.path.join(starpath, 'bin', 'ccdpack')
+    env['CONVERT_DIR'] = os.path.join(starpath, 'bin', 'convert')
+    env['CUPID_DIR'] = os.path.join(starpath, 'bin', 'cupid')
+    env['CURSA_DIR'] = os.path.join(starpath, 'bin', 'cursa')
+    env['DAOPHOT_DIR'] = os.path.join(starpath, 'bin', 'daophot')
+    env['DATACUBE_DIR'] = os.path.join(starpath, 'bin', 'datacube')
+    env['ECHOMOP_DIR'] = os.path.join(starpath, 'bin', 'echomop')
+    env['ESP_DIR'] = os.path.join(starpath, 'bin', 'esp')
+    env['EXTRACTOR_DIR'] = os.path.join(starpath, 'bin', 'extractor')
+    env['FIGARO_DIR'] = os.path.join(starpath, 'bin', 'figaro')
+    env['FIGARO_FORMATS'] = "ndf,dst"
+    env['FIGARO_PROG_N'] =os.path.join(starpath, 'bin', 'figaro')
+    env['FIGARO_PROG_N'] =os.path.join(starpath, 'etc', 'figaro')
+    env['FLUXES_DIR'] = os.path.join(starpath, 'bin', 'echomop')
+    env['GAIA_DIR'] = os.path.join(starpath, 'bin', 'gaia')
+    env['HDSTOOLS_DIR'] = os.path.join(starpath, 'bin', 'hdstools')
+    env['HDSTRACE_DIR'] = os.path.join(starpath, 'bin', 'hdstrace')
+    # Skip ICL and -- not used by orac.
+    env['JCMTDR_DIR'] = os.path.join(starpath, 'bin', 'jcmtdr')
+    # skip JPL?
+    env['KAPPA_DIR'] = os.path.join(starpath, 'bin', 'kappa')
+    env['KAPRH_DIR'] = os.path.join(starpath, 'bin', 'kaprh')
+    env['PAMELA_DIR'] = os.path.join(starpath, 'bin', 'pamela')
+    env['PERIOD_DIR'] = os.path.join(starpath, 'bin', 'period')
+    env['PGPLOT_DIR'] = os.path.join(starpath, 'bin')
+    env['PHOTOM_DIR'] = os.path.join(starpath, 'bin', 'photom')
+    env['PISA_DIR'] = os.path.join(starpath, 'bin', 'pisa')
+    env['POLPACK_DIR'] = os.path.join(starpath, 'bin', 'polpack')
+    env['PONGO_DIR'] = os.path.join(starpath, 'bin', 'pongo')
+    env['SMURF_DIR'] = os.path.join(starpath, 'bin', 'smurf')
+    env['SPECX_DIR'] = os.path.join(starpath, 'share', 'specx')
+    env['SST_DIR'] = os.path.join(starpath, 'bin', 'sst')
+    env['STARBENCH_DIR'] = os.path.join(starpath, 'bin', 'starbench')
+    # skip starman
+    env['SURF_DIR'] = os.path.join(starpath, 'bin', 'surf')
+    env['TSP_DIR'] = os.path.join(starpath, 'bin', 'tsp')
+
+    # Starjava
+    env['STILTS_DIR'] = os.path.join(starpath, 'starjava', 'bin', 'stilts')
+    env['SPLAT_DIR'] = os.path.join(starpath, 'starjava', 'bin', 'splat')
+
+    return env
