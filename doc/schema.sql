@@ -126,7 +126,7 @@ CREATE TABLE task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     taskname VARCHAR(80) NOT NULL,
     etransfer BOOLEAN,
-    starlink TEXT NOT NULL DEFAULT ""
+    starlink VARCHAR(255) NOT NULL DEFAULT ""
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);
