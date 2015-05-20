@@ -239,7 +239,7 @@ def setup_starlink(starpath, env):
     env['FIGARO_FORMATS'] = "ndf,dst"
     env['FIGARO_PROG_N'] =os.path.join(starpath, 'bin', 'figaro')
     env['FIGARO_PROG_N'] =os.path.join(starpath, 'etc', 'figaro')
-    env['FLUXES_DIR'] = os.path.join(starpath, 'bin', 'echomop')
+    env['FLUXES_DIR'] = os.path.join(starpath, 'bin', 'fluxes')
     env['GAIA_DIR'] = os.path.join(starpath, 'bin', 'gaia')
     env['HDSTOOLS_DIR'] = os.path.join(starpath, 'bin', 'hdstools')
     env['HDSTRACE_DIR'] = os.path.join(starpath, 'bin', 'hdstrace')
