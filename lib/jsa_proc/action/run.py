@@ -177,8 +177,15 @@ def run_a_job(job_id, db=None, force=False):
     drparameters = job.parameters
 
     # Get the starlink to be used from the task table.
-    task_info = db.get_task_info(job.task)
-    starpath = task_info.starlink_dir
+    starpath = None
+    try:
+        task_info = db.get_task_info(job.task)
+        starpath = task_info.starlink_dir
+    except NoRowsError:
+        # If the task doesn't have task info, leave "starpath" as None
+        # so that jsawrapdr_run uses the default value from the configuration
+        # file.
+        pass
 
     # Run the processing job.
     logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
