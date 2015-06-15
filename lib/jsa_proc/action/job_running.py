@@ -78,8 +78,8 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
         the one in configured starlink will be used.
 
       starlink_dir (str, optional): The path of a starlink install to
-        use. If not given, the one found in the environ variable
-        'STARLINK_DIR' will be used.
+        use. If not given, the one found in the configuration file will be
+        used.
 
       debug (bool, optional): Turn on jsawrapdr debugging if true,
         default is False.
