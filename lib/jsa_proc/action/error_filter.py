@@ -94,6 +94,5 @@ class JSAProcErrorFilter():
 
         for (job, log) in list(job_logs.items()):
             if self.additional:
-                addtest = any([i in log[0].message for i in self.additional])
-                if addtest is False:
+                if not any([i in log[0].message for i in self.additional]):
                     job_logs.pop(job)

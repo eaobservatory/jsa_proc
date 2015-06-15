@@ -138,7 +138,7 @@ def run_a_job(job_id, db=None, force=False):
 
     for input_file in inputfl:
         input_file = input_file.strip()
-        if os.path.isfile(input_file) is False:
+        if not os.path.isfile(input_file):
 
             # If a file is missing, get log.
             logstring = 'Input file %s for job %i has gone missing' % (

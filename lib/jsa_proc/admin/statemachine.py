@@ -143,7 +143,7 @@ class JSAProcStateMachine:
                                      'task etransfer option is NULL',
                                      job.id)
 
-                    elif self.task_etransfer[job.task] is False:
+                    elif not self.task_etransfer[job.task]:
                         # If e-transfer is not required, then the job is now
                         #  complete (only done if etransfer argument is False).
                         if validate_output(job.id, self.db):
