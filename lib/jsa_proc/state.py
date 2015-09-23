@@ -52,22 +52,22 @@ class JSAProcState:
     PHASE_ERROR = 'E'
 
     _info = OrderedDict((
-        (UNKNOWN,      StateInfo('Unknown',      PHASE_QUEUE,            False, True,  False)),
-        (QUEUED,       StateInfo('Queued',       PHASE_QUEUE,            False, True,  False)),
-        (MISSING,      StateInfo('Missing',      PHASE_QUEUE,            False, True,  False)),
-        (FETCHING,     StateInfo('Fetching',     PHASE_FETCH,            True,  True,  False)),
-        (WAITING,      StateInfo('Waiting',      PHASE_FETCH,            False, True,  False)),
-        (RUNNING,      StateInfo('Running',      PHASE_RUN,              True,  None,  False)),
-        (PROCESSED,    StateInfo('Processed',    PHASE_RUN,              False, False, False)),
-        (TRANSFERRING, StateInfo('Transferring', PHASE_RUN,              False, False, False)),
+        (UNKNOWN,      StateInfo('Unknown',              PHASE_QUEUE,    False, True,  False)),
+        (QUEUED,       StateInfo('Queued',               PHASE_QUEUE,    False, True,  False)),
+        (MISSING,      StateInfo('Missing',              PHASE_QUEUE,    False, True,  False)),
+        (FETCHING,     StateInfo('Fetching',             PHASE_FETCH,    True,  True,  False)),
+        (WAITING,      StateInfo('Waiting',              PHASE_FETCH,    False, True,  False)),
+        (RUNNING,      StateInfo('Running',              PHASE_RUN,      True,  None,  False)),
+        (PROCESSED,    StateInfo('Processed',            PHASE_RUN,      False, False, False)),
+        (TRANSFERRING, StateInfo('Transferring',         PHASE_RUN,      False, False, False)),
         (INGEST_QUEUE, StateInfo('Queued to reingest',   PHASE_RUN,      False, False, False)),
         (INGEST_FETCH, StateInfo('Fetching to reingest', PHASE_RUN,      True,  False, False)),
         (INGESTION,    StateInfo('Waiting to ingest',    PHASE_RUN,      False, False, False)),
-        (INGESTING,    StateInfo('Ingesting',    PHASE_RUN,              True,  False, False)),
-        (COMPLETE,     StateInfo('Complete',     PHASE_COMPLETE,         False, False, True)),
-        (ERROR,        StateInfo('Error',        PHASE_ERROR,            False, None,  True)),
-        (DELETED,      StateInfo('Deleted',      PHASE_ERROR,            False, None,  True)),
-        (WONTWORK,     StateInfo('Won\'t work',  PHASE_ERROR,            False, None,  True)),
+        (INGESTING,    StateInfo('Ingesting',            PHASE_RUN,      True,  False, False)),
+        (COMPLETE,     StateInfo('Complete',             PHASE_COMPLETE, False, False, True)),
+        (ERROR,        StateInfo('Error',                PHASE_ERROR,    False, None,  True)),
+        (DELETED,      StateInfo('Deleted',              PHASE_ERROR,    False, None,  True)),
+        (WONTWORK,     StateInfo('Won\'t work',          PHASE_ERROR,    False, None,  True)),
     ))
 
     STATE_ALL = tuple(_info.keys())
