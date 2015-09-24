@@ -215,7 +215,7 @@ def run_a_job(job_id, db=None, force=False):
     # Change state of job.
     db.change_state(
         job_id, JSAProcState.PROCESSED,
-        'Job has been sucessfully processed',
+        'Job has been successfully processed',
         state_prev=JSAProcState.RUNNING)
 
     logger.info('Done running job %i', job_id)
