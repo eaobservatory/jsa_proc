@@ -302,9 +302,10 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
             raise PTransferException('not_new')
 
     elif stream == 'replace':
-        if ((cadc_file_info is None)
-                or (md5sum == cadc_file_info['content-md5'])):
+        if cadc_file_info is None:
             raise PTransferException('not_replace')
+        elif md5sum == cadc_file_info['content-md5']:
+            raise PTransferException('unchanged')
 
     else:
         raise Exception('unknown stream {0}'.format(stream))
