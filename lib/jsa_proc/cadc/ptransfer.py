@@ -16,6 +16,8 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
+from ConfigParser import SafeConfigParser
+from datetime import datetime
 import logging
 import os
 import tempfile
@@ -113,6 +115,8 @@ def ptransfer_poll(stream=None, dry_run=False):
 
         proc = files[:max_files]
         proc_dir = os.path.join(trans_dir, stream)
+        use_sub_dir = False
+        stamp_file = None
 
     else:
         # Create working directory.
@@ -121,6 +125,23 @@ def ptransfer_poll(stream=None, dry_run=False):
         proc_dir = tempfile.mkdtemp(dir=os.path.join(trans_dir, 'proc'))
         logger.info('Working directory: %s', proc_dir)
 
+        # Create stream-based subdirectories.
+        use_sub_dir = True
+        for stream in streams:
+            os.mkdir(os.path.join(proc_dir, stream))
+
+        # Write stamp file to allow automatic clean-up.
+        stamp_file = os.path.join(proc_dir, 'ptransfer.ini')
+
+        config = SafeConfigParser()
+        config.add_section('ptransfer')
+        config.set('ptransfer', 'pid', str(os.getpid()))
+        config.set('ptransfer', 'start',
+                   datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+
+        with open(stamp_file, 'wb') as f:
+            config.write(f)
+
         # Move some files into the working directory to prevent
         # multiple p-transfer processes trying to transfer them
         # simultaneously.
@@ -128,7 +149,7 @@ def ptransfer_poll(stream=None, dry_run=False):
             try:
                 os.rename(
                     os.path.join(trans_dir, file.stream, file.name),
-                    os.path.join(proc_dir, file.name))
+                    os.path.join(proc_dir, file.stream, file.name))
                 proc.append(file)
                 logger.debug('Processing file %s', file.name)
 
@@ -143,13 +164,20 @@ def ptransfer_poll(stream=None, dry_run=False):
 
     # Attempt to process all the files in our working directory.
     for file in proc:
-        proc_file = os.path.join(proc_dir, file.name)
+        # Determine path to the directory containing the file and the
+        # file itself.
+        if use_sub_dir:
+            proc_sub_dir = os.path.join(proc_dir, file.stream)
+        else:
+            proc_sub_dir = proc_dir
+
+        proc_file = os.path.join(proc_sub_dir, file.name)
 
         try:
             # Check the file.
             md5sum = get_md5sum(proc_file)
             ad_stream = ptransfer_check(
-                proc_dir, file.name, file.stream, md5sum)
+                proc_sub_dir, file.name, file.stream, md5sum)
 
             if dry_run:
                 logger.info('Accepted file %s (%s) (DRY RUN)',
@@ -157,7 +185,7 @@ def ptransfer_poll(stream=None, dry_run=False):
 
             else:
                 # Transfer the file.
-                ptransfer_put(proc_dir, file.name, ad_stream, md5sum)
+                ptransfer_put(proc_sub_dir, file.name, ad_stream, md5sum)
 
                 # Check it was transferred correctly.
                 try:
@@ -221,8 +249,14 @@ def ptransfer_poll(stream=None, dry_run=False):
 
 
     # Finally clean up the processing directory.  It should have nothing
-    # left in it by this point.
+    # left in it by this point other than the stream subdirectories and
+    # stamp file.
     if not dry_run:
+        os.unlink(stamp_file)
+
+        for stream in streams:
+            os.rmdir(os.path.join(proc_dir, stream))
+
         os.rmdir(proc_dir)
 
     # If errors occurred, exit with bad status.
