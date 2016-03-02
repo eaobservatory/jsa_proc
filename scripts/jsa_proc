@@ -32,6 +32,7 @@ Usage:
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q] [--no-etransfer]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
+    jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
@@ -353,11 +354,19 @@ def ptransfer(args):
 
     In dry run mode, a stream ("new" or "replace") must be specified,
     otherwise this is optional and both streams will be processed.
+
+    In clean-up mode (with the --clean option), look for orphaned
+    "proc" directories for which the corresponding p-transfer process
+    is no longer running.  Files will be moved back to their original
+    stream directories and the "proc" directories deleted.
     """
 
-    from jsa_proc.cadc.ptransfer import ptransfer_poll
+    from jsa_proc.cadc.ptransfer import ptransfer_poll, ptransfer_clean_up
 
-    ptransfer_poll(stream=args['--stream'], dry_run=args['--dry-run'])
+    if args['--clean']:
+        ptransfer_clean_up(dry_run=args['--dry-run'])
+    else:
+        ptransfer_poll(stream=args['--stream'], dry_run=args['--dry-run'])
 
 
 @command

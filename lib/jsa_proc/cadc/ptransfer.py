@@ -17,7 +17,7 @@ from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 from ConfigParser import SafeConfigParser
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import os
 import tempfile
@@ -36,6 +36,8 @@ from jsa_proc.files import get_md5sum
 logger = logging.getLogger(__name__)
 
 FileInfo = namedtuple('FileInfo', 'name stream')
+
+allowed_streams = ('new', 'replace')
 
 
 class PTransferException(Exception):
@@ -90,7 +92,7 @@ def ptransfer_poll(stream=None, dry_run=False):
     n_err = 0
 
     # Select transfer streams.
-    streams = ('new', 'replace')
+    streams = allowed_streams
     if stream is None:
         if dry_run:
             raise CommandError('Stream must be specified in dry run mode')
@@ -372,3 +374,112 @@ def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
         sleep(retry_delay)
 
     raise PTransferFailure('Transfer failed')
+
+
+def ptransfer_clean_up(dry_run=False):
+    """Attempt to clean up orphaned p-tranfer "proc" directories.
+    """
+
+    if not dry_run:
+        etransfer_check_config()
+
+    config = get_config()
+
+    trans_dir = config.get('etransfer', 'transdir')
+
+    # Determine latest start time for which we will consider cleaning up
+    # a proc directory.
+    start_limit = datetime.utcnow() - timedelta(
+        minutes=int(config.get('etransfer', 'cleanup_minutes')))
+
+    # Look for proc directories.
+    proc_base_dir = os.path.join(trans_dir, 'proc')
+
+    for dir_ in os.listdir(proc_base_dir):
+        # Consider only directories with the expected name prefix.
+        proc_dir = os.path.join(proc_base_dir, dir_)
+        if not (dir_.startswith('proc') and os.path.isdir(proc_dir)):
+            continue
+
+        logger.debug('Directory %s found', dir_)
+
+        # Check for and read the stamp file.
+        stamp_file = os.path.join(proc_dir, 'ptransfer.ini')
+        config = SafeConfigParser()
+        config_files_read = config.read(stamp_file)
+        if not config_files_read:
+            logger.debug('Directory %s has no stamp file', dir_)
+            continue
+
+        # Check if the transfer started too recently to consider.
+        start = datetime.strptime(config.get('ptransfer', 'start'),
+                                  '%Y-%m-%d %H:%M:%S')
+
+        if start > start_limit:
+            logger.debug('Directory %s is too recent to clean up', dir_)
+            continue
+
+        # Check if the transfer process is still running (by PID).
+        pid = int(config.get('ptransfer', 'pid'))
+        is_running = True
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            is_running = False
+
+        if is_running:
+            logger.debug('Directory %s corresponds to running process (%i)',
+                         dir_, pid)
+
+        # All checks are complete: move the files back to their initial
+        # stream directories.
+        n_moved = 0
+        n_skipped = 0
+
+        for stream in allowed_streams:
+            stream_has_skipped_files = False
+
+            proc_stream_dir = os.path.join(proc_dir, stream)
+            if not os.path.exists(proc_stream_dir):
+                continue
+
+            orig_stream_dir = os.path.join(trans_dir, stream)
+            if (not os.path.exists(orig_stream_dir)) and (not dry_run):
+                os.mkdir(orig_stream_dir)
+
+            for file_ in os.listdir(proc_stream_dir):
+                logger.debug('Directory %s has file %s (%s)',
+                             dir_, file_, stream)
+
+                proc_file = os.path.join(proc_stream_dir, file_)
+                orig_file = os.path.join(orig_stream_dir, file_)
+
+                if os.path.exists(orig_file):
+                    logger.warning(
+                        'File %s present in %s and %s directories',
+                        file_, dir_, stream)
+                    n_skipped += 1
+                    stream_has_skipped_files = True
+
+                else:
+                    if dry_run:
+                        logger.info('Would move %s %s back to %s (DRY RUN)',
+                                    dir_, file_, stream)
+                    else:
+                        os.rename(proc_file, orig_file)
+                    n_moved += 1
+
+            if (not stream_has_skipped_files) and (not dry_run):
+                os.rmdir(proc_stream_dir)
+
+        logger.info(
+            'Proc directory %s: %i file(s) cleaned up, %i skipped',
+            dir_, n_moved, n_skipped)
+
+        # If we didn't skip any files, remove the stamp file and now-empty
+        # proc directory.  (Unless in dry run mode.)
+        if n_skipped or dry_run:
+            continue
+
+        os.unlink(stamp_file)
+        os.rmdir(proc_dir)
