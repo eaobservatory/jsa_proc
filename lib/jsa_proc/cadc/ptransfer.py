@@ -1,4 +1,5 @@
 # Copyright (C) 2015 Science and Technology Facilities Council.
+# Copyright (C) 2016 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -124,7 +125,8 @@ def ptransfer_poll(stream=None, dry_run=False):
         # Create working directory.
 
         proc = []
-        proc_dir = tempfile.mkdtemp(dir=os.path.join(trans_dir, 'proc'))
+        proc_dir = tempfile.mkdtemp(prefix='proc',
+                                    dir=os.path.join(trans_dir, 'proc'))
         logger.info('Working directory: %s', proc_dir)
 
         # Create stream-based subdirectories.
