@@ -26,30 +26,36 @@ acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}$')
 hpx_tile = re.compile('_healpix([0-9]{6})_.*\.(sdf|fits)$')
 
 
+
 def get_jac_data_dir(filename):
     """Guess directory name for a given filename.
 
-    Given a bare raw data filename, return the standardized
-    directory name for where that file should be located.
+    Given a bare raw data filename, return a list of standardized
+    directory names giving where that file should be located.
     """
 
     m = scuba2_file.match(filename)
     if m:
         (subarray, date, obsnum) = m.groups()
 
-        return os.path.join('/jcmtdata/raw/scuba2', subarray, date, obsnum)
+        path1 = os.path.join('/jcmtdata/raw/scuba2', subarray, date, obsnum)
+        path2 = os.path.join('/jcmtcal/scuba2', subarray, date, obsnum)
+        return (path1, path2)
 
     m = acsis_file.match(filename)
     if m:
         (date, obsnum) = m.groups()
 
         if date > '20061000':
-            return os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
+            path1 =  os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
+            path2 = os.path.join('/jcmtcal/acsis', date, obsnum)
+            return (path1, path2)
 
         else:
             year = date[0:4]
-            return os.path.join('/jcmtdata/raw/acsis-das/converted',
+            path1 =os.path.join('/jcmtdata/raw/acsis-das/converted',
                                 year, date, obsnum)
+            return (path1)
 
     raise JSAProcError('Filename {0} does not match '
                        'an expected pattern'.format(filename))
@@ -91,9 +97,12 @@ def file_in_jac_data_dir(filename):
     Otherwise return False.
     """
 
-    dir = get_jac_data_dir(filename)
-
-    return file_in_dir(filename, dir)
+    dirlist = get_jac_data_dir(filename)
+    for d in dirlist:
+        check  = file_in_dir(filename, d)
+        if check:
+            return check
+    return False
 
 
 def hpx_tiles_from_filenames(filenames):
