@@ -178,9 +178,11 @@ def run_a_job(job_id, db=None, force=False):
 
     # Get the starlink to be used from the task table.
     starpath = None
+    version = None
     try:
         task_info = db.get_task_info(job.task)
         starpath = task_info.starlink_dir
+        version = task_info.version
     except NoRowsError:
         # If the task doesn't have task info, leave "starpath" as None
         # so that jsawrapdr_run uses the default value from the configuration
@@ -193,7 +195,7 @@ def run_a_job(job_id, db=None, force=False):
     log = jsawrapdr_run(
         job_id, input_file_list_path, mode,drparameters,
         cleanup='cadc', location='JAC', starlink_dir=starpath,
-        persist=True)
+        persist=True, version=version)
 
     # Create list of output files.
     logger.debug('Preparing list of output files')
