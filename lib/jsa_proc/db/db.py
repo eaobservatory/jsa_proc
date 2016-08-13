@@ -48,7 +48,7 @@ JSAProcJobNote = namedtuple(
     'id message username')
 JSAProcTaskInfo = namedtuple(
     'JSAProcTaskInfo',
-    'id taskname etransfer starlink_dir')
+    'id taskname etransfer starlink_dir version')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1285,7 +1285,7 @@ class JSAProcDB:
         JSAProcJobNote namedtuple: contains the id, taskname,
         etransfer and starlink values from the table.
         """
-        query = 'SELECT id, taskname, etransfer, starlink FROM task WHERE taskname=%s'
+        query = 'SELECT id, taskname, etransfer, starlink, version FROM task WHERE taskname=%s'
         params = (task,)
 
         with self.db as c:
@@ -1313,7 +1313,7 @@ class JSAProcDB:
             raise NoRowsError('No task found!', query % tuple(params))
         return row[0][0]
 
-    def add_task(self, taskname, etransfer, starlink=''):
+    def add_task(self, taskname, etransfer, starlink='', version=None):
         """
         Add a task to the task table.
 
@@ -1323,10 +1323,11 @@ class JSAProcDB:
             ingested or not.
           starlink (str, optional): Path to a STARLINK_DIR to be used
             for this task. Default is '' (use value of $STARLINK_DIR).
+          version: file version.
         """
         with self.db as c:
-            c.execute('INSERT INTO task (taskname, etransfer, starlink) VALUES (%s, %s, %s)',
-                      (taskname, etransfer, starlink))
+            c.execute('INSERT INTO task (taskname, etransfer, starlink, version) VALUES (%s, %s, %s, %s)',
+                      (taskname, etransfer, starlink, version))
 
     def get_parents(self, job_id):
         """

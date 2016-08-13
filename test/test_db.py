@@ -754,12 +754,20 @@ class InterfaceDBTest(DBTestCase):
     def test_taskinfo(self):
         self.db.add_task('testtask', True, 'mystarpath')
         self.db.add_task('testtask2', False)
-        self.db.add_task('testtask3', None, 'mystarpath')
+        self.db.add_task('testtask3', None, 'mystarpath', 1)
+        self.db.add_task('testtask4', None, 'myotherstarpath', 2)
         self.assertEqual(self.db.get_task_info('testtask').starlink_dir, 'mystarpath')
         self.assertEqual(self.db.get_task_info('testtask').etransfer, True)
+        self.assertIsNone(self.db.get_task_info('testtask').version)
         self.assertEqual(self.db.get_task_info('testtask2').starlink_dir, '')
         self.assertEqual(self.db.get_task_info('testtask2').etransfer, False)
+        self.assertIsNone(self.db.get_task_info('testtask2').version)
         self.assertEqual(self.db.get_task_info('testtask3').etransfer, None)
+        self.assertEqual(self.db.get_task_info('testtask3').starlink_dir, 'mystarpath')
+        self.assertEqual(self.db.get_task_info('testtask3').version, 1)
+        self.assertEqual(self.db.get_task_info('testtask4').etransfer, None)
+        self.assertEqual(self.db.get_task_info('testtask4').starlink_dir, 'myotherstarpath')
+        self.assertEqual(self.db.get_task_info('testtask4').version, 2)
 
         with self.assertRaises(NoRowsError):
             self.db.get_task_info('notatask')
