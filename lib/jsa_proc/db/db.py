@@ -1296,6 +1296,30 @@ class JSAProcDB:
 
         return JSAProcTaskInfo(*row[0])
 
+    def get_obsinfo_for_project(self, project, tasks=None):
+        """
+        Get the observation info for a specific project.
+
+        tasks: list of task names to search within.
+        """
+        query = "SELECT obs.*, job.state FROM obs join job on obs.job_id=job.id WHERE obs.project=%s";
+        params = (project,)
+        if tasks:
+            extraquery = ' AND (' + ' OR '.join(['job.task=%s' for i in tasks]) + ') '
+            query += extraquery
+            params += tuple(tasks)
+
+        with self.db as c:
+            c.execute(query, params)
+            rows = c.fetchall()
+            columns = [i[0] for i in c.description]
+
+        if len(rows)==0:
+            raise NoRowsError('No entries found in obs for project %s' % project, query %tuple(params))
+
+        JSAProcObsE = namedtuple('JSAProcObsE', columns)
+        results = [JSAProcObsE(*obs) for obs in rows]
+        return results
 
     def get_etransfer_state(self, task):
         """
