@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h1> Summary of projects for FOP </h1>
+
+<form method="POST" action="{{url_for('fop_summary_getres')}}">
+  <label for="userid">OMP Userid </label>
+  <input type="text" name="userid" value="{% if userid %}{{userid}}{% endif %}"><br/>
+  <label for="semester">Semester </label>
+  <input type="text" name="semester" value="{% if semester %}{{semester}}{% endif %}"><br/>
+  <input type="submit" value="Get Summary"/>
+</form>
+
+{% if userid and semester %}
+<h2> Results for user {{userid}} in semester {{semester}}</h2>
+
+{% if not  projects %}
+<p> No projects found </p>
+{% else %}
+
+<table>
+  <tr>
+    <th> Project </th>
+    <th> All Jobs </th>
+    <th> In Error </th>
+    <th> Bad QA </th>
+    <th> Questionable QA </th>
+    <th> Not done QA </th>
+    <th> Good QA </th>
+  </tr>
+{% for p in projects %}
+  <tr>
+    <td>{{p}}</td>
+    <td><a href="{{url_for('job_list', project=p)}}">{{projects[p][0]|replace0}}</a></td>
+    <td><a href="{{url_for('job_list', project=p, state='E')}}">{{projects[p][1]|replace0}}</a></td>
+    <td><a href="{{url_for('job_list', project=p, qa_state='B')}}">{{projects[p][2]|replace0}}</a></td>
+    <td><a href="{{url_for('job_list', project=p, qa_state='Q')}}">{{projects[p][3]|replace0}}</a></td>
+    <td><a href="{{url_for('job_list', project=p, qa_state='?')}}">{{projects[p][4]|replace0}}</a></td>
+    <td><a href="{{url_for('job_list', project=p, qa_state='G')}}">{{projects[p][5]|replace0}}</a></td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% endif %}
+
+
+{% endblock %}

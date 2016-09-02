@@ -46,6 +46,7 @@ from jsa_proc.web.job_qa_info import prepare_job_qa_info
 from jsa_proc.web.job_log import prepare_job_log
 from jsa_proc.web.error_summary import prepare_error_summary
 
+from jsa_proc.omp.config import get_omp_database
 
 loginstring = 'Basic realm="Login Required: use your username and ' + \
               'the staff password, or hit cancel to log out"'
@@ -312,7 +313,35 @@ def create_web_app():
         path = prepare_job_log(job_id, log)
         return send_file(path, mimetype='text/plain')
 
+
+    @app.route('/fop_summary', methods=['GET'])
+    @templated('fop_summary.html')
+    def fop_summary():
+        userid = request.args.get('userid', None)
+        semester = request.args.get('semester', None)
+        projdict = {}
+        if userid and semester:
+            ompdb = get_omp_database(write_access=None)
+            projects = ompdb.get_support_projects(str(userid), str(semester))
+            for p in projects:
+                jobs = db.find_jobs(obsquery={'project':p}, task='jcmt-nightly')
+                projdict[p] = [len(jobs),
+                               sum(1 for j in jobs if j.state == "E"),
+                               sum(1 for j in jobs if j.qa_state== 'B'),
+                               sum(1 for j in jobs if j.qa_state == 'Q'),
+                               sum(1 for j in jobs if j.qa_state == '?'),
+                               sum(1 for j in jobs if j.qa_state =='G')]
+        else:
+            projects = None
+
+        return {'userid':userid, 'semester':semester, 'projects':projdict}
     # Filters and Tests.
+
+    @app.route('/fop_summary_getres', methods=['POST'])
+    def fop_summary_getres():
+        userid = request.form['userid']
+        semester = request.form['semester']
+        raise HTTPRedirect(url_for('fop_summary', userid=userid, semester=semester))
 
     @app.template_filter('state_name')
     def state_name_filter(state):
@@ -357,6 +386,12 @@ def create_web_app():
     def datetimeformat(value, format='%Y-%m-%d<br>%H:%M'):
         return value.strftime(format)
 
+    @app.template_filter('replace0')
+    def replace_zero(value):
+        if value==0:
+            return '-'
+        else:
+            return value
     @app.context_processor
     def add_to_context():
         return {
