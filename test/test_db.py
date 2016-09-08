@@ -741,16 +741,6 @@ class InterfaceDBTest(DBTestCase):
             jobdict={'tag': ['tag3', 'tag4']})[0]),
             2)
 
-    def test_etransfer_state(self):
-        self.db.add_task('testtask', True)
-        self.db.add_task('testtask2', False)
-        self.db.add_task('testtask3', None, 'mystarpath')
-        self.assertEqual(self.db.get_etransfer_state('testtask'), int(True))
-        self.assertEqual(self.db.get_etransfer_state('testtask2'), int(False))
-        self.assertEqual(self.db.get_etransfer_state('testtask3'), None)
-        with self.assertRaises(NoRowsError):
-            self.db.get_etransfer_state('notatask')
-
     def test_taskinfo(self):
         self.db.add_task('testtask', True, 'mystarpath')
         self.db.add_task('testtask2', False)

@@ -1323,22 +1323,6 @@ class JSAProcDB:
         results = [JSAProcObsE(*obs) for obs in rows]
         return results
 
-    def get_etransfer_state(self, task):
-        """
-        Query the task table to find out if a task should
-        be etransferred to CADC or not.
-
-        Returns a Boolean or Null.
-        """
-        query = 'SELECT etransfer FROM task WHERE taskname=%s'
-        params = (task,)
-        with self.db as c:
-            c.execute(query, params)
-            row = c.fetchall()
-        if len(row) == 0:
-            raise NoRowsError('No task found!', query % tuple(params))
-        return row[0][0]
-
     def add_task(self, taskname, etransfer, starlink='', version=None,
                  command_run=None, command_xfer=None):
         """

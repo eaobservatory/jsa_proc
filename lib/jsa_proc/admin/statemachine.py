@@ -38,10 +38,10 @@ class JSAProcStateMachine:
         # Get full list of tasks, create dictionary with etransfer
         # state as value and task name as key.
         tasks = db.get_tasks()
-        self.task_etransfer = {}
+        self.task_info = {}
         for t in tasks:
             try:
-                self.task_etransfer[t] = db.get_etransfer_state(t)
+                self.task_info[t] = db.get_task_info(t)
 
             except NoRowsError:
                 pass
@@ -125,8 +125,9 @@ class JSAProcStateMachine:
 
                 elif job.state == JSAProcState.PROCESSED:
                     # Check if job's task has e-transfer state?
+                    task_info = self.task_info.get(job.task)
 
-                    if job.task not in self.task_etransfer:
+                    if task_info is None:
                         # Don't know if this should be e-transferred or not,
                         # so do nothing for now.
                         # Eventually this should probably raise an
@@ -136,14 +137,14 @@ class JSAProcStateMachine:
                                      'no etransfer option for task',
                                      job.id)
 
-                    elif self.task_etransfer[job.task] is None:
+                    elif task_info.etransfer is None:
                         # If etransfer is set to None, don't etransfer
                         # but also don't move to complete.
                         logger.debug('Processed job %i unchanged: ' +
                                      'task etransfer option is NULL',
                                      job.id)
 
-                    elif not self.task_etransfer[job.task]:
+                    elif not task_info.etransfer:
                         # If e-transfer is not required, then the job is now
                         #  complete (only done if etransfer argument is False).
                         if validate_output(job.id, self.db):
