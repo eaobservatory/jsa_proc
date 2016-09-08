@@ -137,6 +137,14 @@ class JSAProcStateMachine:
                                      'no etransfer option for task',
                                      job.id)
 
+                    elif task_info.command_xfer is not None:
+                        # The job will be transferred by a custom process.
+                        # Do not do this from the poll routine in case it
+                        # is time-consuming.
+                        logger.debug('Processed job %i unchanged: ' +
+                                     'task has custom transfer command',
+                                     job.id)
+
                     elif task_info.etransfer is None:
                         # If etransfer is set to None, don't etransfer
                         # but also don't move to complete.
