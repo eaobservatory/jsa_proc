@@ -48,7 +48,7 @@ JSAProcJobNote = namedtuple(
     'id message username')
 JSAProcTaskInfo = namedtuple(
     'JSAProcTaskInfo',
-    'id taskname etransfer starlink_dir version')
+    'id taskname etransfer starlink_dir version command_run command_xfer')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1285,7 +1285,9 @@ class JSAProcDB:
         JSAProcJobNote namedtuple: contains the id, taskname,
         etransfer and starlink values from the table.
         """
-        query = 'SELECT id, taskname, etransfer, starlink, version FROM task WHERE taskname=%s'
+        query = 'SELECT id, taskname, etransfer, starlink, version, ' \
+            'command_run, command_xfer ' \
+            'FROM task WHERE taskname=%s'
         params = (task,)
 
         with self.db as c:
@@ -1337,7 +1339,8 @@ class JSAProcDB:
             raise NoRowsError('No task found!', query % tuple(params))
         return row[0][0]
 
-    def add_task(self, taskname, etransfer, starlink='', version=None):
+    def add_task(self, taskname, etransfer, starlink='', version=None,
+                 command_run=None, command_xfer=None):
         """
         Add a task to the task table.
 
@@ -1348,10 +1351,16 @@ class JSAProcDB:
           starlink (str, optional): Path to a STARLINK_DIR to be used
             for this task. Default is '' (use value of $STARLINK_DIR).
           version: file version.
+          command_run: custom command to run job
+          command_xfer: custom data transfer command
         """
         with self.db as c:
-            c.execute('INSERT INTO task (taskname, etransfer, starlink, version) VALUES (%s, %s, %s, %s)',
-                      (taskname, etransfer, starlink, version))
+            c.execute(
+                'INSERT INTO task (taskname, etransfer, starlink, version, '
+                'command_run, command_xfer) '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
+                (taskname, etransfer, starlink, version,
+                command_run, command_xfer))
 
     def get_parents(self, job_id):
         """

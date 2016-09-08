@@ -755,19 +755,30 @@ class InterfaceDBTest(DBTestCase):
         self.db.add_task('testtask', True, 'mystarpath')
         self.db.add_task('testtask2', False)
         self.db.add_task('testtask3', None, 'mystarpath', 1)
-        self.db.add_task('testtask4', None, 'myotherstarpath', 2)
-        self.assertEqual(self.db.get_task_info('testtask').starlink_dir, 'mystarpath')
-        self.assertEqual(self.db.get_task_info('testtask').etransfer, True)
+        self.db.add_task('testtask4', None, 'myotherstarpath', 2,
+                         command_run='custom_run_command',
+                         command_xfer='custom_xfer_command')
+        self.assertEqual(self.db.get_task_info('testtask').starlink_dir,
+                         'mystarpath')
+        self.assertTrue(self.db.get_task_info('testtask').etransfer)
         self.assertIsNone(self.db.get_task_info('testtask').version)
         self.assertEqual(self.db.get_task_info('testtask2').starlink_dir, '')
-        self.assertEqual(self.db.get_task_info('testtask2').etransfer, False)
+        self.assertFalse(self.db.get_task_info('testtask2').etransfer)
         self.assertIsNone(self.db.get_task_info('testtask2').version)
-        self.assertEqual(self.db.get_task_info('testtask3').etransfer, None)
-        self.assertEqual(self.db.get_task_info('testtask3').starlink_dir, 'mystarpath')
+        self.assertIsNone(self.db.get_task_info('testtask3').etransfer)
+        self.assertEqual(self.db.get_task_info('testtask3').starlink_dir,
+                         'mystarpath')
         self.assertEqual(self.db.get_task_info('testtask3').version, 1)
-        self.assertEqual(self.db.get_task_info('testtask4').etransfer, None)
-        self.assertEqual(self.db.get_task_info('testtask4').starlink_dir, 'myotherstarpath')
+        self.assertIsNone(self.db.get_task_info('testtask3').command_run)
+        self.assertIsNone(self.db.get_task_info('testtask3').command_xfer)
+        self.assertIsNone(self.db.get_task_info('testtask4').etransfer)
+        self.assertEqual(self.db.get_task_info('testtask4').starlink_dir,
+                         'myotherstarpath')
         self.assertEqual(self.db.get_task_info('testtask4').version, 2)
+        self.assertEqual(self.db.get_task_info('testtask4').command_run,
+                         'custom_run_command')
+        self.assertEqual(self.db.get_task_info('testtask4').command_xfer,
+                         'custom_xfer_command')
 
         with self.assertRaises(NoRowsError):
             self.db.get_task_info('notatask')
