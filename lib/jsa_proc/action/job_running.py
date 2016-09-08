@@ -33,7 +33,7 @@ from jsa_proc.util import restore_signals
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
                   jsawrapdr=None, starlink_dir=None, debug=False,
-                  version=None):
+                  version=None, command_run=None):
     """
     Execute jsawrapdr script from python.
 
@@ -47,6 +47,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
               --cleanup=$cleanup (cadc by default)
               --location=$location (JAC by default)
               --fileversion=$version (if not None)
+              --drcommand=$command_run (if not None)
 
          if persist is True, then it adds the flag:
               -persist
@@ -86,7 +87,9 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
       debug (bool, optional): Turn on jsawrapdr debugging if true,
         default is False.
 
-      fileversion: CADC file name "version" or None to use default.
+      version: CADC file name "version" or None to use default.
+
+      command_run: custom "run" command to be passed to jsawrapdr.
 
     Returns:
       str: The filename (including path) of the logfile.
@@ -145,6 +148,9 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     if version is not None:
         jsawrapdrcom.append('--fileversion={0}'.format(version))
+
+    if command_run is not None:
+        jsawrapdrcom.append('--drcommand={0}'.format(command_run))
 
     # Set up the environment for running jsawrapdr.
     jsa_env = os.environ.copy()
