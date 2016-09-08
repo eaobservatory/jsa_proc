@@ -116,7 +116,7 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Find paths to starlink, jsawrapdr and orac_dr.
     config = get_config()
 
-    if not starlink_dir:
+    if starlink_dir is None:
         starpath = config.get('job_run', 'starpath')
     else:
         starpath = starlink_dir

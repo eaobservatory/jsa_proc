@@ -752,7 +752,7 @@ class InterfaceDBTest(DBTestCase):
                          'mystarpath')
         self.assertTrue(self.db.get_task_info('testtask').etransfer)
         self.assertIsNone(self.db.get_task_info('testtask').version)
-        self.assertEqual(self.db.get_task_info('testtask2').starlink_dir, '')
+        self.assertIsNone(self.db.get_task_info('testtask2').starlink_dir)
         self.assertFalse(self.db.get_task_info('testtask2').etransfer)
         self.assertIsNone(self.db.get_task_info('testtask2').version)
         self.assertIsNone(self.db.get_task_info('testtask3').etransfer)

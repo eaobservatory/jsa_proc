@@ -126,7 +126,7 @@ CREATE TABLE task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     taskname VARCHAR(80) NOT NULL,
     etransfer BOOLEAN,
-    starlink VARCHAR(255) NOT NULL DEFAULT "",
+    starlink VARCHAR(255) DEFAULT NULL,
     version INTEGER DEFAULT NULL,
     command_run VARCHAR(255) DEFAULT NULL,
     command_xfer VARCHAR(255) DEFAULT NULL

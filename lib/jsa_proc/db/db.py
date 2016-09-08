@@ -1323,7 +1323,7 @@ class JSAProcDB:
         results = [JSAProcObsE(*obs) for obs in rows]
         return results
 
-    def add_task(self, taskname, etransfer, starlink='', version=None,
+    def add_task(self, taskname, etransfer, starlink=None, version=None,
                  command_run=None, command_xfer=None):
         """
         Add a task to the task table.
