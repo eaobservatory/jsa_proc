@@ -108,13 +108,11 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
     # If output dir currently exists, delete the directory.
     if os.path.exists(out_dir):
-        # This will leave the parent directory, so dpCapture can re-create
-        # the "transfer" directory.
         shutil.rmtree(out_dir)
-    else:
-        # The parent directory may not exist, so we must make the "transfer"
-        # directory because dpCapture will not do so in that case.
-        os.makedirs(out_dir)
+
+    # Make the "transfer" directory in advance.  (This saves dpCapture
+    # or another copying routine from having to do so.)
+    os.makedirs(out_dir)
 
     # Find paths to starlink, jsawrapdr and orac_dr.
     config = get_config()
