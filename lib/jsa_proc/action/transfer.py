@@ -123,8 +123,7 @@ def transfer_poll(db):
             else:
                 # If this task should be e-transferred, attempt to
                 # add to e-transfer and move to TRANSFERRING.
-                # (Only done if etransfer argument evaluates to True.)
-                if etransfer and validate_output(job.id, db):
+                if validate_output(job.id, db):
                     # Only e-transfer via SSH if needed.
                     if etransfer_needs_ssh:
                         logger.debug('E-transferring output '
