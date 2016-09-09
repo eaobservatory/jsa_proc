@@ -15,13 +15,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import subprocess
 
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
 from jsa_proc.action.validate import validate_output
+from jsa_proc.admin.directories import get_output_dir, open_log_file
+
 from jsa_proc.cadc.etransfer \
     import etransfer_check_config, etransfer_send_output
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
+from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
 
@@ -63,12 +67,39 @@ def transfer_poll(db):
                              job.id)
 
             elif job_task_info.command_xfer is not None:
-                # The job will be transferred by a custom process.
-                # Do not do this from the poll routine in case it
-                # is time-consuming.
-                logger.debug('Processed job %i unchanged: ' +
-                             'task has custom transfer command',
+                # The job is transferred by a custom process.
+                logger.debug('Running custom transfer command '
+                             'for processed job %i',
                              job.id)
+                out_dir = get_output_dir(job.id)
+
+                try:
+                    with open_log_file(job.id, 'transfer') as log:
+                        subprocess.check_call(
+                            [
+                                job_task_info.command_xfer,
+                                '--transdir', out_dir,
+                            ],
+                            shell=False,
+                            cwd='/tmp',
+                            stdout=log,
+                            stderr=subprocess.STDOUT,
+                            preexec_fn=restore_signals)
+
+                    db.change_state(job.id, JSAProcState.COMPLETE,
+                                    'Custom transfer completed successfully',
+                                    state_prev=JSAProcState.PROCESSED)
+
+                except subprocess.CalledProcessError as e:
+                    logger.exception('Custom transfer command failed '
+                                     'for processed job %i',
+                                     job.id)
+
+                    db.change_state(job.id, JSAProcState.ERROR,
+                                    'Custom transfer failed',
+                                    state_prev=JSAProcState.PROCESSED)
+
+                    n_err += 1
 
             elif job_task_info.etransfer is None:
                 # If etransfer is set to None, don't etransfer
