@@ -17,42 +17,19 @@ import logging
 
 from jsa_proc.action.datafile_handling \
     import get_jac_input_data, write_input_list, check_data_already_present
-from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
-from jsa_proc.action.validate import validate_job, validate_output
+from jsa_proc.action.validate import validate_job
 from jsa_proc.admin.directories import get_output_dir
-from jsa_proc.cadc.etransfer \
-    import etransfer_check_config, etransfer_send_output
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.db.db import Not
-from jsa_proc.error import JSAProcError, NoRowsError, NotAtJACError
+from jsa_proc.error import NotAtJACError
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
 
 class JSAProcStateMachine:
-    def __init__(self, db, cadc):
+    def __init__(self, db):
         self.db = db
-        self.cadc = cadc
-
-        # Get full list of tasks, create dictionary with etransfer
-        # state as value and task name as key.
-        tasks = db.get_tasks()
-        self.task_info = {}
-        for t in tasks:
-            try:
-                self.task_info[t] = db.get_task_info(t)
-
-            except NoRowsError:
-                pass
-
-        # Determine whether we are already the correct user
-        # on the correct machine for e-transfer or not.
-        try:
-            etransfer_check_config()
-            self.etransfer_needs_ssh = False
-        except:
-            self.etransfer_needs_ssh = True
 
     def poll(self):
         self.poll_jac_jobs(self)
@@ -124,61 +101,10 @@ class JSAProcStateMachine:
                     pass
 
                 elif job.state == JSAProcState.PROCESSED:
-                    # Check if job's task has e-transfer state?
-                    task_info = self.task_info.get(job.task)
-
-                    if task_info is None:
-                        # Don't know if this should be e-transferred or not,
-                        # so do nothing for now.
-                        # Eventually this should probably raise an
-                        # error, if we wish to ensure all tasks are
-                        # entered in the task table.
-                        logger.debug('Processed job %i unchanged: ' +
-                                     'no etransfer option for task',
-                                     job.id)
-
-                    elif task_info.command_xfer is not None:
-                        # The job will be transferred by a custom process.
-                        # Do not do this from the poll routine in case it
-                        # is time-consuming.
-                        logger.debug('Processed job %i unchanged: ' +
-                                     'task has custom transfer command',
-                                     job.id)
-
-                    elif task_info.etransfer is None:
-                        # If etransfer is set to None, don't etransfer
-                        # but also don't move to complete.
-                        logger.debug('Processed job %i unchanged: ' +
-                                     'task etransfer option is NULL',
-                                     job.id)
-
-                    elif not task_info.etransfer:
-                        # If e-transfer is not required, then the job is now
-                        #  complete (only done if etransfer argument is False).
-                        if validate_output(job.id, self.db):
-                            self.db.change_state(
-                                job.id, JSAProcState.COMPLETE,
-                                'Processed job is COMPLETE (no etransfer)',
-                                state_prev=JSAProcState.PROCESSED)
-                            logger.debug('Processed job %i moved to ' +
-                                         'COMPLETE (no etransfer)',
-                                         job.id)
-
-                    else:
-                        # If this task should be e-transferred, attempt to
-                        # add to e-transfer and move to TRANSFERRING.
-                        # (Only done if etransfer argument evaluates to True.)
-                        if etransfer and validate_output(job.id, self.db):
-                            # Only e-transfer via SSH if needed.
-                            if self.etransfer_needs_ssh:
-                                logger.debug('E-transferring output '
-                                        'of job %i via SSH', job.id)
-                                ssh_etransfer_send_output(job.id)
-                            else:
-                                logger.debug('E-transferring output '
-                                        'of job %i directly', job.id)
-                                etransfer_send_output(job.id)
-
+                    # To be done in a separate process -- can be slow to
+                    # send files for e-transfer if CADC access is slow, or
+                    # if using a custom transfer command.
+                    pass
 
                 elif job.state == JSAProcState.TRANSFERRING:
                     # Check e-transfer status and move to INGESTION if done.

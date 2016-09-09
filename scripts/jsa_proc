@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2016 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +31,7 @@ Usage:
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task> [--location <location>]
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
-    jsa_proc poll [-v | -q] [--no-etransfer]
+    jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
@@ -40,6 +41,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
+    jsa_proc transfer [-v | -q]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
 
@@ -62,7 +64,6 @@ Options:
     --replaceparent            Force recopying parent jobs into input folder
     --outfile <file>           File into which to write output.
     --obsid <obsid>            Observation identifier (OBSID header).
-    --no-etransfer             Skip e-transfer steps.
     --no-cadc-check            Skip checks for files being at CADC.
     --poll                     Poll a system for state updates.
     --state <state name>       Job state.
@@ -335,10 +336,10 @@ def poll(args):
     db = get_database()
 
     # Get the state machine.
-    sm = JSAProcStateMachine(db, None)
+    sm = JSAProcStateMachine(db)
 
     # Poll the JAC jobs.
-    status = sm.poll_jac_jobs(etransfer=(not args['--no-etransfer']))
+    status = sm.poll_jac_jobs()
 
     # Return a status of 1 if status is not True.
     if not status:
@@ -528,6 +529,26 @@ def run(args):
 
     run_job(job_id=args['--job-id'], force=args['--force'],
             task=args['--task'])
+
+
+@command
+def transfer(args):
+    """
+    This command will check for jobs in the "Processed" state and
+    attempt to transfer their output files.
+    """
+
+    from jsa_proc.action.transfer import transfer_poll
+
+    # Get the database specified in the config file.
+    db = get_database()
+
+    # Poll the JAC jobs.
+    status = transfer_poll(db)
+
+    # Return a status of 1 if status is not True.
+    if not status:
+        raise CommandError('Errors were encountered during transfer poll')
 
 
 @command

@@ -36,7 +36,7 @@ class PollJACTestCase(DBTestCase):
             'tag5', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['f_4_01.sdf'])
 
         # Run state machine.
-        sm = JSAProcStateMachine(self.db, None)
+        sm = JSAProcStateMachine(self.db)
         self.assertTrue(sm.poll_jac_jobs())
 
         # Check results of validation.
