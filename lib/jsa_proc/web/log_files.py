@@ -25,6 +25,7 @@ log_types = {
     'PICARD': re.compile('picard.*\.html'),
     'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
     'Ingestion': re.compile('ingestion.*\.log'),
+    'Transfer': re.compile('transfer.*\.log'),
 }
 
 LogInfo = namedtuple('LogInfo', ['name', 'url'])
