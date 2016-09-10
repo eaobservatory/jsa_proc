@@ -119,21 +119,28 @@ def _clean_job_directories(dir_function, state, task=None, count=None,
             logger.debug('Directory for job %i does not exist', job.id)
             continue
 
-        if clean_function is None:
-            logger.info('Removing directory for job %i: %s', job.id, directory)
+        try:
+            if clean_function is None:
+                logger.info('Removing directory for job %i: %s',
+                            job.id, directory)
 
-            if not dry_run:
-                shutil.rmtree(directory)
+                if not dry_run:
+                    shutil.rmtree(directory)
 
-            n += 1
-
-        else:
-            if clean_function(directory, job_id=job.id, db=db, dry_run=dry_run,
-                              **clean_function_kwargs):
                 n += 1
 
-        if (count is not None) and not (n < count):
-            break
+            else:
+                if clean_function(directory, job_id=job.id, db=db,
+                                  dry_run=dry_run,
+                                  **clean_function_kwargs):
+                    n += 1
+
+            if (count is not None) and not (n < count):
+                break
+
+        except:
+            logger.exception('Error removing directory for job %i: %s',
+                             job.id, directory)
 
 
 def _clean_output_dir(directory, job_id, db, dry_run, no_cadc_check=False):
