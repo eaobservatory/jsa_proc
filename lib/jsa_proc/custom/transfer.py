@@ -116,6 +116,11 @@ class CustomJobTransfer(object):
 
             # Determine VO space information.
             vos_sub_dir = self.determine_vos_directory(transdir, file_)
+
+            if vos_sub_dir is None:
+                # This indicates that the file should be skipped.
+                continue
+
             logger.debug(
                 'VOS directory for {0}: {1}'.format(file_path, vos_sub_dir))
 
