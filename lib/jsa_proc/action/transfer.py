@@ -68,6 +68,11 @@ def transfer_poll(db):
 
             elif job_task_info.command_xfer is not None:
                 # The job is transferred by a custom process.
+                # Mark the job as transferring while this runs.
+                db.change_state(job.id, JSAProcState.TRANSFERRING,
+                                'Transferring via custom command',
+                                state_prev=JSAProcState.PROCESSED)
+
                 logger.debug('Running custom transfer command '
                              'for processed job %i',
                              job.id)
@@ -88,7 +93,7 @@ def transfer_poll(db):
 
                     db.change_state(job.id, JSAProcState.COMPLETE,
                                     'Custom transfer completed successfully',
-                                    state_prev=JSAProcState.PROCESSED)
+                                    state_prev=JSAProcState.TRANSFERRING)
 
                 except subprocess.CalledProcessError as e:
                     logger.exception('Custom transfer command failed '
