@@ -65,7 +65,8 @@ def clean_output(count=None, dry_run=False, task=None, **kwargs):
     logger.debug('Done cleaning output directories')
 
 
-def clean_scratch(count=None, dry_run=False, include_error=False):
+def clean_scratch(count=None, dry_run=False,
+                  include_error=False, include_ingestion=False):
     """Delete scratch directories for processed jobs."""
 
     logger.debug('Beginning scratch clean')
@@ -78,6 +79,9 @@ def clean_scratch(count=None, dry_run=False, include_error=False):
 
     if include_error:
         states.append(JSAProcState.ERROR)
+
+    if include_ingestion:
+        states.append(JSAProcState.INGESTION)
 
     logger.debug('Cleaning jobs in states: %s', ', '.join(states))
 
