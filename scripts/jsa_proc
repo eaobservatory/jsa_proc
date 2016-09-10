@@ -21,7 +21,7 @@
 Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>]
     jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>] [--no-cadc-check]
-    jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion]
+    jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -61,6 +61,7 @@ Options:
     --force, -f                Skip initial state check.
     --include-error            Include jobs in the error state.
     --include-ingestion        Include jobs in the waiting to ingest state.
+    --include-processed        Include jobs in the processed state.
     --instrument <instrument>  Name of instrument.
     --replaceparent            Force recopying parent jobs into input folder
     --outfile <file>           File into which to write output.
@@ -191,7 +192,8 @@ def clean(args):
         from jsa_proc.action.clean import clean_scratch
         clean_scratch(count=args['--count'], dry_run=args['--dry-run'],
                       include_error=args['--include-error'],
-                      include_ingestion=args['--include-ingestion'])
+                      include_ingestion=args['--include-ingestion'],
+                      include_processed=args['--include-processed'])
 
     else:
         raise CommandError('Did not recognise clean type')
