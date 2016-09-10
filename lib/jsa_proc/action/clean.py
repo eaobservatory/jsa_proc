@@ -38,6 +38,7 @@ def clean_input(count=None, dry_run=False):
             JSAProcState.INGESTION,
             JSAProcState.COMPLETE,
             JSAProcState.DELETED,
+            JSAProcState.WONTWORK,
         ],
         count=count,
         dry_run=dry_run)
@@ -72,6 +73,7 @@ def clean_scratch(count=None, dry_run=False, include_error=False):
     states = [
             JSAProcState.COMPLETE,
             JSAProcState.DELETED,
+            JSAProcState.WONTWORK,
     ]
 
     if include_error:
