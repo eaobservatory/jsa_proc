@@ -39,7 +39,7 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
 
     """
 
-    locations = ['JAC', 'CADC']
+    locations = ['JAC']
 
     # Check state_prev parameter
     if state_prev == '':
