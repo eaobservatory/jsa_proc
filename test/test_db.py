@@ -19,7 +19,7 @@ from socket import gethostname
 from unittest import TestCase
 
 from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range, \
-        JSAProcFileInfo
+        JSAProcFileInfo, JSAProcTaskInfo
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -772,6 +772,19 @@ class InterfaceDBTest(DBTestCase):
 
         with self.assertRaises(NoRowsError):
             self.db.get_task_info('notatask')
+
+        # Try getting info for all tasks at once: should get a dictionary
+        # containing sensible entries, one for each task.
+        result = self.db.get_task_info()
+        self.assertIsInstance(result, dict)
+
+        expected_tasks = ['testtask', 'testtask2', 'testtask3', 'testtask4']
+        self.assertEqual(sorted(result.keys()), expected_tasks)
+        for task in expected_tasks:
+            task_info = result[task]
+            self.assertIsInstance(task_info, JSAProcTaskInfo)
+            self.assertIsInstance(task_info.id, int)
+            self.assertEqual(task_info.taskname, task)
 
     def test_tilelist(self):
         job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'])

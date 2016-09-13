@@ -19,7 +19,8 @@ import re
 from socket import gethostname
 from getpass import getuser
 
-from jsa_proc.error import *
+from jsa_proc.error import \
+    JSAProcError, JSAProcDBError, NoRowsError, ExcessRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.qa_state import JSAQAState
 
@@ -1277,26 +1278,51 @@ class JSAProcDB:
 
         return result
 
-    def get_task_info(self, task):
+    def get_task_info(self, task=None):
         """
-        Get the values from task table for a given task.
+        Get the values from task table for a given task or for all tasks.
 
         Returns:
         JSAProcJobNote namedtuple: contains the id, taskname,
-        etransfer and starlink values from the table.
+        etransfer and starlink values from the table.  If task is None
+        then results for all tasks are returned as a dictionary
+        organized by task name.
         """
+
         query = 'SELECT id, taskname, etransfer, starlink, version, ' \
             'command_run, command_xfer ' \
-            'FROM task WHERE taskname=%s'
-        params = (task,)
+            'FROM task'
+        params = []
+
+        if task is not None:
+            query += ' WHERE taskname=%s'
+            params.append(task)
+
+        result = {}
 
         with self.db as c:
             c.execute(query, params)
-            row = c.fetchall()
-        if len(row) == 0:
-            raise NoRowsError('No entry found for task %s' % task, query % tuple(params))
 
-        return JSAProcTaskInfo(*row[0])
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                row = JSAProcTaskInfo(*row)
+
+                result[row.taskname] = row
+
+        if task is not None:
+            if len(result) == 0:
+                raise NoRowsError('task', query % tuple(params))
+            elif len(result) > 1:
+                raise ExcessRowsError('task', query % tuple(params))
+            try:
+                return result[task]
+            except KeyError:
+                raise JSAProcDBError('task', query % tuple(params))
+
+        return result
 
     def get_obsinfo_for_project(self, project, tasks=None):
         """

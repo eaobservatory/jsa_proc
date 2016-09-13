@@ -31,15 +31,8 @@ logger = logging.getLogger(__name__)
 
 
 def transfer_poll(db):
-    # Get full list of tasks, create dictionary with task info
-    # as value and task name as key.
-    task_info = {}
-    for task in db.get_tasks():
-        try:
-            task_info[task] = db.get_task_info(task)
-
-        except NoRowsError:
-            pass
+    # Get full list of tasks.
+    task_info = db.get_task_info()
 
     # Determine whether we are already the correct user
     # on the correct machine for e-transfer or not.
