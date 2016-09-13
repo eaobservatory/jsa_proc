@@ -308,6 +308,9 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
     title = 'Summary of All jobs'
     if task:
         title = task + ' Summary'
+        task_info = db.get_task_info(task)
+    else:
+        task_info = None
     # Observations.
 
     return {
@@ -316,6 +319,7 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
         'job_summary_dict': job_summary_dict,
         'locations': locations,
         'task': task,
+        'task_info': task_info,
         'stamp': time.time(),
         'date_min': date_min,
         'date_max': date_max,
