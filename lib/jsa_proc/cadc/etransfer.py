@@ -54,9 +54,21 @@ def etransfer_poll_output(dry_run):
     logger.debug('Connecting to JSA processing database')
     db = get_database()
 
+    logger.debug('Retrieving task information from database')
+    task_info = db.get_task_info()
+
     n_err = 0
 
     for job in db.find_jobs(location='JAC', state=JSAProcState.TRANSFERRING):
+        # Retrieve this job's task information.
+        job_task_info = task_info.get(job.task)
+
+        if ((task_info is None)
+                or (task_info.command_xfer is not None)
+                or (not task_info.etransfer)):
+            # Job not from an e-transfer task: skip it.
+            continue
+
         job_id = job.id
         logger.debug('Checking state of job %i', job_id)
 
