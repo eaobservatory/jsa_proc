@@ -6,7 +6,7 @@
 <table>
   <tr>
     <th>Task name</th>
-    <th colspan="{{ results.values()[0].keys()|length }}">Number of Jobs</th>
+    <th colspan="{{ 1 + (states | length) }}">Number of Jobs</th>
   </tr>
   <tr>
     <th>(Click for summary)</th>
