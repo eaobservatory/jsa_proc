@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import namedtuple, OrderedDict
+from collections import defaultdict, namedtuple, OrderedDict
 import logging
 import re
 from socket import gethostname
@@ -1504,6 +1504,31 @@ class JSAProcDB:
                 result.append(JSAProcJobNote(*row))
 
         return result
+
+    def get_job_summary(self):
+        """
+        Get an ordered dictionary summarizaing the number of jobs in each
+        task and state.
+        """
+
+        result = defaultdict(dict)
+
+        with self.db as c:
+            c.execute('SELECT task, state, COUNT(*) AS number '
+                      'FROM job '
+                      'GROUP BY task, state '
+                      'ORDER BY task, state')
+
+            while True:
+                row = c.fetchone()
+                if row is None:
+                    break
+
+                (task, state, number) = row
+                result[task][state] = number
+
+        return result
+
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names
