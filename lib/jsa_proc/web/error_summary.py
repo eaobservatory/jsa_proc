@@ -23,7 +23,7 @@ from jsa_proc.web.util import url_for
 
 
 def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
-                          extrafilter=None, state_prev=None):
+                          extrafilter=None, state_prev=None, filter_done=True):
     """
     Prepare a summary of all jobs in error state.
 
@@ -61,12 +61,13 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
 
     # Dictionary to hold output. Keys are location, items are ordered dict
     error_dict = OrderedDict()
-    for l in locations:
-        error_dict[l] = db.find_errors_logs(location=l, task=chosentask,
-                                            state_prev=state_prev)
+    if filter_done:
+        for l in locations:
+            error_dict[l] = db.find_errors_logs(location=l, task=chosentask,
+                                                state_prev=state_prev)
 
-        if error_filter is not None:
-            error_filter(error_dict[l])
+            if error_filter is not None:
+                error_filter(error_dict[l])
 
     if extrafilter is None:
         extrafilter = ''
