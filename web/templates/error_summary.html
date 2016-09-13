@@ -20,7 +20,7 @@
   <select name="chosentask">
     <option value="" {{ 'selected="selected"' |safe if chosentask is none }}>Any task</option>
     {% for t in tasks %}
-    <option value="{{ t }}" {{ 'selected="selected"' | safe if chosentask == t }}> {{ t | capitalize }} </option>
+    <option value="{{ t }}" {{ 'selected="selected"' | safe if chosentask == t }}> {{ t }} </option>
     {% endfor %}
   </select>
   <input type="text" placeholder="additional filter" value="{{extrafilter}}" name="extrafilter"/>
@@ -73,7 +73,7 @@
 
   <input type="hidden" name="url" value="{{ redirect_url }}">
   <input type="hidden" name="state_prev" value="{{ state_prev }}" />
-  <input type="submit" value="submit">
+  <input type="submit" value="Submit">
   {% else %}
       <p>
           Please log in if you would like to change the job state.
