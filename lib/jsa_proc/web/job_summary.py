@@ -125,12 +125,12 @@ def prepare_task_summary(db):
 
     """
 
-    tasks = db.get_tasks()
-    results = {}
-    for t in tasks:
-        results[t] = {'total': db.find_jobs(task=t, count=True)}
-        for s in JSAProcState.STATE_ALL:
-            results[t][s] = db.find_jobs(task=t, state=s, count=True)
+    # Fetch summary from the database.
+    results = db.get_job_summary()
+
+    # Compute the total for each task.
+    for task in results.values():
+        task['total'] = sum(task.values())
 
     return {'results': results, 'states': JSAProcState.STATE_ALL,
             'title': 'Summary'}
