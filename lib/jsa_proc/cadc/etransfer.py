@@ -63,9 +63,9 @@ def etransfer_poll_output(dry_run):
         # Retrieve this job's task information.
         job_task_info = task_info.get(job.task)
 
-        if ((task_info is None)
-                or (task_info.command_xfer is not None)
-                or (not task_info.etransfer)):
+        if ((job_task_info is None)
+                or (job_task_info.command_xfer is not None)
+                or (not job_task_info.etransfer)):
             # Job not from an e-transfer task: skip it.
             continue
 
