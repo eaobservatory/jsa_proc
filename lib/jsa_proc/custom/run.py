@@ -27,7 +27,7 @@ program_usage = """
 {0} - Custom data reduction wrapper script
 
 Usage:
-    {0} [-v | -q] --id <id> --inputs <inputs> --transdir <transdir>
+    {0} [-v | -q] --id <id> --inputs <inputs> --transdir <transdir> [--] [<parameter> ...]
 
 Options:
     --help, -h              Show usage information.
@@ -95,7 +95,8 @@ class CustomJobRun(object):
         # Run the data processing function.
         logger.debug('About to begin processing')
         try:
-            self.run_processing(inputs, transdir, id_=args['--id'])
+            self.run_processing(inputs, transdir, id_=args['--id'],
+                                parameters=args['<parameter>'])
 
         except:
             logger.exception('Exception during processing')
@@ -103,6 +104,6 @@ class CustomJobRun(object):
 
         logger.debug('Processing complete')
 
-    def run_processing(self, inputs, transdir, id_='unknown'):
+    def run_processing(self, inputs, transdir, id_='unknown', parameters=[]):
         # This method must be overridden by subclasses.
         raise Exception('Custom processing routine not defined')
