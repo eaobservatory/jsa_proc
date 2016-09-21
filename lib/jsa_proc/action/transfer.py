@@ -95,7 +95,7 @@ def transfer_poll(db):
 
                     db.change_state(job.id, JSAProcState.ERROR,
                                     'Custom transfer failed',
-                                    state_prev=JSAProcState.PROCESSED)
+                                    state_prev=JSAProcState.TRANSFERRING)
 
                     n_err += 1
 
