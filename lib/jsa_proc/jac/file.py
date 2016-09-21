@@ -55,7 +55,7 @@ def get_jac_data_dir(filename):
             year = date[0:4]
             path1 =os.path.join('/jcmtdata/raw/acsis-das/converted',
                                 year, date, obsnum)
-            return (path1)
+            return (path1,)
 
     raise JSAProcError('Filename {0} does not match '
                        'an expected pattern'.format(filename))
