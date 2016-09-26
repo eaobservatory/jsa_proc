@@ -95,8 +95,9 @@ class CustomJobRun(object):
         # Run the data processing function.
         logger.debug('About to begin processing')
         try:
-            self.run_processing(inputs, transdir, id_=args['--id'],
-                                parameters=args['<parameter>'])
+            self.run_processing(
+                inputs, transdir, id_=args['--id'],
+                parameters=[x for x in args['<parameter>'] if x != '--'])
 
         except:
             logger.exception('Exception during processing')
