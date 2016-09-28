@@ -204,16 +204,26 @@ def setup_starlink(starpath, env):
     """
 
     env['STARLINK_DIR'] = starpath
-    if env.has_key('PATH'):
-        env['PATH']= os.path.join(starpath, 'bin') + os.pathsep + env['PATH']
+
+    if 'PATH' in env:
+        env['PATH'] = os.pathsep.join([
+            os.path.join(starpath, 'java', 'jre', 'bin'),
+            os.path.join(starpath, 'java', 'bin'),
+            os.path.join(starpath, 'bin'),
+            env['PATH'],
+        ])
     else:
-        env['PATH']= os.path.join(starpath, 'bin')
+        env['PATH'] = os.pathsep.join([
+            os.path.join(starpath, 'java', 'jre', 'bin'),
+            os.path.join(starpath, 'java', 'bin'),
+            os.path.join(starpath, 'bin'),
+        ])
 
-    env['PATH'] = os.path.join(starpath, 'java', 'jre', 'bin', os.pathsep,
-                               starpath, 'java', 'bin', os.pathsep, env['PATH'])
-
-    if env.has_key('LD_LIBRARY_PATH'):
-        env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib', os.pathsep, env['LD_LIBRARY_PATH'])
+    if 'LD_LIBRARY_PATH' in env:
+        env['LD_LIBRARY_PATH'] = os.pathsep.join([
+            os.path.join(starpath, 'lib'),
+            env['LD_LIBRARY_PATH'],
+        ])
     else:
         env['LD_LIBRARY_PATH'] = os.path.join(starpath, 'lib')
 
@@ -230,8 +240,10 @@ def setup_starlink(starpath, env):
 
     # This overwrites any existing PERL5LIB environ. Duplicating what the
     # $STARLINK_DIR/etc/profile script does...
-    env['PERL5LIB'] = os.path.join(starpath, 'Perl', 'lib', 'perl5', 'site_perl')
-    env['PERL5LIB'] = os.path.join(starpath, 'Perl', 'lib', 'perl5', os.pathsep, env['PERL5LIB'])
+    env['PERL5LIB'] = os.pathsep.join([
+        os.path.join(starpath, 'Perl', 'lib', 'perl5', 'site_perl'),
+        os.path.join(starpath, 'Perl', 'lib', 'perl5'),
+    ])
 
     # Setup the <packagename>_DIR environ variables. Not really sure
     # why these are needed...
