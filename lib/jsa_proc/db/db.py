@@ -375,15 +375,19 @@ class JSAProcDB:
         This will raise an error if the job can't be found in oldtask.
         """
         if oldtask == newtask:
-            raise JSAProcError("Can't change task if oldtask (%s) is the same as newtask (%s)"
-                               % (oldtask, newtask));
+            raise JSAProcError(
+                "Can't change task if oldtask (%s) "
+                "is the same as newtask (%s)" %
+                (oldtask, newtask))
         with self.db as c:
             query = 'UPDATE job SET task=%s WHERE id=%s AND task=%s'
             params = (newtask, job_id, oldtask,)
             c.execute(query, params)
             if c.rowcount == 0:
                 raise NoRowsError('job', query % tuple(params))
-        logger.debug('Moved job %i from task %s to task %s' % (job_id, oldtask, newtask))
+        logger.debug(
+            'Moved job %i from task %s to task %s',
+            job_id, oldtask, newtask)
 
     def get_obs_info(self, job_id):
         """
@@ -421,17 +425,16 @@ class JSAProcDB:
                                    + column + ' into obs table')
 
         # Escape column names with back ticks.
-        columnnames = ['`' + i +'`=%s' for i in columnnames]
+        columnnames = ['`' + i + '`=%s' for i in columnnames]
         column_query = ','.join(columnnames)
 
         with self.db as c:
 
             query = ('UPDATE obs SET ' + column_query +
-                      ' WHERE obsidss=%s ')
+                     ' WHERE obsidss=%s ')
             params = values + (obsidss,)
             logging.debug(query % params)
             c.execute(query, params)
-
 
     def set_obs_info(self, job_id, obsinfolist, replace_all=True):
         """
@@ -862,8 +865,9 @@ class JSAProcDB:
         """
 
         with self.db as c:
-            c.execute('SELECT filename, md5 FROM output_file WHERE job_id = %s',
-                      (job_id,))
+            c.execute(
+                'SELECT filename, md5 FROM output_file WHERE job_id = %s',
+                (job_id,))
             output_files = c.fetchall()
             if len(output_files) == 0:
                 raise NoRowsError(
@@ -1330,10 +1334,13 @@ class JSAProcDB:
 
         tasks: list of task names to search within.
         """
-        query = "SELECT obs.*, job.state FROM obs join job on obs.job_id=job.id WHERE obs.project=%s";
+        query = (
+            "SELECT obs.*, job.state FROM obs join job on obs.job_id=job.id"
+            " WHERE obs.project=%s")
         params = (project,)
         if tasks:
-            extraquery = ' AND (' + ' OR '.join(['job.task=%s' for i in tasks]) + ') '
+            extraquery = ' AND (' + ' OR '.join(
+                ['job.task=%s' for i in tasks]) + ') '
             query += extraquery
             params += tuple(tasks)
 
@@ -1342,8 +1349,10 @@ class JSAProcDB:
             rows = c.fetchall()
             columns = [i[0] for i in c.description]
 
-        if len(rows)==0:
-            raise NoRowsError('No entries found in obs for project %s' % project, query %tuple(params))
+        if len(rows) == 0:
+            raise NoRowsError(
+                'No entries found in obs for project %s' % project,
+                query % tuple(params))
 
         JSAProcObsE = namedtuple('JSAProcObsE', columns)
         results = [JSAProcObsE(*obs) for obs in rows]
@@ -1370,7 +1379,7 @@ class JSAProcDB:
                 'command_run, command_xfer) '
                 'VALUES (%s, %s, %s, %s, %s, %s)',
                 (taskname, etransfer, starlink, version,
-                command_run, command_xfer))
+                 command_run, command_xfer))
 
     def get_parents(self, job_id):
         """
@@ -1499,7 +1508,7 @@ class JSAProcDB:
         """
 
         if username is None:
-            username = getuser();
+            username = getuser()
 
         with self.db as c:
             c.execute('INSERT INTO note (job_id, message, username) '

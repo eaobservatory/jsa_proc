@@ -76,7 +76,7 @@ def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
             logger.warning('Did not find a job to fetch!')
             return
 
-    fetch_a_job(job_id, db=db, force=force,replaceparent=replaceparent)
+    fetch_a_job(job_id, db=db, force=force, replaceparent=replaceparent)
 
 
 @ErrorDecorator

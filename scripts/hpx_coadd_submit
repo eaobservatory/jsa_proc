@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""hpx_coadd_submit: submit hpx legacy coadds to the jsa processing system.
+"""hpx_coadd_submit: submit hpx legacy coadds to the JSA processing system.
 
 Usage:
     hpx_coadd_submit all [-v | -q] [--dry-run] --task=<task> [options]
@@ -27,30 +27,31 @@ Options:
     --quiet, -q                Omit informational messages.
     --dry-run, -n              Do not actually peform the action.
 
-    --tile=<id>              HEALPix tile to submit job for.
-    --task=<task>             jsa_proc task to look for jobs for.
+    --tile=<id>                HEALPix tile to submit job for.
+    --task=<task>              jsa_proc task to look for jobs for.
     --priority=<priority>      priority of task.
     --location, -l=<location>  Job location, e.g. JAC, CADC.
     --only-science,            Only coadd 'science' obs.
                                (e.g. no pointings)
     --never-update             Don't change an existing job, even if outdated.
     --exclude-pointing-jobs    If a coadd contains any pointing observations,
-                                don't submit it.
+                               don't submit it.
     --pointing-jobs-only       Only include pointing jobs in coadds.
     --output-task=<out-task>   A task name to put the coadd jobs into. If not
-                                given, defaults to <task>_coadd.
+                               given, defaults to <task>_coadd.
 Commands:
     all:
         Submit jobs for all tiles in the tile table for the requested task.
         This will check with the OMP to see which observations are currently
-        set with a state of BAD or JUNK and not include those. It will check the QA
-        status in the JSA_processing system and only include those that are GOOD or
-        QUESTIONABLE. All jobs will be created in a task that is named <task>_coadd
-        unless the option --output-task is given.
+        set with a state of BAD or JUNK and not include those. It will check
+        the QA status in the JSA processing system and only include those that
+        are GOOD or QUESTIONABLE. All jobs will be created in a task that is
+        named <task>_coadd unless the option --output-task is given.
 
     one
-        Submit a coadd job for the requested task and requested tile number. It will
-        perform the same checks as the 'all' command on the OMP and QA states.
+        Submit a coadd job for the requested task and requested tile number.
+        It will perform the same checks as the 'all' command on the OMP and
+        QA states.
 """
 
 from __future__ import print_function, division, absolute_import
@@ -83,21 +84,23 @@ def main():
     elif args['--quiet']:
         loglevel = logging.WARNING
 
+    logging.basicConfig(level=loglevel)
+
     try:
         task = args['--task']
     except KeyError:
         raise CommandError('Task must be supplied.')
 
-
-    if args['--pointing-jobs-only'] and (args['--only-science'] or args['--exclude-pointing-jobs']):
-        raise CommandError('Cannot specify both --pointing-jobs-only and either of --only-science' +
-                           ' --exclude-pointing-jobs.')
-
-    logging.basicConfig(level=loglevel)
+    if (args['--pointing-jobs-only'] and
+            (args['--only-science'] or args['--exclude-pointing-jobs'])):
+        raise CommandError(
+            'Cannot specify both --pointing-jobs-only'
+            ' and either of --only-science'
+            ' --exclude-pointing-jobs.')
 
     try:
         # Process integer arguments.
-        for integer_argument in ('--tile','--priority'):
+        for integer_argument in ('--tile', '--priority'):
             if args[integer_argument] is not None:
                 try:
                     args[integer_argument] = int(args[integer_argument])
@@ -134,10 +137,10 @@ def command(f):
 
 @command
 def all(args):
-
     """
     Sub-command to submit all tile coadd jobs for a given task.
     """
+
     location = args.get('--location', 'JAC')
     parenttask = args['--task']
     science_obs_only = args.get('--only-science', False)
@@ -148,9 +151,9 @@ def all(args):
     dryrun = args.get('--dry-run', True)
     priority = args.get('--priority', 0)
 
-    #Values that are unchanging.
-    mode='public'
-    parameters='COADD_JSA_TILES'
+    # Values that are unchanging.
+    mode = 'public'
+    parameters = 'COADD_JSA_TILES'
     location = 'JAC'
 
     # Get full list of tiles.
@@ -159,28 +162,30 @@ def all(args):
     tiles = list(tiles)
     tiles.sort()
 
-    logger.info('%i tiles found for task %s' % (len(tiles), parenttask))
+    logger.info('%i tiles found for task %s', len(tiles), parenttask)
     total = len(tiles)
     count = 0
     for t in tiles:
-        logger.debug('Processing tile %i (%i of %i)' % (t, count, total))
+        logger.debug('Processing tile %i (%i of %i)', t, count, total)
         try:
-            submit_one_coadd_job(t, parenttask, mode, parameters, location,
-                                 exclude_pointing_jobs=exclude_pointing_jobs,
-                                 science_obs_only=science_obs_only,
-                                 never_update=never_update, dryrun=dryrun, priority=priority,
-                                 output_task=output_task, pointings_only=pointings_only)
+            submit_one_coadd_job(
+                t, parenttask, mode, parameters, location,
+                exclude_pointing_jobs=exclude_pointing_jobs,
+                science_obs_only=science_obs_only,
+                never_update=never_update, dryrun=dryrun, priority=priority,
+                output_task=output_task, pointings_only=pointings_only)
         except JSAProcError:
             pass
 
         count += 1
 
+
 @command
 def one(args):
-
     """
     Sub-command to submit a single tile coadd job for a given task.
     """
+
     parenttask = args['--task']
     location = args.get('--location', 'JAC')
     science_obs_only = args.get('--only-science', False)
@@ -192,20 +197,18 @@ def one(args):
     tile = args.get('--tile')
     priority = args.get('--priority', 0)
 
-    #Values that are unchanging.
+    # Values that are unchanging.
     mode = 'public'
     parameters = 'COADD_JSA_TILES'
     location = 'JAC'
 
-    job_id = submit_one_coadd_job(tile, parenttask, mode, parameters, location,
-                                  exclude_pointing_jobs=exclude_pointing_jobs,
-                                  science_obs_only=science_obs_only,
-                                  never_update=never_update, dryrun=dryrun, priority=priority,
-                                  output_task=output_task, pointings_only=pointings_only)
-
+    job_id = submit_one_coadd_job(
+        tile, parenttask, mode, parameters, location,
+        exclude_pointing_jobs=exclude_pointing_jobs,
+        science_obs_only=science_obs_only,
+        never_update=never_update, dryrun=dryrun, priority=priority,
+        output_task=output_task, pointings_only=pointings_only)
 
 
 if __name__ == '__main__':
     main()
-
-

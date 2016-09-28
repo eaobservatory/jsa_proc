@@ -83,7 +83,8 @@ def prepare_summary_piechart(db, task=None, obsquerydict=None, date_min=None,
     phase_colors[JSAProcState.PHASE_COMPLETE] = 'blue'
     phase_colors[JSAProcState.PHASE_ERROR] = 'black'
 
-    phases = [ phase_colors[JSAProcState.get_info(s).phase] for s in JSAProcState.STATE_ALL[:-1]]
+    phases = [phase_colors[JSAProcState.get_info(s).phase]
+              for s in JSAProcState.STATE_ALL[:-1]]
 
     # Remove any states that don't have any jobs in them
     i = 0

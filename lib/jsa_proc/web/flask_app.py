@@ -258,7 +258,7 @@ def create_web_app():
             # Redirect the page to correct info.
             flash(
                 'The QA status of job %s has been changed to %s.' %
-                (str(' '.join(job_ids)),JSAQAState.get_name(qa_state))
+                (str(' '.join(job_ids)), JSAQAState.get_name(qa_state))
             )
             raise HTTPRedirect(url)
 
@@ -314,7 +314,6 @@ def create_web_app():
         path = prepare_job_log(job_id, log)
         return send_file(path, mimetype='text/plain')
 
-
     @app.route('/fop_summary', methods=['GET'])
     @templated('fop_summary.html')
     def fop_summary():
@@ -325,24 +324,26 @@ def create_web_app():
             ompdb = get_omp_database(write_access=None)
             projects = ompdb.get_support_projects(str(userid), str(semester))
             for p in projects:
-                jobs = db.find_jobs(obsquery={'project':p}, task='jcmt-nightly')
+                jobs = db.find_jobs(
+                    obsquery={'project': p}, task='jcmt-nightly')
                 projdict[p] = [len(jobs),
                                sum(1 for j in jobs if j.state == "E"),
-                               sum(1 for j in jobs if j.qa_state== 'B'),
+                               sum(1 for j in jobs if j.qa_state == 'B'),
                                sum(1 for j in jobs if j.qa_state == 'Q'),
                                sum(1 for j in jobs if j.qa_state == '?'),
-                               sum(1 for j in jobs if j.qa_state =='G')]
+                               sum(1 for j in jobs if j.qa_state == 'G')]
         else:
             projects = None
 
-        return {'userid':userid, 'semester':semester, 'projects':projdict}
+        return {'userid': userid, 'semester': semester, 'projects': projdict}
     # Filters and Tests.
 
     @app.route('/fop_summary_getres', methods=['POST'])
     def fop_summary_getres():
         userid = request.form['userid']
         semester = request.form['semester']
-        raise HTTPRedirect(url_for('fop_summary', userid=userid, semester=semester))
+        raise HTTPRedirect(url_for(
+            'fop_summary', userid=userid, semester=semester))
 
     @app.template_filter('state_name')
     def state_name_filter(state):
@@ -389,10 +390,11 @@ def create_web_app():
 
     @app.template_filter('replace0')
     def replace_zero(value):
-        if value==0:
+        if value == 0:
             return '-'
         else:
             return value
+
     @app.context_processor
     def add_to_context():
         return {
@@ -402,5 +404,4 @@ def create_web_app():
         }
 
     # Return the Application.
-
     return app

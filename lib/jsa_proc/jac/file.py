@@ -26,7 +26,6 @@ acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}$')
 hpx_tile = re.compile('_healpix([0-9]{6})_.*\.(sdf|fits)$')
 
 
-
 def get_jac_data_dir(filename):
     """Guess directory name for a given filename.
 
@@ -47,14 +46,14 @@ def get_jac_data_dir(filename):
         (date, obsnum) = m.groups()
 
         if date > '20061000':
-            path1 =  os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
+            path1 = os.path.join('/jcmtdata/raw/acsis/spectra', date, obsnum)
             path2 = os.path.join('/jcmtcal/acsis', date, obsnum)
             return (path1, path2)
 
         else:
             year = date[0:4]
-            path1 =os.path.join('/jcmtdata/raw/acsis-das/converted',
-                                year, date, obsnum)
+            path1 = os.path.join('/jcmtdata/raw/acsis-das/converted',
+                                 year, date, obsnum)
             return (path1,)
 
     raise JSAProcError('Filename {0} does not match '
@@ -99,7 +98,7 @@ def file_in_jac_data_dir(filename):
 
     dirlist = get_jac_data_dir(filename)
     for d in dirlist:
-        check  = file_in_dir(filename, d)
+        check = file_in_dir(filename, d)
         if check:
             return check
     return False

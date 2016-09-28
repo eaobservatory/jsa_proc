@@ -28,8 +28,8 @@ def prepare_job_list(db, page, **kwargs):
 
     # Identify number of jobs.
     count = db.find_jobs(count=True, **job_query)
-    (number, page, pagination) = calculate_pagination(count,
-        24, page, 'job_list', query)
+    (number, page, pagination) = calculate_pagination(
+        count, 24, page, 'job_list', query)
 
     # If no number in kwargs, add in default.
     if 'number' not in job_query:

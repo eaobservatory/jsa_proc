@@ -37,7 +37,6 @@ def get_omp_database(write_access=None):
             raise JSAProcError('Unknown write_access request {0}'
                                .format(write_access))
 
-
         omp_database_access[write_access] = OMPDB(
             server=config.get(credentials, 'server'),
             user=config.get(credentials, 'user'),

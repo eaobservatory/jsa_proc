@@ -182,7 +182,8 @@ def setup_input_directory(job_id):
     return input_directory
 
 
-def assemble_parent_data_for_job(job_id, parent_job_id, parent_files, force_new=False):
+def assemble_parent_data_for_job(
+        job_id, parent_job_id, parent_files, force_new=False):
     """
     This routine ensures that all the input data from parent jobs is
     available for running a job.

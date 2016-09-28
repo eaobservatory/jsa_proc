@@ -102,7 +102,7 @@ def prepare_job_info(db, job_id, query):
         (url_query, job_query) = job_search(**query)
 
         # Need to remove 'number' option from job_query to.
-        pnquery  = job_query.copy()
+        pnquery = job_query.copy()
         if 'number' in pnquery:
             del(pnquery['number'])
         (prev, next) = db.job_prev_next(job_id, **pnquery)

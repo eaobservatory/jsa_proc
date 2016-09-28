@@ -126,16 +126,17 @@ class CADCTap():
 
             uris[filename] = 'ad:JCMT/{0}'.format(fileid)
 
-        logger.debug('SELECT uri, COUNT(*) FROM caom2.Artifact '
-            'WHERE uri IN ('
-                + ', '.join(['\'{0}\''.format(x) for x in uris.values()])
-                + ') GROUP BY uri')
+        logger.debug(
+            'SELECT uri, COUNT(*) FROM caom2.Artifact '
+            'WHERE uri IN (' +
+            ', '.join(['\'{0}\''.format(x) for x in uris.values()]) +
+            ') GROUP BY uri')
 
         table = self.tap.query(
             'SELECT uri, COUNT(*) FROM caom2.Artifact '
-            'WHERE uri IN ('
-                + ', '.join(['\'{0}\''.format(x) for x in uris.values()])
-                + ') GROUP BY uri')
+            'WHERE uri IN (' +
+            ', '.join(['\'{0}\''.format(x) for x in uris.values()]) +
+            ') GROUP BY uri')
 
         if table is None:
             raise JSAProcError(
@@ -145,7 +146,6 @@ class CADCTap():
 
         for row in table:
             counts[row[0]] = row[1]
-
 
         result = []
 

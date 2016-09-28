@@ -73,9 +73,9 @@ def clean_scratch(count=None, dry_run=False,
     logger.debug('Beginning scratch clean')
 
     states = [
-            JSAProcState.COMPLETE,
-            JSAProcState.DELETED,
-            JSAProcState.WONTWORK,
+        JSAProcState.COMPLETE,
+        JSAProcState.DELETED,
+        JSAProcState.WONTWORK,
     ]
 
     if include_error:
@@ -210,7 +210,8 @@ def _clean_output_dir(directory, job_id, db, dry_run, no_cadc_check=False):
                 os.unlink(filepath)
 
             else:
-                logger.debug('Skipping deletion of file %s (DRY RUN)', filepath)
+                logger.debug(
+                    'Skipping deletion of file %s (DRY RUN)', filepath)
 
         return True
 

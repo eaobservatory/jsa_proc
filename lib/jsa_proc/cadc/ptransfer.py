@@ -233,7 +233,8 @@ def ptransfer_poll(stream=None, dry_run=False):
             # In the event of failure to transfer, put the file back into
             # its original stream directory.
             n_err += 1
-            logger.error('Failed to transfer file %s (%s)', file.name, e.message)
+            logger.error(
+                'Failed to transfer file %s (%s)', file.name, e.message)
 
             if not dry_run:
                 os.rename(
@@ -249,8 +250,6 @@ def ptransfer_poll(stream=None, dry_run=False):
                 os.rename(
                     proc_file,
                     os.path.join(trans_dir, file.stream, file.name))
-
-
 
     # Finally clean up the processing directory.  It should have nothing
     # left in it by this point other than the stream subdirectories and

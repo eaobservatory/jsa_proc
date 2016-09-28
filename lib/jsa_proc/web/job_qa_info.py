@@ -27,6 +27,7 @@ from jsa_proc.web.job_search import job_search
 from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
+
 def prepare_job_qa_info(db, job_id, query):
     # Fetch job and qa information from the database.
     try:
@@ -122,7 +123,8 @@ def prepare_job_qa_info(db, job_id, query):
     # In the case of task='*-cat' and there are no output preview
     # images, show the preview image from the 1st parent job.
     if '-cat' in info['task'] and previews1024 == []:
-        (_, previews1024,_) = make_output_file_list(db, parents.keys()[0], preview_filter='previews_1024.png')
+        (_, previews1024, _) = make_output_file_list(
+            db, parents.keys()[0], preview_filter='previews_1024.png')
         nopreview = True
     else:
         nopreview = False
@@ -130,10 +132,11 @@ def prepare_job_qa_info(db, job_id, query):
     # Get parent output .fits files.
     parent_fits = []
     if parents:
-        for i in  parents.keys():
+        for i in parents.keys():
             (parent_outputs, _, _) = make_output_file_list(db, i)
             # remove everything that isn't a .fits file from output list.
-            [parent_fits.append(i) for i in parent_outputs if '.fits' in i.name]
+            [parent_fits.append(i)
+             for i in parent_outputs if '.fits' in i.name]
 
     return {
         'title': 'Job {}'.format(job_id),
@@ -150,5 +153,5 @@ def prepare_job_qa_info(db, job_id, query):
         'qa_states': JSAQAState.STATE_ALL,
         'pagination': pagination,
         'nopreview': nopreview,
-        'parent_fits':parent_fits,
+        'parent_fits': parent_fits,
     }

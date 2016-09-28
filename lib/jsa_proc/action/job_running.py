@@ -191,7 +191,6 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     return log_name
 
 
-
 def setup_starlink(starpath, env):
     """
     Setup all the starlink paths form the profile script.
@@ -260,8 +259,8 @@ def setup_starlink(starpath, env):
     env['EXTRACTOR_DIR'] = os.path.join(starpath, 'bin', 'extractor')
     env['FIGARO_DIR'] = os.path.join(starpath, 'bin', 'figaro')
     env['FIGARO_FORMATS'] = "ndf,dst"
-    env['FIGARO_PROG_N'] =os.path.join(starpath, 'bin', 'figaro')
-    env['FIGARO_PROG_N'] =os.path.join(starpath, 'etc', 'figaro')
+    env['FIGARO_PROG_N'] = os.path.join(starpath, 'bin', 'figaro')
+    env['FIGARO_PROG_N'] = os.path.join(starpath, 'etc', 'figaro')
     env['FLUXES_DIR'] = os.path.join(starpath, 'bin', 'fluxes')
     env['GAIA_DIR'] = os.path.join(starpath, 'bin', 'gaia')
     env['HDSTOOLS_DIR'] = os.path.join(starpath, 'bin', 'hdstools')

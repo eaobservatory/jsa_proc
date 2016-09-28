@@ -30,7 +30,8 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def ingest_output(job_id, location=None, task=None, dry_run=False, force=False):
+def ingest_output(
+        job_id, location=None, task=None, dry_run=False, force=False):
     """High-level output ingestion function for use from scripts."""
 
     logger.debug('Connecting to JSA processing database')

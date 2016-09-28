@@ -126,10 +126,11 @@ def calculate_pagination(count, default_number,
         pagination: named tuple with first, prev, next and last elements
     """
 
-
     # Check if number is given within the url_args, if not then
     # set it to the default number.
-    if 'number' not in url_args or url_args['number'] is None or url_args['number'] == 0:
+    if ('number' not in url_args or
+            url_args['number'] is None or
+            url_args['number'] == 0):
         number_per_page = default_number
         url_args['number'] = default_number
     else:

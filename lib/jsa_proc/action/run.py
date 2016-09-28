@@ -65,7 +65,7 @@ def run_job(job_id=None, db=None, force=False, task=None):
 
     if scratch_space < scratch_limit:
         logger.warning('Insufficient scratch disk space: %f / %f GiB required',
-                        scratch_space, scratch_limit)
+                       scratch_space, scratch_limit)
         return
 
     # Get a link to the database.
@@ -151,7 +151,7 @@ def run_a_job(job_id, db=None, force=False):
             # again.
             if states.count(JSAProcState.MISSING) <= 2:
                 logstring += ': moving to missing.'
-                logger.warning('Moving job %i to state MISSING due to ' \
+                logger.warning('Moving job %i to state MISSING due to '
                                'missing file(s) %s',
                                job_id, input_file)
                 db.change_state(job_id, JSAProcState.MISSING,
@@ -162,7 +162,7 @@ def run_a_job(job_id, db=None, force=False):
                 # If it has been in the missing STATE more than two times,
                 # give up and move it into ERROR state to be fixed manually.
                 logstring += ': moving to error.'
-                logger.info('Moving job %s to state ERROR due to missing' \
+                logger.info('Moving job %s to state ERROR due to missing'
                             ' file(s).', job_id)
                 inputfl.close()
                 raise JSAProcError('Input file %s for job %i has gone missing.'
@@ -195,7 +195,7 @@ def run_a_job(job_id, db=None, force=False):
     logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
                  mode, drparameters)
     log = jsawrapdr_run(
-        job_id, input_file_list_path, mode,drparameters,
+        job_id, input_file_list_path, mode, drparameters,
         cleanup='cadc', location='JAC', starlink_dir=starpath,
         persist=True, version=version, command_run=command_run)
 

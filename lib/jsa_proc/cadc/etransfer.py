@@ -171,7 +171,8 @@ def etransfer_send_output(job_id, dry_run=False, force=False):
 
         if job.state != JSAProcState.PROCESSED:
             message = 'Job {0} cannot be e-transferred as it is in ' \
-                      'state {1}'.format(job_id, JSAProcState.get_name(job.state))
+                      'state {1}'.format(job_id,
+                                         JSAProcState.get_name(job.state))
             logger.error(message)
             raise CommandError(message)
 
@@ -287,7 +288,9 @@ def etransfer_query_output(job_id):
 
     print('{0:110} {1:5} {2:12} {3:5}'.format('File', 'ET', 'Directory', 'AD'))
 
-    for file in zip(files, etransfer_file_status(files), check_cadc_files(files)):
+    for file in zip(files,
+                    etransfer_file_status(files),
+                    check_cadc_files(files)):
         (filename, etransfer_status, ad_status) = file
 
         if etransfer_status is None:
@@ -299,10 +302,12 @@ def etransfer_query_output(job_id):
             filename, repr(ok), dir, repr(ad_status)))
 
         if ok is False:
-            problem_files.append(os.path.join(transdir, 'reject', dir, filename))
+            problem_files.append(
+                os.path.join(transdir, 'reject', dir, filename))
 
     if problem_files:
-        if yes_or_no_question('Delete rejected files from e-transfer directories?'):
+        if yes_or_no_question(
+                'Delete rejected files from e-transfer directories?'):
             for file in problem_files:
                 logger.debug('Deleting file %s', file)
                 os.unlink(file)

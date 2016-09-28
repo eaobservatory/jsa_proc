@@ -22,7 +22,7 @@ from jsa_proc.jcmtobsinfo import ObsQueryDict
 def job_search(location, state, task,
                date_min, date_max, qa_state,
                sourcename, obsnum, project,
-               mode, number, tau_min, tau_max,**kwargs):
+               mode, number, tau_min, tau_max, **kwargs):
 
     # If number is None, reset to default
     if not number or number is None:
