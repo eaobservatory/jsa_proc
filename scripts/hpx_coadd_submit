@@ -64,7 +64,7 @@ from docopt import docopt
 from jsa_proc.config import get_database
 from jsa_proc.error import CommandError, JSAProcError
 from jsa_proc.state import JSAProcState
-from jsa_proc.submit.hpx_submit import submit_one_coadd_job
+from jsa_proc.submit.hpx import submit_one_coadd_job
 script_name = 'hpx_coadd_submit'
 commands = {}
 logger = logging.getLogger(script_name)
