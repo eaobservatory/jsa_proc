@@ -326,12 +326,13 @@ def create_web_app():
             for p in projects:
                 jobs = db.find_jobs(
                     obsquery={'project': p}, task='jcmt-nightly')
-                projdict[p] = [len(jobs),
-                               sum(1 for j in jobs if j.state == "E"),
-                               sum(1 for j in jobs if j.qa_state == 'B'),
-                               sum(1 for j in jobs if j.qa_state == 'Q'),
-                               sum(1 for j in jobs if j.qa_state == '?'),
-                               sum(1 for j in jobs if j.qa_state == 'G')]
+                projdict[p] = [
+                    len(jobs),
+                    sum(1 for j in jobs if j.state == JSAPROCState.ERROR),
+                    sum(1 for j in jobs if j.qa_state == JSAQAState.BAD),
+                    sum(1 for j in jobs if j.qa_state == JSAQAState.QUESTIONABLE),
+                    sum(1 for j in jobs if j.qa_state == JSAQAState.UNKNOWN),
+                    sum(1 for j in jobs if j.qa_state == JSAQAState.GOOD)]
         else:
             projects = None
 
