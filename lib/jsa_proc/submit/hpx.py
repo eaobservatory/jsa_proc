@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2015-2016 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function, division, absolute_import
+
 import logging
 
 from omp.obs.state import OMPState
@@ -22,6 +25,7 @@ from jsa_proc.db.db import Not
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.qa_state import JSAQAState
 from jsa_proc.state import JSAProcState
+from .update import add_upd_del_job
 
 logger = logging.getLogger(__name__)
 
@@ -84,122 +88,33 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
     tag = generate_hpx_coadd_tag(tile, coadd_task)
     filt = create_hpx_filter(tile, parenttask)
 
-    # TODO:Check if task already exists. Print a warning if it has not
-    # yet been added to task table.
-
-    # Check if job already exists in database.
     db = get_database()
-    try:
-        oldjob = db.get_job(tag=tag)
-        oldparents = set(db.get_parents(oldjob.id))
 
-        logger.debug(
-            'Coadd for tile %i is in already-existing job %i',
-            tile, oldjob.id)
-        if never_update:
-            raise JSAProcError(
-                'Cannot add coadd for tile %i task %s. It already exists '
-                'in job %i and updating is turned off!' %
-                (tile, parenttask, oldjob.id))
-    except NoRowsError:
-        logger.debug(
-            'Coadd for tile %i task %s is not already in database',
-            tile, parenttask)
-        oldjob = None
-        oldparents = None
     # Check what current parent values should be.
     try:
         parent_jobs = get_parents(tile, parenttask,
                                   exclude_pointing_jobs=exclude_pointing_jobs,
                                   pointings_only=pointings_only,
                                   science_obs_only=science_obs_only)
-    except JSAProcError:
-        # If no parent jobs could be found, then the job should marked
-        # as deleted if it already exists
-        if oldjob and not dryrun:
-            db.change_state(
-                oldjob.id, JSAProcState.DELETED,
-                'No valid parent jobs found for tile %i;'
-                ' marking job as DELETED', tile)
-            logger.info(
-                'Job %i on tile %i marked as deleted (no valid input jobs)',
-                oldjob.id, tile)
-        if oldjob and dryrun:
-            logger.info(
-                'DRYRUN: Job %i on tile %s would be marked as DELETED',
-                oldjob.id, tile)
-        if oldjob:
-            job_id = oldjob.id
-        else:
-            job_id = None
-        return job_id
+    except NoRowsError:
+        parent_jobs = []
 
-    parents = zip(parent_jobs, [filt] * len(parent_jobs))
-
-    # If the job was previously there, check if the job list/filters are
-    # different, and rewrite if required.
-    if oldparents:
-        oldspars, oldfilts = zip(*oldparents)
-        pars, filts = zip(*parents)
-        if set(pars) != set(oldspars) or set(oldfilts) != set(filts):
-            logger.debug(
-                'Parent/filter list for job %i has changed from '
-                'previous state', oldjob.id)
-
-            # Get lists of added and removed jobs.
-            added_jobs = set(parents).difference(oldparents)
-            removed_jobs = set(oldparents).difference(parents)
-            logger.debug(
-                'Parent jobs %s have been removed from coadd.',
-                str(removed_jobs))
-            logger.debug(
-                'Parent jobs %s have been added to coadd.',
-                str(added_jobs))
-
-            # Replace the parent jobs with updated list
-            pars, filts = zip(*parents)
-            if not dryrun:
-                db.replace_parents(oldjob.id, pars, filters=filts)
-                db.change_state(oldjob.id, JSAProcState.QUEUED,
-                                'Parent job list has been updated;'
-                                ' job reset to QUEUED')
-                job_id = oldjob.id
-                logger.info(
-                    'Coadd job %i towards tile %i updated and reset to QUEUED',
-                    job_id, tile)
-            else:
-                logger.info(
-                    'DRYRUN: job % i towards tile %i would have been'
-                    ' updated and status changed',
-                    oldjob.id, tile)
-                job_id = 0
-        else:
-            logger.debug(
-                'Parent/filter list for job %i towards tile %i is unchanged',
-                oldjob.id, tile)
-            job_id = oldjob.id
-            # Check if last changed time of each parent job is < last
-            # processed time of old job If nothing has changed, check
-            # if the job needs redoing( if any of its parent jobs have
-            # been redone since last time)
-            pass
-    else:
-        # If the job is new, add the job to the database with the list
-        # of parent jobs.
-        pars, filts = zip(*parents)
-        if not dryrun:
-            job_id = db.add_job(tag, location, mode, parameters, coadd_task,
-                                parent_jobs=pars, filters=filts,
-                                priority=priority,
-                                tilelist=[tile])
-            logger.info('coadd job %i towards tile %i has been created',
-                        job_id, tile)
-        else:
-            logger.info(
-                'DRYRUN: coadding job for tile %i would have been created',
-                tile)
-            job_id = 0
-    return job_id
+    # Perform upsert operation and return job ID (or None).
+    return add_upd_del_job(
+        db=db,
+        tag=tag,
+        location=location,
+        mode=mode,
+        parameters=parameters,
+        task=coadd_task,
+        priority=priority,
+        parent_jobs=parent_jobs,
+        filters=([filt] * len(parent_jobs)),
+        tilelist=[tile],
+        allow_upd=(not never_update),
+        allow_del=(not never_update),
+        description='coadd for tile {}'.format(tile),
+        dry_run=dryrun)
 
 
 def get_parents(tile, parenttask, exclude_pointing_jobs=False,
