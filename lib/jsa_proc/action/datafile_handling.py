@@ -117,26 +117,6 @@ def get_jac_input_data(input_file_list):
     return inputsfiles
 
 
-def get_jac_input_data(input_file_list):
-    """
-    Try and assemble data for job, if it is all in the JAC
-    standard tree.
-
-    Raise NotAtJACError if data is not  *all* present at JAC.
-
-    Returns list of file paths if all files are present.
-    """
-
-    inputsfiles = []
-    for f in input_file_list:
-        filepath = file_in_jac_data_dir(f)
-        if not filepath:
-            raise NotAtJACError(f)
-        else:
-            inputsfiles.append(filepath)
-    return inputsfiles
-
-
 def write_input_list(job_id, input_file_list):
     """
     Write a textfile to list in the input directory
