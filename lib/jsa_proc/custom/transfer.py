@@ -134,11 +134,7 @@ class CustomJobTransfer(object):
                         file_path, vos_file))
 
             else:
-                if vos_client.isdir(vos_dir):
-                    logger.debug('VOS directory {0} exists'.format(vos_dir))
-                else:
-                    logger.info('Making VOS directory {0}'.format(vos_dir))
-                    vos_client.mkdir(vos_dir)
+                self.make_vos_directory(vos_client, vos_dir)
 
                 if vos_client.isfile(vos_file):
                     logger.debug('Deleting existing file {0}'.format(vos_file))
@@ -146,6 +142,26 @@ class CustomJobTransfer(object):
 
                 logger.info('Storing {0} as {1}'.format(file_path, vos_file))
                 vos_client.copy(file_path, vos_file)
+
+    def make_vos_directory(self, vos_client, vos_dir):
+        """
+        Recursively make a VOS directory, doing nothing if it already
+        exists.
+        """
+
+        if vos_client.isdir(vos_dir):
+            logger.debug('VOS directory {0} exists'.format(vos_dir))
+        else:
+            # Get parent directory and ensure it exists.
+            dir_parts = vos_dir.rsplit('/', 1)
+            if len(dir_parts) != 2:
+                raise Exception('Cannot make top level VOS directory')
+
+            self.make_vos_directory(vos_client, dir_parts[0])
+
+            # Now create the requested directory.
+            logger.info('Making VOS directory {0}'.format(vos_dir))
+            vos_client.mkdir(vos_dir)
 
     def determine_vos_directory(self, transdir, filename):
         # This method must be overridden by subclasses.
