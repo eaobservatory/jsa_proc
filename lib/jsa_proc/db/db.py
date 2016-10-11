@@ -1528,7 +1528,7 @@ class JSAProcDB:
 
         with self.db as c:
             c.execute('SELECT id, message, username FROM note '
-                      'WHERE job_id=%s'
+                      'WHERE job_id=%s '
                       'ORDER BY id DESC', (job_id,))
 
             while True:
