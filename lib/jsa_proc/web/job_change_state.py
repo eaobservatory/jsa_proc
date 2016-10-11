@@ -20,6 +20,13 @@ from jsa_proc.qa_state import JSAQAState
 from jsa_proc.web.util import url_for, ErrorPage
 
 
+def prepare_add_note(db, job_id, message, username):
+    if message == '':
+        raise ErrorPage('The note is empty!')
+
+    db.add_note(job_id, message, username)
+
+
 def prepare_change_state(db, job_ids, newstate, state_prev, message, username):
     if not JSAProcState.is_valid(newstate):
         raise ErrorPage('Unknown state %s' % (newstate))

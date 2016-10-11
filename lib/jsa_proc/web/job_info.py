@@ -95,6 +95,9 @@ def prepare_job_info(db, job_id, query):
     # Get the log files on disk (if any)
     log_files = get_log_files(job_id)
 
+    # Get notes.
+    notes = db.get_notes(job_id)
+
     # If we know what the user's job query was (from the session information)
     # then set up pagination based on the previous and next job identifiers.
     if query is not None:
@@ -122,6 +125,7 @@ def prepare_job_info(db, job_id, query):
         'info': info,
         'tiles': tiles,
         'log': log,
+        'notes': notes,
         'input_files': input_files,
         'parents': parents,
         'children': children,

@@ -236,6 +236,36 @@
     Please log in to change the job state.
 </p>
 {% endif %}
+
+<h2>Notes</h2>
+
+{% if notes %}
+<table>
+<tr>
+    <th>User</th>
+    <th>Note</th>
+</tr>
+{% for note in notes %}
+    <tr>
+        <td>{{ note.username }}</td>
+        <td>{{ note.message }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% if request.authorization and request.authorization.username %}
+<div class="addnote">
+<form method="POST" action="{{ url_for('job_add_note', job_id=info.id) }}">
+    <textarea rows="2" name="message" placeholder="Write note text here."></textarea>
+  <input type="submit" value="Add Note"/>
+</form>
+</div>
+{% else %}
+<p>
+    Please log in to add a note.
+</p>
+{% endif %}
 </div>
 
 {% if log_files %}

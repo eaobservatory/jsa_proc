@@ -309,11 +309,11 @@ th {
     box-shadow: 0px 0px 10px 5px white, 0px 0px 20px 10px yellow;
 }
 
-div.changestate {
+div.changestate, div.addnote {
     text-align: center;
 }
 
-div.changestate select, .changestate input {
+div.changestate select, div.changestate input, div.addnote input {
     vertical-align: top;
     text-align: center;
 }

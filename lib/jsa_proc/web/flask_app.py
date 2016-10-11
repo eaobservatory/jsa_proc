@@ -35,8 +35,8 @@ from jsa_proc.web.util import \
     ErrorPage, error_page_response
 
 from jsa_proc.web.job_list import prepare_job_list
-from jsa_proc.web.job_change_state import prepare_change_state, \
-    prepare_change_qa
+from jsa_proc.web.job_change_state import prepare_add_note, \
+    prepare_change_state, prepare_change_qa
 from jsa_proc.web.job_summary import prepare_job_summary, \
     prepare_task_summary, prepare_summary_piechart, \
     prepare_task_qa_summary
@@ -205,6 +205,23 @@ def create_web_app():
     @templated('job_qa.html')
     def job_qa(job_id):
         return prepare_job_qa_info(db, job_id, session.get('job_query'))
+
+    @app.route('/job/<int:job_id>/add_note', methods=['POST'])
+    @requires_auth
+    def job_add_note(job_id):
+        message = request.form['message']
+        username = request.authorization['username']
+
+        try:
+            # Add the note.
+            prepare_add_note(db, job_id, message, username)
+
+            # Redirect back to the job info page.
+            flash('The note has been saved.')
+            raise HTTPRedirect(url_for('job_info', job_id=job_id))
+
+        except ErrorPage as err:
+            return error_page_response(err)
 
     @app.route('/job_change_state', methods=['POST'])
     @requires_auth
