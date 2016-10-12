@@ -79,9 +79,13 @@ def prepare_job_qa_info(db, job_id, query):
     except NoRowsError:
         children = None
 
+    if info['task'] == 'lap-transient':
+        preview_filter = None
+    else:
+        preview_filter = ['_reduced-', '_healpix-', '_extent-', '_peak-']
+
     (output_files, previews1024, _) = \
-        make_output_file_list(db, job.id, preview_filter=[
-            '_reduced-', '_healpix-', '_extent-', '_peak-'])
+        make_output_file_list(db, job.id, preview_filter=preview_filter)
 
     obs_info = db.get_obs_info(job.id)
 
@@ -124,7 +128,7 @@ def prepare_job_qa_info(db, job_id, query):
     # images, show the preview image from the 1st parent job.
     if '-cat' in info['task'] and previews1024 == []:
         (_, previews1024, _) = make_output_file_list(
-            db, parents.keys()[0], preview_filter='previews_1024.png')
+            db, parents.keys()[0])
         nopreview = True
     else:
         nopreview = False
