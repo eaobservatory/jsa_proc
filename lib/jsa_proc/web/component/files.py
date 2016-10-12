@@ -23,6 +23,7 @@ from jsa_proc.error import NoRowsError
 from jsa_proc.web.util import url_for
 
 FileInfo = namedtuple('FileInfo', ['name', 'url', 'mtype'])
+PreviewInfo = namedtuple('PreviewInfo', ['url', 'caption'])
 
 
 def make_output_file_list(db, job_id, preview_filter=None):
@@ -36,13 +37,20 @@ def make_output_file_list(db, job_id, preview_filter=None):
     try:
         for i in db.get_output_files(job_id):
             if preview_filter is None or any((f in i for f in preview_filter)):
-                if 'preview_256.png' in i:
-                    previews256.append(
-                        url_for('job_preview', job_id=job_id, preview=i))
+                if i.endswith('.png'):
+                    caption = i
+                    caption = re.sub('^jcmt_', '', caption)
+                    caption = re.sub('_(preview_)?\d+\.png', '', caption)
 
-                if 'preview_1024.png' in i:
-                    previews1024.append(
-                        url_for('job_preview', job_id=job_id, preview=i))
+                    if '_256.png' in i:
+                        previews256.append(PreviewInfo(
+                            url_for('job_preview', job_id=job_id, preview=i),
+                            caption))
+
+                    if '_1024.png' in i:
+                        previews1024.append(PreviewInfo(
+                            url_for('job_preview', job_id=job_id, preview=i),
+                            caption))
 
             if i.endswith('.fits'):
                 url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)

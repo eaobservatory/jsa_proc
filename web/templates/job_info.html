@@ -59,7 +59,7 @@
 <div class="panel panel-small">
 <div class="preview">
   <figure>
-    <a href="{{ previews[0][1] }}"><img src="{{ previews[0][0] }}" /></a>
+    <a href="{{ previews[0][1].url }}"><img src="{{ previews[0][0].url }}" /></a>
     <figcaption> {% if previews|length >1 %}
       First  Preview (click to embiggen) <br> <a href="#previews">link to others</a>
       {% else %}
@@ -292,8 +292,8 @@
 {% for l in previews %}
     <div class="panel preview">
       <figure>
-        <a href="{{ l[1] }}"><img src="{{ l[0] }}" /></a>
-        <figcaption>{{ break_underscore(l[0].split('_preview_')[0].split('jcmt_')[1]) }}</figcaption>
+        <a href="{{ l[1].url }}"><img src="{{ l[0].url }}" /></a>
+        <figcaption>{{ break_underscore(l[0].caption) }}</figcaption>
       </figure>
     </div>
 {% endfor %}

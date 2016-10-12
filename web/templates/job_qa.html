@@ -280,11 +280,11 @@
 <div class="column-right">
   {% for l in previews %}
   <div class="panel preview">
-    <h4>{{ break_underscore(l[0].split('_preview_')[0].split('jcmt_')[1]) }}</h4>
+    <h4>{{ break_underscore(l[0].caption) }}</h4>
     {% if info['task']=='hpx-s2-850-r1-cat' and nopreview %}
     <h4> No detections found: showing parent job previews </h4>
     {% endif %}
-    <a href="{{ l[0] }}"><img src="{{ l[0] }}" /></a>
+    <a href="{{ l[0].url }}"><img src="{{ l[0].url }}" /></a>
   </div>
   {% endfor %}
 </div>
