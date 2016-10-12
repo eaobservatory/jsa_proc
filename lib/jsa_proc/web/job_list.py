@@ -37,7 +37,7 @@ def prepare_job_list(db, page, **kwargs):
 
     jobs = []
 
-    for job in db.find_jobs(outputs='%preview_64.png',
+    for job in db.find_jobs(outputs='%_64.png',
                             offset=(number * page),
                             **job_query):
         if job.outputs:
