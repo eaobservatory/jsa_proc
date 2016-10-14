@@ -202,6 +202,12 @@ def _etransfer_send(job_id, dry_run, db, force):
     except NoRowsError:
         raise CommandError('No output files found for job {0}'.format(job_id))
 
+    logger.debug('Checking that the MD5 sum for each file is defined')
+    for info in file_info:
+        if info.md5 is None:
+            raise CommandError('File {0} MD5 sum is missing from database'.
+                               format(info.filename))
+
     logger.debug('Checking that all files are present')
     outdir = get_output_dir(job_id)
     for file in files:
