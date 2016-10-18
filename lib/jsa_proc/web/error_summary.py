@@ -23,7 +23,8 @@ from jsa_proc.web.util import url_for
 
 
 def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
-                          extrafilter=None, state_prev=None, filter_done=True):
+                          extrafilter=None, state_prev=None, error_state=None,
+                          filter_done=True):
     """
     Prepare a summary of all jobs in error state.
 
@@ -45,6 +46,10 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
     if state_prev == '':
         state_prev = None
 
+    # Check error_state parameter
+    if error_state == '' or error_state is None:
+        error_state = JSAProcState.ERROR
+
     # Fixup the extrafilter parameter.
     if extrafilter is None or extrafilter == '':
         extrafilter = None
@@ -64,7 +69,8 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
     if filter_done:
         for l in locations:
             error_dict[l] = db.find_errors_logs(location=l, task=chosentask,
-                                                state_prev=state_prev)
+                                                state_prev=state_prev,
+                                                error_state=error_state)
 
             if error_filter is not None:
                 error_filter(error_dict[l])
@@ -75,12 +81,13 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
         'title': 'Errors in JSA Processing Jobs',
         'job_summary_dict': error_dict,
         'states': JSAProcState.STATE_ALL,
-        'state_prev': JSAProcState.ERROR,
+        'error_states': JSAProcState.STATE_ERROR,
         'filtering': filtering,
         'filtering_options': JSAProcErrorFilter.filter_names,
         'tasks': tasks,
         'chosentask': chosentask,
         'extrafilter': extrafilter,
         'chosen_state_prev': state_prev,
+        'chosen_error_state': error_state,
         'redirect_url': redirect_url,
     }

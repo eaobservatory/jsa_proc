@@ -79,6 +79,9 @@ class JSAProcState:
 
     STATE_FINAL = set((s for (s, i) in _info.items() if i.final))
 
+    # Final states other than complete presumably indicate a problem.
+    STATE_ERROR = [s for (s, i) in _info.items() if i.final and s != COMPLETE]
+
     @classmethod
     def get_name(cls, state):
         """Return the human-readable name of the state.

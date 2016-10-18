@@ -912,7 +912,8 @@ class JSAProcDB:
                           'VALUES (%s, %s, %s)',
                           (job_id, f.filename, f.md5))
 
-    def find_errors_logs(self, location=None, task=None, state_prev=None):
+    def find_errors_logs(self, location=None, task=None, state_prev=None,
+                         error_state=JSAProcState.ERROR):
         """
         Retrieve list of all jobs in an error state, together with their logs.
 
@@ -929,7 +930,7 @@ class JSAProcDB:
         query = 'SELECT job.id, log.datetime, log.message, log.state_new, ' \
                 'job.location  FROM job JOIN log ON job.id=log.job_id'
         query += ' WHERE job.state=%s'
-        param = [JSAProcState.ERROR]
+        param = [error_state]
 
         if location is not None:
             query += ' AND job.location=%s '

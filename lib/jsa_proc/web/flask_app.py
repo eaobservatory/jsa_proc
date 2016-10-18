@@ -193,6 +193,7 @@ def create_web_app():
             chosentask=request.args.get('chosentask', None),
             extrafilter=request.args.get('extrafilter', None),
             state_prev=request.args.get('state_prev', None),
+            error_state=request.args.get('error_state', None),
             filter_done=('submit_filter' in request.args),
         )
 

@@ -23,6 +23,11 @@
     <option value="{{ t }}" {{ 'selected="selected"' | safe if chosentask == t }}> {{ t }} </option>
     {% endfor %}
   </select>
+  <select name="error_state">
+    {% for s in error_states %}
+    <option value="{{ s }}" {{ 'selected="selected"' | safe if chosen_error_state == s }}>{{ s | state_name }}</option>
+    {% endfor %}
+  </select>
   <input type="text" placeholder="additional filter" value="{{extrafilter}}" name="extrafilter"/>
   <input type="submit" value="Filter" name="submit_filter" />
 </form>
@@ -72,7 +77,7 @@
   </p>
 
   <input type="hidden" name="url" value="{{ redirect_url }}">
-  <input type="hidden" name="state_prev" value="{{ state_prev }}" />
+  <input type="hidden" name="state_prev" value="{{ chosen_error_state }}" />
   <input type="submit" value="Submit">
   {% else %}
       <p>
