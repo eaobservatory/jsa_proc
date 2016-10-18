@@ -40,7 +40,7 @@ JSAProcJobInfo = namedtuple(
     'id tag state location foreign_id task qa_state outputs')
 JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
-    'id time message state location')
+    'id time message state state_prev location')
 JSAProcFileInfo = namedtuple(
     'FileInfo',
     'filename md5')
@@ -928,7 +928,8 @@ class JSAProcDB:
         """
 
         query = 'SELECT job.id, log.datetime, log.message, log.state_new, ' \
-                'job.location  FROM job JOIN log ON job.id=log.job_id'
+                'log.state_prev, job.location '\
+                'FROM job JOIN log ON job.id=log.job_id'
         query += ' WHERE job.state=%s'
         param = [error_state]
 

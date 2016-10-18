@@ -18,6 +18,7 @@ from __future__ import absolute_import, division
 import operator
 
 from jsa_proc.error import JSAProcError
+from jsa_proc.state import JSAProcState
 
 
 class JSAProcErrorFilter():
@@ -49,7 +50,7 @@ class JSAProcErrorFilter():
 
     filter_names = sorted(filters.keys()) + ['uncategorized']
 
-    def __init__(self, filter_name, extrafilter=None):
+    def __init__(self, filter_name, extrafilter=None, state_prev=None):
         """Create error filter object.
 
         Parameters:
@@ -75,6 +76,8 @@ class JSAProcErrorFilter():
         else:
             self.additional = []
 
+        self.state_prev = state_prev
+
     def __call__(self, job_logs):
         """Apply filter to a dictionary of jobs and their errors.
 
@@ -82,17 +85,37 @@ class JSAProcErrorFilter():
         those jobs which do not match the filter.
         """
 
+        # Return immediately if there is nothing to do.
+        if not (self.include or self.additional or self.state_prev):
+            return
+
         # Iterate over a copy of the list of items because in Python 3 items
         # is an iterator, which we can't use while popping entries out of
         # the dictionary.
         for (job, log) in list(job_logs.items()):
-            if self.include == []:
-                self.include = log[0].message
-            if not (any([i in log[0].message for i in self.include])
-                    and not any([i in log[0].message for i in self.exclude])):
+            # Look through the job's log until we find the first (assumed
+            # to be most recent) error.
+            for log_entry in log:
+                if log_entry.state == JSAProcState.ERROR:
+                    break
+            else:
+                # Didn't find an error state: remove this job.
                 job_logs.pop(job)
+                continue
 
-        for (job, log) in list(job_logs.items()):
-            if self.additional:
-                if not any([i in log[0].message for i in self.additional]):
+            if self.include:
+                if not (any([i in log_entry.message for i in self.include])
+                        and not
+                        any([i in log_entry.message for i in self.exclude])):
                     job_logs.pop(job)
+                    continue
+
+            if self.additional:
+                if not any([i in log_entry.message for i in self.additional]):
+                    job_logs.pop(job)
+                    continue
+
+            if self.state_prev:
+                if log_entry.state_prev != self.state_prev:
+                    job_logs.pop(job)
+                    continue

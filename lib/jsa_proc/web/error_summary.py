@@ -54,11 +54,12 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
     if extrafilter is None or extrafilter == '':
         extrafilter = None
 
-    # Prepare a filter based on last error messgae for each ID.
-    if filtering is None or filtering == '':
-        error_filter = None
-
-    error_filter = JSAProcErrorFilter(filtering, extrafilter=extrafilter)
+    # Prepare a filter based on last error message for each ID.  Include
+    # the "state_prev" constraint if not looking for jobs currently in the
+    # error state.
+    error_filter = JSAProcErrorFilter(
+        filtering, extrafilter=extrafilter,
+        state_prev=(None if error_state == JSAProcState.ERROR else state_prev))
 
     if chosentask is None or chosentask == '':
         chosentask = None
@@ -68,12 +69,15 @@ def prepare_error_summary(db, redirect_url, filtering=None, chosentask=None,
     error_dict = OrderedDict()
     if filter_done:
         for l in locations:
-            error_dict[l] = db.find_errors_logs(location=l, task=chosentask,
-                                                state_prev=state_prev,
-                                                error_state=error_state)
+            # Find jobs in the desired "error" state, leaving state_prev
+            # filtering to the error filter if this state isn't ERROR.
+            error_dict[l] = db.find_errors_logs(
+                location=l, task=chosentask,
+                state_prev=(state_prev if error_state == JSAProcState.ERROR
+                            else None),
+                error_state=error_state)
 
-            if error_filter is not None:
-                error_filter(error_dict[l])
+            error_filter(error_dict[l])
 
     if extrafilter is None:
         extrafilter = ''
