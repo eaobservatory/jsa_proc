@@ -205,14 +205,31 @@
 <div id="pane-log">
 {% if log %}
 <div class="panel">
-<h2>Logs</h2>
+{% if notes %}
+<h2>Notes</h2>
+
+<table>
+<tr>
+    <th>User</th>
+    <th>Note</th>
+</tr>
+{% for note in notes %}
+    <tr>
+        <td>{{ note.username }}</td>
+        <td>{{ note.message }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+
+<h2>Log</h2>
 <table>
 {{ log_table(log) }}
 </table>
 {% endif %}
 
 <!-- Allow users to change state of job. -->
-<h3> Change the state of this Job </h3>
+<h3>Change the state of this job</h3>
 
 {% if request.authorization and request.authorization.username %}
 <div class="changestate">
@@ -237,22 +254,8 @@
 </p>
 {% endif %}
 
-<h2>Notes</h2>
-
-{% if notes %}
-<table>
-<tr>
-    <th>User</th>
-    <th>Note</th>
-</tr>
-{% for note in notes %}
-    <tr>
-        <td>{{ note.username }}</td>
-        <td>{{ note.message }}</td>
-    </tr>
-{% endfor %}
-</table>
-{% endif %}
+<!-- Allow users to add notes to this job. -->
+<h3>Add a note to this job</h3>
 
 {% if request.authorization and request.authorization.username %}
 <div class="addnote">
