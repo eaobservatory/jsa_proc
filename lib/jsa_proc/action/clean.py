@@ -27,19 +27,29 @@ from jsa_proc.state import JSAProcState
 logger = logging.getLogger(__name__)
 
 
-def clean_input(count=None, dry_run=False):
+def clean_input(count=None, dry_run=False,
+                task=None, include_error=False, include_processed=False):
     """Delete input directories for processed jobs."""
 
     logger.debug('Beginning input clean')
 
+    states = [
+        JSAProcState.INGESTION,
+        JSAProcState.COMPLETE,
+        JSAProcState.DELETED,
+        JSAProcState.WONTWORK,
+    ]
+
+    if include_error:
+        states.append(JSAProcState.ERROR)
+
+    if include_processed:
+        states.append(JSAProcState.PROCESSED)
+
     _clean_job_directories(
         get_input_dir,
-        [
-            JSAProcState.INGESTION,
-            JSAProcState.COMPLETE,
-            JSAProcState.DELETED,
-            JSAProcState.WONTWORK,
-        ],
+        states,
+        task=task,
         count=count,
         dry_run=dry_run)
 
