@@ -307,11 +307,13 @@ def prepare_job_summary(db, task=None, date_min=None, date_max=None):
         processed_jobs_found = 0
     # Title
     title = 'Summary of All jobs'
+    task_info = None
     if task:
         title = task + ' Summary'
-        task_info = db.get_task_info(task)
-    else:
-        task_info = None
+        try:
+            task_info = db.get_task_info(task)
+        except NoRowsError:
+            pass
     # Observations.
 
     return {
