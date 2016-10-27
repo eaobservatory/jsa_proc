@@ -61,12 +61,10 @@
 	<!-- e.g. JCMTH20070515_00021_01_REDUCED002_NIT_000 - tile 2 of a composite observation from a night product -->
 	<!-- comment out the complete version of the name 2007-11-27
 	   <value>JCMT(H|S)(20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_(0[0-4]|[48]50)_(CUBE[\d]{3}|REDUCED[\d]{3}|RIMG|RSP|RVEL|LINTEG[\d]{3}|SP[\d]{3}|STD)_(OBS|NIT|PRO|PUB)_([\d]{3})</value>
-	   For the moment we will accept only cube, reduced, rimg and rsp products for obs and nit associations by e-transfer.
-	   CUBE files exist only as ACSIS obs products with version=000.
+	   For the moment we will accept only reduced, rimg and rsp products for obs and nit associations by e-transfer.
 	   RIMG and RSP are only valid as ACSIS products.
 	   REDUCED files are produced for both ACSIS and SCUBA-2.
 	-->
-	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_CUBE[\d]{3}_OBS_000</value>
 	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_(RIMG|RSP)_(OBS|NIT|PRO)_([\d]{3})</value>
 	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED[\d]{3}|HEALPIX[\d]{6}|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})</value>
 	<!-- ACSIS and SCUBA2 CAOM2 thumbnails -->
@@ -77,9 +75,9 @@
         <!--  -->
         <!--  -->
         <value>JCMT(|LS|USER)_([\w]+)-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(((ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9]))|(([\w]+)-([\w]+)))_(CUBE|RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-([\d]{6}MHZ)-(1000MHZX1024|1000MHZX2048|160MHZX1024|160MHZX128|160MHZX2048|160MHZX256|160MHZX512|1899MHZX1945|1948MHZX1995|1GHZX2048|250MHZX4096|250MHZX8192|450MHZX7371|490MHZX8027)-([\d])_PREVIEW_(64|256|1024)</value>
+        <value>JCMT(|LS|USER)_(((ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9]))|(([\w]+)-([\w]+)))_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-([\d]{6}MHZ)-(1000MHZX1024|1000MHZX2048|160MHZX1024|160MHZX128|160MHZX2048|160MHZX256|160MHZX512|1899MHZX1945|1948MHZX1995|1GHZX2048|250MHZX4096|250MHZX8192|450MHZX7371|490MHZX8027)-([\d])_PREVIEW_(64|256|1024)</value>
         <value>JCMT(|LS|USER)_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9])_(CUBE|RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-(450|850)UM_PREVIEW_(64|256|1024)</value>
+        <value>JCMT(|LS|USER)_(ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9])_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-(450|850)UM_PREVIEW_(64|256|1024)</value>
         <!-- SCUBA-2 public products -->
         <!-- template JCMTSSUBSYSNR_PRODUCTTILENUMBER_PUB_VERSION -->
         <value>JCMTS([48]50)UM_(HEALPIX|TILE-MOC|EXTENT-MOC|EXTENT-MASK|EXTENT-CAT|PEAK-CAT)([\d]{6})_PUB_([\d]{3})</value>
