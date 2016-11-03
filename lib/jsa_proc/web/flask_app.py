@@ -346,7 +346,7 @@ def create_web_app():
                     obsquery={'project': p}, task='jcmt-nightly')
                 projdict[p] = [
                     len(jobs),
-                    sum(1 for j in jobs if j.state == JSAPROCState.ERROR),
+                    sum(1 for j in jobs if j.state == JSAProcState.ERROR),
                     sum(1 for j in jobs if j.qa_state == JSAQAState.BAD),
                     sum(1 for j in jobs if j.qa_state == JSAQAState.QUESTIONABLE),
                     sum(1 for j in jobs if j.qa_state == JSAQAState.UNKNOWN),
