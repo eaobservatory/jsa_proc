@@ -337,6 +337,42 @@ class InterfaceDBTest(DBTestCase):
         # Check that the state was reset to UNKNOWN.
         self.assertEqual(job.state, JSAProcState.UNKNOWN)
 
+    def test_set_mode(self):
+        """
+        Test setting the mode of a job.
+        """
+
+        job_id = self.db.add_job('test_sm', 'JAC', 'obs', '', 'testtask',
+                                 input_file_names=['file1', 'file2'])
+
+        job = self.db.get_job(id_=job_id)
+
+        self.assertEqual(job.mode, 'obs')
+
+        self.db.set_mode(job_id, 'night')
+
+        job = self.db.get_job(id_=job_id)
+
+        self.assertEqual(job.mode, 'night')
+
+    def test_set_paramters(self):
+        """
+        Test setting the parameters of a job.
+        """
+
+        job_id = self.db.add_job('test_sp', 'JAC', 'obs', 'R_P_X', 'testtask',
+                                 input_file_names=['file1', 'file2'])
+
+        job = self.db.get_job(id_=job_id)
+
+        self.assertEqual(job.parameters, 'R_P_X')
+
+        self.db.set_parameters(job_id, 'R_P_Y')
+
+        job = self.db.get_job(id_=job_id)
+
+        self.assertEqual(job.parameters, 'R_P_Y')
+
     def test_set_input_files(self):
         """
         Test setting input files for a job.

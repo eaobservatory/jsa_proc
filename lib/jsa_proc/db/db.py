@@ -833,6 +833,24 @@ class JSAProcDB:
             c.execute('UPDATE job SET foreign_id = %s WHERE id = %s',
                       (foreign_id, job_id))
 
+    def set_mode(self, job_id, mode):
+        """
+        Update the mode of a job.
+        """
+
+        with self.db as c:
+            c.execute('UPDATE job SET mode = %s WHERE id = %s',
+                      (mode, job_id))
+
+    def set_parameters(self, job_id, parameters):
+        """
+        Update the parameters of a job.
+        """
+
+        with self.db as c:
+            c.execute('UPDATE job SET parameters = %s WHERE id = %s',
+                      (parameters, job_id))
+
     def get_date_range(self, task=None):
         """
         Get the minimum and maximum utdate for
