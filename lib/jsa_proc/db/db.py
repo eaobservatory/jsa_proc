@@ -295,10 +295,7 @@ class JSAProcDB:
 
             # Add input file names to input_file table.
             if input_file_names:
-                for filename in input_file_names:
-                    c.execute('INSERT INTO input_file (job_id, filename) '
-                              'VALUES (%s, %s)',
-                              (job_id, filename))
+                self._set_input_files(c, job_id, input_file_names)
 
             # Log the job creation
             self._add_log_entry(c, job_id, JSAProcState.UNKNOWN, state,
@@ -616,6 +613,24 @@ class JSAProcDB:
         input_files = [file for i in input_files for file in i]
 
         return input_files
+
+    def set_input_files(self, job_id, input_files):
+        """
+        Set the list of input files for a specific job.
+        """
+
+        with self.db as c:
+            self._set_input_files(c, job_id, input_files)
+
+    def _set_input_files(self, c, job_id, input_files):
+        # Remove any current input files for this job_id.
+        c.execute('DELETE FROM input_file WHERE job_id = %s', (job_id,))
+
+        # Insert the new input file records.
+        for filename in input_files:
+            c.execute('INSERT INTO input_file (job_id, filename) '
+                      'VALUES (%s, %s)',
+                      (job_id, filename))
 
     def _add_log_entry(self, c, job_id, state_prev, state_new, message,
                        username):
