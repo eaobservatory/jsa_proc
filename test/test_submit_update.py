@@ -51,7 +51,7 @@ class SubmitUpdateTest(DBTestCase):
             'tag': 'tag-c-1',
             'location': 'LOC',
             'mode': 'public',
-            'parameters': 'PARAM',
+            'parameters': 'PARAM-C1',
             'task': 'task-coadd',
             'priority': 50,
             'parent_jobs': [job_1, job_2],
@@ -69,7 +69,7 @@ class SubmitUpdateTest(DBTestCase):
         self.assertEqual(
             [job.id, job.tag, job.location, job.mode, job.parameters,
              job.priority, job.task, job.state],
-            [job_id, 'tag-c-1', 'LOC', 'public', 'PARAM', 50, 'task-coadd',
+            [job_id, 'tag-c-1', 'LOC', 'public', 'PARAM-C1', 50, 'task-coadd',
              JSAProcState.UNKNOWN])
 
         self._compare_job(job_id, JSAProcState.UNKNOWN, [], [job_1, job_2])
@@ -84,8 +84,6 @@ class SubmitUpdateTest(DBTestCase):
 
         self.assertEqual(job_id_upd, job_id)
 
-        self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
-
         # Try updating child job: change parents.  State should be reset.
         kwargs['parent_jobs'] = [job_1, job_3]
 
@@ -97,6 +95,42 @@ class SubmitUpdateTest(DBTestCase):
         self.assertEqual(job_id_upd, job_id)
 
         self._compare_job(job_id, JSAProcState.UNKNOWN, [], [job_1, job_3])
+
+        self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
+
+        # Test updating child job: change mode.
+        kwargs['mode'] = 'project'
+
+        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+            add_upd_del_job(allow_upd=False, **kwargs)
+
+        job_id_upd = add_upd_del_job(**kwargs)
+
+        self.assertEqual(job_id_upd, job_id)
+
+        job = self._compare_job(
+            job_id, JSAProcState.UNKNOWN, [], [job_1, job_3])
+
+        self.assertEqual(job.mode, 'project')
+        self.assertEqual(job.parameters, 'PARAM-C1')
+
+        self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
+
+        # Test updating child job: change parameters.
+        kwargs['parameters'] = 'PARAM-C2'
+
+        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+            add_upd_del_job(allow_upd=False, **kwargs)
+
+        job_id_upd = add_upd_del_job(**kwargs)
+
+        self.assertEqual(job_id_upd, job_id)
+
+        job = self._compare_job(
+            job_id, JSAProcState.UNKNOWN, [], [job_1, job_3])
+
+        self.assertEqual(job.mode, 'project')
+        self.assertEqual(job.parameters, 'PARAM-C2')
 
         # Try deleting a job: set empty parents list.
         kwargs['parent_jobs'] = []
@@ -115,6 +149,8 @@ class SubmitUpdateTest(DBTestCase):
     def _compare_job(self, job_id, state, input_files, parents):
         """
         Private method to compare a job record with expected values.
+
+        Return the job object to allow the caller to make additional tests.
         """
 
         job = self.db.get_job(job_id)
@@ -134,3 +170,5 @@ class SubmitUpdateTest(DBTestCase):
         else:
             with self.assertRaises(NoRowsError):
                 self.db.get_parents(job_id)
+
+        return job

@@ -23,7 +23,7 @@ from ..error import JSAProcError, NoRowsError
 from ..state import JSAProcState
 
 UpdateAction = namedtuple(
-    'UpdateAction', ('parents',))
+    'UpdateAction', ('parents', 'mode', 'parameters'))
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,6 @@ def add_upd_del_job(
 
     # TODO: support file-based jobs as well as than parent-based jobs.
     # (And jobs which use both?)
-
-    # TODO: update job parameters if they have changed.
 
     if description is None:
         description = '{} job tagged {}'.format(task, tag)
@@ -150,6 +148,22 @@ def add_upd_del_job(
             'Parent jobs %s have been added to coadd.',
             str(added_jobs))
 
+    # Check for change to mode.
+    if mode != oldjob.mode:
+        update = update._replace(mode=True)
+
+        logger.debug(
+            'Mode for job %i has changed from %s to %s',
+            oldjob.id, oldjob.mode, mode)
+
+    # Check for change to parameters.
+    if parameters != oldjob.parameters:
+        update = update._replace(parameters=True)
+
+        logger.debug(
+            'Parameters for job %i have changed from "%s" to "%s"',
+            oldjob.id, oldjob.parameters, parameters)
+
     if not any(update):
         logger.debug(
             'Settings for job %i (%s) are unchanged',
@@ -177,6 +191,12 @@ def add_upd_del_job(
         if update.parents:
             # Replace the parent jobs with updated list
             db.replace_parents(oldjob.id, parent_jobs, filters=filters)
+
+        if update.mode:
+            db.set_mode(oldjob.id, mode)
+
+        if update.parameters:
+            db.set_parameters(oldjob.id, parameters)
 
         # Reset the job status and issue logging info.
         db.change_state(oldjob.id, JSAProcState.UNKNOWN,
