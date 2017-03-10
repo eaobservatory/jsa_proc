@@ -79,7 +79,8 @@ class SubmitUpdateTest(DBTestCase):
         self._compare_job(job_id, JSAProcState.COMPLETE, [], [job_1, job_2])
 
         # Try updating child job: no change.
-        job_id_upd = add_upd_del_job(**kwargs)
+        job_id_upd = add_upd_del_job(
+            allow_add=False, allow_upd=False, allow_del=False, **kwargs)
 
         self.assertEqual(job_id_upd, job_id)
 

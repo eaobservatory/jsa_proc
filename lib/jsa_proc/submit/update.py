@@ -104,13 +104,12 @@ def add_upd_del_job(
 
         return oldjob.id
 
-    parents = zip(parent_jobs, filters)
-
     # If the job was previously there, check if the job list/filters are
     # different, and rewrite if required.
     if oldjob is not None:
-        oldspars, oldfilts = zip(*oldparents)
-        if set(parent_jobs) != set(oldspars) or set(oldfilts) != set(filters):
+        parents = set(zip(parent_jobs, filters))
+
+        if parents != oldparents:
             logger.debug(
                 'Parent/filter list for job %i has changed from '
                 'previous state', oldjob.id)
@@ -122,7 +121,7 @@ def add_upd_del_job(
                     (description, oldjob.id))
 
             # Get lists of added and removed jobs.
-            added_jobs = set(parents).difference(oldparents)
+            added_jobs = parents.difference(oldparents)
             removed_jobs = oldparents.difference(parents)
             logger.debug(
                 'Parent jobs %s have been removed from coadd.',
