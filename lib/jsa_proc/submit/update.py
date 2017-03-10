@@ -92,7 +92,7 @@ def add_upd_del_job(
             db.change_state(
                 oldjob.id, JSAProcState.DELETED,
                 'No valid parent jobs found for %s;'
-                ' marking job as DELETED', description)
+                ' marking job as DELETED' % (description,))
             logger.info(
                 'Job %i for %s marked as deleted'
                 ' (no valid input jobs)',
