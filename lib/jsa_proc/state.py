@@ -1,4 +1,5 @@
-# Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2014-2015 Science and Technology Facilities Council.
+# Copyright (C) 2016-2017 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@ class JSAProcState:
         (WAITING,      StateInfo('Waiting',              PHASE_FETCH,    False, True,  False)),
         (RUNNING,      StateInfo('Running',              PHASE_RUN,      True,  None,  False)),
         (PROCESSED,    StateInfo('Processed',            PHASE_RUN,      False, False, False)),
-        (TRANSFERRING, StateInfo('Transferring',         PHASE_RUN,      False, False, False)),
+        (TRANSFERRING, StateInfo('Transferring',         PHASE_RUN,      True,  False, False)),
         (INGEST_QUEUE, StateInfo('Queued to reingest',   PHASE_RUN,      False, False, False)),
         (INGEST_FETCH, StateInfo('Fetching to reingest', PHASE_RUN,      True,  False, False)),
         (INGESTION,    StateInfo('Waiting to ingest',    PHASE_RUN,      False, False, False)),
