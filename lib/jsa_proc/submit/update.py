@@ -73,15 +73,33 @@ def add_upd_del_job(
     except NoRowsError:
         logger.debug(
             '%s is not already in database', description)
-        oldjob = None
-        oldparents = None
+
+        if not parent_jobs:
+            # If no parent jobs specified, do nothing (to retain old behavior).
+            return None
+
+        # If the job is new, add the job to the database with the list
+        # of parent jobs.
+        if not allow_add:
+            raise JSAProcError(
+                'Cannot add %s. It doesn\'t already exist '
+                'and adding is turned off!' %
+                (description,))
+
+        if dry_run:
+            logger.info('DRYRUN: %s would have been created', description)
+            return None
+
+        job_id = db.add_job(tag, location, mode, parameters, task,
+                            parent_jobs=parent_jobs, filters=filters,
+                            priority=priority,
+                            tilelist=tilelist)
+        logger.info('%s has been created', description)
+        return job_id
 
     if not parent_jobs:
         # If no parent jobs could be found, then the job should marked
-        # as deleted if it already exists
-        if oldjob is None:
-            return None
-
+        # as deleted.
         if not allow_del:
             raise JSAProcError(
                 'Cannot delete %s. It already exists '
@@ -106,74 +124,52 @@ def add_upd_del_job(
 
     # If the job was previously there, check if the job list/filters are
     # different, and rewrite if required.
-    if oldjob is not None:
-        parents = set(zip(parent_jobs, filters))
+    parents = set(zip(parent_jobs, filters))
 
-        if parents != oldparents:
-            logger.debug(
-                'Parent/filter list for job %i has changed from '
-                'previous state', oldjob.id)
+    if parents != oldparents:
+        logger.debug(
+            'Parent/filter list for job %i has changed from '
+            'previous state', oldjob.id)
 
-            if not allow_upd:
-                raise JSAProcError(
-                    'Cannot update %s. It already exists '
-                    'in job %i and updating is turned off!' %
-                    (description, oldjob.id))
+        if not allow_upd:
+            raise JSAProcError(
+                'Cannot update %s. It already exists '
+                'in job %i and updating is turned off!' %
+                (description, oldjob.id))
 
-            # Get lists of added and removed jobs.
-            added_jobs = parents.difference(oldparents)
-            removed_jobs = oldparents.difference(parents)
-            logger.debug(
-                'Parent jobs %s have been removed from coadd.',
-                str(removed_jobs))
-            logger.debug(
-                'Parent jobs %s have been added to coadd.',
-                str(added_jobs))
+        # Get lists of added and removed jobs.
+        added_jobs = parents.difference(oldparents)
+        removed_jobs = oldparents.difference(parents)
+        logger.debug(
+            'Parent jobs %s have been removed from coadd.',
+            str(removed_jobs))
+        logger.debug(
+            'Parent jobs %s have been added to coadd.',
+            str(added_jobs))
 
-            # Replace the parent jobs with updated list
-            if not dry_run:
-                db.replace_parents(oldjob.id, parent_jobs, filters=filters)
-                db.change_state(oldjob.id, JSAProcState.UNKNOWN,
-                                'Parent job list has been updated;'
-                                ' job reset to UNKNOWN')
-                logger.info(
-                    'Job %i (%s) updated and reset to UNKNOWN',
-                    oldjob.id, description)
-            else:
-                logger.info(
-                    'DRYRUN: job %i (%s) would have been'
-                    ' updated and status changed',
-                    oldjob.id, description)
-
+        # Replace the parent jobs with updated list
+        if not dry_run:
+            db.replace_parents(oldjob.id, parent_jobs, filters=filters)
+            db.change_state(oldjob.id, JSAProcState.UNKNOWN,
+                            'Parent job list has been updated;'
+                            ' job reset to UNKNOWN')
+            logger.info(
+                'Job %i (%s) updated and reset to UNKNOWN',
+                oldjob.id, description)
         else:
-            logger.debug(
-                'Parent/filter list for job %i (%s) is unchanged',
+            logger.info(
+                'DRYRUN: job %i (%s) would have been'
+                ' updated and status changed',
                 oldjob.id, description)
 
-            # TODO: Check if last changed time of each parent job is < last
-            # processed time of old job If nothing has changed, check
-            # if the job needs redoing( if any of its parent jobs have
-            # been redone since last time)
-
-        return oldjob.id
-
     else:
-        # If the job is new, add the job to the database with the list
-        # of parent jobs.
-        if not allow_add:
-            raise JSAProcError(
-                'Cannot add %s. It doesn\'t already exist '
-                'and adding is turned off!' %
-                (description,))
+        logger.debug(
+            'Parent/filter list for job %i (%s) is unchanged',
+            oldjob.id, description)
 
-        if not dry_run:
-            job_id = db.add_job(tag, location, mode, parameters, task,
-                                parent_jobs=parent_jobs, filters=filters,
-                                priority=priority,
-                                tilelist=tilelist)
-            logger.info('%s has been created', description)
-            return job_id
+        # TODO: Check if last changed time of each parent job is < last
+        # processed time of old job If nothing has changed, check
+        # if the job needs redoing( if any of its parent jobs have
+        # been redone since last time)
 
-        else:
-            logger.info('DRYRUN: %s would have been created', description)
-            return None
+    return oldjob.id
