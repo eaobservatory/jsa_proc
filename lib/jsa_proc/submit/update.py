@@ -123,7 +123,7 @@ def add_upd_del_job(
 
             # Get lists of added and removed jobs.
             added_jobs = set(parents).difference(oldparents)
-            removed_jobs = set(oldparents).difference(parents)
+            removed_jobs = oldparents.difference(parents)
             logger.debug(
                 'Parent jobs %s have been removed from coadd.',
                 str(removed_jobs))
