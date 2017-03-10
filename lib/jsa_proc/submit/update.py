@@ -16,10 +16,14 @@
 
 from __future__ import print_function, division, absolute_import
 
+from collections import namedtuple
 import logging
 
 from ..error import JSAProcError, NoRowsError
 from ..state import JSAProcState
+
+UpdateAction = namedtuple(
+    'UpdateAction', ('parents',))
 
 logger = logging.getLogger(__name__)
 
@@ -122,22 +126,21 @@ def add_upd_del_job(
 
         return oldjob.id
 
-    # If the job was previously there, check if the job list/filters are
+    # If the job was previously there, check if the job is
     # different, and rewrite if required.
+    update = UpdateAction(*(False for x in UpdateAction._fields))
+
+    # Check for update to parents list.
     parents = set(zip(parent_jobs, filters))
 
     if parents != oldparents:
+        update = update._replace(parents=True)
+
         logger.debug(
             'Parent/filter list for job %i has changed from '
             'previous state', oldjob.id)
 
-        if not allow_upd:
-            raise JSAProcError(
-                'Cannot update %s. It already exists '
-                'in job %i and updating is turned off!' %
-                (description, oldjob.id))
-
-        # Get lists of added and removed jobs.
+        # Get lists of added and removed jobs for logging information.
         added_jobs = parents.difference(oldparents)
         removed_jobs = oldparents.difference(parents)
         logger.debug(
@@ -147,29 +150,40 @@ def add_upd_del_job(
             'Parent jobs %s have been added to coadd.',
             str(added_jobs))
 
-        # Replace the parent jobs with updated list
-        if not dry_run:
-            db.replace_parents(oldjob.id, parent_jobs, filters=filters)
-            db.change_state(oldjob.id, JSAProcState.UNKNOWN,
-                            'Parent job list has been updated;'
-                            ' job reset to UNKNOWN')
-            logger.info(
-                'Job %i (%s) updated and reset to UNKNOWN',
-                oldjob.id, description)
-        else:
-            logger.info(
-                'DRYRUN: job %i (%s) would have been'
-                ' updated and status changed',
-                oldjob.id, description)
-
-    else:
+    if not any(update):
         logger.debug(
-            'Parent/filter list for job %i (%s) is unchanged',
+            'Settings for job %i (%s) are unchanged',
             oldjob.id, description)
 
         # TODO: Check if last changed time of each parent job is < last
         # processed time of old job If nothing has changed, check
-        # if the job needs redoing( if any of its parent jobs have
+        # if the job needs redoing (if any of its parent jobs have
         # been redone since last time)
+
+    elif not allow_upd:
+        raise JSAProcError(
+            'Cannot update %s. It already exists '
+            'in job %i and updating is turned off!' %
+            (description, oldjob.id))
+
+    elif dry_run:
+        logger.info(
+            'DRYRUN: job %i (%s) would have been'
+            ' updated and status changed',
+            oldjob.id, description)
+
+    else:
+        # Perform whichever updates were necessary.
+        if update.parents:
+            # Replace the parent jobs with updated list
+            db.replace_parents(oldjob.id, parent_jobs, filters=filters)
+
+        # Reset the job status and issue logging info.
+        db.change_state(oldjob.id, JSAProcState.UNKNOWN,
+                        'Parent job list has been updated;'
+                        ' job reset to UNKNOWN')
+        logger.info(
+            'Job %i (%s) updated and reset to UNKNOWN',
+            oldjob.id, description)
 
     return oldjob.id
