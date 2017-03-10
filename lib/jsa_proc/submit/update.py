@@ -1,5 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2015-2016 East Asian Observatory.
+# Copyright (C) 2015-2017 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ from ..error import JSAProcError, NoRowsError
 from ..state import JSAProcState
 
 UpdateAction = namedtuple(
-    'UpdateAction', ('parents', 'mode', 'parameters'))
+    'UpdateAction', ('input_files', 'parents', 'mode', 'parameters'))
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ def add_upd_del_job(
         db,
         tag, location, mode, parameters, task, priority,
         parent_jobs=None, filters=None, tilelist=None,
+        input_file_names=None, obsinfolist=None,
         allow_add=True, allow_upd=True, allow_del=True,
         description=None, dry_run=False):
     """
@@ -51,8 +52,7 @@ def add_upd_del_job(
     :return: the job ID, or None if there isn't one.
     """
 
-    # TODO: support file-based jobs as well as than parent-based jobs.
-    # (And jobs which use both?)
+    job_is_empty = not (parent_jobs or input_file_names)
 
     if description is None:
         description = '{} job tagged {}'.format(task, tag)
@@ -67,7 +67,6 @@ def add_upd_del_job(
     # Check if job already exists in database.
     try:
         oldjob = db.get_job(tag=tag)
-        oldparents = set(db.get_parents(oldjob.id))
 
         logger.debug(
             '%s is in already-existing job %i', description, oldjob.id)
@@ -76,8 +75,9 @@ def add_upd_del_job(
         logger.debug(
             '%s is not already in database', description)
 
-        if not parent_jobs:
-            # If no parent jobs specified, do nothing (to retain old behavior).
+        if job_is_empty:
+            # If no input files / parent jobs specified, do nothing (to retain
+            # old behavior).
             return None
 
         # If the job is new, add the job to the database with the list
@@ -93,14 +93,15 @@ def add_upd_del_job(
             return None
 
         job_id = db.add_job(tag, location, mode, parameters, task,
+                            input_file_names=input_file_names,
                             parent_jobs=parent_jobs, filters=filters,
                             priority=priority,
-                            tilelist=tilelist)
+                            obsinfolist=obsinfolist, tilelist=tilelist)
         logger.info('%s has been created', description)
         return job_id
 
-    if not parent_jobs:
-        # If no parent jobs could be found, then the job should marked
+    if job_is_empty:
+        # If no files / parent jobs could be found, then the job should marked
         # as deleted.
         if not allow_del:
             raise JSAProcError(
@@ -124,12 +125,44 @@ def add_upd_del_job(
 
         return oldjob.id
 
+    # Retrieve old input files / parents in separate try ... except blocks
+    # in case any database methods raises NoRowsError (we still want to
+    # get the other input sets).
+    try:
+        oldparents = set(db.get_parents(oldjob.id))
+    except NoRowsError:
+        oldparents = set()
+
+    try:
+        old_input_files = set(db.get_input_files(oldjob.id))
+    except NoRowsError:
+        old_input_files = set()
+
     # If the job was previously there, check if the job is
     # different, and rewrite if required.
     update = UpdateAction(*(False for x in UpdateAction._fields))
 
+    # Check for change to input file list.
+    if input_file_names is None:
+        input_file_names_set = set()
+    else:
+        input_file_names_set = set(input_file_names)
+
+    if input_file_names_set != old_input_files:
+        update = update._replace(input_files=True)
+
+        logger.debug(
+            'Input files list for job %i has changed', oldjob.id)
+        for file_ in old_input_files.difference(input_file_names_set):
+            logger.debug('Input file removed: %s', file_)
+        for file_ in input_file_names_set.difference(old_input_files):
+            logger.debug('Input file added: %s', file_)
+
     # Check for update to parents list.
-    parents = set(zip(parent_jobs, filters))
+    if parent_jobs is None:
+        parents = set()
+    else:
+        parents = set(zip(parent_jobs, filters))
 
     if parents != oldparents:
         update = update._replace(parents=True)
@@ -188,9 +221,17 @@ def add_upd_del_job(
 
     else:
         # Perform whichever updates were necessary.
+        if update.input_files:
+            db.set_input_files(
+                oldjob.id,
+                ([] if input_file_names is None else input_file_names))
+
         if update.parents:
             # Replace the parent jobs with updated list
-            db.replace_parents(oldjob.id, parent_jobs, filters=filters)
+            db.replace_parents(
+                oldjob.id,
+                ([] if parent_jobs is None else parent_jobs),
+                filters=([] if filters is None else filters))
 
         if update.mode:
             db.set_mode(oldjob.id, mode)

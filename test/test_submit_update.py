@@ -146,6 +146,73 @@ class SubmitUpdateTest(DBTestCase):
         job = self.db.get_job(job_id)
         self.assertEqual(job.state, JSAProcState.DELETED)
 
+    def test_regular_job(self):
+        # Try creating a regular job.
+        obsinfo = {
+            'obsid': 'x', 'obsidss': 'x_450',
+            'utdate': 20170310, 'obsnum': 40, 'instrument': 'SCUBA-2',
+            'backend': 'SCUBA-2', 'subsys': '450',
+            'date_obs': '2017-03-10 14:00:00'}
+
+        kwargs = {
+            'db': self.db,
+            'tag': 'tag-1',
+            'location': 'LOC',
+            'mode': 'night',
+            'parameters': 'PARAM',
+            'task': 'task-test',
+            'priority': 50,
+            'input_file_names': ['s4a_x.sdf', 's4a_y.sdf'],
+            'obsinfolist': [obsinfo],
+        }
+
+        with self.assertRaisesRegexp(JSAProcError, 'adding is turned off'):
+            add_upd_del_job(allow_add=False, **kwargs)
+
+        job_id = add_upd_del_job(**kwargs)
+
+        self.assertIsInstance(job_id, int)
+
+        self._compare_job(
+            job_id, JSAProcState.UNKNOWN, ['s4a_x.sdf', 's4a_y.sdf'], [])
+
+        self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
+
+        # Try updating regular job: no change.
+        job_id_upd = add_upd_del_job(
+            allow_add=False, allow_upd=False, allow_del=False, **kwargs)
+
+        self.assertEqual(job_id_upd, job_id)
+
+        self._compare_job(
+            job_id, JSAProcState.COMPLETE, ['s4a_x.sdf', 's4a_y.sdf'], [])
+
+        # Try updating regular job: change input files.
+        kwargs['input_file_names'] = ['s4a_x.sdf', 's4a_z.sdf']
+
+        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+            add_upd_del_job(allow_upd=False, **kwargs)
+
+        job_id_upd = add_upd_del_job(**kwargs)
+
+        self.assertEqual(job_id_upd, job_id)
+
+        self._compare_job(
+            job_id, JSAProcState.UNKNOWN, ['s4a_x.sdf', 's4a_z.sdf'], [])
+
+        # Try deleting a regular: set empty input file list.
+        kwargs['input_file_names'] = []
+
+        with self.assertRaisesRegexp(JSAProcError, 'deleting is turned off'):
+            add_upd_del_job(allow_del=False, **kwargs)
+
+        job_id_upd = add_upd_del_job(**kwargs)
+
+        self.assertEqual(job_id_upd, job_id)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.DELETED)
+
     def _compare_job(self, job_id, state, input_files, parents):
         """
         Private method to compare a job record with expected values.
