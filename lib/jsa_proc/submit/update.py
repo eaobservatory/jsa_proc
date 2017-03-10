@@ -110,8 +110,7 @@ def add_upd_del_job(
     # different, and rewrite if required.
     if oldjob is not None:
         oldspars, oldfilts = zip(*oldparents)
-        pars, filts = zip(*parents)
-        if set(pars) != set(oldspars) or set(oldfilts) != set(filts):
+        if set(parent_jobs) != set(oldspars) or set(oldfilts) != set(filters):
             logger.debug(
                 'Parent/filter list for job %i has changed from '
                 'previous state', oldjob.id)
@@ -133,9 +132,8 @@ def add_upd_del_job(
                 str(added_jobs))
 
             # Replace the parent jobs with updated list
-            pars, filts = zip(*parents)
             if not dry_run:
-                db.replace_parents(oldjob.id, pars, filters=filts)
+                db.replace_parents(oldjob.id, parent_jobs, filters=filters)
                 db.change_state(oldjob.id, JSAProcState.UNKNOWN,
                                 'Parent job list has been updated;'
                                 ' job reset to UNKNOWN')
@@ -169,10 +167,9 @@ def add_upd_del_job(
                 'and adding is turned off!' %
                 (description,))
 
-        pars, filts = zip(*parents)
         if not dry_run:
             job_id = db.add_job(tag, location, mode, parameters, task,
-                                parent_jobs=pars, filters=filts,
+                                parent_jobs=parent_jobs, filters=filters,
                                 priority=priority,
                                 tilelist=tilelist)
             logger.info('%s has been created', description)
