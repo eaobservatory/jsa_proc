@@ -200,7 +200,7 @@ class SubmitUpdateTest(DBTestCase):
         self._compare_job(
             job_id, JSAProcState.UNKNOWN, ['s4a_x.sdf', 's4a_z.sdf'], [])
 
-        # Try deleting a regular: set empty input file list.
+        # Try deleting a regular job: set empty input file list.
         kwargs['input_file_names'] = []
 
         with self.assertRaisesRegexp(JSAProcError, 'deleting is turned off'):
@@ -212,6 +212,35 @@ class SubmitUpdateTest(DBTestCase):
 
         job = self.db.get_job(job_id)
         self.assertEqual(job.state, JSAProcState.DELETED)
+
+        # Try deleting a regular job in an active state: should need force.
+        self.db.change_state(job_id, JSAProcState.TRANSFERRING, 'test')
+
+        with self.assertRaisesRegexp(JSAProcError, 'currently active'):
+            add_upd_del_job(**kwargs)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.TRANSFERRING)
+
+        add_upd_del_job(force=True, **kwargs)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.DELETED)
+
+        # Try updating a regular job in an active state: should need force.
+        self.db.change_state(job_id, JSAProcState.RUNNING, 'test')
+        kwargs['input_file_names'] = ['s4a_w.sdf']
+
+        with self.assertRaisesRegexp(JSAProcError, 'currently active'):
+            add_upd_del_job(**kwargs)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.RUNNING)
+
+        add_upd_del_job(force=True, **kwargs)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.UNKNOWN)
 
     def _compare_job(self, job_id, state, input_files, parents):
         """

@@ -34,7 +34,7 @@ def add_upd_del_job(
         parent_jobs=None, filters=None, tilelist=None,
         input_file_names=None, obsinfolist=None,
         allow_add=True, allow_upd=True, allow_del=True,
-        description=None, dry_run=False):
+        description=None, dry_run=False, force=False):
     """
     General function for updating jobs in the processing system database.
 
@@ -48,6 +48,8 @@ def add_upd_del_job(
 
     :param description: description of the job to include in log messages.
     :param dry_run: no database modifications performed if true.
+
+    :param force: allow updates even when the job is in an active state.
 
     :return: the job ID, or None if there isn't one.
     """
@@ -107,6 +109,12 @@ def add_upd_del_job(
             raise JSAProcError(
                 'Cannot delete %s. It already exists '
                 'in job %i and deleting is turned off!' %
+                (description, oldjob.id))
+
+        if JSAProcState.get_info(oldjob.state).active and not force:
+            raise JSAProcError(
+                'Cannot delete %s. It already exists '
+                'in job %i which is currently active!' %
                 (description, oldjob.id))
 
         if not dry_run:
@@ -211,6 +219,12 @@ def add_upd_del_job(
         raise JSAProcError(
             'Cannot update %s. It already exists '
             'in job %i and updating is turned off!' %
+            (description, oldjob.id))
+
+    elif JSAProcState.get_info(oldjob.state).active and not force:
+        raise JSAProcError(
+            'Cannot update %s. It already exists '
+            'in job %i which is currently active!' %
             (description, oldjob.id))
 
     elif dry_run:
