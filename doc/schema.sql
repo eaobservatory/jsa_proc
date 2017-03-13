@@ -66,6 +66,7 @@ CREATE TABLE obs (
     obsid VARCHAR(80) NOT NULL,
     obsidss VARCHAR(80) NOT NULL,
     date_obs DATETIME NOT NULL,
+    date_end DATETIME DEFAULT NULL,
 
     utdate DATE NOT NULL,
     obsnum INTEGER NOT NULL,
