@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import OrderedDict
-from datetime import date
+from datetime import date, datetime
 from socket import gethostname
 from unittest import TestCase
 
@@ -166,11 +166,11 @@ class InterfaceDBTest(DBTestCase):
         obs1 = {'obsid': '01-asdfasd', 'obsidss': '01-asdfas-1',
                 'utdate': 20140101, 'obsnum': 3, 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-01-01 10:00:00'}
+                'date_obs': datetime(2014, 1, 1, 10, 0, 0)}
         obs2 = {'obsid': '02-asdfasd', 'obsidss': '02-asdfas-1',
                 'utdate': 20140102, 'obsnum': 3, 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-01-02 11:00:00'}
+                'date_obs': datetime(2014, 1, 2, 11, 0, 0)}
 
         self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
 
@@ -617,7 +617,7 @@ class InterfaceDBTest(DBTestCase):
         info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',
                   'obsnum': 1, 'instrument': 'F', 'backend': 'B',
                   'subsys': '1', 'survey': 'GBS', 'project': 'G01',
-                  'date_obs': '2014-01-01 10:00:00'}
+                  'date_obs': datetime(2014, 1, 1, 10, 0, 0)}
 
         info_2 = info_1.copy()
         info_2.update(obsidss='1-2', subsys=2)
@@ -720,7 +720,7 @@ class InterfaceDBTest(DBTestCase):
                 'utdate': date(2014, 01, 01), 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-01-01 09:00:00',
+                'date_obs': datetime(2014, 1, 1, 9, 0, 0),
                 'omp_status': 4}
 
         self.db.set_obs_info(job_1, [info])
@@ -888,7 +888,7 @@ class InterfaceDBTest(DBTestCase):
                 'utdate': date(2014, 01, 01), 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-01-01 09:00:00'}
+                'date_obs': datetime(2014, 1, 1, 9, 0, 0)}
         self.db.set_obs_info(job_1, [info])
         self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range())
         self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range(task='test'))
@@ -897,7 +897,7 @@ class InterfaceDBTest(DBTestCase):
                 'utdate': date(2014, 05, 01), 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2014-05-01 09:00:00'}
+                'date_obs': datetime(2014, 5, 1, 9, 0, 0)}
 
         self.db.set_obs_info(job_1, [info, info2])
         self.assertEqual((str(info['utdate']), str(info2['utdate'])), self.db.get_date_range())
@@ -908,12 +908,12 @@ class InterfaceDBTest(DBTestCase):
                  'utdate': date(2013, 05, 01), 'obsnum': 3,
                  'instrument': 'SCUBA-2',
                  'backend': 'ACSIS', 'subsys': '1',
-                 'date_obs': '2013-05-01 09:00:00'}
+                 'date_obs': datetime(2013, 5, 1, 9, 0, 0)}
         info4 = {'obsid': 'cx14_01_1T1', 'obsidss': 'cx14_1_1T1_850',
                 'utdate': date(2013, 01, 01), 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': '2013-01-01 09:00:00'}
+                'date_obs': datetime(2013, 1, 1, 9, 0, 0)}
         self.db.set_obs_info(job_2, [info3, info4])
         self.assertEqual((str(info4['utdate']), str(info2['utdate'])), self.db.get_date_range())
         self.assertEqual((str(info4['utdate']), str(info3['utdate'])), self.db.get_date_range(task='test2'))

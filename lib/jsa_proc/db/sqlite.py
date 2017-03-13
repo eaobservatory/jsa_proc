@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# copyright (C) 2017 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +21,11 @@ from threading import Lock
 
 from jsa_proc.db.db import JSAProcDB
 from jsa_proc.error import JSAProcError
+
+# By default, sqlite3 only recognizes "TIMESTAMP" columns as containing
+# datetimes.  Therefore copy the converter it installs for this column type
+# to also be used for "DATETIME" columns.
+sqlite3.register_converter('DATETIME', sqlite3.converters['TIMESTAMP'])
 
 
 def add_types(query):

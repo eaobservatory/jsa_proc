@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import date, datetime
+
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.submit.update import add_upd_del_job
@@ -150,9 +152,9 @@ class SubmitUpdateTest(DBTestCase):
         # Try creating a regular job.
         obsinfo = {
             'obsid': 'x', 'obsidss': 'x_450',
-            'utdate': 20170310, 'obsnum': 40, 'instrument': 'SCUBA-2',
+            'utdate': date(2017, 3, 10), 'obsnum': 40, 'instrument': 'SCUBA-2',
             'backend': 'SCUBA-2', 'subsys': '450',
-            'date_obs': '2017-03-10 14:00:00'}
+            'date_obs': datetime(2017, 3, 10, 14, 00, 00)}
 
         kwargs = {
             'db': self.db,
