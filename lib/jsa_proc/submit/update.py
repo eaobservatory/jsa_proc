@@ -17,13 +17,19 @@
 from __future__ import print_function, division, absolute_import
 
 from collections import namedtuple
+from datetime import date, datetime
 import logging
 
 from ..error import JSAProcError, NoRowsError
 from ..state import JSAProcState
 
+# Type representing the different update actions we may perform.
 UpdateAction = namedtuple(
-    'UpdateAction', ('input_files', 'parents', 'mode', 'parameters'))
+    'UpdateAction',
+    ('input_files', 'parents', 'mode', 'parameters', 'tilelist', 'obsinfo'))
+
+# Update actions which do not need to trigger resetting a job.
+UPDATE_NO_RESET = ('tilelist', 'obsinfo')
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +211,43 @@ def add_upd_del_job(
             'Parameters for job %i have changed from "%s" to "%s"',
             oldjob.id, oldjob.parameters, parameters)
 
+    # Check for a change to tilelist, but only if it was specified.
+    if tilelist is not None:
+        oldtiles = db.get_tilelist(oldjob.id)
+        if set(tilelist) != oldtiles:
+            update = update._replace(tilelist=True)
+
+            logger.debug(
+                'Tile list for job %i has changed from %s to %s',
+                oldjob.id, str(sorted(oldtiles)), str(sorted(tilelist)))
+
+    # Check for a change to obsinfo, but only if it was specified.
+    if obsinfolist is not None:
+        # Retrieve existing data and organize by obsidss.
+        oldobsinfos = {x.obsidss: x for x in db.get_obs_info(oldjob.id)}
+
+        # Compare obsinfo to determine if something changed.
+        obsinfo_changed = True
+        try:
+            for obsinfo in obsinfolist:
+                oldobsinfo = oldobsinfos.pop(obsinfo['obsidss'])
+                if not compare_obsinfo(oldobsinfo, obsinfo):
+                    break
+            else:
+                # If we got through them all with no changes and there are
+                # none left over, set obsinfo_changed=False
+                if not oldobsinfos:
+                    obsinfo_changed = False
+        except KeyError:
+            # We tried to pop an obsinfo but the obsidss was missing, so
+            # need to update -- leave obsinfo_changed=True.  (Or our new
+            # list lacks obsidss...)
+            pass
+
+        if obsinfo_changed:
+            update = update._replace(obsinfo=True)
+            logger.debug('Obs. info for job %i has changed', oldjob.id)
+
     if not any(update):
         logger.debug(
             'Settings for job %i (%s) are unchanged',
@@ -253,12 +296,82 @@ def add_upd_del_job(
         if update.parameters:
             db.set_parameters(oldjob.id, parameters)
 
-        # Reset the job status and issue logging info.
-        db.change_state(oldjob.id, JSAProcState.UNKNOWN,
-                        'Parent job list has been updated;'
-                        ' job reset to UNKNOWN')
-        logger.info(
-            'Job %i (%s) updated and reset to UNKNOWN',
-            oldjob.id, description)
+        if update.tilelist:
+            db.set_tilelist(oldjob.id, tilelist)
+
+        if update.obsinfo:
+            db.set_obs_info(oldjob.id, obsinfolist)
+
+        # Reset the job status and issue logging info if a significant
+        # change happened.
+        if any(update._replace(**{x: False for x in UPDATE_NO_RESET})):
+            db.change_state(oldjob.id, JSAProcState.UNKNOWN,
+                            'Job has been updated; reset to UNKNOWN')
+            logger.info(
+                'Job %i (%s) updated and reset to UNKNOWN',
+                oldjob.id, description)
+        else:
+            logger.info(
+                'Job %i (%s) updated but does not need to be reset',
+                oldjob.id, description)
 
     return oldjob.id
+
+
+def compare_obsinfo(obsinfo_old, obsinfo_new):
+    """
+    Compare an original obsinfo to a new version.
+
+    Iterates through the keys of the new obsinfo dictionary and
+    compares values.  So if an existing value isn't mentioned in the
+    dictionary, we don't compare it.
+
+    Attempts to deal with mis-typed entries (such as dates and datetimes)
+    which will be coerced as they are inserted into the database.
+
+    :param obsinfo_old: original record (JSAProcObs object)
+    :param obsinfo_new: new record (dictionary)
+
+    :return: True if they match.
+    """
+
+    for (key, value_new) in obsinfo_new.items():
+        value_old = getattr(obsinfo_old, key)
+
+        # Apply type conversions if necessary to do the comparison.
+        if isinstance(value_old, int) and not isinstance(value_new, int):
+            try:
+                value_new = int(value_new)
+            except ValueError:
+                logger.warning('Did not understand obsinfo integer %s: %s',
+                               key, value_new)
+
+        if isinstance(value_new, int) and not isinstance(value_old, int):
+            value_new = unicode(value_new)
+
+        if (isinstance(value_old, datetime)
+                and not isinstance(value_new, datetime)):
+            try:
+                value_new = datetime.strptime(value_new, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                logger.warning('Did not understand obsinfo datetime %s: %s',
+                               key, value_new)
+
+        if isinstance(value_old, date) and not isinstance(value_new, date):
+            try:
+                value_new = datetime.strptime(value_new, '%Y-%m-%d').date()
+            except ValueError:
+                try:
+                    value_new = datetime.strptime(value_new, '%Y%m%d').date()
+                except ValueError:
+                    logger.warning('Did not understand obsinfo date %s: %s',
+                                   key, value_new)
+
+        # Compare the new and old values.
+        if value_new != value_old:
+            logger.debug(
+                'Obsinfo change: %s: %s (%s) -> %s (%s)',
+                key, value_old, type(value_old), value_new, type(value_new))
+            return False
+
+    return True

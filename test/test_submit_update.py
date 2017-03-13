@@ -17,7 +17,7 @@ from datetime import date, datetime
 
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.submit.update import add_upd_del_job
+from jsa_proc.submit.update import add_upd_del_job, compare_obsinfo
 
 from .db import DBTestCase
 
@@ -166,6 +166,7 @@ class SubmitUpdateTest(DBTestCase):
             'priority': 50,
             'input_file_names': ['s4a_x.sdf', 's4a_y.sdf'],
             'obsinfolist': [obsinfo],
+            'tilelist': [50, 51, 52],
         }
 
         with self.assertRaisesRegexp(JSAProcError, 'adding is turned off'):
@@ -177,6 +178,13 @@ class SubmitUpdateTest(DBTestCase):
 
         self._compare_job(
             job_id, JSAProcState.UNKNOWN, ['s4a_x.sdf', 's4a_y.sdf'], [])
+
+        self.assertEqual(sorted(self.db.get_tilelist(job_id)), [50, 51, 52])
+
+        obsinfo_fetched = self.db.get_obs_info(job_id)
+        self.assertEqual(len(obsinfo_fetched), 1)
+
+        self.assertTrue(compare_obsinfo(obsinfo_fetched[0], obsinfo))
 
         self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
 
@@ -243,6 +251,24 @@ class SubmitUpdateTest(DBTestCase):
 
         job = self.db.get_job(job_id)
         self.assertEqual(job.state, JSAProcState.UNKNOWN)
+
+        # Try updating tilelist and obsinfo: state should not be reset.
+        self.db.change_state(job_id, JSAProcState.PROCESSED, 'test')
+
+        kwargs['tilelist'] = [53, 54, 55]
+        kwargs['obsinfolist'][0]['obsnum'] = 42
+
+        add_upd_del_job(**kwargs)
+
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.PROCESSED)
+
+        self.assertEqual(sorted(self.db.get_tilelist(job_id)), [53, 54, 55])
+
+        obsinfo_fetched = self.db.get_obs_info(job_id)
+        self.assertEqual(len(obsinfo_fetched), 1)
+
+        self.assertEqual(obsinfo_fetched[0].obsnum, 42)
 
     def _compare_job(self, job_id, state, input_files, parents):
         """
