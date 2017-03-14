@@ -399,7 +399,10 @@ class JSAProcDB:
 
         with self.db as c:
             # Get all observations with job_id
-            c.execute('SELECT * FROM obs WHERE job_id = %s', (job_id,))
+            c.execute(
+                'SELECT * FROM obs WHERE job_id = %s '
+                'ORDER BY utdate ASC, obsnum ASC',
+                (job_id,))
             results = c.fetchall()
             columns = [i[0] for i in c.description]
 
