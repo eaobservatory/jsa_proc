@@ -35,7 +35,7 @@ def make_output_file_list(db, job_id, preview_filter=None):
     previews256 = []
 
     try:
-        for i in db.get_output_files(job_id):
+        for i in sorted(db.get_output_files(job_id)):
             if preview_filter is None or any((f in i for f in preview_filter)):
                 if i.endswith('.png'):
                     caption = i
