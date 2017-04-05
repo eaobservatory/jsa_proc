@@ -41,6 +41,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
+    jsa_proc search_log [-v | -q] --task <task> [--project <project>] <search>
     jsa_proc transfer [-v | -q]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
@@ -68,6 +69,7 @@ Options:
     --obsid <obsid>            Observation identifier (OBSID header).
     --no-cadc-check            Skip checks for files being at CADC.
     --poll                     Poll a system for state updates.
+    --project <project>        OMP project identifier.
     --state <state name>       Job state.
     --stream <stream>          P-transfer stream ("new" or "replace").
     --tag <tag>                Select jobs by tag.
@@ -538,6 +540,19 @@ def run(args):
 
     run_job(job_id=args['--job-id'], force=args['--force'],
             task=args['--task'])
+
+
+@command
+def search_log(args):
+    """
+    Search log files for the given pattern.
+    """
+
+    from jsa_proc.action.log import search_log_files
+
+    search_log_files(
+        pattern=args['<search>'], filename_pattern='^oracdr',
+        task=args['--task'], project=args['--project'])
 
 
 @command
