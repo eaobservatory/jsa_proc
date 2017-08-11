@@ -52,4 +52,7 @@ fitsverify=/local/progs/bin/fitsverify
 [web]
 key=insert-secret-key-here
 
+[rawingest]
+ignore_instruments=GLT
+
 # vim: syn=dosini

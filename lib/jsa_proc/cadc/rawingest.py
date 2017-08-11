@@ -22,6 +22,7 @@ import shutil
 import subprocess
 
 from jsa_proc.admin.directories import get_misc_log_dir, make_misc_scratch_dir
+from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError, CommandError, NoRowsError
 from jsa_proc.omp.config import get_omp_database
 from jsa_proc.util import restore_signals
@@ -32,12 +33,17 @@ obsid_date = re.compile('_(\d{8})T')
 
 
 def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
+    ignore_instruments = [x.strip() for x in get_config().get(
+        'rawingest', 'ignore_instruments').split(',')]
+
     logger.debug('Connecting to database with read-only access')
     db = get_omp_database()
 
     logger.info('Searching for observations to ingest')
-    obsids = db.find_obs_for_ingestion(date_start, date_end,
-                                       no_status_check=quick)
+    obsids = db.find_obs_for_ingestion(
+        date_start, date_end,
+        no_status_check=quick,
+        ignore_instruments=ignore_instruments)
     logger.info('Found %i observations', len(obsids))
 
     if not dry_run:
