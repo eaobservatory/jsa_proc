@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016 East Asian Observatory.
+# Copyright (C) 2016-2017 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ Usage:
     jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
-    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws) <search>
+    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws | adtap) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task> [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
@@ -399,6 +399,8 @@ def query(args):
 
     dws:        retrieves information from the CADC data web service
                 for a given file.
+
+    adtap:      queries AD via TAP
     """
 
     search = args['<search>']
@@ -443,6 +445,12 @@ def query(args):
         else:
             for key in sorted(info.keys()):
                 print('{0}: {1}'.format(key, repr(info[key])))
+
+    elif args['adtap']:
+        from jsa_proc.cadc.adtap import ADTap
+        ad = ADTap()
+        for entry in ad.search_file(search):
+            print('{} {}'.format(entry.md5, entry.id_))
 
     else:
         raise CommandError('Did not recognise query type')
