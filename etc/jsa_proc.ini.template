@@ -53,6 +53,6 @@ fitsverify=/local/progs/bin/fitsverify
 key=insert-secret-key-here
 
 [rawingest]
-ignore_instruments=GLT
+ignore_instruments=GLT,GLT86,GLT230,GLT345
 
 # vim: syn=dosini
