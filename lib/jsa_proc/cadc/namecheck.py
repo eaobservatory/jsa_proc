@@ -41,7 +41,7 @@ def check_file_name(filename, return_section=False):
     """
 
     (base, ext) = os.path.splitext(filename)
-    base = base.upper()
+    base = base.lower()
 
     for (key, patterns) in _get_namecheck_pattern().items():
         for pattern in patterns:
