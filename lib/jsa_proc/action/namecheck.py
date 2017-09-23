@@ -16,6 +16,7 @@
 from __future__ import print_function
 
 import logging
+import os
 
 from jsa_proc.config import get_database
 from jsa_proc.cadc.namecheck import check_file_name
@@ -48,3 +49,18 @@ def namecheck_output(task, outfile):
             except NoRowsError:
                 # Ignore jobs for which we have no output files.
                 pass
+
+
+def namecheck_directory(directory):
+    for filename in os.listdir(directory):
+        namecheck_file(filename)
+
+
+def namecheck_file(filename):
+    section = check_file_name(filename, return_section=True)
+
+    if section is None:
+        logger.info('Namecheck failure: %s', filename)
+
+    else:
+        logger.debug('Namecheck match (%s): %s', section, filename)

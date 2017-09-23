@@ -30,6 +30,8 @@ Usage:
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>] [--location <location>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task> [--location <location>]
+    jsa_proc namecheck [-v | -q] file <file>
+    jsa_proc namecheck [-v | -q] directory <directory>
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
     jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
@@ -319,16 +321,34 @@ def namecheck(args):
     """
     Run a name check on files listed in the processing database.
 
-    Currently this only supports checking the names of job output files,
-    with the jobs selected by task name.
+    Currently this supports the following otions:
 
-    File names which fail name checking are written to the specified file.
+    * Checking the names of job output files, with the jobs selected by
+      task name.
+
+      File names which fail name checking are written to the specified file.
+
+    * Checking a single file name, or the names of files in a given directory.
+
+      File names which fail are logged.
+
+      File names which pass the name check are logged in verbose mode.
     """
 
     if args['output']:
         from jsa_proc.action.namecheck import namecheck_output
 
         namecheck_output(task=args['--task'], outfile=args['--outfile'])
+
+    elif args['directory']:
+        from jsa_proc.action.namecheck import namecheck_directory
+
+        namecheck_directory(args['<directory>'])
+
+    elif args['file']:
+        from jsa_proc.action.namecheck import namecheck_file
+
+        namecheck_file(args['<file>'])
 
     else:
         raise CommandError('Did not recognise namecheck action')
