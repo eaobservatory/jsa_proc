@@ -67,23 +67,20 @@
 	-->
 	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_(RIMG|RSP)_(OBS|NIT|PRO)_([\d]{3})</value>
 	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED[\d]{3}|HEALPIX[\d]{6}|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})</value>
+	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED|HEALPIX|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})_PREVIEW_(64|256|1024)</value>
 	<!-- ACSIS and SCUBA2 CAOM2 thumbnails -->
 	<!-- <collection>_<observationID>_<productID>_preview_(64|256|1024) -->
-        <!-- e.g. JCMT_20140103-0a3e07ab157c42d36c8ed2414ea239d7_reduced_2_preview_1024 -->
-        <!-- e.g. JCMT_scuba2_00007_20130925T092025_raw_450_preview_256 -->
+        <!-- e.g. JCMTS20170920_00012_850_REDUCED_NIT_000_PREVIEW_1024 -->
         <!--  -->
         <!--  -->
         <!--  -->
-        <value>JCMT(|LS|USER)_([\w]+)-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(((ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9]))|(([\w]+)-([\w]+)))_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-([\d]{6}MHZ)-(1000MHZX1024|1000MHZX2048|160MHZX1024|160MHZX128|160MHZX2048|160MHZX256|160MHZX512|1899MHZX1945|1948MHZX1995|1GHZX2048|250MHZX4096|250MHZX8192|450MHZX7371|490MHZX8027)-([\d])_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9])_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-(450|850)UM_PREVIEW_(64|256|1024)</value>
+	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED|HEALPIX|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})_PREVIEW_(64|256|1024)</value>
         <!-- SCUBA-2 public products -->
         <!-- template JCMTSSUBSYSNR_PRODUCTTILENUMBER_PUB_VERSION -->
         <value>JCMTS([48]50)UM_(HEALPIX|TILE-MOC|EXTENT-MOC|EXTENT-MASK|EXTENT-CAT|PEAK-CAT)([\d]{6})_PUB_([\d]{3})</value>
         <!-- SCUBA-2 public previews -->
-        <!-- template JCMT_SCUBA-2-049048_HEALPIX-850UM_PREVIEW_64 -->
-        <value>JCMT_SCUBA-2-([\d]{6})_(HEALPIX|EXTENT|PEAK)-([48]50)UM_PREVIEW_(64|256|1024)</value>
+        <!-- template JCMTSSUBSYSNR_PRODUCTTILENUMBER_PUB_VERSION_PREVIEW_SIZE -->
+        <value>JCMTS([48]50)UM_(HEALPIX|EXTENT|PEAK)([\d]{6})_PUB_([\d]{3})_PREVIEW_(64|256|1024)</value>
       </list>
     </struct>
   </list>
