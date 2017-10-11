@@ -32,7 +32,7 @@ from jsa_proc.util import restore_signals
 
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
-                  jsawrapdr=None, starlink_dir=None, debug=False,
+                  jsawrapdr=None, starlink_dir=None,
                   version=None, command_run=None):
     """
     Execute jsawrapdr script from python.
@@ -83,9 +83,6 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
       starlink_dir (str, optional): The path of a starlink install to
         use. If not given, the one found in the configuration file will be
         used.
-
-      debug (bool, optional): Turn on jsawrapdr debugging if true,
-        default is False.
 
       version: CADC file name "version" or None to use default.
 
@@ -140,9 +137,6 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     if persist:
         jsawrapdrcom.append('-persist')
         jsawrapdrcom.append('--transdir='+out_dir)
-
-    if debug:
-        jsawrapdrcom.append('-debug')
 
     if version is not None:
         jsawrapdrcom.append('--fileversion={0}'.format(version))
