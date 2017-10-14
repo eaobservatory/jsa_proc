@@ -33,7 +33,8 @@ from jsa_proc.util import restore_signals
 def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
                   cleanup='cadc', location='JAC', persist=False,
                   jsawrapdr=None, starlink_dir=None,
-                  version=None, command_run=None):
+                  version=None, command_run=None,
+                  raw_output=None):
     """
     Execute jsawrapdr script from python.
 
@@ -51,6 +52,9 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
 
          if persist is True, then it adds the flag:
               -persist
+
+         if raw_output is True, it adds the option:
+              --rawoutput
 
     Args:
 
@@ -137,6 +141,9 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     if persist:
         jsawrapdrcom.append('-persist')
         jsawrapdrcom.append('--transdir='+out_dir)
+
+    if raw_output:
+        jsawrapdrcom.append('--rawoutput')
 
     if version is not None:
         jsawrapdrcom.append('--fileversion={0}'.format(version))

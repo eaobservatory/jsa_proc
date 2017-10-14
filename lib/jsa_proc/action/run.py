@@ -180,11 +180,13 @@ def run_a_job(job_id, db=None, force=False):
     starpath = None
     version = None
     command_run = None
+    raw_output = None
     try:
         task_info = db.get_task_info(job.task)
         starpath = task_info.starlink_dir
         version = task_info.version
         command_run = task_info.command_run
+        raw_output = task_info.raw_output
     except NoRowsError:
         # If the task doesn't have task info, leave "starpath" as None
         # so that jsawrapdr_run uses the default value from the configuration
@@ -197,7 +199,8 @@ def run_a_job(job_id, db=None, force=False):
     log = jsawrapdr_run(
         job_id, input_file_list_path, mode, drparameters,
         cleanup='cadc', location='JAC', starlink_dir=starpath,
-        persist=True, version=version, command_run=command_run)
+        persist=True, version=version, command_run=command_run,
+        raw_output=raw_output)
 
     # Create list of output files.
     logger.debug('Preparing list of output files')
