@@ -109,7 +109,8 @@ def transfer_poll(db):
             elif not job_task_info.etransfer:
                 # If e-transfer is not required, then the job is now
                 # complete (only done if etransfer argument is False).
-                if validate_output(job.id, db):
+                # Don't validate output when "raw_output" specified.
+                if job_task_info.raw_output or validate_output(job.id, db):
                     db.change_state(
                         job.id, JSAProcState.COMPLETE,
                         'Processed job is COMPLETE (no etransfer)',
