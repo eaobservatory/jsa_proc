@@ -130,7 +130,8 @@ CREATE TABLE task (
     starlink VARCHAR(255) DEFAULT NULL,
     version INTEGER DEFAULT NULL,
     command_run VARCHAR(255) DEFAULT NULL,
-    command_xfer VARCHAR(255) DEFAULT NULL
+    command_xfer VARCHAR(255) DEFAULT NULL,
+    raw_output BOOLEAN
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);
