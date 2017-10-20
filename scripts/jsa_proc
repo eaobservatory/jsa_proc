@@ -36,7 +36,7 @@ Usage:
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
     jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws | adtap) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
-    jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick]
+    jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task> [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
@@ -483,6 +483,7 @@ def rawingest(args):
         poll_raw_ingestion(date_start=args['--date-start'],
                            date_end=args['--date-end'],
                            quick=args['--quick'],
+                           no_transfer_check=args['--no-transfer-check'],
                            dry_run=args['--dry-run'])
 
     else:

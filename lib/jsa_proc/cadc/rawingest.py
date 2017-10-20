@@ -32,7 +32,9 @@ logger = logging.getLogger(__name__)
 obsid_date = re.compile('_(\d{8})T')
 
 
-def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
+def poll_raw_ingestion(
+        date_start, date_end, quick=False, no_transfer_check=False,
+        dry_run=False):
     ignore_instruments = [x.strip() for x in get_config().get(
         'rawingest', 'ignore_instruments').split(',')]
 
@@ -43,6 +45,7 @@ def poll_raw_ingestion(date_start, date_end, quick=False, dry_run=False):
     obsids = db.find_obs_for_ingestion(
         date_start, date_end,
         no_status_check=quick,
+        no_transfer_check=no_transfer_check,
         ignore_instruments=ignore_instruments)
     logger.info('Found %i observations', len(obsids))
 
