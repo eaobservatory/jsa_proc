@@ -26,15 +26,25 @@ from jsa_proc.state import JSAProcState
 logger = logging.getLogger(__name__)
 
 
-def search_log_files(pattern, filename_pattern, task, project=None):
+def search_log_files(
+        pattern, filename_pattern, task,
+        project=None, state=None, after_context=None):
     db = get_database()
 
     re_pattern = re.compile(pattern)
     re_filename = re.compile(filename_pattern)
 
+    if state is None:
+        state = JSAProcState.COMPLETE
+    else:
+        state = JSAProcState.lookup_name(state)
+
+    if after_context is None:
+        after_context = 0
+
     search_kwargs = {
         'task': task,
-        'state': JSAProcState.COMPLETE,
+        'state': state,
     }
 
     if project is not None:
@@ -55,16 +65,25 @@ def search_log_files(pattern, filename_pattern, task, project=None):
 
             logger.debug('Found log file for job %i: %s', job_id, filename)
 
-            matched = False
+            matched = 0
+            matched_lines = []
 
             pathname = os.path.join(log_dir, filename)
             with open(pathname, 'r') as f:
                 for line in f:
-                    if re_pattern.search(line):
-                        matched = True
+                    if matched or re_pattern.search(line):
+                        matched += 1
+                        matched_lines.append(line.rstrip())
+
+                    if matched > after_context:
                         break
 
             if matched:
-                logger.info('Found match for job %i: %s', job_id, pathname)
+                logger.info(
+                    'Found match for job %i: %s', job_id, matched_lines[0])
+
+                for matched_line in matched_lines[1:]:
+                    logger.info(
+                        '...    continuation %i: %s', job_id, matched_line)
 
             break

@@ -41,7 +41,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
-    jsa_proc search_log [-v | -q] --task <task> [--project <project>] <search>
+    jsa_proc search_log [-v | -q] --task <task> [--project <project>] [--after-context <lines>] [--state <state>] <search>
     jsa_proc transfer [-v | -q]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
@@ -55,6 +55,7 @@ Options:
     --job-id, -j <id>          Identifier of job on which to work.
     --location, -l <location>  Job location, e.g. JAC, CADC.
 
+    --after-context <lines>    Number of lines of context to show.
     --count, -c <number>       Number of jobs to process.
     --check-at-cadc            Test whether files are at CADC.
     --date-start <ut-date>     Date at which to start.
@@ -101,6 +102,7 @@ logger = logging.getLogger(script_name)
 integer_arguments = (
     '--job-id', '--count',
     '--date-start', '--date-end',
+    '--after-context',
 )
 
 
@@ -561,7 +563,8 @@ def search_log(args):
 
     search_log_files(
         pattern=args['<search>'], filename_pattern='^oracdr',
-        task=args['--task'], project=args['--project'])
+        task=args['--task'], project=args['--project'],
+        state=args['--state'], after_context=args['--after-context'])
 
 
 @command
