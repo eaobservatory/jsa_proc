@@ -151,8 +151,8 @@
   </tr>
 
   {% for obs in parent_obs.values() %}
-  <tr>
     {% for o in obs%}
+    <tr>
     {% for key in o.keys()
                          if key not in ['id', 'backend','obsid','obsidss', 'association']%}
     {% if key == 'job_id'%}
@@ -175,8 +175,8 @@
     <td> {{ o.get(key, '') }} </td>
     {% endif %}
     {% endfor %}
+    </tr>
     {% endfor %}
-  </tr>
   {% endfor %}
   </table>
 </div>
