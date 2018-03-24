@@ -36,24 +36,32 @@ def make_output_file_list(db, job_id, preview_filter=None):
 
     try:
         for i in sorted(db.get_output_files(job_id)):
-            if preview_filter is None or any((f in i for f in preview_filter)):
-                if i.endswith('.png'):
+            url = None
+            mtype = None
+
+            if i.endswith('.png'):
+                url = url_for('job_preview', job_id=job_id, preview=i)
+
+                if preview_filter is None or any((f in i for f in preview_filter)):
                     caption = i
                     caption = re.sub('^jcmt_', '', caption)
                     caption = re.sub('_(preview_)?\d+\.png', '', caption)
 
                     if '_256.png' in i:
-                        previews256.append(PreviewInfo(
-                            url_for('job_preview', job_id=job_id, preview=i),
-                            caption))
+                        previews256.append(PreviewInfo(url, caption))
 
                     if '_1024.png' in i:
-                        previews1024.append(PreviewInfo(
-                            url_for('job_preview', job_id=job_id, preview=i),
-                            caption))
+                        previews1024.append(PreviewInfo(url, caption))
 
-            if i.endswith('.fits'):
+            elif i.endswith('.pdf'):
+                url = url_for('job_preview_pdf', job_id=job_id, preview=i)
+
+            elif i.endswith('.txt'):
+                url = url_for('job_text_file', job_id=job_id, text_file=i)
+
+            elif i.endswith('.fits'):
                 url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
+
                 if re.search('-cat[0-9]{6}', i):
                     mtype = 'table.load.fits'
 
@@ -71,9 +79,9 @@ def make_output_file_list(db, job_id, preview_filter=None):
                 else:
                     mtype = 'image.load.fits'
 
-            else:
-                url = None
-                mtype = None
+                # Remove URL for types we can't broadcast.
+                if mtype is None:
+                    url = None
 
             output_files.append(FileInfo(i, url, mtype))
 

@@ -187,7 +187,11 @@
 <ul>
 {% for file in output_files %}
     <li>
-        {{ file.name }}
+        {% if file.url is not none and file.mtype is none %}
+            <a href="{{ file.url }}">{{ file.name }}</a>
+        {% else %}
+            {{ file.name }}
+        {% endif %}
         {% if file.url is not none and file.mtype is not none %}
             <button disabled="disabled" id="broadcast_output_{{ loop.index }}" data-url="{{ file.url }}" data-mtype="{{ file.mtype }}">
                 broadcast

@@ -20,15 +20,24 @@ import re
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.web.util import HTTPError, HTTPNotFound
 
-valid_preview = re.compile('^[-_a-zA-Z0-9]+_(preview_)?\d+\.png$')
+valid_preview_patterns = {
+    'png': re.compile('^[-+_a-zA-Z0-9]+\.png$'),
+    'pdf': re.compile('^[-+_a-zA-Z0-9]+\.pdf$'),
+    'txt': re.compile('^[-+_a-zA-Z0-9]+\.txt$'),
+}
 
 
-def prepare_job_preview(job_id, preview):
+def prepare_job_preview(job_id, preview, type_='png'):
     """
     Prepare a preview image for a job.
 
     Return the path to the preview image
     """
+
+    valid_preview = valid_preview_patterns.get(type_)
+
+    if valid_preview is None:
+        raise HTTPError('Unexpected preview type requested')
 
     if not valid_preview.match(preview):
         raise HTTPError('Invalid preview filename')
