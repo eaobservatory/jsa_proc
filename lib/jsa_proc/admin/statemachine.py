@@ -21,7 +21,7 @@ from jsa_proc.action.validate import validate_job
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.cadc.preview import fetch_cadc_previews
 from jsa_proc.db.db import Not
-from jsa_proc.error import NotAtJACError
+from jsa_proc.error import NotAtJACError, ParentNotReadyError
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
@@ -77,10 +77,12 @@ class JSAProcStateMachine:
                                              state_prev=JSAProcState.QUEUED)
                         logger.debug('Input files for %i are not at JAC',
                                      job.id)
-
-                    # Fetching the data could take a long time, so leave
-                    # this to a separate process.
-                    pass
+                    except ParentNotReadyError:
+                        # If the parent jobs are not ready, do nothing?
+                        # (Alternative would be to set to missing, but for now
+                        # fetching a job like this is an error.)
+                        logger.debug('Parent jobs for %i are not ready',
+                                     job.id)
 
                 elif job.state == JSAProcState.MISSING:
                     # Wait for a separate process to fetch the input files.

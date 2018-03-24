@@ -1419,16 +1419,22 @@ class JSAProcDB:
                 (taskname, etransfer, starlink, version,
                  command_run, command_xfer, raw_output))
 
-    def get_parents(self, job_id):
+    def get_parents(self, job_id, with_state=False):
         """
         Look in the parent table and get all parent jobs
         for the given job_id.
 
-        Returns a list of tuples of (parent job id, filters).
+        Returns a list of tuples of (parent job id, filters).  The state of the
+        parent job can optionally be included.
 
         Raises NoRowsError if no results are found.
         """
-        query = 'SELECT parent, filter FROM parent WHERE job_id = %s'
+        if not with_state:
+            query = 'SELECT parent, filter FROM parent WHERE job_id = %s'
+        else:
+            query = 'SELECT parent.parent, parent.filter, job.state' \
+                ' FROM parent JOIN job ON parent.parent=job.id' \
+                ' WHERE parent.job_id = %s'
         params = (job_id,)
         with self.db as c:
             c.execute(query, params)

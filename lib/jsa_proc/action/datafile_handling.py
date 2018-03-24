@@ -24,9 +24,11 @@ from jsa_proc.admin.directories import get_input_dir, get_output_dir
 from jsa_proc.db.db import JSAProcFileInfo
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
-from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError
+from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError, \
+    ParentNotReadyError
 from jsa_proc.config import get_config
 from jsa_proc.files import get_md5sum
+from jsa_proc.state import JSAProcState
 
 """
 Routines for handling input and output files when running jobs.
@@ -81,9 +83,12 @@ def check_data_already_present(job_id, db):
         inputs = []
 
     try:
-        parents = db.get_parents(job_id)
+        parents = db.get_parents(job_id, with_state=True)
         parent_files_with_paths = []
-        for p, filts in parents:
+        for p, filts, parent_state in parents:
+            if parent_state not in JSAProcState.STATE_POST_RUN:
+                raise ParentNotReadyError('Parent job {} is not ready'.format(p))
+
             outputs = db.get_output_files(p)
             parent_files = filter_file_list(outputs, filts)
             for f in parent_files:

@@ -26,7 +26,7 @@ from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.files import get_input_dir_space, get_output_dir_space, \
     get_md5sum
-from jsa_proc.error import JSAProcError, NoRowsError
+from jsa_proc.error import JSAProcError, NoRowsError, ParentNotReadyError
 
 logger = logging.getLogger(__name__)
 
@@ -128,9 +128,15 @@ def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
 
     # Assemble any files from the parent jobs
     try:
-        parents = db.get_parents(job_id)
+        parents = db.get_parents(job_id, with_state=True)
         parent_files_with_paths = []
-        for p, f in parents:
+        for p, f, parent_state in parents:
+            if parent_state not in JSAProcState.STATE_POST_RUN:
+                logger.error(
+                    'Job %i cannot be fetch because its parent %i is not ready',
+                    job_id, p)
+                raise ParentNotReadyError('Parent job {} is not ready'.format(p))
+
             outputs = db.get_output_files(p)
             parent_files = filter_file_list(outputs, f)
             parent_files_with_paths += assemble_parent_data_for_job(

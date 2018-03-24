@@ -89,6 +89,13 @@ class NotAtJACError(JSAProcError):
         Exception.__init__(self, message, *args)
 
 
+class ParentNotReadyError(JSAProcError):
+    """
+    Error indicating that a parent job isn't ready.
+    """
+    pass
+
+
 class CommandError(Exception):
     """Class for errors detected running a command."""
     pass
