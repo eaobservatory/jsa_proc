@@ -38,22 +38,36 @@ def ingest_output(
     db = get_database()
 
     if job_id is not None:
-        job_ids = [job_id]
+        jobs = [db.get_job(id_=job_id)]
 
     else:
-        job_ids = [x.id for x in db.find_jobs(state=JSAProcState.INGESTION,
-                                              location=location,
-                                              task=task, prioritize=True)]
+        jobs = db.find_jobs(
+            state=JSAProcState.INGESTION,
+            location=location,
+            task=task, prioritize=True)
 
-    for job_id in job_ids:
+    # Get full list of tasks.
+    task_info = db.get_task_info()
+
+    for job in jobs:
+        job_task_info = task_info.get(job.task)
+
+        command_ingest = None
+        description = 'into CAOM-2'
+
+        if ((job_task_info is not None)
+                and (job_task_info.command_ingest is not None)):
+            command_ingest = job_task_info.command_ingest
+            description = 'via custom process'
+
         if not dry_run:
             try:
                 # Change the state from INGESTION to INGESTING, raising an
                 # error if the job was not already in that state.
-                db.change_state(job_id, JSAProcState.INGESTING,
-                                'Job output is being ingested into CAOM-2',
-                                state_prev=(None if force else
-                                            JSAProcState.INGESTION))
+                db.change_state(
+                    job.id, JSAProcState.INGESTING,
+                    'Job output is being ingested {}'.format(description),
+                    state_prev=(None if force else JSAProcState.INGESTION))
 
             except NoRowsError:
                 # This would normally be a "logger.error", but we routinely
@@ -64,19 +78,21 @@ def ingest_output(
                 # logged as these lead to unnecessary warnings in the cron
                 # job monitor.
                 logger.debug('Job %i can not be ingested as it is not ready',
-                             job_id)
+                             job.id)
 
                 continue
 
-            _perform_ingestion(job_id=job_id, db=db)
+            _perform_ingestion(job_id=job.id, db=db, command_ingest=command_ingest)
 
         else:
-            logger.info('Skipping ingestion of job %i (DRY RUN)', job_id)
+            logger.info(
+                'Skipping ingestion %s of job %i (DRY RUN)',
+                description, job.id)
 
 
 @ErrorDecorator
-def _perform_ingestion(job_id, db):
-    """Private function to peform the CAOM-2 ingestion.
+def _perform_ingestion(job_id, db, command_ingest=None):
+    """Private function to peform the ingestion.
 
     Runs under the ErrorDecorator to capture errors.  Sets the job state
     to COMPLETE if it finishes successfully, or ERROR otherwise.
@@ -96,28 +112,45 @@ def _perform_ingestion(job_id, db):
     except NoRowsError:
         raise JSAProcError('Job has no output files to ingest')
 
-    scratch_dir = make_temp_scratch_dir(job_id)
-    logger.debug('Using scratch directory %s', scratch_dir)
-
     with open_log_file(job_id, 'ingestion') as log:
         try:
-            logger.debug('Invoking jsaingest, log file: %s', log.name)
+            if command_ingest is None:
+                scratch_dir = make_temp_scratch_dir(job_id)
+                logger.debug('Using scratch directory %s', scratch_dir)
 
-            subprocess.check_call(
-                [
-                    'jsaingest',
-                    '--ingest',
-                    '--collection', 'JCMT',
-                    '--indir', output_dir,
-                ],
-                shell=False,
-                cwd=scratch_dir,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                preexec_fn=restore_signals)
+                logger.debug('Invoking jsaingest, log file: %s', log.name)
+
+                subprocess.check_call(
+                    [
+                        'jsaingest',
+                        '--ingest',
+                        '--collection', 'JCMT',
+                        '--indir', output_dir,
+                    ],
+                    shell=False,
+                    cwd=scratch_dir,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    preexec_fn=restore_signals)
+
+            else:
+                logger.debug(
+                    'Invoking custom ingestion script %s, log file: %s',
+                    command_ingest, log.name)
+
+                subprocess.check_call(
+                    [
+                        command_ingest,
+                        '--transdir', output_dir,
+                    ],
+                    shell=False,
+                    cwd='/tmp',
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    preexec_fn=restore_signals)
 
             db.change_state(job_id, JSAProcState.COMPLETE,
-                            'CAOM-2 ingestion completed successfully',
+                            'Ingestion completed successfully',
                             state_prev=JSAProcState.INGESTING)
 
             logger.info('Done ingesting ouput for job {0}'.format(job_id))
@@ -132,6 +165,6 @@ def _perform_ingestion(job_id, db):
             errorline = content[content.find('\nERROR '):].split('\n')[1]
 
             db.change_state(job_id, JSAProcState.ERROR,
-                            'CAOM-2 ingestion failed\n' + errorline)
+                            'Ingestion failed\n' + errorline)
 
-            logger.exception('Error during CAOM-2 ingestion of job %i', job_id)
+            logger.exception('Error during ingestion of job %i', job_id)

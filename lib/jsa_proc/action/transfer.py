@@ -84,9 +84,15 @@ def transfer_poll(db):
                             stderr=subprocess.STDOUT,
                             preexec_fn=restore_signals)
 
-                    db.change_state(job.id, JSAProcState.COMPLETE,
-                                    'Custom transfer completed successfully',
-                                    state_prev=JSAProcState.TRANSFERRING)
+                    # Change the state to complete, unless we have a custom
+                    # ingestion command to run.
+                    db.change_state(
+                        job.id,
+                        (JSAProcState.COMPLETE
+                            if job_task_info.command_ingest is None
+                            else JSAProcState.INGESTION),
+                        'Custom transfer completed successfully',
+                        state_prev=JSAProcState.TRANSFERRING)
 
                 except subprocess.CalledProcessError as e:
                     logger.exception('Custom transfer command failed '
