@@ -49,7 +49,7 @@ JSAProcJobNote = namedtuple(
     'id message username')
 JSAProcTaskInfo = namedtuple(
     'JSAProcTaskInfo',
-    'id taskname etransfer starlink_dir version command_run command_xfer raw_output')
+    'id taskname etransfer starlink_dir version command_run command_xfer raw_output command_ingest')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1332,7 +1332,7 @@ class JSAProcDB:
         """
 
         query = 'SELECT id, taskname, etransfer, starlink, version, ' \
-            'command_run, command_xfer, raw_output ' \
+            'command_run, command_xfer, raw_output, command_ingest ' \
             'FROM task'
         params = []
 
@@ -1397,7 +1397,8 @@ class JSAProcDB:
         return results
 
     def add_task(self, taskname, etransfer, starlink=None, version=None,
-                 command_run=None, command_xfer=None, raw_output=None):
+                 command_run=None, command_xfer=None, raw_output=None,
+                 command_ingest=None):
         """
         Add a task to the task table.
 
@@ -1410,14 +1411,16 @@ class JSAProcDB:
           version: file version.
           command_run: custom command to run job
           command_xfer: custom data transfer command
+          raw_output: request raw output files
+          command_ingest: custom data ingestion command
         """
         with self.db as c:
             c.execute(
                 'INSERT INTO task (taskname, etransfer, starlink, version, '
-                'command_run, command_xfer, raw_output) '
-                'VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                'command_run, command_xfer, raw_output, command_ingest) '
+                'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
                 (taskname, etransfer, starlink, version,
-                 command_run, command_xfer, raw_output))
+                 command_run, command_xfer, raw_output, command_ingest))
 
     def get_parents(self, job_id, with_state=False):
         """

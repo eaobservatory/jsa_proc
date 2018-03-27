@@ -131,7 +131,8 @@ CREATE TABLE task (
     version INTEGER DEFAULT NULL,
     command_run VARCHAR(255) DEFAULT NULL,
     command_xfer VARCHAR(255) DEFAULT NULL,
-    raw_output BOOLEAN
+    raw_output BOOLEAN,
+    command_ingest VARCHAR(255) DEFAULT NULL
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);

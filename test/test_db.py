@@ -799,7 +799,8 @@ class InterfaceDBTest(DBTestCase):
         self.db.add_task('testtask3', None, 'mystarpath', 1, raw_output=False)
         self.db.add_task('testtask4', None, 'myotherstarpath', 2,
                          command_run='custom_run_command',
-                         command_xfer='custom_xfer_command')
+                         command_xfer='custom_xfer_command',
+                         command_ingest='custom_ingest_command')
         self.assertEqual(self.db.get_task_info('testtask').starlink_dir,
                          'mystarpath')
         self.assertTrue(self.db.get_task_info('testtask').etransfer)
@@ -816,6 +817,7 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(self.db.get_task_info('testtask3').version, 1)
         self.assertIsNone(self.db.get_task_info('testtask3').command_run)
         self.assertIsNone(self.db.get_task_info('testtask3').command_xfer)
+        self.assertIsNone(self.db.get_task_info('testtask3').command_ingest)
         self.assertIsNone(self.db.get_task_info('testtask4').etransfer)
         self.assertEqual(self.db.get_task_info('testtask4').starlink_dir,
                          'myotherstarpath')
@@ -824,6 +826,8 @@ class InterfaceDBTest(DBTestCase):
                          'custom_run_command')
         self.assertEqual(self.db.get_task_info('testtask4').command_xfer,
                          'custom_xfer_command')
+        self.assertEqual(self.db.get_task_info('testtask4').command_ingest,
+                         'custom_ingest_command')
 
         with self.assertRaises(NoRowsError):
             self.db.get_task_info('notatask')
