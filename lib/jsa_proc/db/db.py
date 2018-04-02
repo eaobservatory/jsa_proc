@@ -35,6 +35,16 @@ JSAProcQa = namedtuple(
     'JSAProcQa',
     'id job_id datetime status  message username')
 
+JSAProcJob = namedtuple(
+    'JSAProcJob',
+    ['id', 'tag', 'state', 'state_prev', 'location', 'foreign_id', 'mode',
+     'parameters', 'priority', 'task', 'qa_state'])
+JSAProcObs = namedtuple(
+    'JSAProcObs',
+    ['id', 'job_id', 'obsid', 'obsidss', 'date_obs', 'date_end', 'utdate',
+     'obsnum', 'instrument', 'backend', 'subsys', 'project', 'survey',
+     'scanmode', 'sourcename', 'obstype', 'association', 'omp_status',
+     'tau', 'seeing'])
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
     'id tag state location foreign_id task qa_state outputs')
@@ -158,7 +168,10 @@ class JSAProcDB:
         Returns JSAProcJob named tuple.
         """
         # Get the values form the database
-        c.execute('SELECT * FROM job WHERE ' + name + '=%s', (value,))
+        c.execute(
+            'SELECT ' +
+            ', '.join(JSAProcJob._fields) +
+            ' FROM job WHERE ' + name + '=%s', (value,))
         job = c.fetchall()
         if len(job) == 0:
             raise NoRowsError(
@@ -171,13 +184,6 @@ class JSAProcDB:
 
         # Turn list into single item
         job = job[0]
-        rows = c.description
-
-        # Define namedtuple dynamically, to ensure we always return
-        # full information about jobs (specific to this function),
-        # define others at top of this file. (Can be defined
-        # statically instead if wanted).
-        JSAProcJob = namedtuple('JSAProcJob', [x[0] for x in rows])
 
         # Turn job into namedtuple
         job = JSAProcJob(*job)
@@ -400,14 +406,12 @@ class JSAProcDB:
         with self.db as c:
             # Get all observations with job_id
             c.execute(
-                'SELECT * FROM obs WHERE job_id = %s '
+                'SELECT ' +
+                ', '.join(JSAProcObs._fields) +
+                ' FROM obs WHERE job_id = %s '
                 'ORDER BY utdate ASC, obsnum ASC',
                 (job_id,))
             results = c.fetchall()
-            columns = [i[0] for i in c.description]
-
-            # Create a named tuple with the correct column output
-            JSAProcObs = namedtuple('JSAProcObs', columns)
 
         results = [JSAProcObs(*obs) for obs in results]
 
@@ -1373,7 +1377,9 @@ class JSAProcDB:
         tasks: list of task names to search within.
         """
         query = (
-            "SELECT obs.*, job.state FROM obs join job on obs.job_id=job.id"
+            "SELECT " +
+            ', '.join(['obs.' + x for x in JSAProcObs._fields]) +
+            ", job.state FROM obs join job on obs.job_id=job.id"
             " WHERE obs.project=%s")
         params = (project,)
         if tasks:
@@ -1392,7 +1398,7 @@ class JSAProcDB:
                 'No entries found in obs for project %s' % project,
                 query % tuple(params))
 
-        JSAProcObsE = namedtuple('JSAProcObsE', columns)
+        JSAProcObsE = namedtuple('JSAProcObsE', JSAProcObs._fields + ('state',))
         results = [JSAProcObsE(*obs) for obs in rows]
         return results
 
