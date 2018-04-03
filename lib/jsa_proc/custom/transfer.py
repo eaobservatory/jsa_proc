@@ -15,12 +15,15 @@
 
 from __future__ import absolute_import, division, print_function
 
+import errno
 import logging
 import os
 import sys
 
 from docopt import docopt
 import vos
+
+from jsa_proc.files import get_md5sum
 
 logger = logging.getLogger(__name__)
 
@@ -101,18 +104,18 @@ class CustomJobTransfer(object):
         :param dry_run: specifies dry run mode.
         """
 
-        if dry_run:
-            vos_client = None
-        else:
-            logger.debug('Constructing VOS client')
-            vos_client = vos.Client()
-            if not vos_client.isdir(self.vos_base):
-                raise Exception(
-                    'VOS base directory does not exist (or is file)')
+        logger.debug('Constructing VOS client')
+        vos_client = vos.Client()
+        if not vos_client.isdir(self.vos_base):
+            raise Exception(
+                'VOS base directory does not exist (or is file)')
+
+        vos_cache = {}
 
         for file_ in (filenames):
             # Determine local file information.
             file_path = os.path.join(transdir, file_)
+            file_md5 = get_md5sum(file_path)
 
             # Determine VO space information.
             vos_sub_dir = self.determine_vos_directory(transdir, file_)
@@ -127,21 +130,74 @@ class CustomJobTransfer(object):
             vos_dir = '/'.join([self.vos_base, vos_sub_dir])
             vos_file = '/'.join([vos_dir, file_])
 
-            # Perform storage (if not in dry-run mode).
-            if dry_run:
+            # Get directory listing -- this creates the directory
+            # if not in dry-run mode.
+            if vos_dir in vos_cache:
+                vos_dir_info = vos_cache[vos_dir]
+
+            else:
+                vos_dir_info = self.get_vos_directory_entries(
+                    vos_client, vos_dir, dry_run=dry_run)
+
+                vos_cache[vos_dir] = vos_dir_info
+
+            # Perform storage, if file changed (and not in dry-run mode).
+            vos_md5 = vos_dir_info.get(file_)
+
+            if (vos_md5 is not None) and (vos_md5 == file_md5):
+                logger.info(
+                    'Skipped storing {0} as {1} [UNCHANGED]'.format(
+                        file_path, vos_file))
+
+            elif dry_run:
                 logger.info(
                     'Skipped storing {0} as {1} [DRY-RUN]'.format(
                         file_path, vos_file))
 
             else:
-                self.make_vos_directory(vos_client, vos_dir)
-
-                if vos_client.isfile(vos_file):
+                if vos_md5 is not None:
                     logger.debug('Deleting existing file {0}'.format(vos_file))
                     vos_client.delete(vos_file)
 
                 logger.info('Storing {0} as {1}'.format(file_path, vos_file))
                 vos_client.copy(file_path, vos_file)
+
+    def get_vos_directory_entries(self, vos_client, vos_dir, dry_run=False):
+        """
+        Get a list of a directory's content, or make it if it doesn't
+        already exist.
+
+        :return: a dictionary of MD5 sums by filename
+        """
+
+        result = {}
+
+        try:
+            logger.debug('Getting VO space node: %s', vos_dir)
+
+            nodes = vos_client.get_node(
+                vos_dir, limit=None, force=True).node_list
+
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                if dry_run:
+                    logger.info('DRY-RUN: would have made: %s', vos_dir)
+
+                else:
+                    self.make_vos_directory(vos_client, vos_dir)
+
+            else:
+                logger.exception('Error getting VO space node')
+                raise
+
+        else:
+            for node in nodes:
+                if node.isdir():
+                    continue
+
+                result[node.name] = node.props['MD5']
+
+        return result
 
     def make_vos_directory(self, vos_client, vos_dir):
         """
