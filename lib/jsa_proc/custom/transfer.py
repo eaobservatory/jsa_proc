@@ -142,9 +142,9 @@ class CustomJobTransfer(object):
                 vos_cache[vos_dir] = vos_dir_info
 
             # Perform storage, if file changed (and not in dry-run mode).
-            vos_md5 = vos_dir_info.get(file_)
+            vos_md5 = vos_dir_info.get(file_, ())
 
-            if (vos_md5 is not None) and (vos_md5 == file_md5):
+            if (vos_md5 != ()) and (vos_md5 == file_md5):
                 logger.info(
                     'Skipped storing {0} as {1} [UNCHANGED]'.format(
                         file_path, vos_file))
@@ -155,7 +155,7 @@ class CustomJobTransfer(object):
                         file_path, vos_file))
 
             else:
-                if vos_md5 is not None:
+                if vos_md5 != ():
                     logger.debug('Deleting existing file {0}'.format(vos_file))
                     vos_client.delete(vos_file)
 
@@ -195,7 +195,25 @@ class CustomJobTransfer(object):
                 if node.isdir():
                     continue
 
-                result[node.name] = node.props['MD5']
+                if 'MD5' in node.props:
+                    result[node.name] = node.props['MD5']
+                    continue
+
+                elif 'length' in node.props:
+                    # VO space seems to fail to return MD5 sums
+                    # for empty files.
+                    if node.props['length'] == '0':
+                        logger.debug('Got no MD5 sum for length-0 file %s', node.name)
+                        result[node.name] = 'd41d8cd98f00b204e9800998ecf8427e'
+                        continue
+
+                    else:
+                        logger.warning('Unexpectedly got no MD5 sum for file %s', node.name)
+
+                else:
+                    logger.warning('Got no MD5 sum or length for file %s', node.name)
+
+                result[node.name] = None
 
         return result
 
