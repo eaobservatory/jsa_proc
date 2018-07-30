@@ -19,71 +19,68 @@
         <!-- SCUBA raw data files -->
         <!-- e.g. 19980415_dem_0026 -->
         <!-- template YYYYMMDD_dem_nnnn -->
-	<value>(199\d|20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_DEM_[\d]{4}</value>
+	<value>(199\d|20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_dem_[\d]{4}</value>
         <!-- -->
         <!-- SCAN raw data files -->
         <!-- e.g. m99an03@990429_134125_cbe_0192 -->
         <!-- template projid@YYMMDD_NNNNNN_INS_nnnn -->
 	<!-- where INS in (cbe,das,ifd,rxa,rxc,aos,rxb,ukt) -->
         <!-- -->
-        <value>[\w]+@[890]\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_[\d]{6}_(CBE|DAS|IFD|RXA|RXC|AOS|RXB|UKT)_[\d]{4}</value>
+        <value>[\w]+@[890]\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_[\d]{6}_(cbe|das|ifd|rxa|rxc|aos|rxb|ukt)_[\d]{4}</value>
         <!-- -->
         <!-- SCUBA2 raw data files -->
         <!-- e.g. S8A20070805_00023_0005 -->
         <!-- template s[48][abcd]YYYYMMDD_nnnnn_nnnn -->
         <!-- -->
-        <value>(S[48][ABCD])(20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([\d]{4})</value>
+        <value>(s[48][abcd])(20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([\d]{4})</value>
         <!-- -->
         <!-- ACSIS/DAS raw data files -->
         <!-- e.g. A20070805_00023_94_0005 -->
         <!-- template aYYYYMMDD_nnnnn_nn_nnnn -->
         <!-- -->
-        <value>(A)(19|20)([\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([\d]{2})_([\d]{4})</value>
+        <value>(a)(19|20)([\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([\d]{2})_([\d]{4})</value>
         <!-- -->
       </list>
       <list key = "PROCESSED">
         <!-- -->
 	<!-- SCUBA products -->
-        <!-- e.g. M99AC44_19990415_0036_OBS_LONG_REB -->
-        <!-- e.g. M99AC44_19990415_0036_OBS_SHORT_REB -->
-        <!-- e.g. M99AC44_19990415_0036_NIGHT_LONG_REB -->
-        <!-- e.g. M99AC44_19990415_0036_PROJECT_LONG_REB -->
-        <!-- e.g. MULTI_19990415_0036_PUBLIC_LONG_REB -->
-        <!-- e.g. M99BC44_19990913_0118_PROJECT_LONG_IQU -->
-        <!-- e.g. M99BC44_19990913_0118_PROJECT_LONG_CAT -->
-        <!-- template PROJID_UTDATE_SCAN_TYPE_WAVE_PRODUCT -->
+        <!-- e.g. m99ac44_19990415_0036_obs_long_reb -->
+        <!-- e.g. m99ac44_19990415_0036_obs_short_reb -->
+        <!-- e.g. m99ac44_19990415_0036_night_long_reb -->
+        <!-- e.g. m99ac44_19990415_0036_project_long_reb -->
+        <!-- e.g. multi_19990415_0036_public_long_reb -->
+        <!-- e.g. m99bc44_19990913_0118_project_long_iqu -->
+        <!-- e.g. m99bc44_19990913_0118_project_long_cat -->
+        <!-- template projid_utdate_scan_type_wave_product -->
         <!-- -->
-        <value>(MULTI|[MS][019]\d[AB][CHINU][\d]{2})_(199\d|20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{4})_(OBS|NIGHT|PROJECT|PUBLIC)_(LONG|SHORT|P2000|P1350|P1100)_(REB|IQU|CAT)</value>
+        <value>(multi|[ms][019]\d[ab][chinu][\d]{2})_(199\d|20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{4})_(obs|night|project|public)_(long|short|p2000|p1350|p1100)_(reb|iqu|cat)</value>
         <!--  -->
 	<!-- ACSIS/DAS and SCUBA2 products -->
-	<!-- template JCMT[HS]UTDATE_OBSNUM_SUBSYSNR_SUFFIX_ASNTYPE_VERSION -->
-        <!-- e.g. JCMTH20070530_00055_01_REDUCED001_OBS_000 - simple cube from a single observation -->
-	<!-- e.g. JCMTH20070515_00021_01_REDUCED002_NIT_000 - tile 2 of a composite observation from a night product -->
+	<!-- template jcmt[hs]utdate_obsnum_subsysnr_suffix_asntype_version -->
+        <!-- e.g. jcmth20070530_00055_01_reduced001_obs_000 - simple cube from a single observation -->
+	<!-- e.g. jcmth20070515_00021_01_reduced002_nit_000 - tile 2 of a composite observation from a night product -->
 	<!-- comment out the complete version of the name 2007-11-27
-	   <value>JCMT(H|S)(20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_(0[0-4]|[48]50)_(CUBE[\d]{3}|REDUCED[\d]{3}|RIMG|RSP|RVEL|LINTEG[\d]{3}|SP[\d]{3}|STD)_(OBS|NIT|PRO|PUB)_([\d]{3})</value>
+	   <value>jcmt(h|s)(20[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_(0[0-4]|[48]50)_(cube[\d]{3}|reduced[\d]{3}|rimg|rsp|rvel|linteg[\d]{3}|sp[\d]{3}|std)_(obs|nit|pro|pub)_([\d]{3})</value>
 	   For the moment we will accept only reduced, rimg and rsp products for obs and nit associations by e-transfer.
 	   RIMG and RSP are only valid as ACSIS products.
 	   REDUCED files are produced for both ACSIS and SCUBA-2.
 	-->
-	<value>JCMTH(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_(RIMG|RSP)_(OBS|NIT|PRO)_([\d]{3})</value>
-	<value>JCMT(H|S)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(REDUCED[\d]{3}|HEALPIX[\d]{6}|HPXRIMG|HPXRSP)_(OBS|NIT|PRO)_([\d]{3})</value>
+	<value>jcmth(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_[01][0-9]_(rimg|rsp)_(obs|nit|pro)_([\d]{3})</value>
+	<value>jcmt(h|s)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(reduced[\d]{3}|healpix[\d]{6}|hpxrimg|hpxrsp)_(obs|nit|pro)_([\d]{3})</value>
+	<value>jcmt(h|s)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(reduced|healpix|hpxrimg|hpxrsp)_(obs|nit|pro)_([\d]{3})_preview_(64|256|1024)</value>
 	<!-- ACSIS and SCUBA2 CAOM2 thumbnails -->
 	<!-- <collection>_<observationID>_<productID>_preview_(64|256|1024) -->
-        <!-- e.g. JCMT_20140103-0a3e07ab157c42d36c8ed2414ea239d7_reduced_2_preview_1024 -->
-        <!-- e.g. JCMT_scuba2_00007_20130925T092025_raw_450_preview_256 -->
+        <!-- e.g. jcmts20170920_00012_850_reduced_nit_000_preview_1024 -->
         <!--  -->
         <!--  -->
         <!--  -->
-        <value>JCMT(|LS|USER)_([\w]+)-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(((ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9]))|(([\w]+)-([\w]+)))_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-([\d]{6}MHZ)-(1000MHZX1024|1000MHZX2048|160MHZX1024|160MHZX128|160MHZX2048|160MHZX256|160MHZX512|1899MHZX1945|1948MHZX1995|1GHZX2048|250MHZX4096|250MHZX8192|450MHZX7371|490MHZX8027)-([\d])_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-([\w]+)_(RAW|REDUCED|RSP)-(450UM|850UM|[\d]{1})_PREVIEW_(64|256|1024)</value>
-        <value>JCMT(|LS|USER)_(ACSIS|SCUBA2|DAS)_([\d]{1,5})_(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([012][0-9])([0-5][0-9])([0-5][0-9])_(RAW|RAW-HYBRID|REDUCED|RSP|HEALPIX)-(450|850)UM_PREVIEW_(64|256|1024)</value>
+	<value>jcmt(h|s)(20[\d]{2}|19[\d]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])_([\d]{5})_([01][0-9]|[48]50)_(reduced|healpix|hpxrimg|hpxrsp)_(obs|nit|pro)_([\d]{3})_preview_(64|256|1024)</value>
         <!-- SCUBA-2 public products -->
-        <!-- template JCMTSSUBSYSNR_PRODUCTTILENUMBER_PUB_VERSION -->
-        <value>JCMTS([48]50)UM_(HEALPIX|TILE-MOC|EXTENT-MOC|EXTENT-MASK|EXTENT-CAT|PEAK-CAT)([\d]{6})_PUB_([\d]{3})</value>
+        <!-- template jcmtssubsysnr_producttilenumber_pub_version -->
+        <value>jcmts([48]50)um_(healpix|tile-moc|extent-moc|extent-mask|extent-cat|peak-cat)([\d]{6})_pub_([\d]{3})</value>
         <!-- SCUBA-2 public previews -->
-        <!-- template JCMT_SCUBA-2-049048_HEALPIX-850UM_PREVIEW_64 -->
-        <value>JCMT_SCUBA-2-([\d]{6})_(HEALPIX|EXTENT|PEAK)-([48]50)UM_PREVIEW_(64|256|1024)</value>
+        <!-- template jcmtssubsysnr_producttilenumber_pub_version_preview_size -->
+        <value>jcmts([48]50)um_(healpix|extent|peak)([\d]{6})_pub_([\d]{3})_preview_(64|256|1024)</value>
       </list>
     </struct>
   </list>
