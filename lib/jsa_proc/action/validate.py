@@ -27,7 +27,7 @@ valid_file = re.compile('^[_a-z0-9]+$')
 
 valid_preview_sizes = set([64, 256, 1024])
 valid_preview_file = re.compile(
-    '^(jcmt_[-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
+    '^(jcmt[hs][-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
 valid_product_file = re.compile('^jcmt[hs][-_a-z0-9]+\.fits$')
 
 
