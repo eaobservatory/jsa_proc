@@ -41,7 +41,7 @@ class CADCTap():
 
         self.obsids_found = {}
 
-    def obsids_by_pattern(self, pattern):
+    def obsids_by_pattern(self, pattern, with_productid=False):
         """Retrueve list of obsids matching a given pattern.
 
         The pattern should be in lower case.
@@ -50,7 +50,7 @@ class CADCTap():
         result = []
 
         table = self.tap.query(
-            'SELECT lower(Observation.observationID) '
+            'SELECT lower(Observation.observationID), Plane.productID '
             'FROM caom2.Observation as Observation '
             'JOIN caom2.Plane as Plane ON Observation.obsID = Plane.obsID '
             'WHERE ( Observation.collection = \'JCMT\' '
@@ -62,8 +62,11 @@ class CADCTap():
             raise JSAProcError(
                 'Failed TAP query for observation ID like {0}'.format(pattern))
 
-        for (obsid,) in table:
-            result.append(obsid)
+        for (obsid, productid) in table:
+            if with_productid:
+                result.append((obsid, productid))
+            else:
+                result.append(obsid)
 
         return result
 

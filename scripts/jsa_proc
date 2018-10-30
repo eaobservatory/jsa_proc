@@ -430,8 +430,9 @@ def query(args):
     if args['caom2']:
         from jsa_proc.cadc.tap import CADCTap
         caom2 = CADCTap()
-        for obsid in sorted(caom2.obsids_by_pattern(search.lower())):
-            print(obsid)
+        for (obsid, planeid) in sorted(caom2.obsids_by_pattern(
+                search.lower(), with_productid=True)):
+            print(obsid, planeid)
 
     elif args['caom2file']:
         from jsa_proc.cadc.tap import CADCTap
