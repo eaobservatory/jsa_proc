@@ -40,12 +40,11 @@ def check_file_name(filename, return_section=False):
     instead.
     """
 
-    (base, ext) = os.path.splitext(filename)
-    base = base.lower()
+    file_id = filename.lower()
 
     for (key, patterns) in _get_namecheck_pattern().items():
         for pattern in patterns:
-            if pattern.match(base):
+            if pattern.match(file_id):
                 # Pattern matched: decide whether to return the section
                 # key or just True.
                 if return_section:
