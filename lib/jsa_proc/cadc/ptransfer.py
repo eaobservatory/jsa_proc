@@ -393,6 +393,9 @@ def ptransfer_clean_up(dry_run=False):
     start_limit = datetime.utcnow() - timedelta(
         minutes=int(config.get('etransfer', 'cleanup_minutes')))
 
+    start_limit_hard = datetime.utcnow() - timedelta(
+        minutes=int(config.get('etransfer', 'cleanup_hard_minutes')))
+
     # Look for proc directories.
     proc_base_dir = os.path.join(trans_dir, 'proc')
 
@@ -431,6 +434,30 @@ def ptransfer_clean_up(dry_run=False):
         if is_running:
             logger.debug('Directory %s corresponds to running process (%i)',
                          dir_, pid)
+
+            if start > start_limit_hard:
+                continue
+
+            logger.debug(
+                'Directory %s is older than hard limit, killing process %i',
+                dir_, pid)
+
+            if not dry_run:
+                try:
+                    os.kill(pid, 15)
+                except OSError:
+                    pass
+
+                # Check whether the process did exit.
+                sleep(5)
+                try:
+                    os.kill(pid, 0)
+                except OSError:
+                    is_running = False
+
+                if is_running:
+                    logger.warning('Could not kill process %i', pid)
+                    continue
 
         # All checks are complete: move the files back to their initial
         # stream directories.

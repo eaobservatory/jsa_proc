@@ -45,6 +45,7 @@ max_tries=3
 retry_delay=10
 ad_stream=RAW:raw PROCESSED:product
 cleanup_minutes=30
+cleanup_hard_minutes=60
 
 [utilities]
 fitsverify=/local/progs/bin/fitsverify
