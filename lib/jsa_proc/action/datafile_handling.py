@@ -20,7 +20,7 @@ import re
 import subprocess
 import shutil
 
-from jsa_proc.admin.directories import get_input_dir, get_output_dir
+from jsa_proc.admin.directories import get_input_dir, get_output_dir, get_log_dir
 from jsa_proc.db.db import JSAProcFileInfo
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
@@ -318,7 +318,7 @@ def get_output_files(job_id):
     # Check it exists and is a directory: raise error if not
     if not os.path.exists(output_dir) or not os.path.isdir:
         raise JSAProcError(
-            'The output directory %s for job %i does not exits' %
+            'The output directory %s for job %i does not exist' %
             (output_dir, job_id))
 
     # Get list of files in directory:
@@ -327,6 +327,25 @@ def get_output_files(job_id):
     return [JSAProcFileInfo(x, get_md5sum(os.path.join(output_dir, x)))
             for x in contents]
 
+def get_output_log_files(job_id):
+    """
+    Get the current list of output log.* files from the log directory.
+
+    This command trusts whatever is in the log directory and starts
+    with log.* is the correct list of output log files.
+
+    Returns: list of bare file names
+    """
+    log_dir = get_log_dir(job_id)
+
+    if not os.path.exists(log_dir) or not os.path.isdir:
+        raise JSAProcError(
+            'The log directory %s for job %i does not exist.' % (log_dir, job_id))
+
+    pattern = re.compile('log.*')
+    logs = [i for i in os.listdir(log_dir) if pattern.match(i)]
+
+    return logs
 
 def valid_hds(filepath):
     """

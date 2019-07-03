@@ -952,6 +952,32 @@ class JSAProcDB:
                           'VALUES (%s, %s, %s)',
                           (job_id, f.filename, f.md5))
 
+    def set_log_files(self, job_id, log_files):
+
+        """
+        This will set the output log file list for a job.
+
+        This first blanks any lines set with that job_id, and then
+        creates new entries for each item in log_files.
+
+        parameters:
+        job_id, required, integer
+        Identify which job to change/set the output file list from.
+
+        log_files, required, list of log_file names.
+
+        """
+
+        with self.db as c:
+            # First of all blank out any current output files for this job_id.
+            c.execute('DELETE FROM log_file WHERE job_id = %s', (job_id,))
+
+            for f in log_files:
+                # Now add in the new output files, one at a time.
+                c.execute('INSERT INTO log_file (job_id, filename) '
+                          'VALUES (%s, %s)',
+                          (job_id, f))
+
     def find_errors_logs(self, location=None, task=None, state_prev=None,
                          error_state=JSAProcState.ERROR):
         """

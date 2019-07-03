@@ -23,7 +23,8 @@ from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.action.decorators import ErrorDecorator
-from jsa_proc.action.datafile_handling import get_output_files, input_list_name
+from jsa_proc.action.datafile_handling import get_output_files, input_list_name, \
+    get_output_log_files
 from jsa_proc.action.job_running import jsawrapdr_run
 from jsa_proc.files import get_output_dir_space, get_scratch_dir_space
 from jsa_proc.jac.file import hpx_tiles_from_filenames
@@ -209,6 +210,14 @@ def run_a_job(job_id, db=None, force=False):
     # write output files to table
     logger.debug('Storing list of output files')
     db.set_output_files(job_id, output_files)
+
+    # Create list of output log files.
+    logger.debug('Preparing list of output log files (log.*)')
+    log_files = get_output_log_files(job_id)
+
+    # Write output log files to table.
+    logger.debug('Storing list of output log files')
+    db.set_log_files(job_id, log_files)
 
     # If task begins with hpx, get tiles from list of output_files
     # and write to tile table in db.
