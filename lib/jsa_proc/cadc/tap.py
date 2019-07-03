@@ -24,7 +24,7 @@ from jsa_proc.util import identifier_to_pattern
 
 logger = logging.getLogger(__name__)
 
-valid_fileid = re.compile('^[-_a-z0-9]+$')
+valid_fileid = re.compile('^[-_a-z0-9]+.[a-z]+$')
 
 
 class CADCTap():
@@ -121,8 +121,8 @@ class CADCTap():
         uris = {}
 
         for filename in filenames:
-            # CADC uses file IDs without extension in the JCMT archive.
-            fileid = os.path.splitext(filename)[0]
+            # CADC now uses file IDs *with* the extension in the JCMT archive.
+            fileid = filename
 
             if not valid_fileid.match(fileid):
                 raise JSAProcError('Invalid file ID {0}'.format(fileid))
