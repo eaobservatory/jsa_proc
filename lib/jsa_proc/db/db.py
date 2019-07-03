@@ -951,6 +951,34 @@ class JSAProcDB:
                 c.execute('INSERT INTO output_file (job_id, filename, md5) '
                           'VALUES (%s, %s, %s)',
                           (job_id, f.filename, f.md5))
+    def get_log_files(self, job_id):
+        """
+        Get the  list of log files for a job.
+
+        parameters:
+        job_id, (required), integer.
+        Identify which job to get the output file list from.
+
+
+        Returns:
+        list of output files.
+
+        Will raise an NoRowsError if there are no output files found.
+        """
+
+        with self.db as c:
+            c.execute(
+                'SELECT filename FROM log_file WHERE job_id = %s',
+                (job_id,))
+            output_files = c.fetchall()
+            if len(output_files) == 0:
+                raise NoRowsError(
+                    'output_file',
+                    'SELECT filename FROM output_file WHERE job_id = ' +
+                    (str(job_id)))
+
+        # Turn list of tuples into single list of strings.
+        return [row[0] for row in output_files]
 
     def set_log_files(self, job_id, log_files):
 
