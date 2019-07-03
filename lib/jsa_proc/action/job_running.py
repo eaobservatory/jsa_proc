@@ -158,6 +158,12 @@ def jsawrapdr_run(job_id, input_file_list, mode, drparameters,
     # Add in the LOGDIR
     jsa_env['ORAC_LOGDIR'] = log_dir
 
+    # Ensure that we delete the results of previous log.* files the ORAC_LOGDIR if they exist.
+    if os.path.exists(log_dir):
+        calculation_logs = glob.glob(os.path.join(log_dir, 'log.*'))
+        for cl in calculation_logs:
+            os.remove(cl)
+
     # Open a log file and run jsawrapdr while saving output to log.
     with open_log_file(job_id, 'jsawrapdr') as log:
 
