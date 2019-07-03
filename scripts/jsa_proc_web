@@ -22,13 +22,15 @@ from jsa_proc.web.flask_app import create_web_app
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', required=False, default=False,
                     action='store_true')
+parser.add_argument('--port', required=False, default=5000,
+                    action='store')
 
 args = parser.parse_args()
 
 app = create_web_app()
 
 options = {
-    'port': 5000,
+    'port': int(args.port),
 }
 
 if args.debug:
