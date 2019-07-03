@@ -16,6 +16,7 @@
 from collections import namedtuple
 import os
 import re
+import time
 
 from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.web.util import url_for
@@ -28,7 +29,7 @@ log_types = {
     'Transfer': re.compile('transfer.*\.log'),
 }
 
-LogInfo = namedtuple('LogInfo', ['name', 'url'])
+LogInfo = namedtuple('LogInfo', ['name', 'url', 'mtime'])
 
 
 def get_log_files(job_id):
@@ -55,8 +56,31 @@ def get_log_files(job_id):
                         url = url_for('job_log_text', job_id=job_id, log=file)
 
                     if type_ in log_files:
-                        log_files[type_].append(LogInfo(file, url))
+                        log_files[type_].append(LogInfo(file, url, None))
                     else:
-                        log_files[type_] = [LogInfo(file, url)]
+                        log_files[type_] = [LogInfo(file, url, None)]
 
+    return log_files
+
+
+def get_orac_log_files(job_id):
+    """
+    Get a dictionary of ORAC-DR (log.*) files for a job.
+
+    Scans the log directory to get all log.* files.
+
+    Skips them if they have a date stamp older than the last run of the system.
+
+    """
+    pattern = re.compile('log.*')
+    log_dir = get_log_dir(job_id)
+
+    log_files = []
+    if os.path.isdir(log_dir):
+        files = os.listdir(log_dir)
+        for f in sorted(files):
+            if pattern.match(f):
+                mtime = time.ctime(os.path.getmtime(os.path.join(log_dir, f)))
+                url = url_for('job_log_text', job_id=job_id, log=f)
+                log_files.append(LogInfo(f, url, mtime))
     return log_files

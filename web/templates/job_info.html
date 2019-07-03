@@ -203,6 +203,18 @@
 </div>
 {% endif %}
 
+<div class="panel">
+<h2>ORAC Logs</h2>
+{% if orac_log_files %}
+  <ul>
+    {% for log in orac_log_files %}
+      <li><a href="{{ log.url }}" >{{ log.name }}</a> ({{log.mtime}})</li>
+    {% endfor %}
+  </ul>
+{% else %}
+<p> No ORAC logs found</p>
+{% endif %}
+</div>
 
 </div>
 

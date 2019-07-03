@@ -21,7 +21,7 @@ import re
 from jsa_proc.error import NoRowsError
 from jsa_proc.state import JSAProcState
 from jsa_proc.web.component.files import make_output_file_list
-from jsa_proc.web.log_files import get_log_files
+from jsa_proc.web.log_files import get_log_files, get_orac_log_files
 from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
@@ -95,6 +95,9 @@ def prepare_job_info(db, job_id, query):
     # Get the log files on disk (if any)
     log_files = get_log_files(job_id)
 
+    # Get the ORAC-DR log.* files on disk (if any)
+    orac_log_files = get_orac_log_files(job_id)
+
     # Get notes.
     notes = db.get_notes(job_id)
 
@@ -131,6 +134,7 @@ def prepare_job_info(db, job_id, query):
         'children': children,
         'output_files': output_files,
         'log_files': log_files,
+        'orac_log_files': orac_log_files,
         'previews': zip(previews256, previews1024),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
