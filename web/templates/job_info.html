@@ -208,7 +208,7 @@
 {% if orac_log_files %}
   <ul>
     {% for log in orac_log_files %}
-      <li><a href="{{ log.url }}" >{{ log.name }}</a> ({{log.mtime}})</li>
+      <li><a href="{{ log[1] }}" >{{ log[0] }}</a></li>
     {% endfor %}
   </ul>
 {% else %}

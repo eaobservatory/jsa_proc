@@ -95,8 +95,14 @@ def prepare_job_info(db, job_id, query):
     # Get the log files on disk (if any)
     log_files = get_log_files(job_id)
 
-    # Get the ORAC-DR log.* files on disk (if any)
-    orac_log_files = get_orac_log_files(job_id)
+    # Get the ORAC-DR log.* files from the database
+    try:
+        orac_log_files = db.get_log_files(job_id)
+        orac_log_files = [(i, url_for('job_log_text', job_id=job_id, log=i))
+                          for i in orac_log_files]
+    except NoRowsError:
+        orac_log_files = None
+
 
     # Get notes.
     notes = db.get_notes(job_id)
