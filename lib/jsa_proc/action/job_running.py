@@ -22,6 +22,7 @@ import shutil
 import subprocess
 import os
 import re
+import glob
 
 from jsa_proc.admin.directories \
     import make_temp_scratch_dir, get_log_dir, get_output_dir, open_log_file
