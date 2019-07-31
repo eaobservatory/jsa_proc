@@ -79,13 +79,8 @@ def prepare_job_qa_info(db, job_id, query):
     except NoRowsError:
         children = None
 
-    if info['task'] == 'lap-transient':
-        preview_filter = None
-    else:
-        preview_filter = ['_reduced-', '_healpix-', '_extent-', '_peak-']
-
     (output_files, previews1024, _) = \
-        make_output_file_list(db, job.id, preview_filter=preview_filter)
+        make_output_file_list(db, job.id)
 
     obs_info = db.get_obs_info(job.id)
 
@@ -150,7 +145,7 @@ def prepare_job_qa_info(db, job_id, query):
         'parents': parents,
         'children': children,
         'log_files': log_files,
-        'previews': zip(previews1024, previews1024),
+        'previews': list(zip(previews1024, previews1024)),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
         'parent_obs': parent_obs,
