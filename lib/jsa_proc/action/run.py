@@ -197,6 +197,11 @@ def run_a_job(job_id, db=None, force=False):
     # Run the processing job.
     logger.debug('Launching jsawrapdr: mode=%s, parameters=%s',
                  mode, drparameters)
+
+    # First of all remove the output files and log_files from the database.
+    db.set_log_files(job_id, [])
+    db.set_output_files(job_id, [])
+
     log = jsawrapdr_run(
         job_id, input_file_list_path, mode, drparameters,
         cleanup='cadc', location='JAC', starlink_dir=starpath,
