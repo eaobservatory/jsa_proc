@@ -951,6 +951,7 @@ class JSAProcDB:
                 c.execute('INSERT INTO output_file (job_id, filename, md5) '
                           'VALUES (%s, %s, %s)',
                           (job_id, f.filename, f.md5))
+
     def get_log_files(self, job_id):
         """
         Get the  list of log files for a job.
@@ -973,8 +974,8 @@ class JSAProcDB:
             output_files = c.fetchall()
             if len(output_files) == 0:
                 raise NoRowsError(
-                    'output_file',
-                    'SELECT filename FROM output_file WHERE job_id = ' +
+                    'log_file',
+                    'SELECT filename FROM log_file WHERE job_id = ' +
                     (str(job_id)))
 
         # Turn list of tuples into single list of strings.
