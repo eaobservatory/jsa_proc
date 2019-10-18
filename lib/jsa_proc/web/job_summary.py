@@ -22,7 +22,10 @@ import numpy as np
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 import time
 
 from flask import send_file
@@ -113,7 +116,7 @@ def prepare_summary_piechart(db, task=None, obsquerydict=None, date_min=None,
 
     # Put figure into a send_file object
     canvas = FigureCanvas(fig)
-    img = StringIO.StringIO()
+    img = StringIO()
     canvas.print_png(img)
     img.seek(0)
 

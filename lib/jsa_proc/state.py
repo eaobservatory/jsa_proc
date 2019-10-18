@@ -80,8 +80,16 @@ class JSAProcState:
 
     STATE_FINAL = set((s for (s, i) in _info.items() if i.final))
 
-    # Final states other than complete presumably indicate a problem.
-    STATE_ERROR = [s for (s, i) in _info.items() if i.final and s != COMPLETE]
+    # Final states other than complete presumably indicate a
+    # problem. (This can't be done in a list comprehension due to the
+    # chnge in python3 with the new local scope inside the list
+    # comprehension interacting with the definition of the names in
+    # class scope: see pep 227,
+    STATE_ERROR = []
+    for (s, i) in _info.items():
+        if s != COMPLETE:
+            STATE_ERROR.append(s)
+
 
     @classmethod
     def get_name(cls, state):

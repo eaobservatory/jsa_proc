@@ -141,7 +141,7 @@ def prepare_job_info(db, job_id, query):
         'output_files': output_files,
         'log_files': log_files,
         'orac_log_files': orac_log_files,
-        'previews': zip(previews256, previews1024),
+        'previews': list(zip(previews256, previews1024)),
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
         'parent_obs': parent_obs,

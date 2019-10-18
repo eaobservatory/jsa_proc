@@ -17,6 +17,13 @@ from collections import defaultdict, namedtuple, OrderedDict
 import logging
 import re
 from socket import gethostname
+
+# Python2/3 compatability:
+try:
+    basestring
+except NameError:
+    basestring = str
+
 from getpass import getuser
 
 from jsa_proc.error import \
