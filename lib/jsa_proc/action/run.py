@@ -17,8 +17,9 @@ import logging
 import os
 import re
 from socket import gethostname
+import subprocess
 
-from jsa_proc.admin.directories import get_input_dir
+from jsa_proc.admin.directories import get_input_dir, open_log_file
 from jsa_proc.config import get_config, get_database
 from jsa_proc.state import JSAProcState
 from jsa_proc.error import JSAProcError, NoRowsError
@@ -28,6 +29,7 @@ from jsa_proc.action.datafile_handling import get_output_files, input_list_name,
 from jsa_proc.action.job_running import jsawrapdr_run
 from jsa_proc.files import get_output_dir_space, get_scratch_dir_space
 from jsa_proc.jac.file import hpx_tiles_from_filenames
+from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
 
@@ -182,12 +184,14 @@ def run_a_job(job_id, db=None, force=False):
     version = None
     command_run = None
     raw_output = None
+    log_ingest_command = None
     try:
         task_info = db.get_task_info(job.task)
         starpath = task_info.starlink_dir
         version = task_info.version
         command_run = task_info.command_run
         raw_output = task_info.raw_output
+        log_ingest_command = task_info.log_ingest
     except NoRowsError:
         # If the task doesn't have task info, leave "starpath" as None
         # so that jsawrapdr_run uses the default value from the configuration
@@ -224,6 +228,29 @@ def run_a_job(job_id, db=None, force=False):
     logger.debug('Storing list of output log files')
     db.set_log_files(job_id, log_files)
 
+    # If a log ingest command is set, run it here.
+    if log_ingest_command:
+        logger.debug('Will try and ingest log files')
+        try:
+            with open_log_file(job.id, 'ingest_log') as logingest_log:
+                subprocess.check_call(
+                    [
+                        log_ingest_command,
+                        str(job_id)
+                    ],
+                    shell=False,
+                    cwd='/tmp',
+                    stdout=logingest_log,
+                    stderr=subprocess.STDOUT,
+                    preexec_fn=restore_signals)
+        except subprocess.CalledProcessError as e:
+            logger.exception('Custom log ingest failed '
+                             'for job %i',
+                             job.id)
+            db.change_state(job.id, JSAProcState.ERROR,
+                            'Custom log ingestion failed',
+                            state_prev=JSAProcState.RUNNING)
+
     # If task begins with hpx, get tiles from list of output_files
     # and write to tile table in db.
     if hpx_task.search(job.task):
@@ -232,6 +259,7 @@ def run_a_job(job_id, db=None, force=False):
         db.set_tilelist(job_id, tiles)
         logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
                      ', '.join(str(i) for i in tiles))
+
 
     # Change state of job.
     db.change_state(
