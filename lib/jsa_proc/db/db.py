@@ -66,7 +66,7 @@ JSAProcJobNote = namedtuple(
     'id message username')
 JSAProcTaskInfo = namedtuple(
     'JSAProcTaskInfo',
-    'id taskname etransfer starlink_dir version command_run command_xfer raw_output command_ingest')
+    'id taskname etransfer starlink_dir version command_run command_xfer raw_output command_ingest log_ingest')
 
 # Regular expressions to be used to check pieces of SQL being generated
 # automatically.
@@ -1398,7 +1398,7 @@ class JSAProcDB:
         """
 
         query = 'SELECT id, taskname, etransfer, starlink, version, ' \
-            'command_run, command_xfer, raw_output, command_ingest ' \
+            'command_run, command_xfer, raw_output, command_ingest, log_ingest ' \
             'FROM task'
         params = []
 
