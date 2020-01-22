@@ -30,6 +30,7 @@ Usage:
     jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>] [--location <location>]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc ingest [-v | -q] [--dry-run] --task <task> [--location <location>]
+    jsa_proc inputs [-v | -q] --job-id <id>
     jsa_proc namecheck [-v | -q] file <file>
     jsa_proc namecheck [-v | -q] directory <directory>
     jsa_proc namecheck [-v | -q] output --task <task> --outfile <file>
@@ -316,6 +317,22 @@ def ingest(args):
                   task=args['--task'],
                   dry_run=args['--dry-run'],
                   force=args['--force'])
+
+
+@command
+def inputs(args):
+    """
+    List the input files of the given job.
+    """
+
+    from jsa_proc.action.datafile_handling import check_data_already_present
+
+    db = get_database()
+
+    inputs = check_data_already_present(args['--job-id'], db)
+
+    for input_ in inputs:
+        print(input_)
 
 
 @command
