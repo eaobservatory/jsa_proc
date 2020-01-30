@@ -1,0 +1,166 @@
+#!/usr/bin/env python2
+
+# Copyright (C) 2014 Science and Technology Facilities Council.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""hpx_coadd_submit: submit hpx legacy coadds to the JSA processing system.
+
+Usage:
+    hpx_coadd_submit [-v | -q] [--dry-run] [--tile=<tile>] --task=<task> [options]
+
+Options:
+    --help, -h                 Show usage information.
+    --verbose, -v              Print debugging information.
+    --quiet, -q                Omit informational messages.
+    --dry-run, -n              Do not actually peform the action.
+
+    --tile=<tile>              HEALPix tile to submit job for.
+    --task=<task>              jsa_proc task to look for jobs for.
+    --priority=<priority>      priority of task. [default: 0]
+    --location, -l=<location>  Job location, e.g. JAC, CADC. [default: JAC]
+    --only-science,            Only coadd 'science' obs.
+                               (e.g. no pointings)
+    --never-update             Don't change an existing job, even if outdated.
+    --exclude-pointing-jobs    If a coadd contains any pointing observations,
+                               don't submit it.
+    --pointing-jobs-only       Only include pointing jobs in coadds.
+    --output-task=<out-task>   A task name to put the coadd jobs into. If not
+                               given, defaults to <task>_coadd.
+Description:
+    Submit jobs for all tiles in the tile table for the requested task.
+    If a tile number is given then only the requested tile number is
+    processed
+
+    This will check with the OMP to see which observations are currently
+    set with a state of BAD or JUNK and not include those. It will check
+    the QA status in the JSA processing system and only include those that
+    are GOOD or QUESTIONABLE. All jobs will be created in a task that is
+    named <task>_coadd unless the option --output-task is given.
+"""
+
+from __future__ import print_function, division, absolute_import
+
+import functools
+import logging
+import sys
+
+from docopt import docopt
+
+from jsa_proc.config import get_database
+from jsa_proc.error import CommandError, JSAProcError
+from jsa_proc.state import JSAProcState
+from jsa_proc.submit.hpx import submit_one_coadd_job
+script_name = 'hpx_coadd_submit'
+logger = logging.getLogger(script_name)
+
+
+def main():
+    """Main routine for the hpx_coadd_submit."""
+
+    args = docopt(__doc__)
+
+    # Determine logging level from the --quiet and --verbose options.
+    loglevel = logging.INFO
+
+    if args['--verbose']:
+        loglevel = logging.DEBUG
+    elif args['--quiet']:
+        loglevel = logging.WARNING
+
+    logging.basicConfig(level=loglevel)
+
+    try:
+        task = args['--task']
+    except KeyError:
+        raise CommandError('Task must be supplied.')
+
+    if (args['--pointing-jobs-only'] and
+            (args['--only-science'] or args['--exclude-pointing-jobs'])):
+        raise CommandError(
+            'Cannot specify both --pointing-jobs-only'
+            ' and either of --only-science'
+            ' --exclude-pointing-jobs.')
+
+    try:
+        # Process integer arguments.
+        for integer_argument in ('--tile', '--priority'):
+            if args[integer_argument] is not None:
+                try:
+                    args[integer_argument] = int(args[integer_argument])
+                except ValueError:
+                    raise CommandError('Option {0} must be an integer'.
+                                       format(integer_argument))
+
+        # Submit jobs.
+        submit_jobs(args)
+
+    except CommandError as e:
+        # If a known error happened, display its message and exit with
+        # bad status.
+        print('{0}: {1}'.format(script_name, e.message), file=sys.stderr)
+        sys.exit(1)
+
+    else:
+        # Otherwise exit with good status.
+        sys.exit(0)
+
+
+def submit_jobs(args):
+    """
+    Submit one or all tile coadd jobs for a given task.
+    """
+
+    parenttask = args['--task']
+
+    if args['--tile'] is not None:
+        # Use the given tile number.
+        tiles = [args['--tile']]
+
+    else:
+        # Get full list of tiles.
+        db = get_database()
+        tiles = db.get_tilelist(task=parenttask)
+        tiles = list(tiles)
+        tiles.sort()
+
+        logger.info('%i tiles found for task %s', len(tiles), parenttask)
+
+    total = len(tiles)
+    count = 1
+
+    for tile in tiles:
+        logger.debug('Processing tile %i (%i of %i)', tile, count, total)
+        try:
+            submit_one_coadd_job(
+                tile=tile,
+                parenttask=parenttask,
+                mode='public',
+                parameters='COADD_JSA_TILES',
+                location=args['--location'],
+                exclude_pointing_jobs=args['--exclude-pointing-jobs'],
+                science_obs_only=args['--only-science'],
+                never_update=args['--never-update'],
+                dryrun=args['--dry-run'],
+                priority=args['--priority'],
+                output_task=args['--output-task'],
+                pointings_only=args['--pointing-jobs-only'])
+        except JSAProcError:
+            logger.exception('Error adding job for tile %i', tile)
+
+        count += 1
+
+
+if __name__ == '__main__':
+    main()
