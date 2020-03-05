@@ -30,9 +30,11 @@ InstrumentsInfo = _where_maker('Instruments')
 Instruments = dict(
     HARP=InstrumentsInfo('HARP', 'HARP', {'instrument': 'HARP'}),
     RxA3=InstrumentsInfo('RxA3', 'RxA3', {'instrument': 'RxA3'}),
+    UU = InstrumentsInfo('UU', 'UU', {'instrument': 'UU'}),
+    RxA3M = InstrumentsInfo('RxA3M', 'RxA3M', {'instrument': 'RxA3M'}),
     SCUBA2=InstrumentsInfo('SCUBA2', 'SCUBA2', {'instrument': 'SCUBA-2'}),
     Heterodyne=InstrumentsInfo('Heterodyne', 'Heterodyne',
-                               {'instrument': ['HARP', 'RxA3', 'RxW']}),
+                               {'instrument': ['HARP', 'RxA3', 'RxW', 'RxA3M', 'UU']}),
 )
 
 # Surveys.
