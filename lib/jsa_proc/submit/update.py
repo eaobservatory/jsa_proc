@@ -26,10 +26,10 @@ from ..state import JSAProcState
 # Type representing the different update actions we may perform.
 UpdateAction = namedtuple(
     'UpdateAction',
-    ('input_files', 'parents', 'mode', 'parameters', 'tilelist', 'obsinfo'))
+    ('input_files', 'parents', 'mode', 'parameters', 'tilelist', 'obsidss'))
 
 # Update actions which do not need to trigger resetting a job.
-UPDATE_NO_RESET = ('tilelist', 'obsinfo')
+UPDATE_NO_RESET = ('tilelist', 'obsidss')
 
 logger = logging.getLogger(__name__)
 
@@ -227,15 +227,15 @@ def add_upd_del_job(
         # Get existing obsid_subsysnrs:
         oldobsidss = [x.obsidss for x in db.get_obs_info(oldjob.id)]
 
-        obsinfo_changed = False
+        obsidss_changed = False
         # Check if different
         if set(obsidss) != set(oldobsidss):
-            obsinfo_changed = True
+            obsidss_changed = True
 
 
-        if obsinfo_changed:
-            update = update._replace(obsinfo=True)
-            logger.debug('Obs. info for job %i has changed', oldjob.id)
+        if obsidss_changed:
+            update = update._replace(obsidss=True)
+            logger.debug('Obsid subsysnrs for job %i has changed', oldjob.id)
 
     if not any(update):
         logger.debug(
@@ -288,7 +288,7 @@ def add_upd_del_job(
         if update.tilelist:
             db.set_tilelist(oldjob.id, tilelist)
 
-        if update.obsinfo:
+        if update.obsidss:
             db.set_obsidss(oldjob.id, obsidss)
 
         # Reset the job status and issue logging info if a significant
