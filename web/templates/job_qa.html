@@ -129,7 +129,7 @@
         {% elif key == 'instrument' %}
         <th> Inst. </th>
         {% elif key == 'omp_status' %}
-        <th> Synced OMP Status </th>
+        <th>OMP Status</th>
         {% else %}
         <th> {{ key }} </th>
         {% endif %}
@@ -147,6 +147,13 @@
         <td> {{uttime}} </td>
         {% elif key == 'obsid' or key == 'obsidss' or key=='scanmode' %}
         <td> {{ break_underscore(o.get(key, '')) }} </td>
+        {% elif key in ['tau', 'seeing'] %}
+        {% set value=o.get(key, 0.0) %}
+        {% if value %}
+        <td> {{ '{0:0.2F}'.format(value) }}</td>
+        {% else %}
+        <td> </td>
+        {% endif %}
         {% elif key=='omp_status' %}
         <td class="omp-{{o.get(key, '')|omp_state_name}}">
           <a href="{{ url_for_omp_comment(o.obsid, o.instrument, o.obsnum, o.date_obs) }}">
@@ -168,8 +175,9 @@
 <table class="obsinfo">
   <caption> Parent Observation Info </caption>
   <tr>
-  {% for key in parent_obs.values()[0][0]
-                         if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
+  {% set keys = parent_obs.values()|list %}
+  {% for key in keys[0][0]
+      if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
 
   {% if key == 'obsnum' %}
   <th> scan </th>
@@ -180,7 +188,7 @@
   {% elif key == 'sourcename' %}
   <th class="sourcename"> source </th>
   {% elif key == 'omp_status' %}
-  <th> Synced OMP Status </th>
+  <th>OMP Status</th>
   {% else %}
   <th> {{ key }} </th>
   {% endif %}
@@ -199,6 +207,13 @@
     <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
     {% elif key == 'obsid' or key == 'obsidss' %}
     <td> {{ break_underscore(o.get(key, '')) }} </td>
+    {% elif key in ['tau', 'seeing'] %}
+    {% set value=o.get(key, 0.0) %}
+    {% if value %}
+    <td> {{ '{0:0.2F}'.format(value) }}</td>
+    {% else %}
+    <td> </td>
+    {% endif %}
     {% elif key == 'association' %}
     <td class="asscn"> {{o.get(key, '') }} </td>
     {% elif key == 'sourcename' %}

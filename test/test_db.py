@@ -43,7 +43,7 @@ class BasicDBTest(DBTestCase):
 
         self.assertEqual(tables, set((
             'job', 'input_file', 'output_file', 'log', 'note',
-            'obs', 'tile', 'qa', 'task', 'parent',
+            'tile', 'qa', 'task', 'parent', 'obsidss',
         )))
 
 
@@ -162,48 +162,18 @@ class InterfaceDBTest(DBTestCase):
         with self.assertRaises(JSAProcError):
             self.db.add_job('tag4', 'JAC', 'obs', 'REC', 'test', parent_jobs=[])
 
-        # Check that we can update the obs table while adding a job.
-        obs1 = {'obsid': '01-asdfasd', 'obsidss': '01-asdfas-1',
-                'utdate': 20140101, 'obsnum': 3, 'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': datetime(2014, 1, 1, 10, 0, 0)}
-        obs2 = {'obsid': '02-asdfasd', 'obsidss': '02-asdfas-1',
-                'utdate': 20140102, 'obsnum': 3, 'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': datetime(2014, 1, 2, 11, 0, 0)}
+        # Check that we can add a job with a list of obsidss. Note
+        #that this get the values from jcmt.COMMON, so can't be easily
+        # CHecked.
 
-        self.db.set_obs_info(1, [obs1, obs2], replace_all=True)
+        obs1 = '1-1'
+        obs2 = '1-2'
+
+        self.db.set_obsidss(1, [obs1, obs2], replace_all=True)
 
         self.db.add_job('tag5', 'JAC', 'obs', 'RED', 'test',
-                        input_file_names=['file1', 'file2'], obsinfolist=[obs1, obs2])
+                        input_file_names=['file1', 'file2'], obsidss=[obs1, obs2])
 
-        # Check that we can't update the obs table with the invalid
-        # or bad column names.
-        for (error, obsbad) in (
-                # Invalid characters:
-                ('invalid column name',
-                 {'obsid*': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
-                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
-                  'subsys': '1'}),
-                # Non-existant column names:
-                ('has no column',
-                 {'obsid': 'asdfasd', 'obsidsss': 'asdfas', 'utdate': 20140101,
-                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
-                  'subsys': '1'}),
-                # Forbidden column names:
-                ('private column name',
-                 {'obsid': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
-                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
-                  'subsys': '1', 'id': 42}),
-                ('private column name',
-                 {'obsid': 'asdfasd', 'obsidss': 'asdfas', 'utdate': 20140101,
-                  'obsnum': 3, 'instrument': 'SCUBA-2', 'backend': 'ACSIS',
-                  'subsys': '1', 'job_id': 42}),
-                ):
-
-            with self.assertRaisesRegexp(JSAProcError, error):
-                self.db.add_job('tag6', 'JAC', 'obs', 'RED', 'test',
-                                input_file_names=['file1', 'file2'], obsinfolist=[obsbad])
 
         # Check that we can set the tile list when adding a job.
         job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RED', 'test',
@@ -614,49 +584,51 @@ class InterfaceDBTest(DBTestCase):
 
     def test_find_jobs_obsquery(self):
 
-        info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': '2014-01-01',
-                  'obsnum': 1, 'instrument': 'F', 'backend': 'B',
-                  'subsys': '1', 'survey': 'GBS', 'project': 'G01',
+        info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': 20140101,
+                  'obsnum': 1, 'instrume': 'F', 'backend': 'B',
+                  'subsys': 1, 'survey': 'GBS', 'project': 'G01',
                   'date_obs': datetime(2014, 1, 1, 10, 0, 0)}
+
+
 
         info_2 = info_1.copy()
         info_2.update(obsidss='1-2', subsys=2)
 
         info_3 = info_1.copy()
-        info_3.update(survey='DDS', project='D01')
+        info_3.update(obsid='2', obsidss='2-3', survey='DDS', project='D01')
 
         job_1 = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_1])
-        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_2])
-        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_1, info_2])
-        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_3])
-        job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_2, info_3])
+                                obsidss=[info_1['obsidss']])
+        job_2 = self.db.add_job('tag2', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test2'],
+                                obsidss=[info_2['obsidss']])
+        job_3 = self.db.add_job('tag3', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1', 'test2'],
+                                obsidss=[info_1['obsidss'], info_2['obsidss']])
+        job_4 = self.db.add_job('tag4', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test3'],
+                                obsidss=[info_3['obsidss']])
+        job_5 = self.db.add_job('tag5', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test2', 'test3'],
+                                obsidss=[info_2['obsidss'], info_3['obsidss']])
 
         info_4 = info_1.copy()
-        info_4.update(survey=None, project='XX01')
+        info_4.update(obsid='3', obsidss='3-4',survey=None, project='XX01')
 
         info_5 = info_4.copy()
-        info_5.update(project='JCMTCAL')
+        info_5.update(obsid='4', obsidss='4-5',project='JCMTCAL')
 
         info_6 = info_4.copy()
-        info_6.update(project='CAL')
+        info_6.update(obsid= '5', obsidss='5-6', project='CAL')
 
-        job_6 = self.db.add_job('tag6', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_4])
-        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_5])
-        job_8 = self.db.add_job('tag8', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_6])
+        job_6 = self.db.add_job('tag6', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test4'],
+                                obsidss=[info_4['obsidss']])
+        job_7 = self.db.add_job('tag7', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test5'],
+                                obsidss=[info_5['obsidss']])
+        job_8 = self.db.add_job('tag8', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test6'],
+                                obsidss=[info_6['obsidss']])
 
         info_7 = info_1.copy()
-        info_7.update(project='JCMTCAL')
+        info_7.update(obsid= '6', obsidss='6-7', project='JCMTCAL')
 
-        job_9 = self.db.add_job('tag9', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info_7])
+        job_9 = self.db.add_job('tag9', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test7'],
+                                obsidss=[info_7['obsidss']])
 
         queries = [
             (
@@ -702,54 +674,19 @@ class InterfaceDBTest(DBTestCase):
         ]
 
         for (oq, expect) in queries:
-            self.assertEqual(
-                set(x.id for x in self.db.find_jobs(obsquery=oq)),
-                set(expect))
+            try:
+                results = set(x.id for x in self.db.find_jobs(obsquery=oq))
+                self.assertEqual(
+                    results,
+                    set(expect))
+            except:
+                print(oq, expect, results)
+                raise
 
             self.assertEqual(
                 self.db.find_jobs(count=True, obsquery=oq),
                 len(expect))
 
-    def test_obs_info(self):
-        job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', input_file_names=['test1'])
-
-        # Should start with no information.
-        self.assertEqual(self.db.get_obs_info(job_1), [])
-
-        info = {'obsid': 'x14_01_1T1', 'obsidss': 'x14_1_1T1_850',
-                'utdate': date(2014, 01, 01), 'obsnum': 3,
-                'instrument': 'SCUBA-2',
-                'backend': 'ACSIS', 'subsys': '1',
-                'date_obs': datetime(2014, 1, 1, 9, 0, 0),
-                'omp_status': 4}
-
-        self.db.set_obs_info(job_1, [info])
-
-        # Create another job with this information from the start.
-        job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test', input_file_names=['test1'],
-                                obsinfolist=[info])
-
-        for job_id in (job_1, job_2):
-            info_retrieved = self.db.get_obs_info(job_id)
-
-            self.assertEqual(len(info_retrieved), 1)
-
-            info_retrieved = info_retrieved[0]
-            for key, value in info.items():
-                self.assertEqual(getattr(info_retrieved, key), value)
-
-        # Now test changing OMP status.  First give one of the jobs a
-        # different obsid so that we can update only one of them.
-        info['obsid'] = 'x14_02_2T2'
-        self.db.set_obs_info(job_1, [info])
-
-        self.assertEqual(self.db.get_obs_info(job_1)[0].omp_status, 4)
-        self.assertEqual(self.db.get_obs_info(job_2)[0].omp_status, 4)
-
-        self.db.set_omp_status('x14_02_2T2', 0)
-
-        self.assertEqual(self.db.get_obs_info(job_1)[0].omp_status, 0)
-        self.assertEqual(self.db.get_obs_info(job_2)[0].omp_status, 4)
 
     def test_processing_time(self):
         job_id = self.db.add_job('tag1', 'JAC', 'obs', 'RECIPE', 'test', input_file_names=['test1'])
@@ -765,7 +702,7 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(len(obsinfo), 1)
 
         # Check that it has no obsinfo but is the correct length
-        self.assertEqual([i for i in obsinfo[0]], [None]*5)
+        self.assertEqual([i for i in obsinfo[0]], [None]*5 + [0])
 
         # Check we don't find the job if it's running or in the error state:
         self.db.change_state(job_id, JSAProcState.RUNNING, 'start again')
@@ -892,38 +829,75 @@ class InterfaceDBTest(DBTestCase):
 
         job_1 = self.db.add_job('tag1', 'JAC',  'obs', 'RECIPE', 'test', input_file_names=['test1'])
         info = {'obsid': 'x14_01_1T1', 'obsidss': 'x14_1_1T1_850',
-                'utdate': date(2014, 01, 01), 'obsnum': 3,
+                'utdate': 20140101, 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
                 'date_obs': datetime(2014, 1, 1, 9, 0, 0)}
-        self.db.set_obs_info(job_1, [info])
-        self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range())
-        self.assertEqual((str(info['utdate']), str(info['utdate'])), self.db.get_date_range(task='test'))
+        with self.db.db as c:
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES ("testfile.sdf", %s, %s, 100, %s)',
+                      (info['obsid'], info['subsys'], info['obsidss']))
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (info['obsid'], info['utdate'], info['obsnum'], info['instrument'],
+                       info['backend'], info['date_obs']))
+
+
+        self.db.set_obsidss(job_1, [info['obsidss']])
+
+        self.assertEqual( (info['utdate'], info['utdate']), self.db.get_date_range())
+
+        self.assertEqual((info['utdate'], info['utdate']), self.db.get_date_range(task='test'))
 
         info2 = {'obsid': 'ax14_01_1T1', 'obsidss': 'ax14_1_1T1_850',
-                'utdate': date(2014, 05, 01), 'obsnum': 3,
+                'utdate': 20140501, 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
                 'date_obs': datetime(2014, 5, 1, 9, 0, 0)}
+        with self.db.db as c:
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES ("testfile.sdf", %s, %s, 100, %s)',
+                      (info2['obsid'], info2['subsys'], info2['obsidss']))
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (info2['obsid'], info2['utdate'], info2['obsnum'], info2['instrument'],
+                       info2['backend'], info2['date_obs']))
+        self.db.set_obsidss(job_1, [info['obsidss'], info2['obsidss']])
 
-        self.db.set_obs_info(job_1, [info, info2])
-        self.assertEqual((str(info['utdate']), str(info2['utdate'])), self.db.get_date_range())
-        self.assertEqual((str(info['utdate']), str(info2['utdate'])), self.db.get_date_range(task='test'))
-
+        self.assertEqual((info['utdate'], info2['utdate']), self.db.get_date_range())
+        self.assertEqual((info['utdate'], info2['utdate']), self.db.get_date_range(task='test'))
         job_2 = self.db.add_job('tag2', 'JAC',  'obs', 'RECIPE', 'test2', input_file_names=['test1'])
+
         info3 = {'obsid': 'bx14_01_1T1', 'obsidss': 'bx14_1_1T1_850',
-                 'utdate': date(2013, 05, 01), 'obsnum': 3,
+                 'utdate': 20130501, 'obsnum': 3,
                  'instrument': 'SCUBA-2',
                  'backend': 'ACSIS', 'subsys': '1',
                  'date_obs': datetime(2013, 5, 1, 9, 0, 0)}
+        with self.db.db as c:
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES ("testfile.sdf", %s, %s, 100, %s)',
+                      (info3['obsid'], info3['subsys'], info3['obsidss']))
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (info3['obsid'], info3['utdate'], info3['obsnum'], info3['instrument'],
+                       info3['backend'], info3['date_obs']))
+
         info4 = {'obsid': 'cx14_01_1T1', 'obsidss': 'cx14_1_1T1_850',
-                'utdate': date(2013, 01, 01), 'obsnum': 3,
+                'utdate': 20130101, 'obsnum': 3,
                 'instrument': 'SCUBA-2',
                 'backend': 'ACSIS', 'subsys': '1',
                 'date_obs': datetime(2013, 1, 1, 9, 0, 0)}
-        self.db.set_obs_info(job_2, [info3, info4])
-        self.assertEqual((str(info4['utdate']), str(info2['utdate'])), self.db.get_date_range())
-        self.assertEqual((str(info4['utdate']), str(info3['utdate'])), self.db.get_date_range(task='test2'))
+        with self.db.db as c:
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES ("testfile.sdf", %s, %s, 100, %s)',
+                      (info4['obsid'], info4['subsys'], info4['obsidss']))
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (info4['obsid'], info4['utdate'], info4['obsnum'], info4['instrument'],
+                       info4['backend'], info4['date_obs']))
+        self.db.set_obsidss(job_2, [info3['obsidss'], info4['obsidss']])
+        self.assertEqual((info4['utdate'], info2['utdate']), self.db.get_date_range())
+        self.assertEqual((info4['utdate'], info3['utdate']), self.db.get_date_range(task='test2'))
 
 
     def test_find_errors_logs(self):
@@ -1072,4 +1046,4 @@ class DBUtilityTestCase(TestCase):
 
 
 def d_add(*args):
-    return dict(sum((d.items() for d in args), []))
+    return dict(sum((list(d.items()) for d in args), []))

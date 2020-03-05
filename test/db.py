@@ -16,7 +16,8 @@
 from unittest import TestCase
 
 from jsa_proc.db.sqlite import JSAProcSQLite
-
+import os
+from datetime import datetime
 schema = None
 
 
@@ -34,6 +35,63 @@ def create_dummy_database():
     with db.db as c:
         c.executescript(schema)
 
+
+    # Can't have 2 databases in memory
+    with open('doc/test-jcmt-schema.sql') as f:
+        jcmtschema = f.read()
+
+    db2 = JSAProcSQLite('tmpjcmtfile.db', file_already_exists=False)
+    with db2.db as c:
+        c.executescript(jcmtschema)
+
+        # Insert test data into database.
+        info_1 = {'obsid': '1', 'obsidss': '1-1', 'utdate': 20140101,
+                  'obsnum': 1, 'instrume': 'F', 'backend': 'B',
+                  'subsys': '1', 'survey': 'GBS', 'project': 'G01',
+                  'date_obs': datetime(2014, 1, 1, 10, 0, 0), 'filename': 'test1'}
+
+        info_2 = info_1.copy()
+        info_2.update(obsidss='1-2', subsys=2, filename='test2')
+
+        info_3 = info_1.copy()
+        info_3.update(obsid='2', obsidss='2-3', survey='DDS', project='D01', filename='test3')
+
+        info_4 = info_1.copy()
+        info_4.update(obsid='3',obsidss='3-4',survey=None, project='XX01', filename='test4')
+
+        info_5 = info_4.copy()
+        info_5.update(obsid='4',obsidss='4-5',project='JCMTCAL', filename='test5',)
+
+        info_6 = info_4.copy()
+        info_6.update(obsid='5', obsidss='5-6', project='CAL', filename='test6',)
+
+        info_7 = info_1.copy()
+        info_7.update(obsid='6', obsidss='6-7', project='JCMTCAL', filename='test7')
+        for obs in (info_1, info_2, info_3, info_4, info_5, info_6, info_7):
+            c.execute('INSERT INTO FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES (%s, %s, %s, 100, %s)',
+                      (obs['filename'], obs['obsid'], obs['subsys'], obs['obsidss']))
+            c.execute('INSERT INTO COMMON (obsid, utdate, obsnum, instrume, backend, survey, project, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                      (obs['obsid'], obs['utdate'], obs['obsnum'], obs['instrume'],
+                       obs['backend'], obs['survey'], obs['project'], obs['date_obs']))
+
+
+    with db.db as c:
+        c.execute('ATTACH DATABASE "tmpjcmtfile.db" AS jcmt')
+
+    with open('doc/test-omp-schema.sql') as f:
+        ompschema = f.read()
+    db3 = JSAProcSQLite('tmpompfile.db', file_already_exists=False)
+    with db3.db as c:
+        c.executescript(ompschema)
+    print('attaching omp database')
+    with db.db as c:
+        c.execute('ATTACH DATABASE "tmpompfile.db" AS omp')
+
+
+    del(db3)
+    del(db2)
     return db
 
 
@@ -48,9 +106,23 @@ class DBTestCase(TestCase):
 
         self.db = create_dummy_database()
 
+
+
     def tearDown(self):
         """Disconnect from the database by deleting the
         JSAProcDB object.
         """
 
-        del self.db
+
+        try:
+            os.remove('tmpjcmtfile.db')
+        except:
+            warning('Could not remove tmpjcmtfile.db')
+        try:
+            os.remove('tmpompfile.db')
+        except:
+            warning('Could not remove tmpompfile.db')
+
+        del(self.db)
+        #del self.db2
+        #del self.db3

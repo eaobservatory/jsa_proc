@@ -17,9 +17,10 @@ from datetime import date, datetime
 
 from jsa_proc.error import JSAProcError, NoRowsError
 from jsa_proc.state import JSAProcState
-from jsa_proc.submit.update import add_upd_del_job, compare_obsinfo
+from jsa_proc.submit.update import add_upd_del_job
 
 from .db import DBTestCase
+
 
 
 class SubmitUpdateTest(DBTestCase):
@@ -152,9 +153,25 @@ class SubmitUpdateTest(DBTestCase):
         # Try creating a regular job.
         obsinfo = {
             'obsid': 'x', 'obsidss': 'x_450',
-            'utdate': date(2017, 3, 10), 'obsnum': 40, 'instrument': 'SCUBA-2',
+            'utdate': 2017310, 'obsnum': 40, 'instrument': 'SCUBA-2',
             'backend': 'SCUBA-2', 'subsys': '450',
             'date_obs': datetime(2017, 3, 10, 14, 00, 00)}
+        with self.db.db as c:
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                      'VALUES ("testfile.sdf", %s, %s, 100, %s)',
+                      (obsinfo['obsid'], obsinfo['subsys'], obsinfo['obsidss']))
+            c.execute('INSERT INTO jcmt.FILES (file_id, obsid, subsysnr, nsubscan, obsid_subsysnr) ' +
+                       'VALUES ("testfile2.sdf", "test-42", "1", 100, "test-42-1")',
+                       )
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES (%s, %s, %s, %s, %s, %s)',
+                      (obsinfo['obsid'], obsinfo['utdate'], obsinfo['obsnum'], obsinfo['instrument'],
+                       obsinfo['backend'], obsinfo['date_obs']))
+            c.execute('INSERT INTO jcmt.COMMON (obsid, utdate, obsnum, instrume, backend, date_obs) ' +
+                      'VALUES ("test-42", 20190101, 5, "HARP", "DAS", %s)',
+                      (datetime(2019,1,1,9,0,0),))
+            #c.execute('SELECT * from jcmt.COMMON')
+            #print('COMMON', c.fetchall())
 
         kwargs = {
             'db': self.db,
@@ -165,9 +182,12 @@ class SubmitUpdateTest(DBTestCase):
             'task': 'task-test',
             'priority': 50,
             'input_file_names': ['s4a_x.sdf', 's4a_y.sdf'],
-            'obsinfolist': [obsinfo],
+            'obsidss': [obsinfo['obsidss']],
             'tilelist': [50, 51, 52],
         }
+
+
+        # Insert into database and test.
 
         with self.assertRaisesRegexp(JSAProcError, 'adding is turned off'):
             add_upd_del_job(allow_add=False, **kwargs)
@@ -183,8 +203,6 @@ class SubmitUpdateTest(DBTestCase):
 
         obsinfo_fetched = self.db.get_obs_info(job_id)
         self.assertEqual(len(obsinfo_fetched), 1)
-
-        self.assertTrue(compare_obsinfo(obsinfo_fetched[0], obsinfo))
 
         self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
 
@@ -252,23 +270,30 @@ class SubmitUpdateTest(DBTestCase):
         job = self.db.get_job(job_id)
         self.assertEqual(job.state, JSAProcState.UNKNOWN)
 
-        # Try updating tilelist and obsinfo: state should not be reset.
+        # Try updating tilelist : state should not be reset.
         self.db.change_state(job_id, JSAProcState.PROCESSED, 'test')
 
         kwargs['tilelist'] = [53, 54, 55]
-        kwargs['obsinfolist'][0]['obsnum'] = 42
+        add_upd_del_job(**kwargs)
+        job = self.db.get_job(job_id)
+        self.assertEqual(job.state, JSAProcState.PROCESSED)
+        self.assertEqual(sorted(self.db.get_tilelist(job_id)), [53, 54, 55])
 
+
+        # Try updating obs info (and input_files): state should be reset:
+
+        kwargs['obsidss'] = ['test-42-1']
+        kwargs['input_file_names'] = ['testfile2']
         add_upd_del_job(**kwargs)
 
         job = self.db.get_job(job_id)
-        self.assertEqual(job.state, JSAProcState.PROCESSED)
+        self.assertEqual(job.state, JSAProcState.UNKNOWN)
 
-        self.assertEqual(sorted(self.db.get_tilelist(job_id)), [53, 54, 55])
+        obsinfo_fetched = self.db.get_obs_info(job.id)
 
-        obsinfo_fetched = self.db.get_obs_info(job_id)
         self.assertEqual(len(obsinfo_fetched), 1)
 
-        self.assertEqual(obsinfo_fetched[0].obsnum, 42)
+        self.assertEqual(obsinfo_fetched[0].obsnum, 5)
 
     def _compare_job(self, job_id, state, input_files, parents):
         """

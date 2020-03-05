@@ -142,11 +142,15 @@ class JSAProcSQLiteLock():
 
         self._conn.close()
 
+    def unlock(self):
+        """ Does nothing in sqlite? """
+        pass
+
 
 class JSAProcSQLite(JSAProcDB):
     """JSA Processing database SQLite database access class."""
 
-    def __init__(self, filename):
+    def __init__(self, filename, file_already_exists=True):
         """Construct SQLite access object.
 
         Opens the specified SQLite database file and prepares
@@ -156,8 +160,9 @@ class JSAProcSQLite(JSAProcDB):
         the database is to be accessed.
         """
 
-        if filename != ':memory:' and not os.path.exists(filename):
-            raise Exception('SQLite file ' + filename + ' not found')
+        if file_already_exists:
+            if filename != ':memory:' and 'mode=memory' not in filename and not os.path.exists(filename):
+                raise Exception('SQLite file ' + filename + ' not found')
 
         conn = sqlite3.connect(
             filename, check_same_thread=False,

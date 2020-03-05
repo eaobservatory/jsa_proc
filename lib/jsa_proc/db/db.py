@@ -48,9 +48,9 @@ JSAProcJob = namedtuple(
      'parameters', 'priority', 'task', 'qa_state'])
 JSAProcObs = namedtuple(
     'JSAProcObs',
-    ['id', 'job_id', 'obsid', 'obsidss', 'date_obs', 'date_end', 'utdate',
-     'obsnum', 'instrument', 'backend', 'subsys', 'project', 'survey',
-     'scanmode', 'sourcename', 'obstype', 'association', 'omp_status',
+    ['job_id', 'obsid', 'obsidss', 'date_obs', 'date_end', 'utdate',
+     'obsnum', 'instrument', 'backend', 'project', 'survey', 'subsys',
+     'scanmode', 'sourcename', 'obstype', 'omp_status',
      'tau', 'seeing'])
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
@@ -200,7 +200,7 @@ class JSAProcDB:
     def add_job(self, tag, location, mode, parameters, task,
                 input_file_names=None, parent_jobs=None, filters=None,
                 foreign_id=None, state='?',
-                priority=0, obsinfolist=None, tilelist=None):
+                priority=0, obsidss=None, tilelist=None):
         """
         Add a JSA data processing job to the database.
 
@@ -254,10 +254,8 @@ class JSAProcDB:
         tilelist: optional, list of integers.
         The list of tiles this job will produce.
 
-        obsinfolist: optional, list of dictionaries.
-        A list of observations dictionaries. Each item in list represents a
-        single observation which is included in this job. The dictionary
-        should contain an entry for each column in the 'obs' table.
+        obsidss: optional, list
+        A list of obsidss, as found in the jcmt FILES, SCUBA2 or ACSIS tables.
 
         Returns the job identifier.
         """
@@ -319,8 +317,8 @@ class JSAProcDB:
                 self._set_tilelist(c, job_id, tilelist)
 
             # If present, replace/update the observation list.
-            if obsinfolist:
-                self._set_obs_info(c, job_id, obsinfolist, False)
+            if obsidss:
+                self._set_obsidss(c, job_id, obsidss, False)
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -409,14 +407,24 @@ class JSAProcDB:
 
         List of NamedTuples with entries from obs table.
         """
-
+        logger.debug('Getting observation info for job %i', job_id)
         with self.db as c:
             # Get all observations with job_id
+            self.db.unlock()
             c.execute(
-                'SELECT ' +
-                ', '.join(JSAProcObs._fields) +
-                ' FROM obs WHERE job_id = %s '
-                'ORDER BY utdate ASC, obsnum ASC',
+                'SELECT job_id, obsidss.obsid, obsidss.obsid_subsysnr, date_obs, date_end, utdate, ' +
+                ' obsnum, ' +
+                ' CASE WHEN instrume="SCUBA-2" AND inbeam like "%POL" THEN "POL-2" ELSE instrume END as instrume, ' +
+                ' backend, project, survey, obsidss.subsys, '+
+                " CASE WHEN jcmt.COMMON.sam_mode='SCAN' THEN jcmt.COMMON.scan_pat ELSE jcmt.COMMON.sam_mode END AS scanmode, " +
+                ' object, obs_type, ' +
+                " CASE WHEN o.commentstatus is NULL THEN 0 ELSE o.commentstatus END AS omp_status, " +
+                " (wvmtaust + wvmtauen)/2.0 AS tau, " +
+                " (seeingst + seeingen)/2.0 AS seeing " +
+                ' FROM obsidss LEFT JOIN jcmt.COMMON  ON obsidss.obsid=jcmt.COMMON.obsid ' +
+                ' LEFT OUTER JOIN omp.ompobslog AS o ON o.obslogid = (SELECT MAX(obslogid) FROM omp.ompobslog AS o2 WHERE o2.obsid=jcmt.COMMON.obsid ) ' +
+                ' WHERE job_id = %s '
+                ' ORDER BY utdate ASC, obsnum ASC',
                 (job_id,))
             results = c.fetchall()
 
@@ -447,63 +455,56 @@ class JSAProcDB:
             logging.debug(query % params)
             c.execute(query, params)
 
-    def set_obs_info(self, job_id, obsinfolist, replace_all=True):
+    def set_obsidss(self, job_id, obsidss, replace_all=True):
         """
         Update the obs table with additional observations for a given job.
 
         job_id: integer, required
 
-        obsinfolist: list of dictionaries.
+        obsidss: list of obsidss values.
 
-        Each dictionary is the key/values for the obs table headings
-        and values for 1 observation belonging to the job_id.
 
         replace_all: Boolean, default True
 
         If set True, delete all existing entries for the job_id before
         updating the table with the obsinfo dictionaries.
         """
-
         with self.db as c:
-            self._set_obs_info(c, job_id, obsinfolist, replace_all)
+            self._set_obsidss(c, job_id, obsidss, replace_all)
 
-    def _set_obs_info(self, c, job_id, obsinfolist, replace_all):
+    def _set_obsidss(self, c, job_id, obsidss, replace_all):
+
         # If replace_all is set, then delete the existing observations.
         if replace_all:
-            c.execute(' DELETE FROM obs WHERE job_id = %s', (job_id,))
+            c.execute('DELETE FROM obsidss WHERE job_id = %s', (job_id,))
 
-        # Go through each observation dictionary in the list.
-        for obs in obsinfolist:
-            columnnames, values = zip(*obs.items())
+        # Get the obsid from jcmt.FILES
+        self.db.unlock()
 
-            # Column names can only use valid characters.
-            for column in columnnames:
-                if column in ('id', 'job_id'):
-                    raise JSAProcError('Could not insert into obs table: '
-                                       'private column name: ' + column)
+        query = 'SELECT obsid_subsysnr, obsid, subsysnr FROM jcmt.FILES WHERE obsid_subsysnr IN ({0}) GROUP BY obsid_subsysnr, obsid'.format(
+            ', '.join(('%s',)*len(obsidss)))
 
-                if not valid_column.match(column):
-                    raise JSAProcError('Could not insert into obs table: '
-                                       'invalid column name: ' + column)
+        c.execute(query, tuple(obsidss))
 
-            # Escape column names with back ticks.
-            column_query = '(job_id, `' + '`, `'.join(columnnames) + '`)'
-            values_questions = '(%s, ' + ', '.join(['%s'] * len(values)) + ')'
+        results = c.fetchall()
 
-            c.execute('INSERT INTO obs ' + column_query +
-                      ' VALUES ' + values_questions,
-                      (job_id,) + values)
 
-    def set_omp_status(self, obsid, status_new):
-        """Update the OMP status of an observation.
+        # Check if any are missing, and warn if so.
+        obsidss_fromquery = [i[0] for i in results]
+        for o in obsidss:
+            if o not in obsidss_fromquery:
+                logger.warning(
+                    'OBSIDSS %s was not added to job %i as no matching OBSID was found in jcmt FILES Table',
+                    o, job_id)
 
-        Changes the omp_status column of all entries in the obs table
-        for a given obsid.
-        """
+        # Go through each pair of obsid_subsysnr and obsid, and insert
+        # into obsidss for current job.
+        for (obsid_subsysnr, obsid, subsys) in results:
 
-        with self.db as c:
-            c.execute('UPDATE obs SET omp_status=%s WHERE obsid=%s',
-                      (status_new, obsid))
+            c.execute('INSERT INTO obsidss (job_id, obsid_subsysnr, obsid, subsys) ' +
+                      ' VALUES (%s, %s, %s, %s)' ,
+                      (job_id, obsid_subsysnr, obsid, subsys))
+
 
     def change_state(self, job_id, newstate, message, state_prev=None,
                      username=None):
@@ -876,20 +877,22 @@ class JSAProcDB:
         Atuple of datetime.date object.s
         """
 
-        select = 'SELECT MIN(obs.utdate), MAX(obs.utdate) ' + \
-                 'FROM job JOIN obs ON job.id = obs.job_id'
+        select = 'SELECT MIN(jcmt.COMMON.utdate), MAX(jcmt.COMMON.utdate) ' + \
+                 'FROM job JOIN obsidss ON job.id = obsidss.job_id ' + \
+                 '  JOIN jcmt.COMMON on obsidss.obsid=jcmt.COMMON.obsid '
         params = ()
         if task:
             select += ' WHERE job.task = %s'
             params = (task,)
 
         with self.db as c:
+            self.db.unlock()
             c.execute(select, params)
 
             times = c.fetchall()[0]
 
         if times[0] is None and times[1] is None:
-            raise NoRowsError('obs', select % params)
+            raise NoRowsError('COMMON', select % params)
 
         return times
 
@@ -1091,7 +1094,7 @@ class JSAProcDB:
 
         In addition the jobs returned can be affected by an optional
         obsquery parameter. If given, this must be a dictionary of
-        columns from the obs table giving their required value.
+        columns from the jcmt COMMON table giving their required value.
         This dictionary is processed by _dict_query_where_clause
         and accepts any type of value permitted by that method.
 
@@ -1168,9 +1171,10 @@ class JSAProcDB:
 
         with self.db as c:
 
+            if 'jcmt.COMMON' in query:
+                self.db.unlock()
             logger.debug([query, param])
             c.execute(query, param)
-
             while True:
                 row = c.fetchone()
 
@@ -1229,9 +1233,8 @@ class JSAProcDB:
         param.extend(jobparam)
 
         if obsquery:
-            (obswhere, obsparam) = _dict_query_where_clause('obs', obsquery)
-
-            where.append('job.id IN (SELECT job_id FROM obs WHERE ' +
+            (obswhere, obsparam) = _dict_query_where_clause('jcmt.COMMON', obsquery)
+            where.append('job.id IN (SELECT job_id FROM obsidss JOIN jcmt.COMMON ON obsidss.obsid=jcmt.COMMON.obsid  WHERE ' +
                          obswhere + ')')
             param.extend(obsparam)
 
@@ -1292,11 +1295,15 @@ class JSAProcDB:
         """
         from_query = "FROM job " + \
                      " LEFT JOIN log ON job.id = log.job_id " + \
-                     " LEFT JOIN obs ON job.id = obs.job_id "
+                     " LEFT JOIN obsidss ON job.id=obsidss.job_id " + \
+                     " LEFT JOIN jcmt.COMMON ON obsidss.obsid=jcmt.COMMON.obsid " + \
+                     " LEFT OUTER JOIN omp.ompobslog AS o ON o.obslogid = (SELECT MAX(obslogid) FROM omp.ompobslog o2 WHERE o2.obsid=jcmt.COMMON.obsid) "
 
-        select_query = " SELECT job.id, MAX(log.datetime) AS maxdt, " + \
-                       "obs.obstype, obs.scanmode, obs.project, " + \
-                       "obs.survey, obs.instrument "
+        select_query = "SELECT job.id, MAX(log.datetime) AS maxdt, " + \
+                       "jcmt.COMMON.obs_type, " + \
+                       "CASE WHEN jcmt.COMMON.sam_mode='SCAN' THEN jcmt.COMMON.scan_pat ELSE jcmt.COMMON.sam_mode END AS scanmode, " + \
+                       "jcmt.COMMON.project, " + \
+                       "jcmt.COMMON.survey, jcmt.COMMON.instrume, CASE WHEN o.commentstatus is NULL THEN 0 ELSE o.commentstatus END AS omp_status "
 
         where = ['log.state_new=%s']
 
@@ -1304,7 +1311,7 @@ class JSAProcDB:
         group_query = " GROUP BY job.id "
 
         if obsdict:
-            obsquery, obsparam = _dict_query_where_clause('obs', obsdict)
+            obsquery, obsparam = _dict_query_where_clause('jcmt.COMMON', obsdict)
             where.append(obsquery)
             param += obsparam
 
@@ -1330,11 +1337,15 @@ class JSAProcDB:
             group_query
 
         with self.db as c:
+            if 'jcmt.COMMON' in query:
+                self.db.unlock()
             c.execute(query, [JSAProcState.RUNNING] + param)
             startresults = c.fetchall()
             columns = c.description
 
         with self.db as c:
+            if 'jcmt.COMMON' in query:
+                self.db.unlock()
             c.execute(query_processed,
                       [JSAProcState.RUNNING, JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()
@@ -1431,38 +1442,6 @@ class JSAProcDB:
                 raise JSAProcDBError('task', query % tuple(params))
 
         return result
-
-    def get_obsinfo_for_project(self, project, tasks=None):
-        """
-        Get the observation info for a specific project.
-
-        tasks: list of task names to search within.
-        """
-        query = (
-            "SELECT " +
-            ', '.join(['obs.' + x for x in JSAProcObs._fields]) +
-            ", job.state FROM obs join job on obs.job_id=job.id"
-            " WHERE obs.project=%s")
-        params = (project,)
-        if tasks:
-            extraquery = ' AND (' + ' OR '.join(
-                ['job.task=%s' for i in tasks]) + ') '
-            query += extraquery
-            params += tuple(tasks)
-
-        with self.db as c:
-            c.execute(query, params)
-            rows = c.fetchall()
-            columns = [i[0] for i in c.description]
-
-        if len(rows) == 0:
-            raise NoRowsError(
-                'No entries found in obs for project %s' % project,
-                query % tuple(params))
-
-        JSAProcObsE = namedtuple('JSAProcObsE', JSAProcObs._fields + ('state',))
-        results = [JSAProcObsE(*obs) for obs in rows]
-        return results
 
     def add_task(self, taskname, etransfer, starlink=None, version=None,
                  command_run=None, command_xfer=None, raw_output=None,
@@ -1720,18 +1699,28 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
     parameters for the query.
     """
 
-    if not valid_column.match(table):
+    if not valid_column.match(table) and not table in ['jcmt.COMMON']:
         raise JSAProcError('Invalid table name "{0}"'.format(table))
 
     where = []
     params = []
-
     for key, value in wheredict.items():
-
+        table_key = '{0}.`{1}`'.format(table, key)
         # Column names can only use valid characters.
         if not valid_column.match(key):
             raise JSAProcError('Non allowed column name %s for SQL matching' %
                                (str(key)))
+
+        # Fix up column names (due to switch from jsa_proc.obs to using jcmt.COMMON
+        if table == 'jcmt.COMMON':
+            if key == 'obstype':
+                table_key = 'jcmt.COMMON.obs_type'
+            if key == 'instrument':
+                table_key = 'jcmt.COMMON.instrume'
+            if key == 'tau':
+                table_key = '(jcmt.COMMON.wvmtaust+jcmt.COMMON.wvmtauen)/2.0'
+
+
 
         if isinstance(value, Not):
             value = value.value
@@ -1741,8 +1730,9 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
 
         if value is None:
             where.append(
-                '{0}.`{1}` IS {2}'.format(table, key,
-                                          'NOT NULL' if logic_not else 'NULL'))
+                '{0} IS {1}'.format(table_key,
+                                    'NOT NULL' if logic_not else 'NULL'))
+
 
         elif isinstance(value, Range):
             if value.min is None and value.max is None:
@@ -1750,8 +1740,8 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
 
             elif value.min is not None and value.max is not None:
                 where.append(
-                    '{0}.`{1}` {2} %s AND %s'.format(
-                        table, key, 'NOT BETWEEN' if logic_not else 'BETWEEN'))
+                    '{0} {1} %s AND %s'.format(
+                        table_key, 'NOT BETWEEN' if logic_not else 'BETWEEN'))
                 params.extend(value)
 
             else:
@@ -1763,17 +1753,17 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
                     params.append(value.max)
                     range_op = '>' if logic_not else '<='
 
-                where.append('{0}.`{1}` {2} %s'.format(table, key, range_op))
+                where.append('{0} {1} %s'.format(table_key, range_op))
 
         elif isinstance(value, Fuzzy):
             # Not really very fuzzy, but for now implement this as a LIKE
             # expression with wildcards at both ends (LIKE is case
             # insensitive).
             where.append((
-                '({0}.`{1}` NOT LIKE %s OR {0}.`{1}` IS NULL)'
+                '({0} NOT LIKE %s OR {0} IS NULL)'
                 if logic_not else
-                '{0}.`{1}` LIKE %s'
-                ).format(table, key))
+                '{0} LIKE %s'
+                ).format(table_key))
             params.append(
                 '%{0}%'.format(value.value)
                 if value.wildcards else
@@ -1782,19 +1772,19 @@ def _dict_query_where_clause(table, wheredict, logic_or=False):
         elif isinstance(value, basestring) or not hasattr(value, '__iter__'):
             # If string or non iterable object, use simple comparison.
             where.append((
-                '({0}.`{1}`<>%s OR {0}.`{1}` IS NULL)'
+                '({0}<>%s OR {0} IS NULL)'
                 if logic_not else
-                '{0}.`{1}`=%s'
-                ).format(table, key))
+                '{0}=%s'
+                ).format(table_key))
             params.append(value)
 
         else:
             # Otherwise use an IN expression.
             where.append((
-                '({0}.`{1}` NOT IN ({2}) OR {0}.`{1}` IS NULL)'
+                '({0} NOT IN ({1}) OR {0} IS NULL)'
                 if logic_not else
-                '{0}.`{1}` IN ({2})'
-                ).format(table, key, ', '.join(('%s',) * len(value))))
+                '{0} IN ({1})'
+                ).format(table_key, ', '.join(('%s',) * len(value))))
             params.extend(value)
 
     if not where:

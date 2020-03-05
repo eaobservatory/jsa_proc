@@ -47,6 +47,7 @@ class JSAProcMySQLLock():
 
         self._tables = result
 
+
     def __enter__(self):
         """Context manager block entry method."""
 
@@ -60,7 +61,11 @@ class JSAProcMySQLLock():
         if self._tables is not None:
             self._cursor.execute(
                 'LOCK TABLES ' +
-                ', '.join((x + ' WRITE' for x in self._tables)))
+                ', '.join([x + ' WRITE' for x in self._tables] #+ 
+                          #[x + ' READ' for x in self._readonlytables]
+                      ))
+
+
 
         return self._cursor
 
@@ -90,6 +95,10 @@ class JSAProcMySQLLock():
 
         self._conn.close()
 
+
+    def unlock(self):
+        """ UNLOCK tables """
+        self._cursor.execute('UNLOCK TABLES')
 
 class JSAProcMySQL(JSAProcDB):
     """JSA processing database MySQL database access class."""
@@ -154,6 +163,8 @@ class JSAProcMySQL(JSAProcDB):
         prev = next_ = None
 
         with self.db as c:
+            if 'jcmt.COMMON' in query:
+                c.execute('UNLOCK TABLES')
             c.execute(query, param)
             while True:
                 row = c.fetchone()

@@ -60,40 +60,16 @@ CREATE TABLE log (
 CREATE INDEX log_job_id ON log (job_id);
 CREATE INDEX log_state_new ON log (state_new);
 
-CREATE TABLE obs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL,
-    obsid VARCHAR(80) NOT NULL,
-    obsidss VARCHAR(80) NOT NULL,
-    date_obs DATETIME NOT NULL,
-    date_end DATETIME DEFAULT NULL,
-
-    utdate DATE NOT NULL,
-    obsnum INTEGER NOT NULL,
-    instrument VARCHAR(80) NOT NULL,
-    backend VARCHAR(80) NOT NULL,
-    subsys VARCHAR(80) NOT NULL,
-
-    project VARCHAR(80),
-    survey VARCHAR(80),
-    scanmode VARCHAR(80),
-    sourcename VARCHAR(80),
-    obstype VARCHAR(80),
-
-    association VARCHAR(80),
-    omp_status INTEGER NOT NULL DEFAULT 0,
-
-    tau FLOAT DEFAULT NULL,
-    seeing FLOAT DEFAULT NULL,
-
-    FOREIGN KEY (job_id) REFERENCES job(id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT
+CREATE TABLE obsidss (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id INTEGER NOT NULL,
+  obsid_subsysnr VARCHAR(50) NOT NULL,
+  obsid VARCHAR(48) NOT NULL,
+  subsys INTEGER NOT NULL,
+  FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
-CREATE UNIQUE INDEX obs_job_obsidss ON obs (job_id, obsidss);
-CREATE INDEX obs_job_id ON obs (job_id);
-CREATE INDEX obs_utdate ON obs (utdate);
-CREATE INDEX obs_project ON obs (project);
+CREATE UNIQUE INDEX job_id_obsidss ON obsidss (job_id, obsid_subsysnr);
 
 CREATE TABLE tile (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,7 +108,9 @@ CREATE TABLE task (
     command_run VARCHAR(255) DEFAULT NULL,
     command_xfer VARCHAR(255) DEFAULT NULL,
     raw_output BOOLEAN,
-    command_ingest VARCHAR(255) DEFAULT NULL
+    command_ingest VARCHAR(255) DEFAULT NULL,
+    log_ingest varchar(255) DEFAULT NULL
+
 );
 
 CREATE UNIQUE INDEX task_name ON task (taskname);
