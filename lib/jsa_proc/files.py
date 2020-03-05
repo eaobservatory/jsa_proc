@@ -62,7 +62,7 @@ def get_size(path):
     """
 
     stdout = subprocess.check_output(['du', '-sk', path])
-
+    stdout = stdout.decode()
     sizek = float(stdout.split('\t')[0])
     sizeg = sizek/(1024**2)
 

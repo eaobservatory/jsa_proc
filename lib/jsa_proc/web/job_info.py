@@ -63,7 +63,7 @@ def prepare_job_info(db, job_id, query):
         parents = db.get_parents(job_id)
         parents = dict(parents)
         parent_obs = OrderedDict()
-        pjobs = parents.keys()
+        pjobs = list(parents.keys())
         pjobs.sort()
         for i in pjobs:
             parent_obs[i] = [o._asdict() for o in db.get_obs_info(i)]

@@ -56,7 +56,7 @@ def prepare_job_qa_info(db, job_id, query):
         parents = db.get_parents(job_id)
         parents = dict(parents)
         parent_obs = OrderedDict()
-        pjobs = parents.keys()
+        pjobs = list(parents.keys())
         pjobs.sort()
         for i in pjobs:
             obsinfo = db.get_obs_info(i)
