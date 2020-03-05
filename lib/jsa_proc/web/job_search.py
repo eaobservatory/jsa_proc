@@ -66,6 +66,9 @@ def job_search(location, state, task,
     obsquery = job_query['obsquery'] = {}
 
     if (date_min is not None) or (date_max is not None):
+        # Convert from %Y-%m-%d to %Y%m%d
+        if date_min: date_min = int(''.join(date_min.split('-')))
+        if date_max: date_max = int(''.join(date_max.split('-')))
         obsquery['utdate'] = Range(date_min, date_max)
 
     if (tau_min is not None) or (tau_max is not None):

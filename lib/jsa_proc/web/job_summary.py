@@ -165,7 +165,7 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None,
             direction = -1
 
         daylist = [
-            (d1 + datetime.timedelta(days=i * direction)).strftime('%Y-%m-%d')
+            (d1 + datetime.timedelta(days=i * direction)).strftime('%Y%m%d')
             for i in range(abs(delta.days))]
 
     if task:
@@ -190,6 +190,7 @@ def prepare_task_qa_summary(db, task=None, date_min=None, date_max=None,
 
             # Within each task go through each day
             for d in daylist:
+
                 # Create the Range object
                 obsquery['utdate'] = Range(d, d)
 
