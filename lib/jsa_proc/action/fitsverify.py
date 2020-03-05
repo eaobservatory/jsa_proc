@@ -46,7 +46,7 @@ def valid_fits(filename, allow_warnings=True):
 
     (out, _) = p.communicate()
     logger.debug(out.rstrip())
-
+    out = out.decode()
     if out.startswith('verification OK'):
         return True
 

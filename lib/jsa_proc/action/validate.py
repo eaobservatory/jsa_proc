@@ -80,10 +80,10 @@ def validate_job(job_id, db):
                         'invalid input file: {0}'.format(file))
 
     except ValidationError as e:
-        logger.error('Job %i failed validation: %s', job_id, e.message)
+        logger.error('Job %i failed validation: %s', job_id, e.args[0])
         db.change_state(job_id,
                         JSAProcState.ERROR,
-                        'Job failed validation: ' + e.message,
+                        'Job failed validation: ' + e.args[0],
                         state_prev=JSAProcState.UNKNOWN)
 
     else:
@@ -149,12 +149,12 @@ def validate_output(job_id, db, dry_run=False):
                         ', '.join(str(i) for i in sizes)))
 
     except ValidationError as e:
-        logger.error('Job %i failed output validation: %s', job_id, e.message)
+        logger.error('Job %i failed output validation: %s', job_id, e.args[0])
 
         if not dry_run:
             db.change_state(job_id,
                             JSAProcState.ERROR,
-                            'Job failed output: ' + e.message)
+                            'Job failed output: ' + e.args[0])
 
         return False
 
