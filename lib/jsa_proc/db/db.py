@@ -414,7 +414,7 @@ class JSAProcDB:
             c.execute(
                 'SELECT job_id, obsidss.obsid, obsidss.obsid_subsysnr, date_obs, date_end, utdate, ' +
                 ' obsnum, ' +
-                ' CASE WHEN instrume="SCUBA-2" AND inbeam like "%POL" THEN "POL-2" ELSE instrume END as instrume, ' +
+                ' CASE WHEN instrume="SCUBA-2" AND inbeam like "%%POL" THEN "POL-2" ELSE instrume END as instrume, ' +
                 ' backend, project, survey, obsidss.subsys, '+
                 " CASE WHEN jcmt.COMMON.sam_mode='SCAN' THEN jcmt.COMMON.scan_pat ELSE jcmt.COMMON.sam_mode END AS scanmode, " +
                 ' object, obs_type, ' +
