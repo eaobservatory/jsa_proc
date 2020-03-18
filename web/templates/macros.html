@@ -1,11 +1,11 @@
 {% macro render_navbar(active_page, onlogout=False) %}
     {% set navigation_bar = [
-      ('/summary', 'summary', 'Summary'),
-      ('/error_summary', 'error_summary', 'Errors'),
-      ('/job', 'job', 'Full Job List'),
-      ('/qa', 'qa', 'QA Summary'),
-      ('/qa-nightly', 'qa-nightly', 'Nightly QA'),
-      ('/fop_summary', 'fop_summary', 'FoP Summary'),
+      (url_for('task_summary'), 'summary', 'Summary'),
+      (url_for('error_summary'), 'error_summary', 'Errors'),
+      (url_for('job_list'), 'job', 'Full Job List'),
+      (url_for('task_qa_summary'), 'qa', 'QA Summary'),
+      (url_for('qa_night_page'), 'qa-nightly', 'Nightly QA'),
+      (url_for('fop_summary'), 'fop_summary', 'FoP Summary'),
       ] -%}
 
     <ul id="nav">
