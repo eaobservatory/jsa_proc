@@ -353,8 +353,8 @@ def create_web_app():
             projects = ompdb.get_support_projects(str(userid), str(semester))
             for p in projects:
                 jobs = db.find_jobs(
-                    obsquery={'project': p}, task='jcmt-nightly')
-                projdict[p] = [
+                    obsquery={'project': str(p)}, task='jcmt-nightly')
+                projdict[str(p)] = [
                     len(jobs),
                     sum(1 for j in jobs if j.state == JSAProcState.ERROR),
                     sum(1 for j in jobs if j.qa_state == JSAQAState.BAD),
