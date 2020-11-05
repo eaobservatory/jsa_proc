@@ -124,7 +124,12 @@ def add_upd_del_job(
                 'in job %i which is currently active!' %
                 (description, oldjob.id))
 
-        if not dry_run:
+        if oldjob.state == JSAProcState.DELETED:
+            logger.info(
+                'Job %i for %s is already marked as deleted',
+                oldjob.id, description)
+
+        elif not dry_run:
             db.change_state(
                 oldjob.id, JSAProcState.DELETED,
                 'No valid parent jobs found for %s;'
