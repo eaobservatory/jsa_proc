@@ -257,6 +257,10 @@ td.time, td.datetime {
     white-space: nowrap;
 }
 
+td.checkbox, td.checkboxid {
+    vertical-align: top;
+}
+
 .empty {
     border: none;
 }
