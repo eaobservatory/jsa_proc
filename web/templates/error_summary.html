@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% set active_page='error_summary' %}
-{% set scripts=['select_all'] %}
+{% set scripts=['select_all', 'show_more'] %}
 {% from 'macros.html' import log_table %}
 {% block content%}
 
@@ -52,7 +52,8 @@
   {{ log_table(job_summary_dict[l][job_id],
                   headings=False, columns=[("Time", "time"),
                              ("State", "state"), ("Message", "message")],
-                  checkbox=["job_id", job_id])}}
+                  checkbox=["job_id", job_id],
+                  shown_rows=5)}}
 
   <tr class="blankrow"><td colspan="5" style="padding:1ex;border:none">&nbsp;</td></tr>
 

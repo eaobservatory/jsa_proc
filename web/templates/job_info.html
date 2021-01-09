@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% set scripts=['samp', 'samp_broadcast'] %}
+{% set scripts=['samp', 'samp_broadcast', 'show_more'] %}
 {% from 'macros.html' import break_underscore, log_table, render_page_control %}
 {% block body %}
 
@@ -253,7 +253,7 @@
 
 <h2>Log</h2>
 <table>
-{{ log_table(log) }}
+{{ log_table(log, shown_rows=20) }}
 </table>
 {% endif %}
 

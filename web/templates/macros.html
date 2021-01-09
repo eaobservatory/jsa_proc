@@ -130,7 +130,7 @@
                                 columns=[("Time","datetime"), ("State","state_new"),
                                      ("Previous state","state_prev"), ("Host","host"),
                                      ('User', 'username'), ("Message", "message")],
-                                checkbox = None) %}
+                                checkbox=None, shown_rows=None) %}
 
   {% if headings == true %}
   <tr>
@@ -144,13 +144,18 @@
   </tr>
   {% endif %}
 
-<tr>
-  {% if checkbox !=  none %}
-  <td class="checkbox" rowspan="{{ log|length }}"> <input type="checkbox" value="{{checkbox[1]}}"
-                                         name="{{checkbox[0]}}" /></td>
-  <td class="checkboxid" rowspan="{{ log|length }}"> <a href="{{ url_for('job_info', job_id=checkbox[1]) }}"> {{checkbox[1]}}</a> </td>
-    {% endif %}
   {% for entry in log %}
+  <tr {{ 'style="display: none;"' | safe if (shown_rows is not none and loop.index > shown_rows) }}>
+  {% if checkbox != none %}
+  {% if loop.first %}
+  <td class="checkbox" rowspan="{{ loop.length if shown_rows is none or shown_rows > loop.length else shown_rows }}"> <input type="checkbox" value="{{checkbox[1]}}"
+                                         name="{{checkbox[0]}}" /></td>
+  <td class="checkboxid" rowspan="{{ loop.length if shown_rows is none or shown_rows > loop.length else shown_rows }}"> <a href="{{ url_for('job_info', job_id=checkbox[1]) }}"> {{checkbox[1]}}</a> </td>
+    {% elif shown_rows is not none and loop.index > shown_rows %}
+      <td colspan="2">&nbsp;</td>
+    {% endif %}
+    {% endif %}
+
   {% set entry = entry._asdict() %}
     {% for c in columns %}
 
@@ -172,8 +177,11 @@
     {% endif %}
 
     {% endfor %}
-  </tr> <tr>
+  </tr>
   {% endfor %}
 
+  {% if shown_rows is not none and (log | length) > shown_rows %}
+      <tr><td colspan="{{ columns | length + (2 if checkbox is not none else 0) }}"><a href="#" class="show_more_link">View more entries&hellip;</a></td></tr>
+  {% endif %}
 {% endmacro %}
 
