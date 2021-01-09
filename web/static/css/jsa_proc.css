@@ -253,6 +253,10 @@ th {
     -moz-hyphens: auto;
 }
 
+td.time, td.datetime {
+    white-space: nowrap;
+}
+
 .empty {
     border: none;
 }
