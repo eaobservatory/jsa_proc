@@ -45,7 +45,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>]
     jsa_proc search_log [-v | -q] --task <task> [--project <project>] [--after-context <lines>] [--state <state>] <search>
-    jsa_proc transfer [-v | -q]
+    jsa_proc transfer [-v | -q] [--dry-run] [--task <task>]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
 
@@ -618,7 +618,7 @@ def transfer(args):
     db = get_database()
 
     # Poll the JAC jobs.
-    status = transfer_poll(db)
+    status = transfer_poll(db, task=args['--task'], dry_run=args['--dry-run'])
 
     # Return a status of 1 if status is not True.
     if not status:

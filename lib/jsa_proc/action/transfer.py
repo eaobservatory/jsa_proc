@@ -30,7 +30,7 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def transfer_poll(db):
+def transfer_poll(db, task=None, dry_run=False):
     # Get full list of tasks.
     task_info = db.get_task_info()
 
@@ -45,7 +45,8 @@ def transfer_poll(db):
     logger.info('Starting check for jobs to transfer')
     n_err = 0
 
-    for job in db.find_jobs(location='JAC', state=JSAProcState.PROCESSED):
+    for job in db.find_jobs(
+            location='JAC', state=JSAProcState.PROCESSED, task=task):
         try:
             job_task_info = task_info.get(job.task)
 
@@ -60,50 +61,52 @@ def transfer_poll(db):
                              job.id)
 
             elif job_task_info.command_xfer is not None:
-                # The job is transferred by a custom process.
-                # Mark the job as transferring while this runs.
-                db.change_state(job.id, JSAProcState.TRANSFERRING,
-                                'Transferring via custom command',
-                                state_prev=JSAProcState.PROCESSED)
-
                 logger.debug('Running custom transfer command '
                              'for processed job %i',
                              job.id)
-                out_dir = get_output_dir(job.id)
 
-                try:
-                    with open_log_file(job.id, 'transfer') as log:
-                        subprocess.check_call(
-                            [
-                                job_task_info.command_xfer,
-                                '--transdir', out_dir,
-                            ],
-                            shell=False,
-                            cwd='/tmp',
-                            stdout=log,
-                            stderr=subprocess.STDOUT,
-                            preexec_fn=restore_signals)
+                if not dry_run:
+                    # The job is transferred by a custom process.
+                    # Mark the job as transferring while this runs.
+                    db.change_state(job.id, JSAProcState.TRANSFERRING,
+                                    'Transferring via custom command',
+                                    state_prev=JSAProcState.PROCESSED)
 
-                    # Change the state to complete, unless we have a custom
-                    # ingestion command to run.
-                    db.change_state(
-                        job.id,
-                        (JSAProcState.COMPLETE
-                            if job_task_info.command_ingest is None
-                            else JSAProcState.INGESTION),
-                        'Custom transfer completed successfully',
-                        state_prev=JSAProcState.TRANSFERRING)
+                    out_dir = get_output_dir(job.id)
 
-                except subprocess.CalledProcessError as e:
-                    logger.exception('Custom transfer command failed '
-                                     'for processed job %i',
-                                     job.id)
+                    try:
+                        with open_log_file(job.id, 'transfer') as log:
+                            subprocess.check_call(
+                                [
+                                    job_task_info.command_xfer,
+                                    '--transdir', out_dir,
+                                ],
+                                shell=False,
+                                cwd='/tmp',
+                                stdout=log,
+                                stderr=subprocess.STDOUT,
+                                preexec_fn=restore_signals)
 
-                    db.change_state(job.id, JSAProcState.ERROR,
-                                    'Custom transfer failed',
-                                    state_prev=JSAProcState.TRANSFERRING)
+                        # Change the state to complete, unless we have a custom
+                        # ingestion command to run.
+                        db.change_state(
+                            job.id,
+                            (JSAProcState.COMPLETE
+                                if job_task_info.command_ingest is None
+                                else JSAProcState.INGESTION),
+                            'Custom transfer completed successfully',
+                            state_prev=JSAProcState.TRANSFERRING)
 
-                    n_err += 1
+                    except subprocess.CalledProcessError as e:
+                        logger.exception('Custom transfer command failed '
+                                         'for processed job %i',
+                                         job.id)
+
+                        db.change_state(job.id, JSAProcState.ERROR,
+                                        'Custom transfer failed',
+                                        state_prev=JSAProcState.TRANSFERRING)
+
+                        n_err += 1
 
             elif job_task_info.etransfer is None:
                 # If etransfer is set to None, don't etransfer
@@ -116,11 +119,13 @@ def transfer_poll(db):
                 # If e-transfer is not required, then the job is now
                 # complete (only done if etransfer argument is False).
                 # Don't validate output when "raw_output" specified.
-                if job_task_info.raw_output or validate_output(job.id, db):
-                    db.change_state(
-                        job.id, JSAProcState.COMPLETE,
-                        'Processed job is COMPLETE (no etransfer)',
-                        state_prev=JSAProcState.PROCESSED)
+                if job_task_info.raw_output or validate_output(
+                        job.id, db, dry_run=dry_run):
+                    if not dry_run:
+                        db.change_state(
+                            job.id, JSAProcState.COMPLETE,
+                            'Processed job is COMPLETE (no etransfer)',
+                            state_prev=JSAProcState.PROCESSED)
                     logger.debug('Processed job %i moved to ' +
                                  'COMPLETE (no etransfer)',
                                  job.id)
@@ -128,16 +133,18 @@ def transfer_poll(db):
             else:
                 # If this task should be e-transferred, attempt to
                 # add to e-transfer and move to TRANSFERRING.
-                if validate_output(job.id, db):
+                if validate_output(job.id, db, dry_run=dry_run):
                     # Only e-transfer via SSH if needed.
                     if etransfer_needs_ssh:
                         logger.debug('E-transferring output '
                                      'of job %i via SSH', job.id)
-                        ssh_etransfer_send_output(job.id)
+                        if not dry_run:
+                            ssh_etransfer_send_output(job.id)
                     else:
                         logger.debug('E-transferring output '
                                      'of job %i directly', job.id)
-                        etransfer_send_output(job.id)
+                        if not dry_run:
+                            etransfer_send_output(job.id)
 
         except Exception:
             logger.exception('Error while transferring job %i', job.id)
