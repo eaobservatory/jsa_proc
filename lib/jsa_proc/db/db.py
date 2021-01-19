@@ -1064,7 +1064,7 @@ class JSAProcDB:
         # Now sort out error jobs in sensible option
 
     def find_jobs(self, state=None, location=None, task=None, qa_state=None,
-                  tag=None,
+                  tag=None, state_prev=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
                   obsquery=None, tiles=None):
@@ -1134,7 +1134,8 @@ class JSAProcDB:
 
         # Use the _find_jobs_where method to prepare the WHERE clauses.
         (where, whereparam) = self._find_jobs_where(
-            state, location, task, qa_state, tag, obsquery, tiles)
+            state, location, task, qa_state, tag, obsquery, tiles,
+            state_prev=state_prev)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
@@ -1199,7 +1200,7 @@ class JSAProcDB:
         return result
 
     def _find_jobs_where(self, state, location, task, qa_state, tag,
-                         obsquery, tiles):
+                         obsquery, tiles, state_prev=None):
         """Prepare WHERE expression for the find_jobs method.
 
         Return: a tuple containing a list of SQL expressions
@@ -1227,6 +1228,9 @@ class JSAProcDB:
 
         if tag is not None:
             jobquery['tag'] = tag
+
+        if state_prev is not None:
+            jobquery['state_prev'] = state_prev
 
         (jobwhere, jobparam) = _dict_query_where_clause('job', jobquery)
         where.append(jobwhere)
