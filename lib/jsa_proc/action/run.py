@@ -247,9 +247,7 @@ def run_a_job(job_id, db=None, force=False):
             logger.exception('Custom log ingest failed '
                              'for job %i',
                              job.id)
-            db.change_state(job.id, JSAProcState.ERROR,
-                            'Custom log ingestion failed',
-                            state_prev=JSAProcState.RUNNING)
+            raise JSAProcError('Custom log ingestion failed')
 
     # If task begins with hpx, get tiles from list of output_files
     # and write to tile table in db.
