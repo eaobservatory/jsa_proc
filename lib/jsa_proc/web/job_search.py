@@ -75,7 +75,7 @@ def job_search(location, state, task,
         obsquery['tau'] = Range(tau_min, tau_max)
 
     if sourcename:
-        obsquery['sourcename'] = Fuzzy(sourcename)
+        obsquery['object'] = Fuzzy(sourcename)
 
     if obsnum:
         obsquery['obsnum'] = obsnum
