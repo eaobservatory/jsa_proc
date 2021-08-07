@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2018-2021 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import logging
 import os
 import os.path
@@ -26,8 +29,8 @@ from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError, \
     ParentNotReadyError
-from jsa_proc.config import get_config
-from jsa_proc.files import get_md5sum
+from jsa_proc.config import get_config, get_database
+from jsa_proc.files import get_md5sum, get_size
 from jsa_proc.state import JSAProcState
 
 """
@@ -411,3 +414,33 @@ def filter_file_list(filelist, filt):
         if match.search(f):
             filtered.append(f)
     return filtered
+
+
+def disk_usage_input(tasks):
+    _disk_usage(get_input_dir, tasks=tasks)
+
+
+def disk_usage_output(tasks):
+    _disk_usage(get_output_dir, tasks=tasks)
+
+
+def _disk_usage(dir_function, tasks=None):
+    db = get_database()
+
+    if not tasks:
+        tasks = db.get_tasks()
+
+    for task in tasks:
+        jobs = db.find_jobs(
+            location='JAC', task=task, state=JSAProcState.STATE_ALL)
+
+        total = 0.0
+        for job in jobs:
+            directory = dir_function(job.id)
+
+            if not os.path.exists(directory):
+                continue
+
+            total += get_size(directory)
+
+        print('{:10.3f} {}'.format(total, task))

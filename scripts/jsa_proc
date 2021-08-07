@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016-2017 East Asian Observatory.
+# Copyright (C) 2016-2021 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>] [--include-error] [--include-processed] [--task <task>...]
     jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>...] [--no-cadc-check]
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
+    jsa_proc diskusage [-v | -q] input [--task <task>...]
+    jsa_proc diskusage [-v | -q] output [--task <task>...]
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -217,6 +219,24 @@ def clean(args):
 
     else:
         raise CommandError('Did not recognise clean type')
+
+
+@command
+def diskusage(args):
+    """
+    Displays disk usage by task.
+    """
+
+    if args['input']:
+        from jsa_proc.action.datafile_handling import disk_usage_input
+        disk_usage_input(tasks=args['--task'])
+
+    elif args['output']:
+        from jsa_proc.action.datafile_handling import disk_usage_output
+        disk_usage_output(tasks=args['--task'])
+
+    else:
+        raise CommandError('Did not recognise disk usage type')
 
 
 @command
