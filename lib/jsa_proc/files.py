@@ -36,7 +36,7 @@ def get_md5sum(filename):
         while True:
             data = f.read(1024)
 
-            if data == '':
+            if len(data) == 0:
                 break
 
             sum.update(data)
