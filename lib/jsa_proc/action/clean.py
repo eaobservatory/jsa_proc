@@ -56,16 +56,29 @@ def clean_input(count=None, dry_run=False,
     logger.debug('Done cleaning input directories')
 
 
-def clean_output(count=None, dry_run=False, task=None, **kwargs):
+def clean_output(
+        count=None, dry_run=False, task=None,
+        include_error=False, include_ingestion=False,
+        **kwargs):
     """Delete files other than previews from job output directories."""
 
     logger.debug('Beginning output clean')
 
+    states = [
+        JSAProcState.COMPLETE,
+        JSAProcState.DELETED,
+        JSAProcState.WONTWORK,
+    ]
+
+    if include_error:
+        states.append(JSAProcState.ERROR)
+
+    if include_ingestion:
+        states.append(JSAProcState.INGESTION)
+
     _clean_job_directories(
         get_output_dir,
-        [
-            JSAProcState.COMPLETE,
-        ],
+        states,
         task=task,
         count=count,
         clean_function=_clean_output_dir,
@@ -141,7 +154,7 @@ def _clean_job_directories(dir_function, state, task=None, count=None,
 
             else:
                 if clean_function(directory, job_id=job.id, db=db,
-                                  dry_run=dry_run,
+                                  state=job.state, dry_run=dry_run,
                                   **clean_function_kwargs):
                     n += 1
 
@@ -153,7 +166,7 @@ def _clean_job_directories(dir_function, state, task=None, count=None,
                              job.id, directory)
 
 
-def _clean_output_dir(directory, job_id, db, dry_run, no_cadc_check=False):
+def _clean_output_dir(directory, job_id, db, state, dry_run, no_cadc_check=False):
     """Clean non-previews from an output file after double-checking
     everything is present at CADC.
 
@@ -164,6 +177,18 @@ def _clean_output_dir(directory, job_id, db, dry_run, no_cadc_check=False):
     this is potentially dangerous and removes the check that the output files
     really are at CADC and have been ingested into CAOM-2.
     """
+
+    logger.debug('Considering cleaning job %i state %s directory %s', job_id, state, directory)
+
+    if not no_cadc_check:
+        unwanted_states = [
+            JSAProcState.DELETED,
+            JSAProcState.WONTWORK,
+        ]
+
+        if state in unwanted_states:
+            logger.debug('Job is in an unwanted state, disabling CADC checks')
+            no_cadc_check = True
 
     # Get a list of the non-preview files in the directory.
     non_preview = [x for x in os.listdir(directory) if not x.endswith('.png')]

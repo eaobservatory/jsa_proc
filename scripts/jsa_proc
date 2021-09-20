@@ -20,7 +20,7 @@
 
 Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>] [--include-error] [--include-processed] [--task <task>...]
-    jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>...] [--no-cadc-check]
+    jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>...] [--no-cadc-check] [--include-error] [--include-ingestion]
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
@@ -185,6 +185,13 @@ def command(f):
     return f
 
 
+def command_confirm(prompt):
+    from jsa_proc.action.util import yes_or_no_question
+
+    if not yes_or_no_question(prompt):
+        sys.exit(0)
+
+
 @command
 def clean(args):
     """
@@ -206,9 +213,16 @@ def clean(args):
                     include_processed=args['--include-processed'])
 
     elif args['output']:
+        if args['--include-error']:
+            command_confirm('Clean output for jobs in error states?')
+        if args['--include-ingestion']:
+            command_confirm('Clean output which is awaiting ingestion?')
+
         from jsa_proc.action.clean import clean_output
         clean_output(count=args['--count'], dry_run=args['--dry-run'],
-                     task=args['--task'], no_cadc_check=args['--no-cadc-check'])
+                     task=args['--task'], no_cadc_check=args['--no-cadc-check'],
+                     include_error=args['--include-error'],
+                     include_ingestion=args['--include-ingestion'])
 
     elif args['scratch']:
         from jsa_proc.action.clean import clean_scratch
