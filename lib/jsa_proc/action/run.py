@@ -257,6 +257,9 @@ def run_a_job(job_id, db=None, force=False):
                              'for job %i',
                              job.id)
             raise JSAProcError('Custom log ingestion failed')
+        except:
+            logger.exception('Could not start custom log ingestion for job %i', job.id)
+            raise JSAProcError('Could not start custom log ingestion')
 
     # Change state of job.
     db.change_state(
