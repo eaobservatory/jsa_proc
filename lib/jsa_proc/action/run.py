@@ -228,6 +228,15 @@ def run_a_job(job_id, db=None, force=False):
     logger.debug('Storing list of output log files')
     db.set_log_files(job_id, log_files)
 
+    # If task begins with hpx, get tiles from list of output_files
+    # and write to tile table in db.
+    if hpx_task.search(job.task):
+        logger.debug('Storing list of output tiles for HPX job ' + str(job_id))
+        tiles = hpx_tiles_from_filenames([x.filename for x in output_files])
+        db.set_tilelist(job_id, tiles)
+        logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
+                     ', '.join(str(i) for i in tiles))
+
     # If a log ingest command is set, run it here.
     if log_ingest_command:
         logger.debug('Will try and ingest log files')
@@ -248,16 +257,6 @@ def run_a_job(job_id, db=None, force=False):
                              'for job %i',
                              job.id)
             raise JSAProcError('Custom log ingestion failed')
-
-    # If task begins with hpx, get tiles from list of output_files
-    # and write to tile table in db.
-    if hpx_task.search(job.task):
-        logger.debug('Storing list of output tiles for HPX job ' + str(job_id))
-        tiles = hpx_tiles_from_filenames([x.filename for x in output_files])
-        db.set_tilelist(job_id, tiles)
-        logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
-                     ', '.join(str(i) for i in tiles))
-
 
     # Change state of job.
     db.change_state(
