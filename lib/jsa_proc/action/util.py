@@ -15,11 +15,18 @@
 
 from __future__ import print_function, division, absolute_import
 
+import sys
+
+if sys.version_info[0] < 3:
+    input_ = raw_input
+else:
+    input_ = input
+
 
 def yes_or_no_question(question, default=False):
     while True:
-        reply = raw_input('{0} ({1}): '.format(question,
-                                               'Y/n' if default else 'y/N'))
+        reply = input_('{0} ({1}): '.format(
+            question, 'Y/n' if default else 'y/N'))
 
         if reply == '':
             return default
