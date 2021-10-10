@@ -146,7 +146,7 @@ def ptransfer_poll(stream=None, dry_run=False):
         config.set('ptransfer', 'start',
                    datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
 
-        with open(stamp_file, 'wb') as f:
+        with open(stamp_file, 'w') as f:
             config.write(f)
 
         # Move some files into the working directory to prevent
