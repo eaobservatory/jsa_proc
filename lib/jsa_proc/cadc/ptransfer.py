@@ -17,7 +17,10 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
-from ConfigParser import SafeConfigParser
+try:
+    from configparser import SafeConfigParser
+except ImportError:
+    from ConfigParser import SafeConfigParser
 from datetime import datetime, timedelta
 import logging
 import os
