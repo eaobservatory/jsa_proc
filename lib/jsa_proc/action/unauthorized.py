@@ -137,7 +137,7 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                             obsid_list[found.index(False)]))
 
         except IdentifiedProblem as problem:
-            logger.info('Job {0}: {1}'.format(job_id, problem.message))
+            logger.info('Job {0}: {1}'.format(job_id, problem.args[0]))
             if problem.category in category:
                 category[problem.category].append(job_id)
             else:

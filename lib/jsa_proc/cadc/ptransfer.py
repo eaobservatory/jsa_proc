@@ -237,7 +237,7 @@ def ptransfer_poll(stream=None, dry_run=False):
             # its original stream directory.
             n_err += 1
             logger.error(
-                'Failed to transfer file %s (%s)', file.name, e.message)
+                'Failed to transfer file %s (%s)', file.name, e.args[0])
 
             if not dry_run:
                 os.rename(

@@ -132,11 +132,11 @@ def etransfer_poll_output(dry_run):
                                     state_prev=JSAProcState.TRANSFERRING)
 
         except ETransferError as e:
-            logger.error('Job %i failed e-transfer: %s', job_id, e.message)
+            logger.error('Job %i failed e-transfer: %s', job_id, e.args[0])
             if not dry_run:
                 db.change_state(
                     job_id, JSAProcState.ERROR,
-                    'Job failed e-transfer: {0}'.format(e.message),
+                    'Job failed e-transfer: {0}'.format(e.args[0]),
                     state_prev=JSAProcState.TRANSFERRING)
 
     logger.debug('Done polling the e-transfer system')
