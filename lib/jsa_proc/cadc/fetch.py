@@ -24,7 +24,7 @@ import os.path
 
 from jsa_proc.error import JSAProcError
 
-jcmt_data_url = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
+jcmt_data_url = 'https://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
 
 proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
@@ -33,7 +33,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     """
     Routine which will fetch a file from CADC and save it into the output
     directory. It assumes the url is of the form:
-    http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/s4d20130401_00001_0002
+    http://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/s4d20130401_00001_0002
 
     parameters;
     filename, string
