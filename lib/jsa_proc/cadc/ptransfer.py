@@ -297,6 +297,15 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
 
     proc_file = os.path.join(proc_dir, filename)
 
+    # Name-check.
+    namecheck_section = check_file_name(filename, True)
+    if namecheck_section is None:
+        raise PTransferException('name')
+    if namecheck_section in ad_streams:
+        ad_stream = ad_streams[namecheck_section]
+    else:
+        raise PTransferException('stream')
+
     # Check for permission to read the file.
     if not os.access(proc_file, os.R_OK):
         raise PTransferException('permission')
@@ -313,7 +322,13 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
 
     elif ext == '.fits':
         if not valid_fits(proc_file):
-            raise PTransferException('fitsverify')
+            if ((ad_stream == 'raw') and
+                    config.getboolean('etransfer', 'raw_allow_fitsverify')):
+                logger.warning(
+                    'Ignoring fitsverify error for %s (%s)',
+                    filename, ad_stream)
+            else:
+                raise PTransferException('fitsverify')
 
     elif ext == '.png':
         if not valid_png(proc_file):
@@ -321,15 +336,6 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
 
     else:
         raise PTransferException('filetype')
-
-    # Name-check.
-    namecheck_section = check_file_name(filename, True)
-    if namecheck_section is None:
-        raise PTransferException('name')
-    if namecheck_section in ad_streams:
-        ad_stream = ad_streams[namecheck_section]
-    else:
-        raise PTransferException('stream')
 
     # Check correct new/replacement stream.
     try:

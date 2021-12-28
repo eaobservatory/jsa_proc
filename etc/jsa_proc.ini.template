@@ -46,6 +46,7 @@ retry_delay=10
 ad_stream=RAW:raw PROCESSED:product
 cleanup_minutes=30
 cleanup_hard_minutes=60
+raw_allow_fitsverify=no
 
 [utilities]
 fitsverify=/local/progs/bin/fitsverify
