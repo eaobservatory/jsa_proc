@@ -22,6 +22,7 @@ from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.web.util import url_for
 
 log_types = {
+    'Wesley': re.compile('wesley.*\.html'),
     'ORAC-DR': re.compile('oracdr.*\.html'),
     'PICARD': re.compile('picard.*\.html'),
     'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
