@@ -1662,6 +1662,24 @@ class JSAProcDB:
 
         return result
 
+    def get_obs_preproc_recipe(self, obsid):
+        """
+        Get the preprocessing recipe required for the given observation,
+        if present, or None otherwise.
+        """
+
+        with self.db as c:
+            c.execute(
+                'SELECT recipe FROM obs_preproc WHERE obsid=%s',
+                (obsid,))
+
+            result = c.fetchall()
+
+        if len(result) != 1:
+            return None
+
+        return result[0][0]
+
 
 def _dict_query_where_clause(table, wheredict, logic_or=False):
     """Semi-private function that takes in a dictionary of column names

@@ -43,7 +43,7 @@ class BasicDBTest(DBTestCase):
 
         self.assertEqual(tables, set((
             'job', 'input_file', 'output_file', 'log', 'note',
-            'tile', 'qa', 'task', 'parent', 'obsidss',
+            'tile', 'qa', 'task', 'parent', 'obsidss', 'obs_preproc',
         )))
 
 
@@ -964,6 +964,21 @@ class InterfaceDBTest(DBTestCase):
         self.assertEqual(notes[0].username, 'user2')
         self.assertEqual(notes[1].message, 'Note 1')
         self.assertEqual(notes[1].username, 'user1')
+
+    def test_obs_preproc(self):
+        self.assertIsNone(self.db.get_obs_preproc_recipe(
+            'acsis_00047_20191222T145926'))
+
+        with self.db.db as c:
+            c.execute(
+                'INSERT INTO obs_preproc (obsid, recipe) '
+                'VALUES ("acsis_00047_20191222T145926", "FIX_HEADER_IFFREQ")')
+
+        self.assertEqual(self.db.get_obs_preproc_recipe(
+            'acsis_00047_20191222T145926'), 'FIX_HEADER_IFFREQ')
+
+        self.assertIsNone(self.db.get_obs_preproc_recipe(
+            'acsis_99999_20191222T145926'))
 
 
 class DBUtilityTestCase(TestCase):

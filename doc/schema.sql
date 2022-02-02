@@ -142,3 +142,8 @@ CREATE TABLE note (
 );
 
 CREATE INDEX note_job_id ON note (job_id);
+
+CREATE TABLE obs_preproc (
+    obsid VARCHAR(48) NOT NULL PRIMARY KEY,
+    recipe VARCHAR(80) NOT NULL
+);
