@@ -59,7 +59,13 @@ def search_log_files(
 
         # Find the latest matching log by iterating through them in reverse
         # order and "breaking" after the first match.
-        for filename in sorted(os.listdir(log_dir), reverse=True):
+        try:
+            filenames = sorted(os.listdir(log_dir), reverse=True)
+        except OSError:
+            logger.debug('No log directory for job %i', job_id)
+            continue
+
+        for filename in filenames:
             if not re_filename.search(filename):
                 continue
 
