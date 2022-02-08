@@ -46,7 +46,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>...] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>...]
-    jsa_proc search_log [-v | -q] --task <task>... [--project <project>] [--after-context <lines>] [--state <state>] <search>
+    jsa_proc search_log [-v | -q] --task <task>... [--project <project>] [--after-context <lines>] [--state <state>] [--notes] <search>
     jsa_proc transfer [-v | -q] [--dry-run] [--task <task>...]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
@@ -81,6 +81,7 @@ Options:
     --tag <tag>                Select jobs by tag.
     --task, -t <task>...       Select jobs for a particular task.
     --quick                    Use simpler but less thorough database query.
+    --notes                    Show notes.
 
 For more information about a particular command, please use:
 
@@ -646,7 +647,8 @@ def search_log(args):
     search_log_files(
         pattern=args['<search>'], filename_pattern='^oracdr',
         task=args['--task'], project=args['--project'],
-        state=args['--state'], after_context=args['--after-context'])
+        state=args['--state'], after_context=args['--after-context'],
+        notes=args['--notes'])
 
 
 @command

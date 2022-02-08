@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 def search_log_files(
         pattern, filename_pattern, task,
-        project=None, state=None, after_context=None):
+        project=None, state=None, after_context=None,
+        notes=False):
     db = get_database()
 
     re_pattern = re.compile(pattern)
@@ -91,5 +92,9 @@ def search_log_files(
                 for matched_line in matched_lines[1:]:
                     logger.info(
                         '...    continuation %i: %s', job_id, matched_line)
+
+                if notes:
+                    for note in db.get_notes(job_id):
+                        logger.info('    Note: %s', note.message)
 
             break
