@@ -24,6 +24,7 @@ from docopt import docopt
 import vos
 
 from jsa_proc.files import get_md5sum
+from jsa_proc.util import retry
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ class CustomJobTransfer(object):
 
         logger.debug('Constructing VOS client')
         vos_client = vos.Client()
-        if not vos_client.isdir(self.vos_base):
+        if not retry(lambda: vos_client.isdir(self.vos_base)):
             raise Exception(
                 'VOS base directory does not exist (or is file)')
 
@@ -157,10 +158,10 @@ class CustomJobTransfer(object):
             else:
                 if vos_md5 != ():
                     logger.debug('Deleting existing file {0}'.format(vos_file))
-                    vos_client.delete(vos_file)
+                    retry(lambda: vos_client.delete(vos_file))
 
                 logger.info('Storing {0} as {1}'.format(file_path, vos_file))
-                vos_client.copy(file_path, vos_file)
+                retry(lambda: vos_client.copy(file_path, vos_file))
 
     def get_vos_directory_entries(self, vos_client, vos_dir, dry_run=False):
         """
@@ -175,8 +176,8 @@ class CustomJobTransfer(object):
         try:
             logger.debug('Getting VO space node: %s', vos_dir)
 
-            nodes = vos_client.get_node(
-                vos_dir, limit=None, force=True).node_list
+            nodes = retry(lambda: vos_client.get_node(
+                vos_dir, limit=None, force=True)).node_list
 
         except OSError as e:
             if e.errno == errno.ENOENT:
@@ -223,7 +224,7 @@ class CustomJobTransfer(object):
         exists.
         """
 
-        if vos_client.isdir(vos_dir):
+        if retry(lambda: vos_client.isdir(vos_dir)):
             logger.debug('VOS directory {0} exists'.format(vos_dir))
         else:
             # Get parent directory and ensure it exists.
@@ -235,7 +236,7 @@ class CustomJobTransfer(object):
 
             # Now create the requested directory.
             logger.info('Making VOS directory {0}'.format(vos_dir))
-            vos_client.mkdir(vos_dir)
+            retry(lambda: vos_client.mkdir(vos_dir))
 
     def determine_vos_directory(self, transdir, filename):
         # This method must be overridden by subclasses.
