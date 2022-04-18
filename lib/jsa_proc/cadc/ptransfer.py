@@ -36,6 +36,7 @@ from jsa_proc.cadc.namecheck import check_file_name
 from jsa_proc.config import get_config
 from jsa_proc.error import CommandError, JSAProcError
 from jsa_proc.files import get_md5sum
+from jsa_proc.util import retry
 
 logger = logging.getLogger(__name__)
 
@@ -371,19 +372,14 @@ def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
     max_retries = int(config.get('etransfer', 'max_tries'))
     retry_delay = int(config.get('etransfer', 'retry_delay'))
 
-    for i in range(0, max_retries):
-        try:
-            put_cadc_file(filename, proc_dir, ad_stream)
+    try:
+        return retry(
+            (lambda: put_cadc_file(filename, proc_dir, ad_stream)),
+            max_retries=max_retries, retry_delay=retry_delay,
+            log_message='Failed to put file {0}'.format(filename))
 
-            return
-
-        except JSAProcError:
-            logger.exception('Failed to put file {0} (try {1} of {2})'
-                             .format(filename, i + 1, max_retries))
-
-        sleep(retry_delay)
-
-    raise PTransferFailure('Transfer failed')
+    except JSAProcError:
+        raise PTransferFailure('Transfer failed')
 
 
 def ptransfer_clean_up(dry_run=False):

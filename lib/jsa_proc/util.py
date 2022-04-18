@@ -13,9 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import signal
+import time
 
 from jsa_proc.error import JSAProcError
+
+logger = logging.getLogger(__name__)
 
 
 def identifier_to_pattern(identifier, patterns):
@@ -46,3 +50,25 @@ def restore_signals():
 
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
+
+
+def retry(f, max_retries=6, retry_delay=30, log_message='Operation failed'):
+    """Attempt an operation up to a given number of times.
+
+    In the event of an exception being raised, log as an exception with
+    the given message plus the try number.  On the final try, the exception
+    is re-raised, otherwise sleep for the given time before trying again.
+    """
+
+    for i in range(max_retries, 0, -1):
+        try:
+            return f()
+
+        except Exception:
+            logger.exception('{0} (try {1} of {2})'.format(
+                log_message, 1 + max_retries - i, max_retries))
+
+            if i <= 1:
+                raise
+
+        time.sleep(retry_delay)
