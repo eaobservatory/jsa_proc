@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016-2021 East Asian Observatory.
+# Copyright (C) 2016-2022 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
+    jsa_proc dws [-v | -q] get [--parents] <file>...
+    jsa_proc dws [-v | -q] put --stream <stream> <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -74,6 +76,7 @@ Options:
     --outfile <file>           File into which to write output.
     --obsid <obsid>            Observation identifier (OBSID header).
     --no-cadc-check            Skip checks for files being at CADC.
+    --parents, -p              Create parent directories.
     --poll                     Poll a system for state updates.
     --project <project>        OMP project identifier.
     --state <state name>       Job state.
@@ -92,6 +95,7 @@ from __future__ import print_function, division, absolute_import
 
 import functools
 import logging
+import os
 import sys
 import textwrap
 
@@ -114,6 +118,10 @@ integer_arguments = (
 optional_repeating_arguments = (
     '--task',
 )
+
+
+class CommandContinue(Exception):
+    pass
 
 
 def main():
@@ -155,9 +163,12 @@ def main():
             # Determine which sub-command to perform.
             for (command, func) in commands.items():
                 if args.get(command):
-                    logger.debug('Running %s subcommand', command)
-                    func(args)
-                    break
+                    try:
+                        logger.debug('Running %s subcommand', command)
+                        func(args)
+                        break
+                    except CommandContinue:
+                        pass
             else:
                 raise CommandError('Failed to find sub-command to run')
 
@@ -252,6 +263,58 @@ def diskusage(args):
 
     else:
         raise CommandError('Did not recognise disk usage type')
+
+
+@command
+def dws(args):
+    """
+    Get or put files to CADC data web service.
+    """
+
+    if args['query']:
+        # Continue to the "query dws" command.
+        raise CommandContinue()
+    elif args['get']:
+        action_fetch = True
+    elif args['put']:
+        action_fetch = False
+    else:
+        raise CommandError('Did not recognise dws command')
+
+    from jsa_proc.cadc.fetch import fetch_cadc_file, fetch_cadc_file_info, \
+        put_cadc_file
+
+    for pathname in args['<file>']:
+        (dirname, filename) = os.path.split(pathname)
+
+        if action_fetch:
+            if os.path.exists(pathname):
+                raise CommandError(
+                    'File "{}" already exists'.format(filename))
+
+            if not os.path.exists(dirname):
+                if args['--parents']:
+                    logger.info('Creating directory "{}"'.format(dirname))
+                    os.makedirs(dirname)
+
+                else:
+                    raise CommandError(
+                        'Directory "{}" does not exist'.format(dirname))
+
+            logger.info('Getting file "{}"'.format(filename))
+            fetch_cadc_file(filename, dirname, suffix='')
+
+        else:
+            if not os.path.exists(pathname):
+                raise CommandError(
+                    'File "{}" does not exist'.format(filename))
+
+            if fetch_cadc_file_info(filename) is not None:
+                raise CommandError(
+                    'File "{}" is already in the archive'.format(filename))
+
+            logger.info('Putting file "{}"'.format(filename))
+            put_cadc_file(filename, dirname, ad_stream=args['--stream'])
 
 
 @command
