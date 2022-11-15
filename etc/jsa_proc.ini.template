@@ -4,13 +4,6 @@ database=jsa_proc_test
 user=jsa_proc_test
 password=jsa_proc_test
 
-# Credentials for read/write access to the JCMT database.
-[database_jcmt]
-server=SYB_JAC
-database=jcmt
-user=jcmt
-password=INSERT_PASSWORD_HERE
-
 [directories]
 input=/net/kamaka/export/data/jsa_proc/input
 output=/net/kamaka/export/data/jsa_proc/output

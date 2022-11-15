@@ -2,9 +2,14 @@
 #
 # TODO: insert license statement.
 
-from jsa_proc.config import get_config
+try:
+    from configparser import SafeConfigParser
+except ImportError:
+    from ConfigParser import SafeConfigParser
+
 from omp.siteconfig import get_omp_siteconfig
 from omp.db.db import OMPDB
+from jsa_proc.error import JSAProcError
 
 omp_database_access = {}
 
@@ -31,8 +36,8 @@ def get_omp_database(write_access=None):
             config = get_omp_siteconfig()
             credentials = 'database'
         elif write_access == 'jcmt':
-            config = get_config()
-            credentials = 'database_jcmt'
+            config = get_enterdata_config()
+            credentials = 'database'
         else:
             raise JSAProcError('Unknown write_access request {0}'
                                .format(write_access))
@@ -44,3 +49,15 @@ def get_omp_database(write_access=None):
             read_only=(write_access is None))
 
     return omp_database_access[write_access]
+
+
+def get_enterdata_config():
+    """Read the enterdata config file."""
+
+    enterdata_config_file = '/jac_sw/etc/enterdata/enterdata.cfg'
+
+    config = SafeConfigParser()
+
+    config.read(enterdata_config_file)
+
+    return config
