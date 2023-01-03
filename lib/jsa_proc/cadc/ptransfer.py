@@ -24,6 +24,7 @@ except ImportError:
 from datetime import datetime, timedelta
 import logging
 import os
+import re
 import tempfile
 from time import sleep
 
@@ -109,7 +110,7 @@ def ptransfer_poll(stream=None, dry_run=False):
 
     # Search for files to transfer.
     for stream in streams:
-        for file in os.listdir(os.path.join(trans_dir, stream)):
+        for file in _sort_files(os.listdir(os.path.join(trans_dir, stream))):
             logger.debug('Found file %s (%s)', file, stream)
             files.append(FileInfo(file, stream))
 
@@ -516,3 +517,26 @@ def ptransfer_clean_up(dry_run=False):
 
         os.unlink(stamp_file)
         os.rmdir(proc_dir)
+
+
+def _sort_files(files):
+    """Roughly sort files for p-transfer.
+
+    Attempt to extract a date and observation number from the file
+    name, and use these to sort the files.
+    """
+
+    pattern = re.compile('(\d{8})_(\d{5})')
+
+    file_info = []
+
+    for file_ in files:
+        m = pattern.search(file_)
+        if m is None:
+            file_info.append(('', '', file_))
+        else:
+            file_info.append((m.group(1), m.group(2), file_))
+
+    file_info.sort()
+
+    return [x[2] for x in file_info]
