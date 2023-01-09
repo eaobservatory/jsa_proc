@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016-2022 East Asian Observatory.
+# Copyright (C) 2016-2023 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
+    jsa_proc dws [-v | -q] compare <file>...
     jsa_proc dws [-v | -q] get [--parents] <file>...
     jsa_proc dws [-v | -q] put --stream <stream> <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
@@ -271,9 +272,13 @@ def dws(args):
     Get or put files to CADC data web service.
     """
 
+    action_compare = False
+
     if args['query']:
         # Continue to the "query dws" command.
         raise CommandContinue()
+    elif args['compare']:
+        action_compare = True
     elif args['get']:
         action_fetch = True
     elif args['put']:
@@ -283,11 +288,34 @@ def dws(args):
 
     from jsa_proc.cadc.fetch import fetch_cadc_file, fetch_cadc_file_info, \
         put_cadc_file
+    from jsa_proc.files import get_md5sum
 
     for pathname in args['<file>']:
         (dirname, filename) = os.path.split(pathname)
 
-        if action_fetch:
+        if action_compare:
+            if not os.path.exists(pathname):
+                raise CommandError(
+                    'File "{}" does not exist'.format(filename))
+
+            cadc_file_info = fetch_cadc_file_info(filename)
+            if cadc_file_info is None:
+                raise CommandError(
+                    'File "{}" is not in the archive'.format(filename))
+
+            md5sum = get_md5sum(pathname)
+
+            cadc_md5sum = cadc_file_info['content-md5']
+            if md5sum == cadc_md5sum:
+                print('File "{}" matches the archive: {} == {}'.format(
+                    filename, md5sum, cadc_md5sum))
+
+            else:
+                raise CommandError(
+                    'File "{}" does not match the archive: {} != {}'.format(
+                        filename, md5sum, cadc_md5sum))
+
+        elif action_fetch:
             if os.path.exists(pathname):
                 raise CommandError(
                     'File "{}" already exists'.format(filename))
