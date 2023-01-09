@@ -503,7 +503,7 @@ def namecheck(args):
     elif args['file']:
         from jsa_proc.action.namecheck import namecheck_file
 
-        namecheck_file(args['<file>'])
+        namecheck_file(args['<file>'][0])
 
     else:
         raise CommandError('Did not recognise namecheck action')
