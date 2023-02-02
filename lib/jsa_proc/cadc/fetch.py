@@ -18,13 +18,15 @@ Routines for downloading data from CADC.
 
 """
 
+from base64 import b64decode
+from codecs import ascii_decode
 import requests
 from requests.exceptions import RequestException
 import os.path
 
 from jsa_proc.error import JSAProcError
 
-jcmt_data_url = 'https://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/'
+jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
 
 proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
@@ -98,6 +100,16 @@ def fetch_cadc_file_info(filename):
         # Check if its worked. (raises error if not okay)
         r.raise_for_status()
 
+        # The minoc service seems to be returning the base64 encoding
+        # of the hex representation of the MD5.  Decode it here to
+        # restore the previous style header and in case this changes.
+        if 'content-md5' not in r.headers:
+            digest = r.headers['digest']
+            if not digest.startswith('md5='):
+                raise JSAProcError('Digest not in expected md5= format')
+
+            r.headers['content-md5'] = ascii_decode(b64decode(digest[4:]))[0]
+
         return r.headers
 
     except RequestException as e:
@@ -120,10 +132,8 @@ def check_cadc_files(files):
     return result
 
 
-def put_cadc_file(filename, input_directory, ad_stream):
+def put_cadc_file(filename, input_directory):
     """Put the given file into the CADC archive.
-
-    The CADC AD "stream" for the PUT request must be given.
 
     Raises a JSAProcError on failure.
     """
@@ -134,7 +144,6 @@ def put_cadc_file(filename, input_directory, ad_stream):
     try:
         with open(os.path.join(input_directory, filename), 'rb') as f:
             kwargs['data'] = f
-            kwargs['headers'] = {'X-CADC-Stream': ad_stream}
 
             r = requests.put(*args, **kwargs)
 
@@ -161,6 +170,10 @@ def _prepare_cadc_request(filename):
     """
 
     # Data path.
-    url = jcmt_data_url + filename
+    url = '{}/files/{}'.format(jcmt_data_url, make_artifact_uri(filename))
 
     return ([url], {'cert': proxy_certificate})
+
+
+def make_artifact_uri(filename, archive='JCMT'):
+    return 'cadc:{}/{}'.format(archive, filename)

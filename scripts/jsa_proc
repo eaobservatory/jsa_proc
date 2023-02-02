@@ -26,7 +26,7 @@ Usage:
     jsa_proc diskusage [-v | -q] output [--task <task>...]
     jsa_proc dws [-v | -q] compare <file>...
     jsa_proc dws [-v | -q] get [--parents] <file>...
-    jsa_proc dws [-v | -q] put --stream <stream> <file>...
+    jsa_proc dws [-v | -q] put <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -342,7 +342,7 @@ def dws(args):
                     'File "{}" is already in the archive'.format(filename))
 
             logger.info('Putting file "{}"'.format(filename))
-            put_cadc_file(filename, dirname, ad_stream=args['--stream'])
+            put_cadc_file(filename, dirname)
 
 
 @command

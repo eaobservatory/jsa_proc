@@ -375,7 +375,7 @@ def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
 
     try:
         return retry(
-            (lambda: put_cadc_file(filename, proc_dir, ad_stream)),
+            (lambda: put_cadc_file(filename, proc_dir)),
             max_retries=max_retries, retry_delay=retry_delay,
             log_message='Failed to put file {0}'.format(filename))
 
