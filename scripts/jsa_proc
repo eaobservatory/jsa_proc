@@ -24,9 +24,9 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
-    jsa_proc dws [-v | -q] compare <file>...
-    jsa_proc dws [-v | -q] get [--parents] <file>...
-    jsa_proc dws [-v | -q] put <file>...
+    jsa_proc dws [-v | -q] [--cookie] compare <file>...
+    jsa_proc dws [-v | -q] [--cookie] get [--parents] <file>...
+    jsa_proc dws [-v | -q] [--cookie] put <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -42,7 +42,7 @@ Usage:
     jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
-    jsa_proc query [-v | -q] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws | adtap) <search>
+    jsa_proc query [-v | -q] [--cookie] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws | adtap) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task>... [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
@@ -86,6 +86,7 @@ Options:
     --task, -t <task>...       Select jobs for a particular task.
     --quick                    Use simpler but less thorough database query.
     --notes                    Show notes.
+    --cookie                   Use CADC log in session cookie.
 
 For more information about a particular command, please use:
 
@@ -109,6 +110,7 @@ from jsa_proc.state import JSAProcState
 script_name = 'jsa_proc'
 commands = {}
 logger = logging.getLogger(script_name)
+cookies = None
 
 integer_arguments = (
     '--job-id', '--count',
@@ -128,6 +130,7 @@ class CommandContinue(Exception):
 def main():
     """Main routine for the jsa_proc tool."""
 
+    global cookies
     args = docopt(__doc__, help=False)
 
     # Determine logging level from the --quiet and --verbose options.
@@ -161,6 +164,11 @@ def main():
             help(args)
 
         else:
+            # Do we need to get a CADC log in cookie?
+            if args['--cookie']:
+                from tools4caom2.login import cadc_log_in
+                cookies = cadc_log_in()
+
             # Determine which sub-command to perform.
             for (command, func) in commands.items():
                 if args.get(command):
@@ -298,7 +306,7 @@ def dws(args):
                 raise CommandError(
                     'File "{}" does not exist'.format(filename))
 
-            cadc_file_info = fetch_cadc_file_info(filename)
+            cadc_file_info = fetch_cadc_file_info(filename, cookies=cookies)
             if cadc_file_info is None:
                 raise CommandError(
                     'File "{}" is not in the archive'.format(filename))
@@ -330,19 +338,19 @@ def dws(args):
                         'Directory "{}" does not exist'.format(dirname))
 
             logger.info('Getting file "{}"'.format(filename))
-            fetch_cadc_file(filename, dirname, suffix='')
+            fetch_cadc_file(filename, dirname, suffix='', cookies=cookies)
 
         else:
             if not os.path.exists(pathname):
                 raise CommandError(
                     'File "{}" does not exist'.format(filename))
 
-            if fetch_cadc_file_info(filename) is not None:
+            if fetch_cadc_file_info(filename, cookies=cookies) is not None:
                 raise CommandError(
                     'File "{}" is already in the archive'.format(filename))
 
             logger.info('Putting file "{}"'.format(filename))
-            put_cadc_file(filename, dirname)
+            put_cadc_file(filename, dirname, cookies=cookies)
 
 
 @command
@@ -615,7 +623,7 @@ def query(args):
 
     elif args['dws']:
         from jsa_proc.cadc.fetch import fetch_cadc_file_info
-        info = fetch_cadc_file_info(search)
+        info = fetch_cadc_file_info(search, cookies=cookies)
         if info is None:
             print('Not found')
         else:

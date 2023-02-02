@@ -31,7 +31,7 @@ jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
 proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
 
-def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
+def fetch_cadc_file(filename, output_directory, suffix='.sdf', cookies=None):
     """
     Routine which will fetch a file from CADC and save it into the output
     directory. It assumes the url is of the form:
@@ -59,7 +59,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     output_file_path = os.path.join(output_directory, local_file)
 
     try:
-        (args, kwargs) = _prepare_cadc_request(filename)
+        (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)
 
         # Connect with stream=True for large files.
         kwargs['stream'] = True
@@ -80,7 +80,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf'):
     return output_file_path
 
 
-def fetch_cadc_file_info(filename):
+def fetch_cadc_file_info(filename, cookies=None):
     """Retrieve information about a file in the JCMT archive at CADC.
 
     This routine works in the same way as fetch_cadc_file but makes
@@ -88,7 +88,7 @@ def fetch_cadc_file_info(filename):
     """
 
     try:
-        (args, kwargs) = _prepare_cadc_request(filename)
+        (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)
 
         kwargs['allow_redirects'] = True
 
@@ -132,13 +132,13 @@ def check_cadc_files(files):
     return result
 
 
-def put_cadc_file(filename, input_directory):
+def put_cadc_file(filename, input_directory, cookies=None):
     """Put the given file into the CADC archive.
 
     Raises a JSAProcError on failure.
     """
 
-    (args, kwargs) = _prepare_cadc_request(filename)
+    (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)
     r = None
 
     try:
@@ -161,7 +161,7 @@ def put_cadc_file(filename, input_directory):
                        .format(r.status_code, r.text))
 
 
-def _prepare_cadc_request(filename):
+def _prepare_cadc_request(filename, cookies=None):
     """Prepare request parameters for a CADC data web service
     request.
 
@@ -171,8 +171,15 @@ def _prepare_cadc_request(filename):
 
     # Data path.
     url = '{}/files/{}'.format(jcmt_data_url, make_artifact_uri(filename))
+    kwargs = {}
 
-    return ([url], {'cert': proxy_certificate})
+    if cookies is not None:
+        kwargs['cookies'] = cookies
+
+    else:
+        kwargs['cert'] = proxy_certificate
+
+    return ([url], kwargs)
 
 
 def make_artifact_uri(filename, archive='JCMT'):
