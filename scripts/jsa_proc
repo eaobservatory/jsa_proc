@@ -300,6 +300,8 @@ def dws(args):
 
     for pathname in args['<file>']:
         (dirname, filename) = os.path.split(pathname)
+        if dirname == '':
+            dirname = '.'
 
         if action_compare:
             if not os.path.exists(pathname):
