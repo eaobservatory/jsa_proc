@@ -633,10 +633,10 @@ def query(args):
                 print('{0}: {1}'.format(key, repr(info[key])))
 
     elif args['adtap']:
-        from jsa_proc.cadc.adtap import ADTap
-        ad = ADTap()
-        for entry in ad.search_file(search):
-            print('{} {}'.format(entry.md5, entry.id_))
+        from jsa_proc.cadc.luskan import Luskan
+        luskan = Luskan()
+        for entry in luskan.search_file(search, cookies=cookies):
+            print('{} {}'.format(entry.md5, entry.filename))
 
     else:
         raise CommandError('Did not recognise query type')
