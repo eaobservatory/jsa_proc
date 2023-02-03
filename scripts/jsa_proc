@@ -24,9 +24,9 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
-    jsa_proc dws [-v | -q] [--cookie] compare <file>...
-    jsa_proc dws [-v | -q] [--cookie] get [--parents] <file>...
-    jsa_proc dws [-v | -q] [--cookie] put <file>...
+    jsa_proc minoc [-v | -q] [--cookie] compare <file>...
+    jsa_proc minoc [-v | -q] [--cookie] get [--parents] <file>...
+    jsa_proc minoc [-v | -q] [--cookie] put <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] --query --job-id <id>
@@ -42,7 +42,7 @@ Usage:
     jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
-    jsa_proc query [-v | -q] [--cookie] (jcmtinfo | caom2 | caom2file | common | ompstatus | dws | adtap) <search>
+    jsa_proc query [-v | -q] [--cookie] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task>... [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
@@ -275,15 +275,15 @@ def diskusage(args):
 
 
 @command
-def dws(args):
+def minoc(args):
     """
-    Get or put files to CADC data web service.
+    Get or put files to CADC minoc web service.
     """
 
     action_compare = False
 
     if args['query']:
-        # Continue to the "query dws" command.
+        # Continue to the "query minoc" command.
         raise CommandContinue()
     elif args['compare']:
         action_compare = True
@@ -292,7 +292,7 @@ def dws(args):
     elif args['put']:
         action_fetch = False
     else:
-        raise CommandError('Did not recognise dws command')
+        raise CommandError('Did not recognise minoc command')
 
     from jsa_proc.cadc.fetch import fetch_cadc_file, fetch_cadc_file_info, \
         put_cadc_file
@@ -582,10 +582,10 @@ def query(args):
 
     ompstatus:  retrieves the status of an obsid from the OMP.
 
-    dws:        retrieves information from the CADC data web service
+    minoc:      retrieves information from the CADC minoc web service
                 for a given file.
 
-    adtap:      queries AD via TAP
+    luskan:     queries storage inventory via luskan TAP.
     """
 
     search = args['<search>']
@@ -623,7 +623,7 @@ def query(args):
         for field in sorted(common._fields):
             print('{0}: {1!s}'.format(field, getattr(common, field)))
 
-    elif args['dws']:
+    elif args['minoc']:
         from jsa_proc.cadc.fetch import fetch_cadc_file_info
         info = fetch_cadc_file_info(search, cookies=cookies)
         if info is None:
@@ -632,7 +632,7 @@ def query(args):
             for key in sorted(info.keys()):
                 print('{0}: {1}'.format(key, repr(info[key])))
 
-    elif args['adtap']:
+    elif args['luskan']:
         from jsa_proc.cadc.luskan import Luskan
         luskan = Luskan()
         for entry in luskan.search_file(search, cookies=cookies):
