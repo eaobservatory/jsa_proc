@@ -16,6 +16,7 @@
 from collections import namedtuple
 import logging
 
+from tools4caom2.artifact_uri import extract_artifact_uri_filename
 from tools4caom2.tapclient import tapclient_luskan
 
 from jsa_proc.error import JSAProcError
@@ -54,15 +55,6 @@ class Luskan():
                 size))
 
         return result
-
-
-def extract_artifact_uri_filename(uri, archive):
-    prefix = 'cadc:{}/'.format(archive)
-    if uri.startswith(prefix):
-        return uri[len(prefix):]
-
-    raise JSAProcError(
-        'Artifact URI "{}" not of expected format'.format(uri))
 
 
 def extract_luskan_md5_sum(md5):

@@ -24,6 +24,8 @@ import requests
 from requests.exceptions import RequestException
 import os.path
 
+from tools4caom2.artifact_uri import make_artifact_uri
+
 from jsa_proc.error import JSAProcError
 
 jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
@@ -170,7 +172,9 @@ def _prepare_cadc_request(filename, cookies=None):
     """
 
     # Data path.
-    url = '{}/files/{}'.format(jcmt_data_url, make_artifact_uri(filename))
+    url = '{}/files/{}'.format(
+        jcmt_data_url,
+        make_artifact_uri(filename, archive='JCMT'))
     kwargs = {}
 
     if cookies is not None:
@@ -180,7 +184,3 @@ def _prepare_cadc_request(filename, cookies=None):
         kwargs['cert'] = proxy_certificate
 
     return ([url], kwargs)
-
-
-def make_artifact_uri(filename, archive='JCMT'):
-    return 'cadc:{}/{}'.format(archive, filename)
