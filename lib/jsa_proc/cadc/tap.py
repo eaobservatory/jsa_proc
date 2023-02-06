@@ -17,6 +17,7 @@ import logging
 import os.path
 import re
 
+from tools4caom2.artifact_uri import make_artifact_uri
 from tools4caom2.tapclient import tapclient
 
 from jsa_proc.error import JSAProcError
@@ -121,13 +122,10 @@ class CADCTap():
         uris = {}
 
         for filename in filenames:
-            # CADC now uses file IDs *with* the extension in the JCMT archive.
-            fileid = filename
+            if not valid_fileid.match(filename):
+                raise JSAProcError('Invalid file ID {0}'.format(filename))
 
-            if not valid_fileid.match(fileid):
-                raise JSAProcError('Invalid file ID {0}'.format(fileid))
-
-            uris[filename] = 'ad:JCMT/{0}'.format(fileid)
+            uris[filename] = make_artifact_uri(filename, archive='JCMT')
 
         logger.debug(
             'SELECT uri, COUNT(*) FROM caom2.Artifact '
