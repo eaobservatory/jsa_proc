@@ -19,6 +19,7 @@ Routines for downloading data from CADC.
 """
 
 from base64 import b64decode
+from binascii import hexlify
 from codecs import ascii_decode
 import requests
 from requests.exceptions import RequestException
@@ -102,15 +103,12 @@ def fetch_cadc_file_info(filename, cookies=None):
         # Check if its worked. (raises error if not okay)
         r.raise_for_status()
 
-        # The minoc service seems to be returning the base64 encoding
-        # of the hex representation of the MD5.  Decode it here to
-        # restore the previous style header and in case this changes.
         if 'content-md5' not in r.headers:
             digest = r.headers['digest']
             if not digest.startswith('md5='):
                 raise JSAProcError('Digest not in expected md5= format')
 
-            r.headers['content-md5'] = ascii_decode(b64decode(digest[4:]))[0]
+            r.headers['content-md5'] = ascii_decode(hexlify(b64decode(digest[4:])))[0]
 
         return r.headers
 
