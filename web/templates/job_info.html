@@ -33,7 +33,11 @@
     <tr><th>Sources</th><td>{{ obsinfo | map(attribute='sourcename') | uniq | join(' ') }} </td></tr>
     <tr><th>Instruments</th><td>{{ obsinfo | map(attribute='instrument') | uniq | join(' ') }} </td></tr>
     <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
-    <tr><th>Projects</th><td>{{ obsinfo | map(attribute='project') | uniq | join(' ') }} </td></tr>
+    <tr><th>Projects</th><td>
+      {% for project in obsinfo | map(attribute='project') | uniq %}
+        <a href="{{ url_for_omp('projecthome.pl', {'project': project}) }}">{{ project }}</a></td>
+      {% endfor %}
+    </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
     {% endif %}
     {% if tiles is not none %}
