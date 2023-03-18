@@ -351,7 +351,7 @@
 <div class="panel">
 <h2>Parent Jobs</h2>
   <ul class="multicol">
-    {% for p in parents.keys() %}
+    {% for p in parents.keys() | sort %}
     <li><a href="{{ url_for('job_info', job_id=p) }}"> {{p}} </a></li>
     {% endfor %}
   </ul>
