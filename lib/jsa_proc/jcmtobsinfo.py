@@ -79,13 +79,19 @@ CalTypes = dict(
 # ScanMode.
 ScanMode = _where_maker('ScanMode')
 ScanModes = dict(
-    Daisy=ScanMode('Daisy', 'Daisy scans',
-                   {'scanmode': ['DAISY', 'CV_DAISY']}),
-    Pong=ScanMode('Pong', 'Pong scans', {'scanmode': 'CURVY_PONG'}),
-    Jiggle=ScanMode('Jiggle', 'Jiggle', {'scanmode': 'jiggle'}),
-    Grid=ScanMode('Grid', 'Grid', {'scanmode': 'grid'}),
-    Raster=ScanMode('Raster', 'Raster',
-                    {'scanmode': 'DISCRETE_BOUSTROPHEDON'}),
+    Daisy=ScanMode(
+        'Daisy', 'Daisy scans',
+        {'sam_mode': 'scan', 'scan_pat': ['DAISY', 'CV_DAISY']}),
+    Pong=ScanMode(
+        'Pong', 'Pong scans',
+        {'sam_mode': 'scan', 'scan_pat': 'CURVY_PONG'}),
+    Jiggle=ScanMode(
+        'Jiggle', 'Jiggle', {'sam_mode': 'jiggle'}),
+    Grid=ScanMode(
+        'Grid', 'Grid', {'sam_mode': 'grid'}),
+    Raster=ScanMode(
+        'Raster', 'Raster',
+        {'sam_mode': 'scan', 'scan_pat': 'DISCRETE_BOUSTROPHEDON'}),
 )
 
 # Subsystem
