@@ -35,7 +35,7 @@
     <tr><th>Obs types</th><td>{{ obsinfo | map(attribute='obstype') | uniq | join(' ') }} </td></tr>
     <tr><th>Projects</th><td>
       {% for project in obsinfo | map(attribute='project') | uniq %}
-        <a href="{{ url_for_omp('projecthome.pl', {'project': project}) }}">{{ project }}</a></td>
+        <a href="{{ url_for_omp('projecthome.pl', {'project': project}) }}">{{ project }}</a>
       {% endfor %}
     </td></tr>
     <tr><th>Scan modes</th><td>{{ obsinfo | map(attribute='scanmode') | uniq | join(' ') }} </td></tr>
