@@ -51,7 +51,7 @@ def fetch_cadc_previews(output_files, output_directory):
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
 
-            pathname = fetch_cadc_file(preview, output_directory, suffix='')
+            pathname = fetch_cadc_file(preview, output_directory)
 
             # Record those previews which were succesfully fetched.
             fetched.append(pathname)

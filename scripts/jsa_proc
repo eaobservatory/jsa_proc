@@ -340,7 +340,7 @@ def minoc(args):
                         'Directory "{}" does not exist'.format(dirname))
 
             logger.info('Getting file "{}"'.format(filename))
-            fetch_cadc_file(filename, dirname, suffix='', cookies=cookies)
+            fetch_cadc_file(filename, dirname, cookies=cookies)
 
         else:
             if not os.path.exists(pathname):

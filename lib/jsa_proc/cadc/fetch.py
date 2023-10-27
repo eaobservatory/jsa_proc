@@ -34,11 +34,11 @@ jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
 proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
 
-def fetch_cadc_file(filename, output_directory, suffix='.sdf', cookies=None):
+def fetch_cadc_file(filename, output_directory, cookies=None):
     """
     Routine which will fetch a file from CADC and save it into the output
     directory. It assumes the url is of the form:
-    http://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/data/pub/JCMT/s4d20130401_00001_0002
+    https://ws-cadc.canfar.net/minoc/files/cadc:JCMT/s4d20130401_00001_0002.sdf
 
     parameters;
     filename, string
@@ -47,10 +47,6 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf', cookies=None):
     output_directory, string
     Path to save file to.
 
-    suffix: additional suffix to be added to the filename
-    before saving to the output directory.
-    (string, default: ".sdf")
-
     Will raise an JSAProcError if it can't connect.
 
     Returns name of file with path
@@ -58,8 +54,7 @@ def fetch_cadc_file(filename, output_directory, suffix='.sdf', cookies=None):
 
     # Local name to save to (requests automatically decompresses, so
     # don't need the .gz).
-    local_file = filename + suffix
-    output_file_path = os.path.join(output_directory, local_file)
+    output_file_path = os.path.join(output_directory, filename)
 
     try:
         (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)

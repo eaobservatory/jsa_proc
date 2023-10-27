@@ -252,7 +252,7 @@ def _fetch_job_output(job_id, db, force=False, dry_run=False):
                     os.makedirs(output_dir)
 
                 logger.info('Fetching file %s', filename)
-                fetch_cadc_file(filename, output_dir, suffix='')
+                fetch_cadc_file(filename, output_dir)
 
                 if file.md5 is None:
                     logger.warning('MD5 sum missing: %s', filename)
