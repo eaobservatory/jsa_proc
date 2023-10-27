@@ -18,8 +18,8 @@ import os.path
 
 from jsa_proc.error import JSAProcError
 
-scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_[0-9]{4}$')
-acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}$')
+scuba2_file = re.compile('^(s[48][abcd])([0-9]{8})_([0-9]{5})_[0-9]{4}\.sdf$')
+acsis_file = re.compile('^a([0-9]{8})_([0-9]{5})_[0-9]{2}_[0-9]{4}\.sdf$')
 
 # Find a 6 digit healpix tile number of form 'healpixXXXXXX' ending
 # in .fits or .sdf.
@@ -63,7 +63,7 @@ def get_jac_data_dir(filename):
 def file_in_dir(filename, dir):
     """
     Check whether a filename is present in an arbitrary directory.
-    Checks for both .sdf and .sdf.gz files.
+    Checks for both the name as-is and with .gz suffix.
 
     If present, return full pathname to it.
     Otherwise return False
@@ -75,7 +75,7 @@ def file_in_dir(filename, dir):
     directory to check for file
     """
 
-    pathname = os.path.join(dir, filename) + '.sdf'
+    pathname = os.path.join(dir, filename)
 
     if os.path.exists(pathname):
         return pathname

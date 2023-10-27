@@ -269,7 +269,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
             if filepath:
                 files_list.append(filepath)
             else:
-                filepath = fetch_cadc_file(f + '.sdf', input_directory)
+                filepath = fetch_cadc_file(f, input_directory)
                 valid = valid_hds(filepath)
 
                 if not valid:

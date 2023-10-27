@@ -23,7 +23,7 @@ from jsa_proc.state import JSAProcState
 logger = logging.getLogger(__name__)
 
 valid_modes = ('obs', 'night', 'project', 'public')
-valid_file = re.compile('^[_a-z0-9]+$')
+valid_file = re.compile('^[_a-z0-9]+\.sdf$')
 
 valid_preview_sizes = set([64, 256, 1024])
 valid_preview_file = re.compile(
@@ -71,8 +71,8 @@ def validate_job(job_id, db):
         if not input and not parents:
             raise ValidationError('input file list is empty')
 
-        # Ensure input filenames are plain names without path or
-        # extension.
+        # Ensure input filenames are plain names without path but
+        # with ".sdf" extension.
         if input:
             for file in input:
                 if not valid_file.match(file):

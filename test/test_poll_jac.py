@@ -23,17 +23,17 @@ class PollJACTestCase(DBTestCase):
     def test_poll_jac(self):
         # A job which should pass validation:
         job1 = self.db.add_job(
-            'tag1', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['f_1_01'])
+            'tag1', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['f_1_01.sdf'])
 
         # Jobs which should fail validation:
         job2 = self.db.add_job(
-            'tag2', 'JAC', 'fortnight', 'RECIPE_NAME', 'test', input_file_names=['f_2_01'])
+            'tag2', 'JAC', 'fortnight', 'RECIPE_NAME', 'test', input_file_names=['f_2_01.sdf'])
         job3 = self.db.add_job(
             'tag3', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=[''])
         job4 = self.db.add_job(
-            'tag4', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['/jcmtdata/f_4_01'])
+            'tag4', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['/jcmtdata/f_4_01.sdf'])
         job5 = self.db.add_job(
-            'tag5', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['f_4_01.sdf'])
+            'tag5', 'JAC', 'obs', 'RECIPE_NAME', 'test', input_file_names=['f_4_01'])
 
         # Run state machine.
         sm = JSAProcStateMachine(self.db)
