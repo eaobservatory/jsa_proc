@@ -31,7 +31,7 @@ namecheck_pattern = None
 def check_file_name(filename, return_section=False):
     """Test whether the file name has an acceptable name.
 
-    The upper-cased suffix-removed file name is matched against
+    The lower-cased file name is matched against
     all of the namecheck patterns.  If a match is found, True
     is returned.  Otherwise False is returned.
 
