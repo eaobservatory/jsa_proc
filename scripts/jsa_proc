@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016-2023 East Asian Observatory.
+# Copyright (C) 2016-2024 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ Usage:
     jsa_proc poll [-v | -q]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
-    jsa_proc query [-v | -q] [--cookie] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) <search>
+    jsa_proc query [-v | -q] [--cookie] [--ams] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task>... [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
@@ -87,6 +87,7 @@ Options:
     --quick                    Use simpler but less thorough database query.
     --notes                    Show notes.
     --cookie                   Use CADC log in session cookie.
+    --ams                      Use AMS instead of Argus TAP service.
 
 For more information about a particular command, please use:
 
@@ -592,14 +593,14 @@ def query(args):
 
     if args['caom2']:
         from jsa_proc.cadc.tap import CADCTap
-        caom2 = CADCTap()
+        caom2 = CADCTap(ams=args['--ams'])
         for (obsid, planeid) in sorted(caom2.obsids_by_pattern(
                 search.lower(), with_productid=True)):
             print(obsid, planeid)
 
     elif args['caom2file']:
         from jsa_proc.cadc.tap import CADCTap
-        caom2 = CADCTap()
+        caom2 = CADCTap(ams=args['--ams'])
         print(repr(caom2.check_files([search])))
 
     elif args['jcmtinfo']:

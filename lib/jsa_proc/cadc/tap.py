@@ -18,7 +18,7 @@ import os.path
 import re
 
 from tools4caom2.artifact_uri import make_artifact_uri
-from tools4caom2.tapclient import tapclient
+from tools4caom2.tapclient import tapclient, tapclient_ams
 
 from jsa_proc.error import JSAProcError
 from jsa_proc.util import identifier_to_pattern
@@ -37,8 +37,11 @@ class CADCTap():
          '{0}%{1}%'),
     ]
 
-    def __init__(self):
-        self.tap = tapclient()
+    def __init__(self, ams=False):
+        if ams:
+            self.tap = tapclient_ams()
+        else:
+            self.tap = tapclient()
 
         self.obsids_found = {}
 
