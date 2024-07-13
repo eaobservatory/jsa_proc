@@ -507,7 +507,7 @@ class JSAProcDB:
 
 
     def change_state(self, job_id, newstate, message, state_prev=None,
-                     username=None):
+                     username=None, priority=None):
 
         """
         Change the state of a job in the JSA processing database.
@@ -537,22 +537,33 @@ class JSAProcDB:
 
         with self.db as c:
             self._change_state(c, job_id, newstate, message, state_prev,
-                               username)
+                               username, priority)
 
     def _change_state(self, c, job_id, newstate, message, state_prev,
-                      username):
+                      username, priority):
         # Validate input.
         if not JSAProcState.is_valid(newstate):
             raise JSAProcError('State {0} is not recognised'.format(newstate))
 
         # Change the state to new state and update the state_prev
-        query = ('UPDATE job SET state_prev = state, state = %s '
-                 'WHERE id = %s')
-        param = [newstate, job_id]
+        update_expr = ['state_prev = state', 'state = %s']
+        update_param = [newstate]
+
+        where_expr = ['id = %s']
+        where_param = [job_id]
 
         if state_prev is not None:
-            query += ' AND state=%s'
-            param.append(state_prev)
+            where_expr.append('state = %s')
+            where_param.append(state_prev)
+
+        if priority is not None:
+            update_expr.append('priority = %s')
+            update_param.append(priority)
+
+        query = 'UPDATE job SET {} WHERE {}'.format(
+            ', '.join(update_expr),
+            ' AND '.join(where_expr))
+        param = update_param + where_param
 
         c.execute(query, param)
 
@@ -833,7 +844,8 @@ class JSAProcDB:
                 if message is None:
                     message = 'Location changed to {0}'.format(location)
 
-                self._change_state(c, job_id, state_new, message, None, None)
+                self._change_state(
+                    c, job_id, state_new, message, None, None, None)
 
     def set_foreign_id(self, job_id, foreign_id):
         """

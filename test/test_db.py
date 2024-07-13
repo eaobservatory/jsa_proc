@@ -206,16 +206,18 @@ class InterfaceDBTest(DBTestCase):
 
         # Get the original  state of job 1.
         job = self.db.get_job(id_=job_id)
-        state_orig = job.state
+        self.assertEqual(job.priority, 0)
 
         # Change the state of job 1 twice.
         self.db.change_state(job_id, newstate, message)
-        self.db.change_state(job_id, newstate2, message2, username='testuser')
+        self.db.change_state(
+            job_id, newstate2, message2, username='testuser', priority=-5)
 
         # Check the state and previous state of job 1
         job = self.db.get_job(id_=job_id)
         self.assertEqual(job.state, newstate2)
         self.assertEqual(job.state_prev, newstate)
+        self.assertEqual(job.priority, -5)
 
         # Check log for state and messages.
         # (check both get_last_log and get_logs).
@@ -249,7 +251,8 @@ class InterfaceDBTest(DBTestCase):
 
         with self.assertRaises(NoRowsError):
             self.db.change_state(job_id, JSAProcState.RUNNING, 'test',
-                                 state_prev=JSAProcState.WAITING)
+                                 state_prev=JSAProcState.WAITING,
+                                 priority=-10)
 
         # Check that an error is raised if the new state is bad.
         with self.assertRaises(JSAProcError):
