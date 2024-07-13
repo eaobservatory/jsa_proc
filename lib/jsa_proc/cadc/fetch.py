@@ -54,7 +54,10 @@ def fetch_cadc_file(filename, output_directory, cookies=None):
 
     # Local name to save to (requests automatically decompresses, so
     # don't need the .gz).
-    output_file_path = os.path.join(output_directory, filename)
+    filename_no_gz = filename
+    if filename_no_gz.endswith('.gz'):
+        filename_no_gz = filename_no_gz[:-3]
+    output_file_path = os.path.join(output_directory, filename_no_gz)
 
     try:
         (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)
