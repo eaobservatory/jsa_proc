@@ -269,7 +269,13 @@ def assemble_input_data_for_job(job_id, input_file_list):
             if filepath:
                 files_list.append(filepath)
             else:
-                filepath = fetch_cadc_file(f, input_directory)
+                try:
+                    filepath = fetch_cadc_file(f, input_directory)
+                except JSAProcError:
+                    if f.endswith('.gz'):
+                        raise
+                    # Try again with .gz suffix?
+                    filepath = fetch_cadc_file('{}.gz'.format(f), input_directory)
                 valid = valid_hds(filepath)
 
                 if not valid:
