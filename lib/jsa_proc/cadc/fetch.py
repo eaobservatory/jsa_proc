@@ -22,12 +22,12 @@ from base64 import b64decode
 from binascii import hexlify
 from codecs import ascii_decode
 import requests
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 import os.path
 
 from tools4caom2.artifact_uri import make_artifact_uri
 
-from jsa_proc.error import JSAProcError
+from jsa_proc.error import JSAProcError, JSAProcNotFound
 
 jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
 
@@ -76,6 +76,9 @@ def fetch_cadc_file(filename, output_directory, cookies=None):
                 f.write(chunk)
 
     except RequestException as e:
+        if isinstance(e, HTTPError) and (e.response.status_code == 404):
+            raise JSAProcNotFound('CADC file not found: ' + str(e))
+
         raise JSAProcError('Error fetching CADC file: ' + str(e))
 
     return output_file_path

@@ -27,8 +27,8 @@ from jsa_proc.admin.directories import get_input_dir, get_output_dir, get_log_di
 from jsa_proc.db.db import JSAProcFileInfo
 from jsa_proc.jac.file import file_in_dir, file_in_jac_data_dir
 from jsa_proc.cadc.fetch import fetch_cadc_file
-from jsa_proc.error import JSAProcError, NotAtJACError, NoRowsError, \
-    ParentNotReadyError
+from jsa_proc.error import JSAProcError, JSAProcNotFound, \
+    NotAtJACError, NoRowsError, ParentNotReadyError
 from jsa_proc.config import get_config, get_database
 from jsa_proc.files import get_md5sum, get_size
 from jsa_proc.state import JSAProcState
@@ -271,7 +271,7 @@ def assemble_input_data_for_job(job_id, input_file_list):
             else:
                 try:
                     filepath = fetch_cadc_file(f, input_directory)
-                except JSAProcError:
+                except JSAProcNotFound:
                     if f.endswith('.gz'):
                         raise
                     # Try again with .gz suffix?

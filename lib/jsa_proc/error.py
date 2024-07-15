@@ -42,6 +42,14 @@ class JSAProcDBError(JSAProcError):
         Exception.__init__(self, message, *args)
 
 
+class JSAProcNotFound(JSAProcError):
+    """
+    Error indicating that an HTTP not found response was received.
+    """
+
+    pass
+
+
 class NoRowsError(JSAProcDBError):
     """
     Error indicating that no rows were found.
