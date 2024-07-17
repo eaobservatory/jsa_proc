@@ -66,10 +66,7 @@ def make_output_file_list(db, job_id, preview_filter=None):
                     mtype = 'table.load.fits'
 
                 elif re.search('-moc[0-9]{6}', i):
-                    # This should be "coverage.load.moc.fits" but neither GAIA
-                    # nor Aladin appear to subscribe to that mtype yet.
-                    # mtype = 'coverage.load.moc.fits'
-                    mtype = 'image.load.fits'
+                    mtype = 'coverage.load.moc.fits'
 
                 elif '_rsp_' in i:
                     # Prevent a broadcast button being shown for spectra
