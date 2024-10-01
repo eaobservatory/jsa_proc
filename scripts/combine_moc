@@ -19,13 +19,16 @@
 """combine_moc: Generate combined MOC files from job output MOCs.
 
 Usage:
-    combine_moc --task=<task> --out-base <base-file-name> [--order=<order>] [--title=<title>]
+    combine_moc --task=<task> [--out-base <base-file-name> | --list] [--tile | --extent] [--order=<order>] [--title=<title>]
 
 Options:
     --task <task-name>           Task name
     --out-base <base-file-name>  Stem for output file names
     --order <order>              Order at which to normalize MOC files.
     --title <title>              Title for MOC name FITS header [default: Combined].
+    --list                       List MOC files instead of combining.
+    --tile                       Only process "tile" MOCs.  (Currently only applies in non-list mode.)
+    --extent                     Only process "extent" MOCs.  (Currently only applies in non-list mode.)
 """
 
 from __future__ import absolute_import, division, print_function
@@ -45,14 +48,22 @@ def main():
 
     args = docopt(__doc__)
 
-    tile = MOC(name='{} tile coverage'.format(args['--title']),
-               moctype='IMAGE')
-    extent = MOC(name='{} detected extent'.format(args['--title']),
-                 moctype='IMAGE')
+    process_tile = (args['--tile'] or not args['--extent'])
+    process_extent = (args['--extent'] or not args['--tile'])
 
-    out_base = args['--out-base']
-    if not out_base:
-        raise Exception('Output base file name must be specified')
+    if process_tile:
+        tile = MOC(name='{} tile coverage'.format(args['--title']),
+                   moctype='IMAGE')
+    if process_extent:
+        extent = MOC(name='{} detected extent'.format(args['--title']),
+                     moctype='IMAGE')
+
+    if args['--list']:
+        out_base = None
+    else:
+        out_base = args['--out-base']
+        if not out_base:
+            raise Exception('Output base file name must be specified')
 
     order = args['--order']
     if order is not None:
@@ -67,8 +78,9 @@ def main():
     n_jobs = float(len(jobs))
 
     for job in jobs:
-        print('{:.1f}%'.format(100.0 * n / n_jobs), job.id, repr(job.outputs))
-        n += 1.0
+        if out_base is not None:
+            print('{:.1f}%'.format(100.0 * n / n_jobs), job.id, repr(job.outputs))
+            n += 1.0
 
         # "find_jobs" doesn't normally return "state_prev" but we would need
         # to add it to distinguish jobs in the error state due to ingestion.
@@ -77,24 +89,34 @@ def main():
         #     continue
 
         for file in job.outputs:
+            pathname = os.path.join(get_output_dir(job.id), file)
 
-            moc = MOC(filetype='fits',
-                      filename=os.path.join(get_output_dir(job.id), file))
-
-            if order is not None:
-                moc.normalize(order)
-
-            if '_tile-moc' in file:
-                tile += moc
-
-            elif '_extent-moc' in file:
-                extent += moc
+            if out_base is None:
+                print(pathname)
 
             else:
-                raise Exception('Did not recognise file name: ' + file)
+                moc = MOC(filetype='fits', filename=pathname)
 
-    tile.write('{}_tile.fits'.format(out_base), filetype='fits')
-    extent.write('{}_extent.fits'.format(out_base), filetype='fits')
+                if order is not None:
+                    moc.normalize(order)
+
+                if '_tile-moc' in file:
+                    if process_tile:
+                        tile += moc
+
+                elif '_extent-moc' in file:
+                    if process_extent:
+                        extent += moc
+
+                else:
+                    raise Exception('Did not recognise file name: ' + file)
+
+    if out_base is not None:
+        if process_tile:
+            tile.write('{}_tile.fits'.format(out_base), filetype='fits')
+        if process_extent:
+            extent.write('{}_extent.fits'.format(out_base), filetype='fits')
+
 
 if __name__ == '__main__':
     main()
