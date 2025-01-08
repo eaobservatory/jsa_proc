@@ -33,7 +33,8 @@ obsid_date = re.compile('_(\d{8})T')
 
 
 def poll_raw_ingestion(
-        date_start, date_end, quick=False, no_transfer_check=False,
+        date_start, date_end, min_age_hours,
+        quick=False, no_transfer_check=False,
         dry_run=False):
     ignore_instruments = [x.strip() for x in get_config().get(
         'rawingest', 'ignore_instruments').split(',')]
@@ -44,6 +45,7 @@ def poll_raw_ingestion(
     logger.info('Searching for observations to ingest')
     obsids = db.find_obs_for_ingestion(
         date_start, date_end,
+        min_age_hours=min_age_hours,
         no_status_check=quick,
         no_transfer_check=no_transfer_check,
         ignore_instruments=ignore_instruments)
