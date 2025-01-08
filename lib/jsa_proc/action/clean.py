@@ -90,7 +90,7 @@ def clean_output(
 
 def clean_scratch(count=None, dry_run=False,
                   include_error=False, include_ingestion=False,
-                  include_processed=False):
+                  include_processed=False, include_missing=False):
     """Delete scratch directories for processed jobs."""
 
     logger.debug('Beginning scratch clean')
@@ -109,6 +109,9 @@ def clean_scratch(count=None, dry_run=False,
 
     if include_processed:
         states.append(JSAProcState.PROCESSED)
+
+    if include_missing:
+        states.append(JSAProcState.MISSING)
 
     logger.debug('Cleaning jobs in states: %s', ', '.join(states))
 
