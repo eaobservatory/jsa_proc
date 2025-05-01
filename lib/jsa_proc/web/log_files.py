@@ -28,6 +28,7 @@ log_types = {
     'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
     'Ingestion': re.compile('ingestion.*\.log'),
     'Transfer': re.compile('transfer.*\.log'),
+    'Log Ingestion': re.compile('ingest_log.*\.log'),
 }
 
 LogInfo = namedtuple('LogInfo', ['name', 'url', 'mtime'])
