@@ -184,14 +184,12 @@ def run_a_job(job_id, db=None, force=False):
     version = None
     command_run = None
     raw_output = None
-    log_ingest_command = None
     try:
         task_info = db.get_task_info(job.task)
         starpath = task_info.starlink_dir
         version = task_info.version
         command_run = task_info.command_run
         raw_output = task_info.raw_output
-        log_ingest_command = task_info.log_ingest
     except NoRowsError:
         # If the task doesn't have task info, leave "starpath" as None
         # so that jsawrapdr_run uses the default value from the configuration
@@ -237,30 +235,6 @@ def run_a_job(job_id, db=None, force=False):
         logger.debug('Job ' + str(job_id) + ' produced output on tiles ' +
                      ', '.join(str(i) for i in tiles))
 
-    # If a log ingest command is set, run it here.
-    if log_ingest_command:
-        logger.debug('Will try and ingest log files')
-        try:
-            with open_log_file(job.id, 'ingest_log') as logingest_log:
-                subprocess.check_call(
-                    [
-                        log_ingest_command,
-                        str(job_id)
-                    ],
-                    shell=False,
-                    cwd='/tmp',
-                    stdout=logingest_log,
-                    stderr=subprocess.STDOUT,
-                    preexec_fn=restore_signals)
-        except subprocess.CalledProcessError as e:
-            logger.exception('Custom log ingest failed '
-                             'for job %i',
-                             job.id)
-            raise JSAProcError('Custom log ingestion failed')
-        except:
-            logger.exception('Could not start custom log ingestion for job %i', job.id)
-            raise JSAProcError('Could not start custom log ingestion')
-
     # Change state of job.
     db.change_state(
         job_id, JSAProcState.PROCESSED,
@@ -270,3 +244,27 @@ def run_a_job(job_id, db=None, force=False):
     logger.info('Done running job %i', job_id)
 
     return job_id
+
+
+@ErrorDecorator
+def ingest_job_log_files(job_id, log_ingest_command):
+    try:
+        with open_log_file(job_id, 'ingest_log') as logingest_log:
+            subprocess.check_call(
+                [
+                    log_ingest_command,
+                    str(job_id)
+                ],
+                shell=False,
+                cwd='/tmp',
+                stdout=logingest_log,
+                stderr=subprocess.STDOUT,
+                preexec_fn=restore_signals)
+    except subprocess.CalledProcessError as e:
+        logger.exception('Custom log ingest failed '
+                         'for job %i',
+                         job_id)
+        raise JSAProcError('Custom log ingestion failed')
+    except:
+        logger.exception('Could not start custom log ingestion for job %i', job_id)
+        raise JSAProcError('Could not start custom log ingestion')

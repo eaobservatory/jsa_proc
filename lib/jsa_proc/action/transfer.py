@@ -18,6 +18,7 @@ import logging
 import subprocess
 
 from jsa_proc.action.etransfer_ssh import ssh_etransfer_send_output
+from jsa_proc.action.run import ingest_job_log_files
 from jsa_proc.action.validate import validate_output
 from jsa_proc.admin.directories import get_output_dir, open_log_file
 
@@ -57,10 +58,22 @@ def transfer_poll(db, task=None, dry_run=False):
                 # error, if we wish to ensure all tasks are
                 # entered in the task table.
                 logger.debug('Processed job %i unchanged: ' +
-                             'no etransfer option for task',
-                             job.id)
+                             'no task info for task %s',
+                             job.id, job.task)
 
-            elif job_task_info.command_xfer is not None:
+                continue
+
+            # If a log ingest command is set, run it here.
+            log_ingest_command = job_task_info.log_ingest
+            if log_ingest_command is not None:
+                logger.debug(
+                    'Will try and ingest log files for job %i',
+                    job.id)
+
+                if not dry_run:
+                    ingest_job_log_files(job.id, log_ingest_command)
+
+            if job_task_info.command_xfer is not None:
                 logger.debug('Running custom transfer command '
                              'for processed job %i',
                              job.id)
