@@ -145,6 +145,9 @@ class CustomJobTransfer(object):
             # Perform storage, if file changed (and not in dry-run mode).
             vos_md5 = vos_dir_info.get(file_, ())
 
+            if vos_md5 is None:
+                vos_md5 = self.get_vos_file_md5(vos_client, vos_file)
+
             if (vos_md5 != ()) and (vos_md5 == file_md5):
                 logger.info(
                     'Skipped storing {0} as {1} [UNCHANGED]'.format(
@@ -174,7 +177,7 @@ class CustomJobTransfer(object):
         result = {}
 
         try:
-            logger.debug('Getting VO space node: %s', vos_dir)
+            logger.debug('Getting VO space directory node: %s', vos_dir)
 
             nodes = retry(lambda: vos_client.get_node(
                 vos_dir, limit=None, force=True)).node_list
@@ -209,7 +212,7 @@ class CustomJobTransfer(object):
                         continue
 
                     else:
-                        logger.warning('Unexpectedly got no MD5 sum for file %s', node.name)
+                        logger.debug('Unexpectedly got no MD5 sum for file %s', node.name)
 
                 else:
                     logger.warning('Got no MD5 sum or length for file %s', node.name)
@@ -217,6 +220,24 @@ class CustomJobTransfer(object):
                 result[node.name] = None
 
         return result
+
+    def get_vos_file_md5(self, vos_client, vos_file):
+        """
+        Get MD5 sum of a file.
+        """
+
+        logger.debug('Getting VO space file node: %s', vos_file)
+
+        node = retry(lambda: vos_client.get_node(
+            vos_file, limit=None, force=True))
+
+        if 'MD5' in node.props:
+            return node.props['MD5']
+
+        else:
+            logger.debug('Unexpectedly got no MD5 sum for specific file %s', node.name)
+
+        return None
 
     def make_vos_directory(self, vos_client, vos_dir):
         """
