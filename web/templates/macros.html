@@ -110,6 +110,7 @@
         <input type="text" name="tiles" value="{{ query.tiles | default('', True) }}" size="6" placeholder="Tile #"/>
         <input type="text" name="tau_min" value="{{ query.tau_min | default('', True) }}" size="10" placeholder="225 GHz Tau" /> &ndash;
         <input type="text" name="tau_max" value="{{ query.tau_max | default('', True) }}" size="10" placeholder="225 GHz Tau" />
+        <input type="text" name="parameters" value="{{ query.parameters| default('', True) }}" size="10" placeholder="Parameters"/>
         <input type="checkbox" name="mode" value="JSAQA" {{ 'checked="checked"' | safe if mode == 'JSAQA' }}> QA </input>
         <input type="submit" value="Filter" />
 
