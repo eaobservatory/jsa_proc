@@ -108,8 +108,10 @@
                             'obstype', 'project', 'scanmode', ) %}
     {% if key == 'utdate' %}
     <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
-    {% elif key == 'obsid' or key == 'obsidss' %}
-    <td> {{ break_underscore(o.get(key, '')) }} </td>
+    {% elif key == 'obsid' %}
+    <td><a href="{{ url_for_omp('staffworf.pl', {'telescope': 'JCMT', 'obsid': o.obsid}) }}">{{ break_underscore(o.obsid) }}</a></td>
+    {% elif key == 'obsidss' %}
+    <td>{{ break_underscore(o.get(key, '')) }}</td>
     {% elif key in ['tau', 'seeing'] %}
     {% set value=o.get(key, 0.0) %}
     {% if value %}
