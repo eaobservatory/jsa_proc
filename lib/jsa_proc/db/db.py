@@ -55,6 +55,9 @@ JSAProcObs = namedtuple(
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
     'id tag state location foreign_id task qa_state outputs')
+JSAProcJobParent = namedtuple(
+    'JSAProcJobParent',
+    ['id', 'filter', 'state'])
 JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
     'id time message state state_prev location')
@@ -1499,7 +1502,7 @@ class JSAProcDB:
         Raises NoRowsError if no results are found.
         """
         if not with_state:
-            query = 'SELECT parent, filter FROM parent WHERE job_id = %s'
+            query = 'SELECT parent, filter, NULL FROM parent WHERE job_id = %s'
         else:
             query = 'SELECT parent.parent, parent.filter, job.state' \
                 ' FROM parent JOIN job ON parent.parent=job.id' \
@@ -1507,11 +1510,12 @@ class JSAProcDB:
         params = (job_id,)
         with self.db as c:
             c.execute(query, params)
-            result = c.fetchall()
+            results = c.fetchall()
 
-        if len(result) == 0:
+        if len(results) == 0:
             raise NoRowsError('parent', query % params)
-        return result
+
+        return [JSAProcJobParent(*result) for result in results]
 
     def get_children(self, job_id):
         """

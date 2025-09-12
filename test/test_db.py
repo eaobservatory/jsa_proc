@@ -19,7 +19,7 @@ from socket import gethostname
 from unittest import TestCase
 
 from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range, \
-        JSAProcFileInfo, JSAProcTaskInfo
+        JSAProcFileInfo, JSAProcJobParent, JSAProcTaskInfo
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -546,7 +546,8 @@ class InterfaceDBTest(DBTestCase):
                                  parent_jobs=[1,2], filters=['850um', '850um'],
                                priority=7)
         # Check you get back the right values
-        self.assertEqual(set([(1, '850um'), (2, '850um')]),
+        self.assertEqual(set([JSAProcJobParent(1, '850um', None),
+                              JSAProcJobParent(2, '850um', None)]),
                          set(self.db.get_parents(jobid3)))
 
         # Check you can recover the other way
@@ -564,7 +565,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Test that you can delete a single parent job.
         self.db.delete_some_parents(jobid3, [1])
-        self.assertEqual(set([(2, '850um')]),
+        self.assertEqual(set([JSAProcJobParent(2, '850um', None)]),
                          set(self.db.get_parents(jobid3)))
 
         # Test that you can't delete a parent that doesn't exist
@@ -573,7 +574,8 @@ class InterfaceDBTest(DBTestCase):
 
         # Test that you can add a single job.
         self.db.add_to_parents(jobid3, [jobid], filters='450um')
-        self.assertEqual(set([(1, '450um'), (2, '850um')]),
+        self.assertEqual(set([JSAProcJobParent(1, '450um', None),
+                              JSAProcJobParent(2, '850um', None)]),
                          set(self.db.get_parents(jobid3)))
         # Test that you can delete all parents
         self.db.delete_parents(jobid3)

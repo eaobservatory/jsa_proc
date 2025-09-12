@@ -149,7 +149,7 @@ def add_upd_del_job(
     # in case any database methods raises NoRowsError (we still want to
     # get the other input sets).
     try:
-        oldparents = set(db.get_parents(oldjob.id))
+        oldparents = set((x.id, x.filter) for x in db.get_parents(oldjob.id))
     except NoRowsError:
         oldparents = set()
 
