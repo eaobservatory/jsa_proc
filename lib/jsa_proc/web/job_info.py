@@ -60,13 +60,14 @@ def prepare_job_info(db, job_id, query):
     # Try to get parent jobs (if any).
     # Dictionary with parent as key and filter as item.
     try:
-        parents = db.get_parents(job_id)
-        parents = dict(parents)
-        parent_obs = OrderedDict()
-        pjobs = list(parents.keys())
-        pjobs.sort()
-        for i in pjobs:
-            parent_obs[i] = [o._asdict() for o in db.get_obs_info(i)]
+        parents = db.get_parents(job_id, with_state=True)
+        parent_obs = []
+        for parent in sorted(parents, key=lambda x: x.id):
+            parent_obs.append({
+                'id': parent.id,
+                'state': parent.state,
+                'obs': [o._asdict() for o in db.get_obs_info(parent.id)],
+            })
     except NoRowsError:
         parents = None
         parent_obs = None

@@ -142,8 +142,7 @@
 <table class="obsinfo">
   <caption> Parent Observation Info </caption>
   <tr>
-  {% set keys = parent_obs.values()|list %}
-  {% for key in keys[0][0]
+  {% for key in parent_obs[0].obs[0]
       if key not in ['id', 'backend','obsid','obsidss', 'association']%}
 
   {% if key == 'obsnum' %}
@@ -162,13 +161,19 @@
   {% endfor %}
   </tr>
 
-  {% for obs in parent_obs.values() %}
-    {% for o in obs%}
+  {% for parent in parent_obs %}
+    {% for o in parent.obs %}
+    {% set obs_loop = loop %}
     <tr>
     {% for key in o.keys()
                          if key not in ['id', 'backend','obsid','obsidss', 'association']%}
     {% if key == 'job_id'%}
-    <td> <a href="{{url_for('job_info', job_id=o.get(key, ''))}}"> {{ o.get(key, '') }} </a></td>
+        {% if obs_loop.first %}
+            <td rowspan="{{ obs_loop.length }}" class="state_{{ parent.state | state_phase }}{% if parent.state is state_active %} state_active{% endif %}">
+                <a href="{{url_for('job_info', job_id=o.job_id)}}">{{ o.job_id }}
+                <br />{{ parent.state | state_name }}</a>
+            </td>
+        {% endif %}
     {% elif key == 'utdate' %}
     <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
     {% elif key == 'obsid' or key == 'obsidss' %}
@@ -353,8 +358,8 @@
 <div class="panel">
 <h2>Parent Jobs</h2>
   <ul class="multicol">
-    {% for p in parents.keys() | sort %}
-    <li><a href="{{ url_for('job_info', job_id=p) }}"> {{p}} </a></li>
+    {% for parent in parents | sort(attribute='id') %}
+        <li><a href="{{ url_for('job_info', job_id=parent.id) }}">{{ parent.id }}</a> ({{ parent.state | state_name | lower }})</li>
     {% endfor %}
   </ul>
 </div>
