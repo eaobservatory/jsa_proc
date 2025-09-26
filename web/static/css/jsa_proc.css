@@ -248,6 +248,10 @@ td, th {
     padding: 5px;
 }
 
+table.noborder td, table.noborder th {
+    border: none;
+}
+
 th {
     hyphens: auto;
     -moz-hyphens: auto;

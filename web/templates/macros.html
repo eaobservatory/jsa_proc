@@ -63,26 +63,33 @@
 
 {% macro render_choices() %}
 <form>
-    <p>
-        <select name="location">
-            <option value="" {{ 'selected="selected"' | safe if query.location is none }}>Any location</option>
-            {% for location in locations %}
-                <option value="{{ location }}" {{ 'selected="selected"' | safe if location == query.location }}>{{ location }}</option>
-            {% endfor %}
-        </select>
+    <table class="noborder">
+    <tr>
+    <td rowspan="2">
         <select multiple="multiple" name="state" size="5">
             {% for state in states %}
                 <option value="{{ state }}" {{ 'selected="selected"' | safe if state in query.state }}>{{ state | state_name }}</option>
             {% endfor %}
         </select>
+    </td>
+    <td>
+        <select name="location">
+            <option value="" {{ 'selected="selected"' | safe if query.location is none }}>Any location</option>
+            <hr />
+            {% for location in locations %}
+                <option value="{{ location }}" {{ 'selected="selected"' | safe if location == query.location }}>{{ location }}</option>
+            {% endfor %}
+        </select>
         <select name="qa_state">
           <option value="" {{ 'selected="selected"' | safe if query.qa_state is none }}> Any QA state</option>
+            <hr />
             {% for qa_state in qa_states %}
                 <option value="{{ qa_state }}" {{ 'selected="selected"' | safe if qa_state == query.qa_state }}>{{ qa_state | qa_state_name }}</option>
             {% endfor %}
         </select>
         <select name="task">
             <option value="" {{ 'selected="selected"' | safe if query.task is none }}>All tasks</option>
+            <hr />
             {% for task in tasks %}
                 <option value="{{ task }}" {{ 'selected="selected"' | safe if task == query.task }}>{{ task }}</option>
             {% endfor %}
@@ -96,14 +103,23 @@
         {% with selected = query.get(key, None) %}
         <select name="{{ key }}">
           <option value="" {{ 'selected="selected"' | safe if selected is none }}>Any {{ key }}</option>
-          {% for option  in  obsqueries[key].values() %}
-          <option value="{{ option.name }}" {{ 'selected="selected"' | safe if selected == option.name}}>{{ option.name }}</option>
+          <hr />
+          {% for (option_name, option) in obsqueries[key].items() %}
+            {% if option is none %}
+              <hr />
+            {% else %}
+              <option value="{{ option_name }}" {{ 'selected="selected"' | safe if selected == option_name }}>{{ option.fullname if key in ('subsys', 'instrument') else option_name }}</option>
+            {% endif %}
           {% endfor %}
         </select>
         {% endwith %}
         {% endfor %}
-        <input type="text" name="date_min" value="{{ query.date_min | default('', True) }}" size="10" placeholder="YYYY-MM-DD" /> &ndash;
-        <input type="text" name="date_max" value="{{ query.date_max | default('', True) }}" size="10" placeholder="YYYY-MM-DD" />
+    </td>
+    </tr>
+    <tr>
+    <td>
+        <input type="text" name="date_min" value="{{ query.date_min | default('', True) }}" size="12" placeholder="YYYY-MM-DD" /> &ndash;
+        <input type="text" name="date_max" value="{{ query.date_max | default('', True) }}" size="12" placeholder="YYYY-MM-DD" />
         <input type="text" name="sourcename" value="{{ query.sourcename | default('', True) }}" placeholder="Source name" />
         <input type="text" name="obsnum" value="{{ query.obsnum | default('', True) }}" size="5" placeholder="Obs #"/>
         <input type="text" name="project" value="{{ query.project | default('', True) }}" size="10" placeholder="Project"/>
@@ -113,8 +129,9 @@
         <input type="text" name="parameters" value="{{ query.parameters| default('', True) }}" size="10" placeholder="Parameters"/>
         <input type="checkbox" name="mode" value="JSAQA" {{ 'checked="checked"' | safe if mode == 'JSAQA' }}> QA </input>
         <input type="submit" value="Filter" />
-
-    </p>
+    </td>
+    </tr>
+    </table>
 </form>
 
 {% endmacro %}
