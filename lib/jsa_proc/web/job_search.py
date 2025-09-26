@@ -66,6 +66,7 @@ def job_search(location, state, task,
     # Add dictionary of obs table requirements to send to find jobs
     # to the job query.
     obsquery = job_query['obsquery'] = {}
+    obsidssquery = job_query['obsidssquery'] = {}
 
     if (date_min is not None) or (date_max is not None):
         # Convert from %Y-%m-%d to %Y%m%d
@@ -93,7 +94,7 @@ def job_search(location, state, task,
         value = kwargs[key]
         if value is not None:
             # Add the filtering information to the obsquery dictionary.
-            obsquery.update(info[value].where)
+            (obsidssquery if key == 'subsystem' else obsquery).update(info[value].where)
 
             # Add the parameter to the URL (for pagination links).
             query[key] = value

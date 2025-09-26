@@ -1082,7 +1082,8 @@ class JSAProcDB:
                   tag=None, state_prev=None,
                   prioritize=False, number=None, offset=None,
                   sort=False, sortdir='ASC', outputs=None, count=False,
-                  obsquery=None, tiles=None, parameters=None):
+                  obsidssquery=None, obsquery=None,
+                  tiles=None, parameters=None):
         """Retrieve a list of jobs matching the given values.
 
         Searches by the following values:
@@ -1149,8 +1150,8 @@ class JSAProcDB:
 
         # Use the _find_jobs_where method to prepare the WHERE clauses.
         (where, whereparam) = self._find_jobs_where(
-            state, location, task, qa_state, tag, obsquery, tiles,
-            parameters, state_prev=state_prev)
+            state, location, task, qa_state, tag, obsidssquery, obsquery,
+            tiles, parameters, state_prev=state_prev)
 
         if where:
             query += ' WHERE ' + ' AND '.join(where)
@@ -1215,7 +1216,7 @@ class JSAProcDB:
         return result
 
     def _find_jobs_where(self, state, location, task, qa_state, tag,
-                         obsquery, tiles, parameters, state_prev=None):
+                         obsidssquery, obsquery, tiles, parameters, state_prev=None):
         """Prepare WHERE expression for the find_jobs method.
 
         Return: a tuple containing a list of SQL expressions
@@ -1254,11 +1255,18 @@ class JSAProcDB:
         where.append(jobwhere)
         param.extend(jobparam)
 
-        if obsquery:
-            (obswhere, obsparam) = _dict_query_where_clause('jcmt.COMMON', obsquery)
+        if obsidssquery or obsquery:
+            obsidssorobswhere = []
+            if obsidssquery:
+                (obsidsswhere, obsidssparam) = _dict_query_where_clause('obsidss', obsidssquery)
+                obsidssorobswhere.append(obsidsswhere)
+                param.extend(obsidssparam)
+            if obsquery:
+                (obswhere, obsparam) = _dict_query_where_clause('jcmt.COMMON', obsquery)
+                obsidssorobswhere.append(obswhere)
+                param.extend(obsparam)
             where.append('job.id IN (SELECT job_id FROM obsidss JOIN jcmt.COMMON ON obsidss.obsid=jcmt.COMMON.obsid  WHERE ' +
-                         obswhere + ')')
-            param.extend(obsparam)
+                         ' AND '.join(obsidssorobswhere) + ')')
 
         if tiles:
             (tilewhere, tileparam) = _dict_query_where_clause('tile',
