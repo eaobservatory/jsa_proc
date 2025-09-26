@@ -52,7 +52,7 @@ loginstring = 'Basic realm="Login Required: use your username and ' + \
               'the staff password, or hit cancel to log out"'
 
 
-def create_web_app():
+def create_web_app(auto_reload_templates=False):
     """Function to prepare the Flask web application."""
 
     home = get_home()
@@ -64,6 +64,8 @@ def create_web_app():
         static_folder=os.path.join(home, 'web', 'static'),
         template_folder=os.path.join(home, 'web', 'templates'),
     )
+
+    app.config['TEMPLATES_AUTO_RELOAD'] = auto_reload_templates
 
     app.secret_key = get_config().get('web', 'key')
 
