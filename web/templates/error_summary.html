@@ -7,18 +7,21 @@
 <form>
   <select name="state_prev">
     <option value="" {{ 'selected="selected"' | safe if chosen_state_prev is none }}>Any previous state</option>
+    <hr />
     {% for s in states %}
     <option value="{{ s }}" {{ 'selected="selected"' | safe if chosen_state_prev == s }}>{{ s | state_name }}</option>
     {% endfor %}
   </select>
   <select name="filtering">
     <option value="" {{ 'selected="selected"' | safe if filtering is none }}>Any error type</option>
+    <hr />
     {% for f in filtering_options %}
     <option value="{{ f }}" {{ 'selected="selected"' | safe if filtering == f }}> {{ f | capitalize }} </option>
     {% endfor %}
   </select>
   <select name="chosentask">
     <option value="" {{ 'selected="selected"' |safe if chosentask is none }}>Any task</option>
+    <hr />
     {% for t in tasks %}
     <option value="{{ t }}" {{ 'selected="selected"' | safe if chosentask == t }}> {{ t }} </option>
     {% endfor %}
