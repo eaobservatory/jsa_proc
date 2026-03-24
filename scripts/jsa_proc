@@ -24,6 +24,7 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed] [--include-missing]
     jsa_proc diskusage [-v | -q] input [--task <task>...]
     jsa_proc diskusage [-v | -q] output [--task <task>...]
+    jsa_proc luskan [-v | -q] [--cookie] check <md5file>
     jsa_proc minoc [-v | -q] [--cookie] compare <file>...
     jsa_proc minoc [-v | -q] [--cookie] get [--parents] <file>...
     jsa_proc minoc [-v | -q] [--cookie] put <file>...
@@ -276,6 +277,54 @@ def diskusage(args):
 
     else:
         raise CommandError('Did not recognise disk usage type')
+
+
+@command
+def luskan(args):
+    """
+    Interact with the CADC luskan web service.
+    """
+
+    if args['query']:
+        # Continue to the "query luskan" command.
+        raise CommandContinue()
+
+    elif args['check']:
+        from jsa_proc.cadc.luskan import Luskan
+        luskan = Luskan()
+
+        results = {}
+        n_error = 0
+
+        with open(args['<md5file>'], 'r') as f:
+            for line in f:
+                (md5sum, pathname) = line.strip().split()
+                (dirname, filename) = os.path.split(pathname)
+                pattern = luskan._filename_pattern(filename)
+                if pattern in results:
+                    pattern_result = results[pattern]
+                else:
+                    pattern_result = results[pattern] = {
+                        x.filename: x.md5
+                        for x in luskan.search_file(pattern, cookies=cookies)}
+
+                luskan_md5sum = pattern_result.get(filename)
+                if luskan_md5sum is None:
+                    status = 'not found'
+                    n_error += 1
+                elif luskan_md5sum != md5sum:
+                    status = 'mismatch'
+                    n_error += 1
+                else:
+                    status = 'OK'
+
+                print('{}: {}'.format(pathname, status))
+
+        if n_error:
+            raise CommandError('Problem with {} file(s)'.format(n_error))
+
+    else:
+        raise CommandError('Did not recognise luskan command')
 
 
 @command

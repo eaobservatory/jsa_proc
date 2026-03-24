@@ -20,8 +20,10 @@ from tools4caom2.artifact_uri import extract_artifact_uri_filename
 from tools4caom2.tapclient import tapclient_luskan
 
 from jsa_proc.error import JSAProcError
+from jsa_proc.util import identifier_to_pattern
 
 logger = logging.getLogger(__name__)
+import re
 
 LuskanFileInfo = namedtuple('LuskanFileInfo', ('filename', 'md5', 'size'))
 
@@ -30,6 +32,20 @@ class Luskan():
     """
     Class for interaction with CADC's luskan TAP service.
     """
+
+    patterns = [
+        # SCUBA-2 raw file.
+        (re.compile('^(s)[48][abcd]([0-9]{8}_[0-9]{5}_)[0-9]{4}(\.sdf)$'),
+         '{0}%{1}%{2}'),
+
+        # ACSIS raw file.
+        (re.compile('^(a[0-9]{8}_[0-9]{5}_)[0-9]{2}_[0-9]{4}(\.sdf)$'),
+         '{0}%{1}'),
+
+        # RxH3 raw file.
+        (re.compile('^(rxh3-[0-9]{8}-)[0-9]{6}(\.fits)'),
+         '{0}%{1}'),
+    ]
 
     def __init__(self):
         self.tap = tapclient_luskan()
@@ -55,6 +71,17 @@ class Luskan():
                 size))
 
         return result
+
+    def _filename_pattern(self, filename):
+        """Convert a filename into a wildcarded pattern which should match
+        that file.
+
+        The pattern should match a reasonable number of files to query
+        simultaneously, as this should be more efficient than
+        querying a large number of similar files individually.
+        """
+
+        return identifier_to_pattern(filename, self.patterns)
 
 
 def extract_luskan_md5_sum(md5):
