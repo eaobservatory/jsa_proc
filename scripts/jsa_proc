@@ -108,7 +108,7 @@ import textwrap
 from docopt import docopt
 
 from jsa_proc.config import get_database
-from jsa_proc.error import CommandError
+from jsa_proc.error import CommandError, JSAProcNotFound
 from jsa_proc.state import JSAProcState
 
 script_name = 'jsa_proc'
@@ -393,7 +393,12 @@ def minoc(args):
                         'Directory "{}" does not exist'.format(dirname))
 
             logger.info('Getting file "{}"'.format(filename))
-            fetch_cadc_file(filename, dirname, cookies=cookies)
+            try:
+                fetch_cadc_file(filename, dirname, cookies=cookies)
+            except JSAProcNotFound:
+                if filename.endswith('.gz'):
+                    raise
+                fetch_cadc_file('{}.gz'.format(filename), dirname, cookies=cookies)
 
         else:
             if not os.path.exists(pathname):
