@@ -351,66 +351,76 @@ def minoc(args):
         put_cadc_file
     from jsa_proc.files import get_md5sum
 
+    n_error = 0
+
     for pathname in args['<file>']:
-        (dirname, filename) = os.path.split(pathname)
-        if dirname == '':
-            dirname = '.'
+        try:
+            (dirname, filename) = os.path.split(pathname)
+            if dirname == '':
+                dirname = '.'
 
-        if action_compare:
-            if not os.path.exists(pathname):
-                raise CommandError(
-                    'File "{}" does not exist'.format(filename))
+            if action_compare:
+                if not os.path.exists(pathname):
+                    raise CommandError(
+                        'File "{}" does not exist'.format(filename))
 
-            cadc_file_info = fetch_cadc_file_info(filename, cookies=cookies)
-            if cadc_file_info is None:
-                raise CommandError(
-                    'File "{}" is not in the archive'.format(filename))
+                cadc_file_info = fetch_cadc_file_info(filename, cookies=cookies)
+                if cadc_file_info is None:
+                    raise CommandError(
+                        'File "{}" is not in the archive'.format(filename))
 
-            md5sum = get_md5sum(pathname)
+                md5sum = get_md5sum(pathname)
 
-            cadc_md5sum = cadc_file_info['content-md5']
-            if md5sum == cadc_md5sum:
-                print('File "{}" matches the archive: {} == {}'.format(
-                    filename, md5sum, cadc_md5sum))
-
-            else:
-                raise CommandError(
-                    'File "{}" does not match the archive: {} != {}'.format(
+                cadc_md5sum = cadc_file_info['content-md5']
+                if md5sum == cadc_md5sum:
+                    print('File "{}" matches the archive: {} == {}'.format(
                         filename, md5sum, cadc_md5sum))
-
-        elif action_fetch:
-            if os.path.exists(pathname):
-                raise CommandError(
-                    'File "{}" already exists'.format(filename))
-
-            if not os.path.exists(dirname):
-                if args['--parents']:
-                    logger.info('Creating directory "{}"'.format(dirname))
-                    os.makedirs(dirname)
 
                 else:
                     raise CommandError(
-                        'Directory "{}" does not exist'.format(dirname))
+                        'File "{}" does not match the archive: {} != {}'.format(
+                            filename, md5sum, cadc_md5sum))
 
-            logger.info('Getting file "{}"'.format(filename))
-            try:
-                fetch_cadc_file(filename, dirname, cookies=cookies)
-            except JSAProcNotFound:
-                if filename.endswith('.gz'):
-                    raise
-                fetch_cadc_file('{}.gz'.format(filename), dirname, cookies=cookies)
+            elif action_fetch:
+                if os.path.exists(pathname):
+                    raise CommandError(
+                        'File "{}" already exists'.format(filename))
 
-        else:
-            if not os.path.exists(pathname):
-                raise CommandError(
-                    'File "{}" does not exist'.format(filename))
+                if not os.path.exists(dirname):
+                    if args['--parents']:
+                        logger.info('Creating directory "{}"'.format(dirname))
+                        os.makedirs(dirname)
 
-            if fetch_cadc_file_info(filename, cookies=cookies) is not None:
-                raise CommandError(
-                    'File "{}" is already in the archive'.format(filename))
+                    else:
+                        raise CommandError(
+                            'Directory "{}" does not exist'.format(dirname))
 
-            logger.info('Putting file "{}"'.format(filename))
-            put_cadc_file(filename, dirname, cookies=cookies)
+                logger.info('Getting file "{}"'.format(filename))
+                try:
+                    fetch_cadc_file(filename, dirname, cookies=cookies)
+                except JSAProcNotFound:
+                    if filename.endswith('.gz'):
+                        raise
+                    fetch_cadc_file('{}.gz'.format(filename), dirname, cookies=cookies)
+
+            else:
+                if not os.path.exists(pathname):
+                    raise CommandError(
+                        'File "{}" does not exist'.format(filename))
+
+                if fetch_cadc_file_info(filename, cookies=cookies) is not None:
+                    raise CommandError(
+                        'File "{}" is already in the archive'.format(filename))
+
+                logger.info('Putting file "{}"'.format(filename))
+                put_cadc_file(filename, dirname, cookies=cookies)
+
+        except CommandError as e:
+            logger.error(e.args[0])
+            n_error += 1
+
+    if n_error:
+        raise CommandError('Problem with {} file(s)'.format(n_error))
 
 
 @command
