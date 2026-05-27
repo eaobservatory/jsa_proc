@@ -374,13 +374,28 @@ def minoc(args):
                         'File "{}" does not exist'.format(filename))
 
                 cadc_file_info = fetch_cadc_file_info(filename, cookies=cookies)
-                if cadc_file_info is None:
+                if cadc_file_info is not None:
+                    cadc_md5sum = cadc_file_info['content-md5']
+
+                elif filename.endswith('.gz'):
                     raise CommandError(
-                        'File "{}" is not in the archive'.format(filename))
+                        'File "{}" is not in the archive and already has .gz extension'.format(filename))
+
+                else:
+                    logger.info(
+                        'File "{}" not found, trying with .gz extension'.format(filename))
+
+                    try:
+                        cadc_md5sum = fetch_cadc_file(
+                            '{}.gz'.format(filename), output_directory=None,
+                            cookies=cookies)
+
+                    except JSAProcNotFound:
+                        raise CommandError(
+                            'File "{}" is not in the archive'.format(filename))
 
                 md5sum = get_md5sum(pathname)
 
-                cadc_md5sum = cadc_file_info['content-md5']
                 if md5sum == cadc_md5sum:
                     print('File "{}" matches the archive: {} == {}'.format(
                         filename, md5sum, cadc_md5sum))
