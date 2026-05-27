@@ -408,9 +408,15 @@ def minoc(args):
                 try:
                     fetch_cadc_file(filename, dirname, cookies=cookies)
                 except JSAProcNotFound:
-                    if filename.endswith('.gz'):
-                        raise
-                    fetch_cadc_file('{}.gz'.format(filename), dirname, cookies=cookies)
+                    try:
+                        if filename.endswith('.gz'):
+                            raise
+
+                        fetch_cadc_file('{}.gz'.format(filename), dirname, cookies=cookies)
+
+                    except JSAProcNotFound:
+                        raise CommandError(
+                            'File "{}" is not in the archive'.format(filename))
 
             else:
                 if not os.path.exists(pathname):
