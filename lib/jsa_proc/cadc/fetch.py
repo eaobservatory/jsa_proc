@@ -21,6 +21,7 @@ Routines for downloading data from CADC.
 from base64 import b64decode
 from binascii import hexlify
 from codecs import ascii_decode
+from hashlib import md5
 import requests
 from requests.exceptions import HTTPError, RequestException
 import os.path
@@ -50,6 +51,9 @@ def fetch_cadc_file(filename, output_directory, cookies=None):
     Will raise an JSAProcError if it can't connect.
 
     Returns name of file with path
+
+    If `output_directory` is given as `None`, instead of saving the
+    file, compute and return its MD5 sum.
     """
 
     # Local name to save to (requests automatically decompresses, so
@@ -57,7 +61,12 @@ def fetch_cadc_file(filename, output_directory, cookies=None):
     filename_no_gz = filename
     if filename_no_gz.endswith('.gz'):
         filename_no_gz = filename_no_gz[:-3]
-    output_file_path = os.path.join(output_directory, filename_no_gz)
+
+    sum_ = None
+    if output_directory is not None:
+        output_file_path = os.path.join(output_directory, filename_no_gz)
+    else:
+        sum_ = md5()
 
     try:
         (args, kwargs) = _prepare_cadc_request(filename, cookies=cookies)
@@ -70,16 +79,24 @@ def fetch_cadc_file(filename, output_directory, cookies=None):
         # Check if its worked. (raises error if not okay)
         r.raise_for_status()
 
-        # write out to a file in the requested output directory
-        with open(output_file_path, 'wb') as f:
+        if sum_ is None:
+            # write out to a file in the requested output directory
+            with open(output_file_path, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=1024):
+                    f.write(chunk)
+
+        else:
             for chunk in r.iter_content(chunk_size=1024):
-                f.write(chunk)
+                sum_.update(chunk)
 
     except RequestException as e:
         if isinstance(e, HTTPError) and (e.response.status_code == 404):
             raise JSAProcNotFound('CADC file not found: ' + str(e))
 
         raise JSAProcError('Error fetching CADC file: ' + str(e))
+
+    if sum_ is not None:
+        return sum_.hexdigest()
 
     return output_file_path
 
