@@ -20,6 +20,7 @@ Functions for examining the files and disks.
 
 from __future__ import absolute_import, division, print_function
 
+from collections import defaultdict
 from hashlib import md5
 import os
 import subprocess
@@ -67,6 +68,22 @@ def get_size(path):
     sizeg = sizek/(1024**2)
 
     return sizeg
+
+
+def get_size_by_suffix(path):
+    suffixes = defaultdict(float)
+
+    for (dirpath, dirnames, filenames) in os.walk(path):
+        for name in filenames:
+            (_, suffix) = os.path.splitext(name)
+            pathname = os.path.join(dirpath, name)
+
+            info = os.stat(pathname)
+            size = info.st_size / (1024 ** 3)
+
+            suffixes[suffix] += size
+
+    return suffixes
 
 
 def get_space(path):

@@ -22,8 +22,8 @@ Usage:
     jsa_proc clean [-v | -q] [--dry-run] input [--count <number>] [--include-error] [--include-processed] [--task <task>...]
     jsa_proc clean [-v | -q] [--dry-run] output [--count <number>] [--task <task>...] [--no-cadc-check] [--no-caom-check] [--include-error] [--include-ingestion]
     jsa_proc clean [-v | -q] [--dry-run] scratch [--count <number>] [--include-error] [--include-ingestion] [--include-processed] [--include-missing]
-    jsa_proc diskusage [-v | -q] input [--task <task>...]
-    jsa_proc diskusage [-v | -q] output [--task <task>...]
+    jsa_proc diskusage [-v | -q] input [--by-state | --by-type] [--task <task>...]
+    jsa_proc diskusage [-v | -q] output [--by-state | --by-type] [--task <task>...]
     jsa_proc luskan [-v | -q] [--cookie] check <md5file>
     jsa_proc minoc [-v | -q] [--cookie] compare <file>...
     jsa_proc minoc [-v | -q] [--cookie] get [--parents] <file>...
@@ -70,6 +70,8 @@ Options:
     --date-start <ut-date>     Date at which to start.
     --date-end <ut-date>       Date at which to end.
     --force, -f                Skip initial state check.
+    --by-state                 Break down disk usage by job state.
+    --by-type                  Break down disk usage by file suffix.
     --include-error            Include jobs in the error state.
     --include-ingestion        Include jobs in the waiting to ingest state.
     --include-processed        Include jobs in the processed state.
@@ -272,11 +274,15 @@ def diskusage(args):
 
     if args['input']:
         from jsa_proc.action.datafile_handling import disk_usage_input
-        disk_usage_input(tasks=args['--task'])
+        disk_usage_input(
+            tasks=args['--task'],
+            by_state=args['--by-state'], by_type=args['--by-type'])
 
     elif args['output']:
         from jsa_proc.action.datafile_handling import disk_usage_output
-        disk_usage_output(tasks=args['--task'])
+        disk_usage_output(
+            tasks=args['--task'],
+            by_state=args['--by-state'], by_type=args['--by-type'])
 
     else:
         raise CommandError('Did not recognise disk usage type')

@@ -16,6 +16,7 @@
 
 from __future__ import print_function
 
+from collections import defaultdict
 import logging
 import os
 import os.path
@@ -30,7 +31,7 @@ from jsa_proc.cadc.fetch import fetch_cadc_file
 from jsa_proc.error import JSAProcError, JSAProcNotFound, \
     NotAtJACError, NoRowsError, ParentNotReadyError
 from jsa_proc.config import get_config, get_database
-from jsa_proc.files import get_md5sum, get_size
+from jsa_proc.files import get_md5sum, get_size, get_size_by_suffix
 from jsa_proc.state import JSAProcState
 
 """
@@ -425,16 +426,24 @@ def filter_file_list(filelist, filt):
     return filtered
 
 
-def disk_usage_input(tasks):
-    _disk_usage(get_input_dir, tasks=tasks)
+def disk_usage_input(tasks, by_state=False, by_type=False):
+    _disk_usage(
+        get_input_dir, tasks=tasks,
+        by_state=by_state, by_type=by_type)
 
 
-def disk_usage_output(tasks):
-    _disk_usage(get_output_dir, tasks=tasks)
+def disk_usage_output(tasks, by_state=False, by_type=False):
+    _disk_usage(
+        get_output_dir, tasks=tasks,
+        by_state=by_state, by_type=by_type)
 
 
-def _disk_usage(dir_function, tasks=None):
+def _disk_usage(
+        dir_function, tasks=None,
+        by_state=False, by_type=False):
     db = get_database()
+    states = None
+    types = None
 
     if not tasks:
         tasks = db.get_tasks()
@@ -444,12 +453,42 @@ def _disk_usage(dir_function, tasks=None):
             location='JAC', task=task, state=JSAProcState.STATE_ALL)
 
         total = 0.0
+        if by_type:
+            types = defaultdict(float)
+        elif by_state:
+            states = defaultdict(float)
+
+
         for job in jobs:
             directory = dir_function(job.id)
 
             if not os.path.exists(directory):
                 continue
 
-            total += get_size(directory)
+            if types is not None:
+                sizes = get_size_by_suffix(directory)
+
+                for (type_, size) in sizes.items():
+                    total += size
+                    types[type_] += size
+
+                continue
+
+            size = get_size(directory)
+            total += size
+
+            if states is not None:
+                states[job.state] += size
 
         print('{:10.3f} {}'.format(total, task))
+
+        if types is not None:
+            for type_ in sorted(types.keys()):
+                print('{:10.3f} --- {}'.format(
+                        types[type_], type_))
+
+        if states is not None:
+            for state in JSAProcState.STATE_ALL:
+                if state in states:
+                    print('{:10.3f} --- {}'.format(
+                        states[state], JSAProcState.get_name(state)))
