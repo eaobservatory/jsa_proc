@@ -169,29 +169,33 @@ def _clean_job_directories(dir_function, state, task=None, count=None,
                              job.id, directory)
 
 
-def _clean_output_dir(directory, job_id, db, state, dry_run, no_cadc_check=False):
+def _clean_output_dir(
+        directory, job_id, db, state, dry_run,
+        no_cadc_check=False, no_caom_check=False):
     """Clean non-previews from an output file after double-checking
     everything is present at CADC.
 
     As required for _clean_job_directories, returns True if it cleaned up
     the directory, and False otherwise.
 
-    CADC checking can be skipped by setting no_cadc_check=True.  Note that
-    this is potentially dangerous and removes the check that the output files
+    CADC checking can be skipped by setting no_cadc_check=True
+    and no_caom_check=True.  Note that this is potentially dangerous
+    and removes the check that the output files
     really are at CADC and have been ingested into CAOM-2.
     """
 
     logger.debug('Considering cleaning job %i state %s directory %s', job_id, state, directory)
 
-    if not no_cadc_check:
+    if not (no_cadc_check and no_caom_check):
         unwanted_states = [
             JSAProcState.DELETED,
             JSAProcState.WONTWORK,
         ]
 
         if state in unwanted_states:
-            logger.debug('Job is in an unwanted state, disabling CADC checks')
+            logger.debug('Job is in an unwanted state, disabling CADC/CAOM checks')
             no_cadc_check = True
+            no_caom_check = True
 
     # Get a list of the non-preview files in the directory.
     non_preview = [x for x in os.listdir(directory) if not x.endswith('.png')]
@@ -207,11 +211,11 @@ def _clean_output_dir(directory, job_id, db, state, dry_run, no_cadc_check=False
 
     # Consider files other than those which are either a preview or not under
     # consideration for deletion.
-    output_files = filter(
+    output_files = list(filter(
         (lambda x: x.filename in non_preview),
-        db.get_output_files(job_id, with_info=True))
+        db.get_output_files(job_id, with_info=True)))
 
-    if no_cadc_check:
+    if no_caom_check:
         # When skipping CADC checks, assume files are all in CAOM-2.
         files_in_caom2 = [True for x in output_files]
     else:
@@ -222,10 +226,11 @@ def _clean_output_dir(directory, job_id, db, state, dry_run, no_cadc_check=False
         files_in_caom2 = caom2.check_files([x.filename for x in output_files])
 
     for (file, in_caom2) in zip(output_files, files_in_caom2):
-        # Check whether the file has been ingested into CAOM-2.
-        if not in_caom2:
-            logger.warning('File %s is not in CAOM-2', file.filename)
-            break
+        if not no_caom_check:
+            # Check whether the file has been ingested into CAOM-2.
+            if not in_caom2:
+                logger.warning('File %s is not in CAOM-2', file.filename)
+                break
 
         if not no_cadc_check:
             # Check whether the file is identical to what CADC have in AD.
