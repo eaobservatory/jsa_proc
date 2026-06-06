@@ -31,7 +31,7 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def transfer_poll(db, task=None, dry_run=False):
+def transfer_poll(db, count=None, task=None, dry_run=False):
     # Get full list of tasks.
     task_info = db.get_task_info()
 
@@ -45,6 +45,7 @@ def transfer_poll(db, task=None, dry_run=False):
 
     logger.info('Starting check for jobs to transfer')
     n_err = 0
+    n = 0
 
     for job in db.find_jobs(
             location='JAC', state=JSAProcState.PROCESSED, task=task):
@@ -128,6 +129,9 @@ def transfer_poll(db, task=None, dry_run=False):
                              'task etransfer option is NULL',
                              job.id)
 
+                # Do not count this as a job transferred.
+                continue
+
             elif not job_task_info.etransfer:
                 # If e-transfer is not required, then the job is now
                 # complete (only done if etransfer argument is False).
@@ -159,9 +163,14 @@ def transfer_poll(db, task=None, dry_run=False):
                         if not dry_run:
                             etransfer_send_output(job.id)
 
+            n += 1
+
         except Exception:
             logger.exception('Error while transferring job %i', job.id)
             n_err += 1
+
+        if (count is not None) and not (n < count):
+            break
 
     logger.info('Done checking for jobs to transfer')
 
