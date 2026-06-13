@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 def ingest_output(
-        job_id, location=None, task=None, dry_run=False, force=False):
+        job_id, location=None, task=None, count=None, dry_run=False, force=False):
     """High-level output ingestion function for use from scripts."""
 
     logger.debug('Connecting to JSA processing database')
@@ -48,6 +48,7 @@ def ingest_output(
 
     # Get full list of tasks.
     task_info = db.get_task_info()
+    n = 0
 
     for job in jobs:
         job_task_info = task_info.get(job.task)
@@ -88,6 +89,11 @@ def ingest_output(
             logger.info(
                 'Skipping ingestion %s of job %i (DRY RUN)',
                 description, job.id)
+
+        n += 1
+
+        if (count is not None) and not (n < count):
+            break
 
 
 @ErrorDecorator
