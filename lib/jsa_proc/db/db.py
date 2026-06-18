@@ -64,6 +64,9 @@ JSAProcErrorInfo = namedtuple(
 JSAProcFileInfo = namedtuple(
     'FileInfo',
     'filename md5')
+JSAProcFileInfoExtra = namedtuple(
+    'FileInfoExtra',
+    'id job_id filename md5')
 JSAProcJobNote = namedtuple(
     'JSAProcJobNote',
     'id message username')
@@ -910,6 +913,31 @@ class JSAProcDB:
             raise NoRowsError('COMMON', select % params)
 
         return times
+
+    def search_output_files(self, pattern, task=None, state=None):
+        query = (
+            'SELECT output_file.id, job.id, filename, md5'
+            ' FROM job JOIN output_file ON job.id = output_file.job_id'
+            ' WHERE filename LIKE %s')
+        params = [pattern, ]
+
+        if task is not None:
+            query = ' AND '.join((
+                query, 'task IN ({})'.format(', '.join(('%s',) * len(task)))))
+            params.extend(task)
+
+        if state is not None:
+            query = ' AND '.join((query, 'state = %s'))
+            params.append(state)
+
+        with self.db as c:
+            c.execute(query, params)
+
+            output_files = c.fetchall()
+            if len(output_files) == 0:
+                raise NoRowsError('output_file', query % tuple(params))
+
+        return [JSAProcFileInfoExtra(*row) for row in output_files]
 
     def get_output_files(self, job_id, with_info=False):
         """

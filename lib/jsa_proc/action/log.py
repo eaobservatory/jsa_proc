@@ -35,11 +35,6 @@ def search_log_files(
     re_pattern = re.compile(pattern)
     re_filename = re.compile(filename_pattern)
 
-    if state is None:
-        state = JSAProcState.COMPLETE
-    else:
-        state = JSAProcState.lookup_name(state)
-
     if after_context is None:
         after_context = 0
 

@@ -50,7 +50,8 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>...] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>...]
-    jsa_proc search_log [-v | -q] --task <task>... [--project <project>] [--after-context <lines>] [--state <state>] [--notes] <search>
+    jsa_proc search [-v | -q] log [--task <task>...] [--state <state>] [--project <project>] [--after-context <lines>] [--notes] <search>
+    jsa_proc search [-v | -q] (message | obsid | output) [--task <task>...] [--state <state>] <search>
     jsa_proc transfer [-v | -q] [--dry-run] [--count <number>] [--task <task>...]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
@@ -838,18 +839,66 @@ def run(args):
 
 
 @command
-def search_log(args):
+def search(args):
     """
-    Search log files for the given pattern.
+    Utility to search local database and files.
+
+    log:        search log files for the given pattern.
+
+    message:    search the job log database table for the given message.
+
+    obsid:      search for jobs involving the given obsid.
+
+    output:     search output files for the given pattern.
     """
 
-    from jsa_proc.action.log import search_log_files
+    search = args['<search>']
 
-    search_log_files(
-        pattern=args['<search>'], filename_pattern='^oracdr',
-        task=args['--task'], project=args['--project'],
-        state=args['--state'], after_context=args['--after-context'],
-        notes=args['--notes'])
+    search_kwargs = {}
+
+    if args['--task'] is not None:
+        search_kwargs['task'] = args['--task']
+
+    if args['--state'] is not None:
+        search_kwargs['state'] = JSAProcState.lookup_name(args['--state'])
+
+    db = get_database()
+
+    if args['log']:
+        from jsa_proc.action.log import search_log_files
+
+        search_log_files(
+            pattern=search, filename_pattern='^oracdr',
+            project=args['--project'],
+            after_context=args['--after-context'],
+            notes=args['--notes'],
+            **search_kwargs)
+
+    elif args['message']:
+        jobs = db.find_jobs(**search_kwargs)
+
+        for job in jobs:
+            log = db.get_last_log(job.id)
+
+            if search in log.message:
+                print(job.id, log.message.replace('\n', ' '))
+
+    elif args['obsid']:
+        jobs = db.find_jobs(
+            obsidssquery={'obsid': search},
+            **search_kwargs)
+
+        for job in jobs:
+            print(job.id, job.tag)
+
+    elif args['output']:
+        result = db.search_output_files(search, **search_kwargs)
+
+        for file_info in result:
+            print(file_info.job_id, file_info.filename)
+
+    else:
+        raise CommandError('Did not recognise search type')
 
 
 @command
