@@ -20,20 +20,19 @@ import os
 import re
 
 from jsa_proc.admin.directories import get_log_dir
-from jsa_proc.config import get_database
 from jsa_proc.state import JSAProcState
 
 logger = logging.getLogger(__name__)
 
 
 def search_log_files(
-        pattern, filename_pattern, task,
+        db, pattern, filename_pattern, task,
         project=None, state=None, after_context=None,
         notes=False):
-    db = get_database()
-
     re_pattern = re.compile(pattern)
-    re_filename = re.compile(filename_pattern)
+    re_filename = (
+        None if filename_pattern is None
+        else re.compile(filename_pattern))
 
     if after_context is None:
         after_context = 0
@@ -62,8 +61,9 @@ def search_log_files(
             continue
 
         for filename in filenames:
-            if not re_filename.search(filename):
-                continue
+            if re_filename is not None:
+                if not re_filename.search(filename):
+                    continue
 
             logger.debug('Found log file for job %i: %s', job_id, filename)
 

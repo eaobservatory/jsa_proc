@@ -50,7 +50,7 @@ Usage:
     jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>...] [--location <location>]
     jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>...]
-    jsa_proc search [-v | -q] log [--task <task>...] [--state <state>] [--project <project>] [--after-context <lines>] [--notes] <search>
+    jsa_proc search [-v | -q] log [--name <pattern>] [--task <task>...] [--state <state>] [--project <project>] [--after-context <lines>] [--notes] <search>
     jsa_proc search [-v | -q] (message | obsid | output) [--task <task>...] [--state <state>] <search>
     jsa_proc transfer [-v | -q] [--dry-run] [--count <number>] [--task <task>...]
     jsa_proc unauthorized [-v | -q] [--check-at-cadc]
@@ -82,6 +82,7 @@ Options:
     --min-age <hours>          Minimum time since start of observation. [default: 4]
     --outfile <file>           File into which to write output.
     --obsid <obsid>            Observation identifier (OBSID header).
+    --name <pattern>           Filename search pattern. [default: ^oracdr]
     --no-cadc-check            Skip checks for files being at CADC.
     --no-caom-check            Skip checks for files being in CAOM-2.
     --parents, -p              Create parent directories.
@@ -868,7 +869,7 @@ def search(args):
         from jsa_proc.action.log import search_log_files
 
         search_log_files(
-            pattern=search, filename_pattern='^oracdr',
+            db, pattern=search, filename_pattern=args['--name'],
             project=args['--project'],
             after_context=args['--after-context'],
             notes=args['--notes'],
