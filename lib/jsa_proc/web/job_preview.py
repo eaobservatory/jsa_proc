@@ -24,6 +24,7 @@ valid_preview_patterns = {
     'png': re.compile('^[-+_a-zA-Z0-9]+\.png$'),
     'pdf': re.compile('^[-+_a-zA-Z0-9]+\.pdf$'),
     'txt': re.compile('^[-+_a-zA-Z0-9]+\.txt$'),
+    'fits': re.compile('^[-+_a-zA-Z0-9]+\.fits$'),
 }
 
 

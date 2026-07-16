@@ -60,7 +60,7 @@ def make_output_file_list(db, job_id, preview_filter=None):
                 url = url_for('job_text_file', job_id=job_id, text_file=i)
 
             elif i.endswith('.fits'):
-                url = 'file://{0}/{1}'.format(get_output_dir(job_id), i)
+                url = url_for('job_fits_file', job_id=job_id, fits_file=i, _external=True)
 
                 if re.search('-cat[0-9]{6}', i):
                     mtype = 'table.load.fits'

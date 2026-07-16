@@ -335,6 +335,11 @@ def create_web_app(auto_reload_templates=False):
         path = prepare_job_preview(job_id, text_file, 'txt')
         return send_file(path, mimetype='text/plain')
 
+    @app.route('/job/<int:job_id>/fits/<fits_file>')
+    def job_fits_file(job_id, fits_file):
+        path = prepare_job_preview(job_id, fits_file, 'fits')
+        return send_file(path, mimetype='application/fits')
+
     @app.route('/job/<int:job_id>/log/<log>')
     def job_log_html(job_id, log):
         path = prepare_job_log(job_id, log)
