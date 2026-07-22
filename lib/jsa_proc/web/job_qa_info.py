@@ -54,7 +54,7 @@ def prepare_job_qa_info(db, job_id, query):
     # Dictionary with parent as key and filter as item.
     try:
         parents = db.get_parents(job_id)
-        parents = dict(parents)
+        parents = {p.id: p for p in parents}
         parent_obs = OrderedDict()
         pjobs = list(parents.keys())
         pjobs.sort()

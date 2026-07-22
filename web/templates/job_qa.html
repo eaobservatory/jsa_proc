@@ -198,11 +198,14 @@
   {% for obs in parent_obs.values() %}
 
     {% for o in obs%}
-    <tr class="qa_state_{{ o.get('qa_state', '?')| qa_state_name | lower }}">
+    <tr>
     {% for key in o.keys()
                          if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
     {% if key == 'job_id'%}
-    <td> <a href="{{url_for('job_info', job_id=o.get(key, ''))}}"> {{ o.get(key, '') }} </a></td>
+    <td class="qa_state_{{ o.get('qa_state', '?')| qa_state_name | lower }}">
+        <a href="{{url_for('job_info', job_id=o.get(key, ''))}}"> {{ o.get(key, '') }} </a>
+        <br />{{ o.get('qa_state', '?')| qa_state_name }}</a>
+    </td>
     {% elif key == 'utdate' %}
     <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate': o.utdate}) }}">{{ o.utdate }}</a></td>
     {% elif key == 'obsid' or key == 'obsidss' %}
