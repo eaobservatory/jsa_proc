@@ -551,7 +551,7 @@ class InterfaceDBTest(DBTestCase):
                          set(self.db.get_parents(jobid3)))
 
         # Check you can recover the other way
-        self.assertEqual([jobid3], self.db.get_children(jobid))
+        self.assertEqual([jobid3], [x.id for x in self.db.get_children(jobid)])
 
         # Check you can't add a job with parents that aren't in the database
         with self.assertRaises(JSAProcError):

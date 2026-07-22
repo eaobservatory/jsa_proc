@@ -55,6 +55,9 @@ JSAProcObs = namedtuple(
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
     'id tag state location foreign_id task qa_state outputs')
+JSAProcJobChild = namedtuple(
+    'JSAProcJobChild',
+    ['id'])
 JSAProcJobParent = namedtuple(
     'JSAProcJobParent',
     ['id', 'filter', 'state'])
@@ -1570,14 +1573,12 @@ class JSAProcDB:
 
         with self.db as c:
             c.execute(query, params)
-            result = c.fetchall()
+            results = c.fetchall()
 
-        if len(result) == 0:
+        if len(results) == 0:
             raise NoRowsError('parent', query % params)
 
-        # Fix up the format so its not a list of 1-item tuples:
-        result = [i[0] for i in result]
-        return result
+        return [JSAProcJobChild(*result) for result in results]
 
     def add_to_parents(self, job_id, parents, filters=None):
         """

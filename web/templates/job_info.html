@@ -51,7 +51,7 @@
     <tr><th>Children</th>
       <td>
         {% for c in children %}
-        <a href="{{url_for('job_info', job_id=c)}}">{{c}}</a>&nbsp;
+        <a href=" {{url_for('job_info', job_id=c.id) }}">{{ c.id }}</a>&nbsp;
         {% endfor %}
       </td>
     </tr>
