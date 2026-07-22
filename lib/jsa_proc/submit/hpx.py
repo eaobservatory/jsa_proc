@@ -144,11 +144,16 @@ def get_parents(tile, parenttasks, exclude_pointing_jobs=False,
         parenttasks, tile)
 
     db = get_database()
+    job_state = Not([
+        JSAProcState.ERROR,
+        JSAProcState.DELETED,
+        JSAProcState.WONTWORK,
+    ])
     qa_state = [JSAQAState.GOOD,
                 JSAQAState.QUESTIONABLE,
                 JSAQAState.UNKNOWN]
 
-    obsquery = {'omp_status': Not(list(OMPState.STATE_NO_COADD))}
+    obsquery = {}
     if science_obs_only:
         obsquery['obstype'] = {'science'}
     if pointings_only:
@@ -157,31 +162,21 @@ def get_parents(tile, parenttasks, exclude_pointing_jobs=False,
     parentjobs = db.find_jobs(tiles=[tile],
                               task=parenttasks,
                               qa_state=qa_state,
-                              state=Not([JSAProcState.DELETED]),
+                              state=job_state,
                               obsquery=obsquery)
 
     parentjobs = [p.id for p in parentjobs]
 
     # Do some other queries to give the user info about what is not being
     # included.
-    excludedjobs_ompstatus = db.find_jobs(
-        tiles=[tile],
-        task=parenttasks,
-        qa_state=qa_state,
-        state=Not([JSAProcState.DELETED]),
-        obsquery={'omp_status': OMPState.STATE_NO_COADD}
-    )
-
     if science_obs_only or exclude_pointing_jobs:
         obsquery = {
             'obstype': 'pointing',
-            'omp_status': Not(list(OMPState.STATE_NO_COADD)),
         }
-        state = Not([JSAProcState.DELETED])
         excludedjobs_pointings = db.find_jobs(tiles=[tile],
                                               task=parenttasks,
                                               qa_state=qa_state,
-                                              state=state,
+                                              state=job_state,
                                               obsquery=obsquery)
 
         # If it was requested to exclude entirely any job containing a
@@ -196,16 +191,6 @@ def get_parents(tile, parenttasks, exclude_pointing_jobs=False,
     logger.debug(
         '%i jobs in task %r fall on tile %i with appropriate QA States'
         ', OMP States and obstype states', len(parentjobs), parenttasks, tile)
-
-    if len(excludedjobs_ompstatus) > 0:
-        logger.debug(
-            '%i jobs were excluded due to wrong OMP status',
-            len(excludedjobs_ompstatus))
-        for i in excludedjobs_ompstatus:
-            omp_status = db.get_obs_info(i.id)[0].omp_status
-            logger.debug(
-                'Job %i NOT INCLUDED (omp status of %s)',
-                i.id, OMPState.get_name(omp_status))
 
     if science_obs_only:
         if len(excludedjobs_pointings) > 0:

@@ -43,11 +43,9 @@ Description:
     If a tile number is given then only the requested tile number is
     processed
 
-    This will check with the OMP to see which observations are currently
-    set with a state of BAD or JUNK and not include those. It will check
-    the QA status in the JSA processing system and only include those that
-    are GOOD or QUESTIONABLE. All jobs will be created in a task that is
-    named <task>-coadd unless the option --output-task is given,
+    It will check the QA status in the JSA processing system and only include
+    those that are GOOD or QUESTIONABLE. All jobs will be created in a task
+    that is named <task>-coadd unless the option --output-task is given,
     where this option is mandatory if there are multiple input tasks.
 """
 
