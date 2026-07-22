@@ -69,7 +69,7 @@ def create_hpx_filter(tile, task):
     return hpx_filter
 
 
-def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
+def submit_one_coadd_job(tile, parenttasks, mode, parameters, location,
                          exclude_pointing_jobs=False,
                          science_obs_only=False,
                          never_update=False,
@@ -81,18 +81,22 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
     """
     # Generate tag, task name, and filter.
     if not output_task:
-        coadd_task = generate_hpx_coadd_task(parenttask)
+        if 1 == len(parenttasks):
+            coadd_task = generate_hpx_coadd_task(parenttasks[0])
+        else:
+            raise JSAProcError(
+                'Cannot generate output task name for multiple input tasks')
     else:
         coadd_task = output_task
 
     tag = generate_hpx_coadd_tag(tile, coadd_task)
-    filt = create_hpx_filter(tile, parenttask)
+    filt = create_hpx_filter(tile, coadd_task)
 
     db = get_database()
 
     # Check what current parent values should be.
     try:
-        parent_jobs = get_parents(tile, parenttask,
+        parent_jobs = get_parents(tile, parenttasks,
                                   exclude_pointing_jobs=exclude_pointing_jobs,
                                   pointings_only=pointings_only,
                                   science_obs_only=science_obs_only)
@@ -117,7 +121,7 @@ def submit_one_coadd_job(tile, parenttask, mode, parameters, location,
         dry_run=dryrun)
 
 
-def get_parents(tile, parenttask, exclude_pointing_jobs=False,
+def get_parents(tile, parenttasks, exclude_pointing_jobs=False,
                 science_obs_only=False, pointings_only=False):
     """
     get parent jobs for the requested tile and coaddtask,
@@ -128,16 +132,16 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
     tile (int)
     Tile number to perform coadd on.
 
-    parenttask (string)
-    input task name to look for jobs for.
+    parenttasks (list of strings)
+    input task names to look for jobs for.
 
     """
     # Find all jobs from the parent task which include the requested tile and
     # 1) Have a JSAQA State that is not BAD or INVALID
     # 2) Have not been marked as deleted.
     logger.debug(
-        'Finding all jobs in task %s that fall on tile %i',
-        parenttask, tile)
+        'Finding all jobs in task %r that fall on tile %i',
+        parenttasks, tile)
 
     db = get_database()
     qa_state = [JSAQAState.GOOD,
@@ -151,7 +155,7 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
         obsquery['obstype'] = {'pointing'}
     # Get the parent jobs.
     parentjobs = db.find_jobs(tiles=[tile],
-                              task=parenttask,
+                              task=parenttasks,
                               qa_state=qa_state,
                               state=Not([JSAProcState.DELETED]),
                               obsquery=obsquery)
@@ -162,7 +166,7 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
     # included.
     excludedjobs_ompstatus = db.find_jobs(
         tiles=[tile],
-        task=parenttask,
+        task=parenttasks,
         qa_state=qa_state,
         state=Not([JSAProcState.DELETED]),
         obsquery={'omp_status': OMPState.STATE_NO_COADD}
@@ -175,7 +179,7 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
         }
         state = Not([JSAProcState.DELETED])
         excludedjobs_pointings = db.find_jobs(tiles=[tile],
-                                              task=parenttask,
+                                              task=parenttasks,
                                               qa_state=qa_state,
                                               state=state,
                                               obsquery=obsquery)
@@ -190,8 +194,8 @@ def get_parents(tile, parenttask, exclude_pointing_jobs=False,
     # TODO: check what logger level is being used before going through for
     # loops.
     logger.debug(
-        '%i jobs in task %s fall on tile %i with appropriate QA States'
-        ', OMP States and obstype states', len(parentjobs), parenttask, tile)
+        '%i jobs in task %r fall on tile %i with appropriate QA States'
+        ', OMP States and obstype states', len(parentjobs), parenttasks, tile)
 
     if len(excludedjobs_ompstatus) > 0:
         logger.debug(

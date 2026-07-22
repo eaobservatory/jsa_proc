@@ -338,16 +338,20 @@ class JSAProcDB:
 
         tiles = []
         query = 'SELECT DISTINCT(tile) FROM tile'
-        where = ()
-        params = ()
+        where = []
+        params = []
         join = ''
         if job_id:
-            where += ('job_id = %s',)
-            params += (job_id,)
+            where.append('job_id = %s')
+            params.append(job_id)
         if task:
-            where += ('job.task = %s',)
             join = ' JOIN job ON tile.job_id = job.id'
-            params += (task,)
+            if isinstance(task, list):
+                where.append('job.task IN ({})'.format(', '.join(('%s',) * len(task))))
+                params.extend(task)
+            else:
+                where.append('job.task = %s')
+                params.append(task)
         query = query + join
         if where:
             query += ' WHERE ' + ' '.join(where)
