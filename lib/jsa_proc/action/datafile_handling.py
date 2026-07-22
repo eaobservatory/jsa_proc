@@ -88,15 +88,14 @@ def check_data_already_present(job_id, db):
 
     try:
         parents = db.get_parents(job_id, with_state=True)
-        parent_files_with_paths = []
-        for p, filts, parent_state in parents:
-            if parent_state not in JSAProcState.STATE_POST_RUN:
-                raise ParentNotReadyError('Parent job {} is not ready'.format(p))
+        for parent in parents:
+            if parent.state not in JSAProcState.STATE_POST_RUN:
+                raise ParentNotReadyError('Parent job {} is not ready'.format(parent.id))
 
-            outputs = db.get_output_files(p)
-            parent_files = filter_file_list(outputs, filts)
+            outputs = db.get_output_files(parent.id)
+            parent_files = filter_file_list(outputs, parent.filter)
             for f in parent_files:
-                filepath = is_file_in_a_dir(f, get_output_dir(p))
+                filepath = is_file_in_a_dir(f, get_output_dir(parent.id))
                 if not filepath:
                     raise NotAtJACError(f)
                 else:

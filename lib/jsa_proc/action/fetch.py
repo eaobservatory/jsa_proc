@@ -130,17 +130,17 @@ def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
     try:
         parents = db.get_parents(job_id, with_state=True)
         parent_files_with_paths = []
-        for p, f, parent_state in parents:
-            if parent_state not in JSAProcState.STATE_POST_RUN:
+        for parent in parents:
+            if parent.state not in JSAProcState.STATE_POST_RUN:
                 logger.error(
                     'Job %i cannot be fetch because its parent %i is not ready',
-                    job_id, p)
-                raise ParentNotReadyError('Parent job {} is not ready'.format(p))
+                    job_id, parent.id)
+                raise ParentNotReadyError('Parent job {} is not ready'.format(parent.id))
 
-            outputs = db.get_output_files(p)
-            parent_files = filter_file_list(outputs, f)
+            outputs = db.get_output_files(parent.id)
+            parent_files = filter_file_list(outputs, parent.filter)
             parent_files_with_paths += assemble_parent_data_for_job(
-                job_id, p, parent_files, force_new=replaceparent)
+                job_id, parent.id, parent_files, force_new=replaceparent)
     except NoRowsError:
         parent_files_with_paths = []
 
