@@ -56,6 +56,8 @@
             {% for c in children %}
             <a href="{{ url_for('job_info', job_id=c.id) }}">{{ c.id }}</a>&nbsp;
             {% endfor %}
+            <br />&nbsp;<br />
+            <a href="{{ url_for('job_children', job_id=info.id)}}">View previews</a>
           </td>
         </tr>
         {% endif %}
@@ -65,6 +67,8 @@
             {% for p in parents %}
             <a href="{{url_for('job_info', job_id=p)}}">{{p}}</a>&nbsp;
             {% endfor %}
+            <br />&nbsp;<br />
+            <a href="{{ url_for('job_parents', job_id=info.id)}}">View previews</a>
             </td>
           </tr>
         {% endif %}

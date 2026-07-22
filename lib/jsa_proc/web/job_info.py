@@ -148,3 +148,43 @@ def prepare_job_info(db, job_id, query):
         'parent_obs': parent_obs,
         'pagination': pagination,
     }
+
+
+def prepare_job_parents(db, job_id):
+    ctx = _prepare_job_relation(
+        db, job_id, db.get_parents(job_id, with_state=True))
+
+    ctx['title'] = 'Job {}: Parents'.format(job_id)
+
+    return ctx
+
+
+def prepare_job_children(db, job_id):
+    ctx = _prepare_job_relation(
+        db, job_id, db.get_children(job_id))
+
+    ctx['title'] = 'Job {}: Children'.format(job_id)
+
+    return ctx
+
+
+def _prepare_job_relation(db, job_id, relations_info):
+    try:
+        job = db.get_job(job_id)
+    except NoRowsError:
+        raise HTTPNotFound()
+
+    relations = []
+    for relation in sorted(relations_info, key=lambda x: x.id):
+        (output_files, previews1024, previews256) = \
+            make_output_file_list(db, relation.id)
+
+        relation_info = relation._asdict()
+        relation_info['previews'] = list(zip(previews256, previews1024))
+
+        relations.append(relation_info)
+
+    return {
+        'info': job,
+        'relations': relations,
+    }

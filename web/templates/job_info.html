@@ -53,6 +53,8 @@
         {% for c in children %}
         <a href=" {{url_for('job_info', job_id=c.id) }}">{{ c.id }}</a>&nbsp;
         {% endfor %}
+        <br />&nbsp;<br />
+        <a href="{{ url_for('job_children', job_id=info.id)}}">View previews</a>
       </td>
     </tr>
     {% endif %}
@@ -362,6 +364,9 @@
         <li><a href="{{ url_for('job_info', job_id=parent.id) }}">{{ parent.id }}</a> ({{ parent.state | state_name | lower }})</li>
     {% endfor %}
   </ul>
+  <p>
+    <a href="{{ url_for('job_parents', job_id=info.id)}}">View previews</a>
+  </p>
 </div>
 {% endif %}
 

@@ -40,7 +40,8 @@ from jsa_proc.web.job_change_state import prepare_add_note, \
 from jsa_proc.web.job_summary import prepare_job_summary, \
     prepare_task_summary, prepare_summary_piechart, \
     prepare_task_qa_summary
-from jsa_proc.web.job_info import prepare_job_info
+from jsa_proc.web.job_info import prepare_job_info, \
+    prepare_job_parents, prepare_job_children
 from jsa_proc.web.job_preview import prepare_job_preview
 from jsa_proc.web.job_qa_info import prepare_job_qa_info
 from jsa_proc.web.job_log import prepare_job_log
@@ -209,6 +210,16 @@ def create_web_app(auto_reload_templates=False):
     @templated('job_qa.html')
     def job_qa(job_id):
         return prepare_job_qa_info(db, job_id, session.get('job_query'))
+
+    @app.route('/job/<int:job_id>/parents', methods=['GET'])
+    @templated('job_relations.html')
+    def job_parents(job_id):
+        return prepare_job_parents(db, job_id)
+
+    @app.route('/job/<int:job_id>/children', methods=['GET'])
+    @templated('job_relations.html')
+    def job_children(job_id):
+        return prepare_job_children(db, job_id)
 
     @app.route('/job/<int:job_id>/add_note', methods=['POST'])
     @requires_auth

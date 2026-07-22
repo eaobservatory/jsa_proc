@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <table>
+    {% for relation in relations %}
+      <tr>
+        <td><a href="{{ url_for('job_info', job_id=relation.id) }}">{{ relation.id }}</a></td>
+        <td>
+          {% if relation.previews %}
+              <a href="{{ relation.previews[0][1].url }}"><img src="{{ relation.previews[0][0].url }}" /></a>
+          {% else %}
+            <i>No preview image</i>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
