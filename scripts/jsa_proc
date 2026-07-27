@@ -41,6 +41,7 @@ Usage:
     jsa_proc namecheck [-v | -q] directory <directory>
     jsa_proc namecheck [-v | -q] output --task <task>... --outfile <file>
     jsa_proc poll [-v | -q]
+    jsa_proc pollparents [-v | -q] [--dry-run] --task <task>...
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
     jsa_proc query [-v | -q] [--cookie] [--ams] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) <search>
@@ -641,6 +642,37 @@ def poll(args):
     # Return a status of 1 if status is not True.
     if not status:
         raise CommandError('Errors were encountered during state poll')
+
+
+@command
+def pollparents(args):
+    dry_run = args['--dry-run']
+
+    db = get_database()
+
+    jobs = db.find_jobs(task=args['--task'], state=JSAProcState.STATE_POST_RUN)
+    for job in jobs:
+        log = db.get_last_log(job_id=job.id, state_new='P')
+
+        parents = db.get_parents(job.id)
+        need_update = True
+        for parent in parents:
+            parent_log = db.get_last_log(job_id=parent.id, state_new='P')
+            if parent_log.datetime > log.datetime:
+                break
+
+        else:
+            need_update = False
+
+        if need_update:
+            if dry_run:
+                logger.info('Would have reset job %i [DRY-RUN]', job.id)
+
+            else:
+                logger.info('Resetting job %i', job.id)
+                db.change_state(
+                    job.id, JSAProcState.QUEUED,
+                    'Parent was reprocessed; reset to queued')
 
 
 @command

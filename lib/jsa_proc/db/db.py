@@ -767,16 +767,24 @@ class JSAProcDB:
 
         return entries
 
-    def _get_last_entry(self, job_id, tablename):
+    def _get_last_entry(self, job_id, tablename, **kwargs):
         """
         Private method to get the last entry from a table which has a
         timestamp and multiple entries per job_id.
         """
 
+        where = ["job_id = %s"]
+        params = [job_id]
+
+        for kwarg in kwargs:
+            where.append("{} = %s".format(kwarg))
+            params.append(kwargs[kwarg])
+
         with self.db as c:
-            c.execute("SELECT * FROM " + tablename + " WHERE job_id = %s " +
-                      "ORDER BY id DESC LIMIT 1",
-                      (job_id,))
+            c.execute("SELECT * FROM " + tablename + " WHERE " +
+                      " AND ".join(where) +
+                      " ORDER BY id DESC LIMIT 1",
+                      params)
             entry = c.fetchall()
         if len(entry) < 1:
             raise NoRowsError(
@@ -801,7 +809,7 @@ class JSAProcDB:
         qa = JSAProcQa(*qa)
         return qa
 
-    def get_last_log(self, job_id):
+    def get_last_log(self, job_id, **kwargs):
         """
         Return the last log entry for a given job.
 
@@ -812,7 +820,7 @@ class JSAProcDB:
         log: namedtuple JSAProcLog
         """
 
-        log = self._get_last_entry(job_id, 'log')
+        log = self._get_last_entry(job_id, 'log', **kwargs)
         log = JSAProcLog(*log)
         return log
 
