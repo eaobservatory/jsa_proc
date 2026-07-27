@@ -38,6 +38,9 @@ class JSAQAState:
     STATE_ALL = tuple(_info.keys())
     STATE_IFFY = set((INVALID, BAD, QUESTIONABLE))
 
+    _importance = {x: i for (i, x) in enumerate(
+        (GOOD, UNKNOWN, QUESTIONABLE, BAD, INVALID))}
+
     @classmethod
     def get_name(cls, state):
         """Return the human-readable name of the state.
@@ -58,3 +61,19 @@ class JSAQAState:
         """
 
         return state in cls._info
+
+    @classmethod
+    def coalesce(cls, states):
+        """Return the most 'important' of the given states"""
+
+        result = None
+
+        for state in states:
+            if ((result is None)
+                    or (cls._importance[state] > cls._importance[result])):
+                result = state
+
+        if result is None:
+            result = cls.UNKNOWN
+
+        return result
