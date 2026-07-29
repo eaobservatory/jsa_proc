@@ -212,7 +212,7 @@
                          if key not in ['id', 'backend','obsid','obsidss', 'association', 'qa_state']%}
     {% if key == 'job_id'%}
     <td class="qa_state_{{ o.get('qa_state', '?')| qa_state_name | lower }}">
-        <a href="{{url_for('job_info', job_id=o.get(key, ''))}}"> {{ o.get(key, '') }} </a>
+        <a href="{{url_for('job_qa', job_id=o.get(key, ''))}}">{{ o.get(key, '') }}
         <br />{{ o.get('qa_state', '?')| qa_state_name }}</a>
     </td>
     {% elif key == 'utdate' %}
