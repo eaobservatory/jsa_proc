@@ -47,6 +47,7 @@
     <tr><th>Task</th><td>{{ info.task }} </td></tr>
     <tr><th>Mode</th><td>{{ info.mode }} </td></tr>
     <tr><th>Tag</th><td>{{ break_underscore(info.tag) }} </td></tr>
+    <tr><th>Job QA Page</th><td><a href="{{url_for('job_qa', job_id=info.id)}}">job QA</a></td></tr>
     {% if children %}
     <tr><th>Children</th>
       <td>
