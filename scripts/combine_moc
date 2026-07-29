@@ -19,7 +19,7 @@
 """combine_moc: Generate combined MOC files from job output MOCs.
 
 Usage:
-    combine_moc --task=<task> [--out-base <base-file-name> | --list] [--tile | --extent] [--order=<order>] [--title=<title>]
+    combine_moc --task=<task> (--out-base <base-file-name> | --list) [--tile | --extent] [--order=<order>] [--title=<title>]
 
 Options:
     --task <task-name>           Task name
