@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2014 Science and Technology Facilities Council.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""hpx_cat_submit: submit hpx legacy catalogue jobs to the JSA processing system.
+
+Usage:
+    hpx_cat_submit [-v | -q] [--dry-run] --task=<task>... [options]
+
+Options:
+    --help, -h                 Show usage information.
+    --verbose, -v              Print debugging information.
+    --quiet, -q                Omit informational messages.
+    --dry-run, -n              Do not actually peform the action.
+
+    --task=<task>...           jsa_proc task(s) to look for jobs for.
+    --priority=<priority>      priority of task. [default: 0]
+    --location, -l=<location>  Job location, e.g. JAC, CADC. [default: JAC]
+    --output-task=<out-task>   A task name to put the catalogue jobs into. If not
+                               given, defaults to <task> with "-coadd"
+                               replaced with "-cat".
+Description:
+    Submit jobs for all jobs in the requested task.
+"""
+
+from __future__ import print_function, division, absolute_import
+
+import functools
+import logging
+import sys
+
+from docopt import docopt
+
+from jsa_proc.config import get_database
+from jsa_proc.db.db import Not
+from jsa_proc.error import CommandError, JSAProcError
+from jsa_proc.state import JSAProcState
+from jsa_proc.qa_state import JSAQAState
+from jsa_proc.submit.update import add_upd_del_job
+
+script_name = 'hpx_cat_submit'
+logger = logging.getLogger(script_name)
+
+
+def main():
+    """Main routine for the hpx_cat_submit."""
+
+    args = docopt(__doc__)
+
+    # Determine logging level from the --quiet and --verbose options.
+    loglevel = logging.INFO
+
+    if args['--verbose']:
+        loglevel = logging.DEBUG
+    elif args['--quiet']:
+        loglevel = logging.WARNING
+
+    logging.basicConfig(level=loglevel)
+
+    try:
+        if not args['--task']:
+            raise CommandError('Task must be supplied.')
+
+        # Process integer arguments.
+        for integer_argument in ('--priority',):
+            if args[integer_argument] is not None:
+                try:
+                    args[integer_argument] = int(args[integer_argument])
+                except ValueError:
+                    raise CommandError('Option {0} must be an integer'.
+                                       format(integer_argument))
+
+        # Submit jobs.
+        submit_jobs(args)
+
+    except CommandError as e:
+        # If a known error happened, display its message and exit with
+        # bad status.
+        print('{0}: {1}'.format(script_name, e.args[0]), file=sys.stderr)
+        sys.exit(1)
+
+    else:
+        # Otherwise exit with good status.
+        sys.exit(0)
+
+
+def submit_jobs(args):
+    """
+    Submit all tile catalogue jobs for a given task.
+    """
+
+    parenttasks = args['--task']
+    dry_run = args['--dry-run']
+    priority = args['--priority']
+    output_task = args['--output-task']
+    location = args['--location']
+
+    if not output_task:
+        if 1 == len(parenttasks) and '-coadd' in parenttasks[0]:
+            output_task = parenttasks[0].replace('-coadd', '-cat', 1)
+            assert output_task != parenttasks[0]
+        else:
+            raise JSAProcError('Cannot generate output task name')
+
+    parameters = 'JSA_CATALOGUE'
+    filters = [r'^jcmts[48]50um_healpix[0-9]{6}_pub_[0-9]{3}.fits$']
+
+    db = get_database()
+
+    jobs = db.find_jobs(
+        task=parenttasks,
+        state=Not([
+            JSAProcState.ERROR,
+            JSAProcState.DELETED,
+            JSAProcState.WONTWORK,
+        ]),
+        qa_state=[
+            JSAQAState.GOOD,
+            JSAQAState.QUESTIONABLE,
+            JSAQAState.UNKNOWN,
+        ],
+    )
+
+    total = len(jobs)
+    count = 1
+
+    for job in jobs:
+        tag = job.tag.replace('-coadd-', '-cat-', 1)
+        assert tag != job.tag
+        logger.debug(
+            'Processing job %i (%i of %i) %s -> %s',
+            job.id, count, total,
+            job.tag, tag)
+
+        try:
+            child_id = add_upd_del_job(
+                db=db,
+                tag=tag,
+                location=location,
+                mode='public',
+                parameters=parameters,
+                task=output_task,
+                priority=priority,
+                parent_jobs=[job.id],
+                filters=filters,  # No need to duplicate as only one input job
+                tilelist=None,
+                description='catalog for job {}'.format(job.id),
+                dry_run=dry_run)
+
+        except JSAProcError:
+            logger.exception('Error adding catalog job for job %i', tile)
+
+        count += 1
+        if count > 20:
+            break
+
+
+if __name__ == '__main__':
+    main()
