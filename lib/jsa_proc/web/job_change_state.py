@@ -53,3 +53,28 @@ def prepare_change_qa(db, job_ids, qa_state, message, username):
 
     for job_id in job_ids:
         db.add_qa_entry(job_id, qa_state, message, username)
+
+
+def prepare_job_reset(db, job, username):
+    state_info = JSAProcState.get_info(job.state)
+
+    if state_info.active:
+        raise ErrorPage('The job is currently active.')
+
+    if state_info.pre_run:
+        raise ErrorPage('The job is already in a pre-run state.')
+
+    db.change_state(
+        job.id, newstate=JSAProcState.QUEUED, message='Job reset',
+        username=username)
+
+
+def prepare_job_delete(db, job, username):
+    state_info = JSAProcState.get_info(job.state)
+
+    if state_info.active:
+        raise ErrorPage('The job is currently active.')
+
+    db.change_state(
+        job.id, newstate=JSAProcState.DELETED, message='Job deleted',
+        username=username)

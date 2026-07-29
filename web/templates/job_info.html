@@ -265,6 +265,16 @@
 {% endif %}
 
 <h2>Log</h2>
+
+{% if (info.state is not state_active) and request.authorization and request.authorization.username %}
+  <ul>
+    {% if info.state is not state_pre_run %}
+      <li><a href="{{ url_for('job_reset', job_id=info.id) }}">Reset job</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('job_delete', job_id=info.id) }}">Delete job</a></li>
+  </ul>
+{% endif %}
+
 <table>
 {{ log_table(log, shown_rows=20) }}
 </table>

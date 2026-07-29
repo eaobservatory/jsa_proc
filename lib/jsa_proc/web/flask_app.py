@@ -36,7 +36,8 @@ from jsa_proc.web.util import \
 
 from jsa_proc.web.job_list import prepare_job_list
 from jsa_proc.web.job_change_state import prepare_add_note, \
-    prepare_change_state, prepare_change_qa
+    prepare_change_state, prepare_change_qa, \
+    prepare_job_reset, prepare_job_delete
 from jsa_proc.web.job_summary import prepare_job_summary, \
     prepare_task_summary, prepare_summary_piechart, \
     prepare_task_qa_summary
@@ -238,6 +239,48 @@ def create_web_app(auto_reload_templates=False):
         except ErrorPage as err:
             return error_page_response(err)
 
+    @app.route('/job/<int:job_id>/reset', methods=['GET', 'POST'])
+    @requires_auth
+    @templated('confirm.html')
+    def job_reset(job_id):
+        job = db.get_job(job_id)
+        is_confirm = _is_confirm()
+
+        if is_confirm is None:
+            return {
+                'title': 'Job {}: Reset'.format(job.id),
+                'message': 'Reset this job to "queued" status?',
+            }
+
+        elif is_confirm:
+            prepare_job_reset(
+                db, job, request.authorization['username'])
+
+            flash('Job %i has been reset.' % job.id)
+
+        raise HTTPRedirect(url_for('job_info', job_id=job.id))
+
+    @app.route('/job/<int:job_id>/delete', methods=['GET', 'POST'])
+    @requires_auth
+    @templated('confirm.html')
+    def job_delete(job_id):
+        job = db.get_job(job_id)
+        is_confirm = _is_confirm()
+
+        if is_confirm is None:
+            return {
+                'title': 'Job {}: Delete'.format(job.id),
+                'message': 'Delete this job?',
+            }
+
+        elif is_confirm:
+            prepare_job_delete(
+                db, job, request.authorization['username'])
+
+            flash('Job %i has been deleted.' % job.id)
+
+        raise HTTPRedirect(url_for('job_info', job_id=job.id))
+
     @app.route('/job_change_state', methods=['POST'])
     @requires_auth
     def job_change_state():
@@ -401,6 +444,10 @@ def create_web_app(auto_reload_templates=False):
     def state_active_test(state):
         return JSAProcState.get_info(state).active
 
+    @app.template_test('state_pre_run')
+    def state_pre_run_test(state):
+        return JSAProcState.get_info(state).pre_run
+
     @app.template_filter('state_phase')
     def state_phase_filter(state):
         phase = JSAProcState.get_info(state).phase
@@ -453,3 +500,10 @@ def create_web_app(auto_reload_templates=False):
 
     # Return the Application.
     return app
+
+
+def _is_confirm():
+    return (
+        None
+        if (request.method != 'POST')
+        else ('submit_confirm' in request.form))
