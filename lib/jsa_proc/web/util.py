@@ -96,7 +96,7 @@ def error_page_response(err):
     """Prepare flask response for an error page."""
 
     return _make_response('error.html',
-                          {'title': 'Error', 'message': err.message})
+                          {'title': 'Error', 'message': err.args[0]})
 
 
 def _make_response(template, result):
