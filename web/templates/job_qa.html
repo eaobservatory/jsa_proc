@@ -174,10 +174,15 @@
   </div>
   {% endif %}
 
-{% if parent_obs is not none  and parent_obs != [] %}
+{% if parent_obs or (parent_overall_qa is not none) %}
 <div class="panel">
 <table class="obsinfo">
   <caption> Parent Observation Info </caption>
+  <tr>
+    <td class="qa_state_{{ parent_overall_qa | qa_state_name | lower }}">{{ parent_overall_qa | qa_state_name }}</td>
+    <th colspan="14">Overall QA state</th>
+  </tr>
+  {% if parent_obs %}
   <tr>
   {% set keys = parent_obs.values()|list %}
   {% for key in keys[0][0]
@@ -239,6 +244,7 @@
     {% endfor %}
 
   {% endfor %}
+  {% endif %}
   </table>
 </div>
 {% endif %}

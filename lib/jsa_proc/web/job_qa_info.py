@@ -53,7 +53,8 @@ def prepare_job_qa_info(db, job_id, query):
         # Try to get parent jobs (if any).
     # Dictionary with parent as key and filter as item.
     try:
-        parents = db.get_parents(job_id)
+        parents = db.get_parents(job_id, with_state=True)
+        parent_overall_qa = JSAQAState.coalesce(p.qa_state for p in parents)
         parents = {p.id: p for p in parents}
         parent_obs = OrderedDict()
         pjobs = list(parents.keys())
@@ -62,7 +63,7 @@ def prepare_job_qa_info(db, job_id, query):
             obsinfo = db.get_obs_info(i)
             if obsinfo != []:
                 obsinfo = [o._asdict() for o in db.get_obs_info(i)]
-                qa_state = db.get_job(i).qa_state
+                qa_state = parents[i].qa_state
                 for o in obsinfo:
                     o['qa_state'] = qa_state
 
@@ -72,6 +73,7 @@ def prepare_job_qa_info(db, job_id, query):
     except NoRowsError:
         parents = None
         parent_obs = None
+        parent_overall_qa = None
 
     # See if there are any child jobs.
     try:
@@ -149,6 +151,7 @@ def prepare_job_qa_info(db, job_id, query):
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
         'parent_obs': parent_obs,
+        'parent_overall_qa': parent_overall_qa,
         'qa_states': JSAQAState.STATE_ALL,
         'pagination': pagination,
         'nopreview': nopreview,

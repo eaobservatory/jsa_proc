@@ -60,7 +60,7 @@ JSAProcJobChild = namedtuple(
     ['id'])
 JSAProcJobParent = namedtuple(
     'JSAProcJobParent',
-    ['id', 'filter', 'state'])
+    ['id', 'filter', 'state', 'qa_state'])
 JSAProcErrorInfo = namedtuple(
     'JSAProcErrorInfo',
     'id time message state state_prev location')
@@ -1553,9 +1553,9 @@ class JSAProcDB:
         Raises NoRowsError if no results are found.
         """
         if not with_state:
-            query = 'SELECT parent, filter, NULL FROM parent WHERE job_id = %s'
+            query = 'SELECT parent, filter, NULL, NULL FROM parent WHERE job_id = %s'
         else:
-            query = 'SELECT parent.parent, parent.filter, job.state' \
+            query = 'SELECT parent.parent, parent.filter, job.state, job.qa_state' \
                 ' FROM parent JOIN job ON parent.parent=job.id' \
                 ' WHERE parent.job_id = %s'
         params = (job_id,)
