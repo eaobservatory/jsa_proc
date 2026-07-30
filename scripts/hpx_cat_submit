@@ -164,8 +164,6 @@ def submit_jobs(args):
             logger.exception('Error adding catalog job for job %i', tile)
 
         count += 1
-        if count > 20:
-            break
 
 
 if __name__ == '__main__':
