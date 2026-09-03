@@ -34,7 +34,7 @@ class JSAProcStateMachine:
     def poll(self):
         self.poll_jac_jobs(self)
 
-    def poll_jac_jobs(self, etransfer=True):
+    def poll_jac_jobs(self, task=None, etransfer=True, dry_run=False):
         """Try to update status of all JAC jobs.
 
         For all jobs to be run at JAC, look at the current status
@@ -49,9 +49,16 @@ class JSAProcStateMachine:
         logger.info('Starting update of JAC job status')
         n_err = 0
 
-        for job in self.db.find_jobs(location='JAC',
-                                     state=Not(JSAProcState.STATE_FINAL)):
+        for job in self.db.find_jobs(
+                location='JAC',
+                state=Not(JSAProcState.STATE_FINAL),
+                task=task):
             logger.debug('Checking state of job %i', job.id)
+
+            # TODO: more detailed dry-run mode -- aborting here at least
+            # allows us to see which jobs would be checked.
+            if dry_run:
+                continue
 
             try:
                 if job.state == JSAProcState.UNKNOWN:
