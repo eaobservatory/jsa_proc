@@ -113,9 +113,9 @@ def main():
 
     if out_base is not None:
         if process_tile:
-            tile.write('{}_tile.fits'.format(out_base), filetype='fits')
+            tile.write('{}_tile-moc.fits'.format(out_base), filetype='fits')
         if process_extent:
-            extent.write('{}_extent.fits'.format(out_base), filetype='fits')
+            extent.write('{}_extent-moc.fits'.format(out_base), filetype='fits')
 
 
 if __name__ == '__main__':
