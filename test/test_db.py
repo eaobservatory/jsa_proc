@@ -511,8 +511,9 @@ class InterfaceDBTest(DBTestCase):
 
         # Test the return preview files option..
         outfiles = ['1.sdf', '2.sdf', 'name_preview_64.png']
-        self.db.set_output_files(1,
-                                 [JSAProcFileInfo(x, None) for x in outfiles])
+        self.db.set_output_files(
+            1,
+            [JSAProcFileInfo(x, 'aaafff') for x in outfiles])
         self.assertEqual(
             [x.outputs for x in self.db.find_jobs(number=1, outputs='%')][0],
             outfiles)
@@ -546,8 +547,8 @@ class InterfaceDBTest(DBTestCase):
                                  parent_jobs=[1,2], filters=['850um', '850um'],
                                priority=7)
         # Check you get back the right values
-        self.assertEqual(set([JSAProcJobParent(1, '850um', None),
-                              JSAProcJobParent(2, '850um', None)]),
+        self.assertEqual(set([JSAProcJobParent(1, '850um', None, None),
+                              JSAProcJobParent(2, '850um', None, None)]),
                          set(self.db.get_parents(jobid3)))
 
         # Check you can recover the other way
@@ -565,7 +566,7 @@ class InterfaceDBTest(DBTestCase):
 
         # Test that you can delete a single parent job.
         self.db.delete_some_parents(jobid3, [1])
-        self.assertEqual(set([JSAProcJobParent(2, '850um', None)]),
+        self.assertEqual(set([JSAProcJobParent(2, '850um', None, None)]),
                          set(self.db.get_parents(jobid3)))
 
         # Test that you can't delete a parent that doesn't exist
@@ -574,8 +575,8 @@ class InterfaceDBTest(DBTestCase):
 
         # Test that you can add a single job.
         self.db.add_to_parents(jobid3, [jobid], filters='450um')
-        self.assertEqual(set([JSAProcJobParent(1, '450um', None),
-                              JSAProcJobParent(2, '850um', None)]),
+        self.assertEqual(set([JSAProcJobParent(1, '450um', None, None),
+                              JSAProcJobParent(2, '850um', None, None)]),
                          set(self.db.get_parents(jobid3)))
         # Test that you can delete all parents
         self.db.delete_parents(jobid3)
