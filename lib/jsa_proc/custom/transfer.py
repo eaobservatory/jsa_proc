@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 
+from cadcutils.exceptions import NotFoundException
 from docopt import docopt
 import vos
 
@@ -181,6 +182,16 @@ class CustomJobTransfer(object):
 
             nodes = retry(lambda: vos_client.get_node(
                 vos_dir, limit=None, force=True)).node_list
+
+        # New error in the case of it not being there?
+        except NotFoundException:
+            # For now do the same as below...
+
+            if dry_run:
+                logger.info('DRY-RUN: would have made: %s', vos_dir)
+
+            else:
+                self.make_vos_directory(vos_client, vos_dir)
 
         except OSError as e:
             if e.errno == errno.ENOENT:
