@@ -54,7 +54,7 @@ JSAProcObs = namedtuple(
      'tau', 'seeing'])
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
-    'id tag state location foreign_id task qa_state outputs')
+    'id tag state location foreign_id task qa_state outputs md5s')
 JSAProcJobChild = namedtuple(
     'JSAProcJobChild',
     ['id'])
@@ -1180,13 +1180,13 @@ class JSAProcDB:
                     'job.foreign_id, job.task, job.qa_state'
 
             if outputs:
-                query += ', GROUP_CONCAT(output_file.filename) '
+                query += ', GROUP_CONCAT(output_file.filename), GROUP_CONCAT(output_file.md5) '
                 join = (' LEFT JOIN output_file ON job.id=output_file.job_id '
                         'AND output_file.filename LIKE %s')
                 param.append(outputs)
 
             else:
-                query += ', NULL'
+                query += ', NULL, NULL'
 
         # Note: join and count cannot be used together.
         query += ' FROM job' + join
@@ -1251,7 +1251,9 @@ class JSAProcDB:
 
                 # If output files were returned, split them into a list.
                 if row.outputs is not None:
-                    row = row._replace(outputs=row.outputs.split(','))
+                    row = row._replace(
+                        outputs=row.outputs.split(','),
+                        md5s=row.md5s.split(','))
 
                 # Append the (possibly modified) row to the result list.
                 result.append(row)

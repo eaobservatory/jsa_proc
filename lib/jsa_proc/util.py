@@ -52,7 +52,9 @@ def restore_signals():
     signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
 
 
-def retry(f, max_retries=6, retry_delay=30, log_message='Operation failed'):
+def retry(
+        f, max_retries=6, retry_delay=30, log_message='Operation failed',
+        raise_=()):
     """Attempt an operation up to a given number of times.
 
     In the event of an exception being raised, log as an exception with
@@ -63,6 +65,9 @@ def retry(f, max_retries=6, retry_delay=30, log_message='Operation failed'):
     for i in range(max_retries, 0, -1):
         try:
             return f()
+
+        except raise_:
+            raise
 
         except Exception:
             logger.exception('{0} (try {1} of {2})'.format(

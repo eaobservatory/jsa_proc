@@ -130,42 +130,11 @@ class CustomJobTransfer(VOSClient):
                 'VOS directory for {0}: {1}'.format(file_path, vos_sub_dir))
 
             vos_dir = '/'.join([self.vos_base, vos_sub_dir])
-            vos_file = '/'.join([vos_dir, file_])
 
-            # Get directory listing -- this creates the directory
-            # if not in dry-run mode.
-            if vos_dir in vos_cache:
-                vos_dir_info = vos_cache[vos_dir]
-
-            else:
-                vos_dir_info = self.get_vos_directory_entries(
-                    vos_client, vos_dir, dry_run=dry_run)
-
-                vos_cache[vos_dir] = vos_dir_info
-
-            # Perform storage, if file changed (and not in dry-run mode).
-            vos_md5 = vos_dir_info.get(file_, ())
-
-            if vos_md5 is None:
-                vos_md5 = self.get_vos_file_md5(vos_client, vos_file)
-
-            if (vos_md5 != ()) and (vos_md5 == file_md5):
-                logger.info(
-                    'Skipped storing {0} as {1} [UNCHANGED]'.format(
-                        file_path, vos_file))
-
-            elif dry_run:
-                logger.info(
-                    'Skipped storing {0} as {1} [DRY-RUN]'.format(
-                        file_path, vos_file))
-
-            else:
-                if vos_md5 != ():
-                    logger.debug('Deleting existing file {0}'.format(vos_file))
-                    retry(lambda: vos_client.delete(vos_file))
-
-                logger.info('Storing {0} as {1}'.format(file_path, vos_file))
-                retry(lambda: vos_client.copy(file_path, vos_file))
+            self.transfer_file(
+                vos_client=vos_client,
+                file_dir=transdir, file_name=file_, file_md5=file_md5, vos_dir=vos_dir,
+                vos_cache=vos_cache, dry_run=dry_run)
 
     def determine_vos_directory(self, transdir, filename):
         # This method must be overridden by subclasses.

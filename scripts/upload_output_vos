@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2026 East Asian Observatory.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+upload_output_vos - Transfer job products to CADC VO Space
+
+Usage:
+    upload_output_vos [-v | -q] [--dry-run] --task <task> <directory>
+
+Options:
+    --verbose, -v              Print debugging information.
+    --quiet, -q                Omit informational messages.
+    --dry-run, -n              Do not actually peform the action.
+
+    --task, -t <task>          Select files from a particular task.
+"""
+
+from __future__ import absolute_import, division, print_function
+
+import logging
+
+from docopt import docopt
+import vos
+
+from jsa_proc.admin.directories import get_output_dir
+from jsa_proc.config import get_database
+from jsa_proc.cadc.vos import VOSClient
+from jsa_proc.state import JSAProcState
+
+logger = logging.getLogger('upload_output_vos')
+
+
+def main():
+    args = docopt(__doc__)
+
+    loglevel = logging.INFO
+
+    if args['--verbose']:
+        loglevel = logging.DEBUG
+    elif args['--quiet']:
+        loglevel = logging.WARNING
+
+    logging.basicConfig(level=loglevel)
+
+    dry_run = args['--dry-run']
+    vos_dir = args['<directory>']
+
+    if not vos_dir.startswith('vos:'):
+        vos_dir = 'vos:{}'.format(vos_dir)
+
+    # Prepare CADC VOS client
+    vos_client = vos.Client()
+
+    # Prepare our VOS utility object
+    client = VOSClient()
+    vos_cache = {}
+
+    db = get_database()
+
+    pattern = '%.fits'
+    states = JSAProcState.STATE_POST_RUN
+
+    jobs = db.find_jobs(task=args['--task'], state=states, outputs=pattern)
+    for job in jobs:
+        if job.outputs is None:
+            continue
+
+        for (file_name, file_md5) in zip(job.outputs, job.md5s):
+            file_dir = get_output_dir(job.id)
+            logger.info(
+                'uploading %s (%s) to %s',
+                file_dir + '/' + file_name, file_md5, vos_dir)
+            client.transfer_file(
+                vos_client,
+                file_dir=file_dir, file_name=file_name, file_md5=file_md5,
+                vos_dir=vos_dir, vos_cache=vos_cache,
+                dry_run=dry_run)
+
+
+if __name__ == '__main__':
+    main()

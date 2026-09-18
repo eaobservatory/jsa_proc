@@ -17,6 +17,7 @@ from __future__ import absolute_import, division, print_function
 
 import errno
 import logging
+import os
 
 from cadcutils.exceptions import NotFoundException
 
@@ -26,6 +27,50 @@ logger = logging.getLogger(__name__)
 
 
 class VOSClient(object):
+    def transfer_file(
+            self, vos_client,
+            file_dir, file_name, file_md5, vos_dir,
+            vos_cache=None,
+            dry_run=False):
+        file_path = os.path.join(file_dir, file_name)
+        vos_file = '/'.join([vos_dir, file_name])
+
+        # Get directory listing -- this creates the directory
+        # if not in dry-run mode.
+        if (vos_cache is not None) and (vos_dir in vos_cache):
+            vos_dir_info = vos_cache[vos_dir]
+
+        else:
+            vos_dir_info = self.get_vos_directory_entries(
+                vos_client, vos_dir, dry_run=dry_run)
+
+            if vos_cache is not None:
+                vos_cache[vos_dir] = vos_dir_info
+
+        # Perform storage, if file changed (and not in dry-run mode).
+        vos_md5 = vos_dir_info.get(file_name, ())
+
+        if vos_md5 is None:
+            vos_md5 = self.get_vos_file_md5(vos_client, vos_file)
+
+        if (vos_md5 != ()) and (vos_md5 == file_md5):
+            logger.info(
+                'Skipped storing {0} as {1} [UNCHANGED]'.format(
+                    file_path, vos_file))
+
+        elif dry_run:
+            logger.info(
+                'Skipped storing {0} as {1} [DRY-RUN]'.format(
+                    file_path, vos_file))
+
+        else:
+            if vos_md5 != ():
+                logger.debug('Deleting existing file {0}'.format(vos_file))
+                retry(lambda: vos_client.delete(vos_file))
+
+            logger.info('Storing {0} as {1}'.format(file_path, vos_file))
+            retry(lambda: vos_client.copy(file_path, vos_file))
+
     def get_vos_directory_entries(self, vos_client, vos_dir, dry_run=False):
         """
         Get a list of a directory's content, or make it if it doesn't
@@ -40,7 +85,8 @@ class VOSClient(object):
             logger.debug('Getting VO space directory node: %s', vos_dir)
 
             nodes = retry(lambda: vos_client.get_node(
-                vos_dir, limit=None, force=True)).node_list
+                vos_dir, limit=None, force=True),
+                raise_=(NotFoundException,)).node_list
 
         # New error in the case of it not being there?
         except NotFoundException:
