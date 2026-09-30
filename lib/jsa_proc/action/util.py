@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2021-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +24,11 @@ else:
     input_ = input
 
 
-def yes_or_no_question(question, default=False):
+def yes_or_no_question(question, default=False, assume_yes=False):
+    if assume_yes:
+        print('{0} (assuming {1})'.format(question, 'Y'))
+        return True
+
     while True:
         reply = input_('{0} ({1}): '.format(
             question, 'Y/n' if default else 'y/N'))

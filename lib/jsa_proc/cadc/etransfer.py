@@ -1,4 +1,5 @@
-# Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2014-2015 Science and Technology Facilities Council.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -280,7 +281,7 @@ def _etransfer_send(job_id, dry_run, db, force):
             state_prev=(None if force else JSAProcState.PROCESSED))
 
 
-def etransfer_query_output(job_id):
+def etransfer_query_output(job_id, assume_yes=False, dry_run=False):
     """Investigate the e-transfer status of the output of a job."""
 
     db = get_database()
@@ -313,17 +314,21 @@ def etransfer_query_output(job_id):
 
     if problem_files:
         if yes_or_no_question(
-                'Delete rejected files from e-transfer directories?'):
+                'Delete rejected files from e-transfer directories?',
+                assume_yes=assume_yes):
             for file in problem_files:
                 logger.debug('Deleting file %s', file)
-                os.unlink(file)
+                if not dry_run:
+                    os.unlink(file)
 
-            if yes_or_no_question('Re-try e-transfer?'):
+            if yes_or_no_question(
+                    'Re-try e-transfer?',
+                    assume_yes=assume_yes):
                 # Clear cache before attempting to e-transfer since we just
                 # removed the files from the e-transfer directories.
                 _etransfer_clear_cache()
 
-                etransfer_send_output(job_id, dry_run=False, force=True)
+                etransfer_send_output(job_id, dry_run=dry_run, force=True)
 
 
 def etransfer_file_status(files):

@@ -1,4 +1,5 @@
-# Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2014-2015 Science and Technology Facilities Council.
+# Copyright (C) 2021-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +41,8 @@ class IdentifiedProblem(Exception):
         self.category = category
 
 
-def investigate_unauthorized_errors(location, check_at_cadc=True):
+def investigate_unauthorized_errors(
+        location, check_at_cadc=True, assume_yes=False):
     logger.debug('Starting to investigate unauthorized errors')
 
     logger.debug('Connecting to JSA processing database')
@@ -152,7 +154,9 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
         if jobs:
             print('Category {0}: {1} job(s)'.format(cat, len(jobs)))
 
-            if yes_or_no_question('Show detail?', False):
+            if yes_or_no_question(
+                    'Show detail?',
+                    default=False, assume_yes=assume_yes):
                 for job in jobs:
                     info = job_info[job]
                     print(job,
@@ -164,7 +168,9 @@ def investigate_unauthorized_errors(location, check_at_cadc=True):
                           info['obs'][0].scanmode,
                           info['release'])
 
-                if yes_or_no_question('Resubmit jobs?', False):
+                if yes_or_no_question(
+                        'Resubmit jobs?',
+                        default=False, assume_yes=assume_yes):
                     for job in jobs:
                         db.change_state(
                             job, JSAProcState.QUEUED,
