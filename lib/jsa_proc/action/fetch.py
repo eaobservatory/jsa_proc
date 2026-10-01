@@ -1,4 +1,5 @@
-# Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2014-2015 Science and Technology Facilities Council.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +32,9 @@ from jsa_proc.error import JSAProcError, NoRowsError, ParentNotReadyError
 logger = logging.getLogger(__name__)
 
 
-def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
+def fetch(
+        job_id=None, db=None, force=False, replaceparent=False, task=None,
+        dry_run=False):
     """
     Assemble the files required to process a job.
 
@@ -61,7 +64,7 @@ def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
         db = get_database()
 
     # Get next job if a job_id is not specified.
-    if not job_id:
+    if job_id is None:
         force = False
 
         logger.debug('Looking for a job for which to fetch data')
@@ -76,7 +79,12 @@ def fetch(job_id=None, db=None, force=False, replaceparent=False, task=None):
             logger.warning('Did not find a job to fetch!')
             return
 
-    fetch_a_job(job_id, db=db, force=force, replaceparent=replaceparent)
+    for id_ in (job_id if isinstance(job_id, list) else (job_id,)):
+        if dry_run:
+            logger.info('DRY-RUN: would have fetched job %i', id_)
+
+        else:
+            fetch_a_job(id_, db=db, force=force, replaceparent=replaceparent)
 
 
 @ErrorDecorator
@@ -183,7 +191,8 @@ def fetch_output(job_id=None, location=None, task=None,
             logger.warning('Did not find a job to fetch output data for!')
             return
 
-    _fetch_job_output(job_id, db=db, force=force, dry_run=dry_run)
+    for id_ in (job_id if isinstance(job_id, list) else (job_id,)):
+        _fetch_job_output(id_, db=db, force=force, dry_run=dry_run)
 
 
 @ErrorDecorator

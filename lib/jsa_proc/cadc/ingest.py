@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +39,9 @@ def ingest_output(
     db = get_database()
 
     if job_id is not None:
-        jobs = [db.get_job(id_=job_id)]
+        jobs = [
+            db.get_job(id_=id_)
+            for id_ in (job_id if isinstance(job_id, list) else (job_id,))]
 
     else:
         jobs = db.find_jobs(

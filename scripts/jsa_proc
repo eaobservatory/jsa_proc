@@ -28,15 +28,12 @@ Usage:
     jsa_proc minoc [-v | -q] [--cookie] compare <file>...
     jsa_proc minoc [-v | -q] [--cookie] get [--parents] <file>...
     jsa_proc minoc [-v | -q] [--cookie] put <file>...
-    jsa_proc etransfer [-v | -q] [--dry-run] [--force] --job-id <id>
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
-    jsa_proc etransfer [-v | -q] [--dry-run] --query [-y] --job-id <id>
-    jsa_proc fetch [-v | -q] [--job-id <id>] [--force] [--replaceparent] [--task <task>...]
-    jsa_proc fetch [-v | -q] [--dry-run] output [--force] --job-id <id>
-    jsa_proc fetch [-v | -q] [--dry-run] output [--force] [--task <task>...] [--location <location>]
-    jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>
+    jsa_proc etransfer [-v | -q] [--dry-run] (--query [-y] | [--force]) --job-id <id>...
+    jsa_proc fetch [-v | -q] [--dry-run] [--force] ([--replaceparent] | output [--location <location>]) [--job-id <id>]... [--task <task>...]
+    jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>...
     jsa_proc ingest [-v | -q] [--dry-run] [--count <number>] --task <task>... [--location <location>]
-    jsa_proc inputs [-v | -q] --job-id <id>
+    jsa_proc inputs [-v | -q] --job-id <id>...
     jsa_proc namecheck [-v | -q] file <file>
     jsa_proc namecheck [-v | -q] directory <directory>
     jsa_proc namecheck [-v | -q] output --task <task>... --outfile <file>
@@ -48,9 +45,9 @@ Usage:
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check] [--min-age <hours>]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task>... [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
-    jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>
+    jsa_proc revalidate [-v | -q] [--dry-run] (output) --job-id <id>...
     jsa_proc revalidate [-v | -q] [--dry-run] (output) [--task <task>...] [--location <location>]
-    jsa_proc run [-v | -q] [--job-id <id>] [--force] [--task <task>...]
+    jsa_proc run [-v | -q] [--dry-run] [--job-id <id>...] [--force] [--task <task>...]
     jsa_proc search [-v | -q] log [--name <pattern>] [--task <task>...] [--state <state>] [--project <project>] [--after-context <lines>] [--notes] <search>
     jsa_proc search [-v | -q] (message | obsid | output) [--task <task>...] [--state <state>] <search>
     jsa_proc transfer [-v | -q] [--dry-run] [--count <number>] [--task <task>...]
@@ -64,7 +61,7 @@ Options:
     --dry-run, -n              Do not actually peform the action.
     --assumeyes, -y            Assume answer yes to all questions.
 
-    --job-id, -j <id>          Identifier of job on which to work.
+    --job-id, -j <id>...       Identifier of jobs on which to work.
     --location, -l <location>  Job location, e.g. JAC, CADC.
 
     --after-context <lines>    Number of lines of context to show.
@@ -124,13 +121,18 @@ logger = logging.getLogger(script_name)
 cookies = None
 
 integer_arguments = (
-    '--job-id', '--count',
+    '--count',
     '--date-start', '--date-end', '--min-age',
     '--after-context',
 )
 
+integer_list_arguments = (
+    '--job-id',
+)
+
 optional_repeating_arguments = (
     '--task',
+    '--job-id',
 )
 
 
@@ -163,6 +165,15 @@ def main():
                 except ValueError:
                     raise CommandError('Option {0} must be an integer'.
                                        format(integer_argument))
+
+        for integer_list_argument in integer_list_arguments:
+            if args[integer_list_argument]:
+                try:
+                    args[integer_list_argument] = [
+                        int(x) for x in args[integer_list_argument]]
+                except ValueError:
+                    raise CommandError('Option {0} must be integers'.
+                                       format(integer_list_argument))
 
         # Process optional repeating arguments
         # for which we want `None` instead of [].
@@ -478,16 +489,18 @@ def etransfer(args):
             dry_run=args['--dry-run'])
 
     elif args['--query']:
-        etransfer_query_output(
-            args['--job-id'],
-            assume_yes=args['--assumeyes'],
-            dry_run=args['--dry-run'])
+        for id_ in args['--job-id']:
+            etransfer_query_output(
+                id_,
+                assume_yes=args['--assumeyes'],
+                dry_run=args['--dry-run'])
 
     else:
-        etransfer_send_output(
-            args['--job-id'],
-            dry_run=args['--dry-run'],
-            force=args['--force'])
+        for id_ in args['--job-id']:
+            etransfer_send_output(
+                id_,
+                dry_run=args['--dry-run'],
+                force=args['--force'])
 
 
 @command
@@ -518,7 +531,8 @@ def fetch_(args):
 
         fetch(job_id=args['--job-id'], force=args['--force'],
               replaceparent=args['--replaceparent'],
-              task=args['--task'])
+              task=args['--task'],
+              dry_run=args['--dry-run'])
 
 
 def help(args):
@@ -584,10 +598,11 @@ def inputs(args):
 
     db = get_database()
 
-    inputs = check_data_already_present(args['--job-id'], db)
+    for id_ in args['--job-id']:
+        inputs = check_data_already_present(id_, db)
 
-    for input_ in inputs:
-        print(input_)
+        for input_ in inputs:
+            print(input_)
 
 
 @command
@@ -852,7 +867,8 @@ def revalidate(args):
         db = get_database()
 
         if args['--job-id'] is not None:
-            validate_output(args['--job-id'], db, dry_run=args['--dry-run'])
+            for id_ in args['--job-id']:
+                validate_output(id_, db, dry_run=args['--dry-run'])
 
         else:
             for job in db.find_jobs(task=args['--task'],
@@ -874,8 +890,10 @@ def run(args):
 
     from jsa_proc.action.run import run_job
 
-    run_job(job_id=args['--job-id'], force=args['--force'],
-            task=args['--task'])
+    run_job(
+        job_id=args['--job-id'], force=args['--force'],
+        task=args['--task'],
+        dry_run=args['--dry-run'])
 
 
 @command

@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2015-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 hpx_task = re.compile('^hpx-')
 
 
-def run_job(job_id=None, db=None, force=False, task=None):
+def run_job(job_id=None, db=None, force=False, task=None, dry_run=False):
     """
     Run the JSA processing of the next job. This will select the highest
     priority job in state 'WAITING' with location 'JAC'.
@@ -76,7 +77,7 @@ def run_job(job_id=None, db=None, force=False, task=None):
         db = get_database()
 
     # Get next job if a job id is not specified
-    if not job_id:
+    if job_id is None:
         force = False
 
         logger.debug('Looking for a job to run')
@@ -91,7 +92,12 @@ def run_job(job_id=None, db=None, force=False, task=None):
             logger.warning('Did not find a job to run!')
             return
 
-    run_a_job(job_id, db=db, force=force)
+    for id_ in (job_id if isinstance(job_id, list) else (job_id,)):
+        if dry_run:
+            logger.info('DRY-RUN: would have run job %i', id_)
+
+        else:
+            run_a_job(id_, db=db, force=force)
 
 
 @ErrorDecorator
