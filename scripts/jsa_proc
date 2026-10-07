@@ -37,6 +37,7 @@ Usage:
     jsa_proc namecheck [-v | -q] file <file>
     jsa_proc namecheck [-v | -q] directory <directory>
     jsa_proc namecheck [-v | -q] output --task <task>... --outfile <file>
+    jsa_proc outputs [-v | -q] --task <task>...
     jsa_proc poll [-v | -q] [--dry-run] [--task <task>...]
     jsa_proc pollparents [-v | -q] [--dry-run] --task <task>...
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
@@ -643,6 +644,30 @@ def namecheck(args):
 
     else:
         raise CommandError('Did not recognise namecheck action')
+
+
+@command
+def outputs(args):
+    """
+    List the output files of the given tasks.
+    """
+
+    from jsa_proc.admin.directories import get_output_dir
+    db = get_database()
+
+    pattern = '%.fits'
+    states = JSAProcState.STATE_POST_RUN
+
+    jobs = db.find_jobs(task=args['--task'], state=states, outputs=pattern)
+    for job in jobs:
+        if job.outputs is None:
+            continue
+
+        output_dir = get_output_dir(job.id)
+
+        for file in job.outputs:
+            pathname = os.path.join(output_dir, file)
+            print(pathname)
 
 
 @command
