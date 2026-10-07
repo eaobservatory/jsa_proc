@@ -168,7 +168,10 @@
   {% if loop.first %}
   <td class="checkbox" rowspan="{{ loop.length if shown_rows is none or shown_rows > loop.length else shown_rows }}"> <input type="checkbox" value="{{checkbox[1]}}"
                                          name="{{checkbox[0]}}" /></td>
-  <td class="checkboxid" rowspan="{{ loop.length if shown_rows is none or shown_rows > loop.length else shown_rows }}"> <a href="{{ url_for('job_info', job_id=checkbox[1]) }}"> {{checkbox[1]}}</a> </td>
+  <td class="checkboxid" rowspan="{{ loop.length if shown_rows is none or shown_rows > loop.length else shown_rows }}">
+    <a href="{{ url_for('job_info', job_id=checkbox[1]) }}">{{ checkbox[1] }}</a>
+    <a class="copy_text" href="#" data-copy_text="{{ checkbox[1] }}">&loz;</a>
+  </td>
     {% elif shown_rows is not none and loop.index > shown_rows %}
       <td colspan="2">&nbsp;</td>
     {% endif %}

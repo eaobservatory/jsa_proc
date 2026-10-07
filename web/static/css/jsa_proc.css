@@ -20,6 +20,10 @@ a:link, a:visited {
     color: blue;
 }
 
+a.copy_text {
+    text-decoration: none;
+}
+
 span.greyedlink {
     opacity: 0.20;
     cursor: not-allowed;
