@@ -45,22 +45,35 @@ class CADCTap():
 
         self.obsids_found = {}
 
-    def obsids_by_pattern(self, pattern, with_productid=False):
+    def obsids_by_pattern(
+        self, pattern, with_productid=False, calibration_level=0):
         """Retrueve list of obsids matching a given pattern.
 
         The pattern should be in lower case.
         """
 
+        where = [
+            'Observation.collection = \'JCMT\'',
+            'lower(Observation.observationID) LIKE \'{0}\''.format(pattern),
+        ]
+
+        if calibration_level is None:
+            pass
+        elif isinstance(calibration_level, list):
+            where.append('Plane.calibrationLevel IN ({0})'.format(
+                ', '.join(('{0}'.format(x) for x in calibration_level))))
+        else:
+            where.append('Plane.calibrationLevel = {0}'.format(calibration_level))
+
         result = []
 
-        table = self.tap.query(
+        table = self.tap.query(' '.join((
             'SELECT lower(Observation.observationID), Plane.productID '
             'FROM caom2.Observation as Observation '
             'JOIN caom2.Plane as Plane ON Observation.obsID = Plane.obsID '
-            'WHERE ( Observation.collection = \'JCMT\' '
-            'AND lower(Observation.observationID) LIKE \'{0}\' '
-            'AND Plane.calibrationLevel = 0 '
-            ')'.format(pattern))
+            'WHERE (',
+            ' AND '.join(where),
+            ')')))
 
         if table is None:
             raise JSAProcError(

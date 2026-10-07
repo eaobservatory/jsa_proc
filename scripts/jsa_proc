@@ -41,7 +41,7 @@ Usage:
     jsa_proc pollparents [-v | -q] [--dry-run] --task <task>...
     jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
-    jsa_proc query [-v | -q] [--cookie] [--ams] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) <search>
+    jsa_proc query [-v | -q] [--cookie] [--ams] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) [--raw | --reduced] <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
     jsa_proc rawingest [-v | -q] [--dry-run] --poll --date-start <ut-date> [--date-end <ut-date>] [--quick] [--no-transfer-check] [--min-age <hours>]
     jsa_proc reset [-v | -q] [--dry-run] [--force] --task <task>... [--date-start <ut-date>] [--date-end <ut-date>] [--instrument <instrument>] [--state <state>]
@@ -95,6 +95,8 @@ Options:
     --notes                    Show notes.
     --cookie                   Use CADC log in session cookie.
     --ams                      Use AMS instead of Argus TAP service.
+    --raw                      Use calibration level 0 for CAOM-2 search.
+    --reduced                  Use calibration level 2, 3, 4 for CAOM-2 search.
 
 For more information about a particular command, please use:
 
@@ -749,7 +751,11 @@ def query(args):
         from jsa_proc.cadc.tap import CADCTap
         caom2 = CADCTap(ams=args['--ams'])
         for (obsid, planeid) in sorted(caom2.obsids_by_pattern(
-                search.lower(), with_productid=True)):
+                search.lower(), with_productid=True,
+                calibration_level=(
+                    0 if args['--raw']
+                    else ([2, 3, 4] if args['--reduced'] else None)
+                ))):
             print(obsid, planeid)
 
     elif args['caom2file']:
