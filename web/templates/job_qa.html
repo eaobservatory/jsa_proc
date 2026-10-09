@@ -1,15 +1,18 @@
 {% extends "layout.html" %}
-{% set scripts=['samp', 'samp_broadcast'] %}
+{% set scripts=['samp', 'samp_broadcast', 'copy_text'] %}
 {% from 'macros.html' import break_underscore, render_page_control %}
 {% block body %}
 
 {{ render_page_control(pagination, 'job', False) }}
 
-{% if info.task == 'jcmt-nightly' %}
-<h1> {{ info.task }} : {{obsinfo |map (attribute='utdate') | uniq | join(' ')}} : {{ title }} </h1>
-{% else %}
-<h1>  {{ info.task }} : {{ title }} </h1>
-{% endif %}
+<h1>
+    {{ info.task }}:
+    {% if info.task == 'jcmt-nightly' %}
+        {{ obsinfo | map (attribute='utdate') | uniq | join(' ') }}:
+    {% endif %}
+    {{ title }}
+    <a class="copy_text" href="#" data-copy_text="{{ info.id }}">&loz;</a>
+</h1>
 
 <div class="column-left">
   <div class="panel panel-small">
@@ -147,7 +150,10 @@
         {% if key == 'utdate' %}
         {% set starttime = o.get('obsid', '').split('_')[2].split('T')[1] %}
         {% set uttime = ':'.join([starttime[0:2].lstrip('0'), starttime[2:4], starttime[4:6]]) %}
-        <td> <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate':o.utdate }) }}">{{ o.utdate }}</a></td>
+        <td>
+          <a href="{{ url_for_omp('nightrep.pl', {'tel': 'JCMT', 'utdate':o.utdate }) }}">{{ o.utdate }}</a>
+          <a class="copy_text" href="#" data-copy_text="{{ o.utdate }}">&loz;</a>
+        </td>
         <td> {{uttime}} </td>
         {% elif key == 'obsid' or key == 'obsidss' or key=='scanmode' %}
         <td> {{ break_underscore(o.get(key, '')) }} </td>
