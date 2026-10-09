@@ -24,8 +24,8 @@ def scale_preview(filename, height=64):
     """Create a scaled version of a preview at the given vertical size."""
 
     filename_new = re.sub(
-        '_preview_\d+\.png',
-        '_preview_{0}.png'.format(height),
+        r'_preview_\d+\.png',
+        r'_preview_{0}.png'.format(height),
         filename)
 
     im = Image.open(filename)

@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.cadc.namecheck import check_file_name, _get_namecheck_pattern
+
+from .compat import TestCase
 
 
 class NamecheckTestCase(TestCase):

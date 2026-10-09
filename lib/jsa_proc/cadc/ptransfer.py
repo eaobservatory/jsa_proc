@@ -17,10 +17,6 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
 from datetime import datetime, timedelta
 import logging
 import os
@@ -35,6 +31,7 @@ from jsa_proc.cadc.etransfer import etransfer_check_config
 from jsa_proc.cadc.fetch import fetch_cadc_file_info, put_cadc_file
 from jsa_proc.cadc.namecheck import check_file_name
 from jsa_proc.config import get_config
+from jsa_proc.compat import ConfigParser
 from jsa_proc.error import CommandError, JSAProcError
 from jsa_proc.files import get_md5sum
 from jsa_proc.util import retry
@@ -142,7 +139,7 @@ def ptransfer_poll(stream=None, dry_run=False):
         # Write stamp file to allow automatic clean-up.
         stamp_file = os.path.join(proc_dir, 'ptransfer.ini')
 
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.add_section('ptransfer')
         config.set('ptransfer', 'pid', str(os.getpid()))
         config.set('ptransfer', 'start',
@@ -415,7 +412,7 @@ def ptransfer_clean_up(dry_run=False):
 
         # Check for and read the stamp file.
         stamp_file = os.path.join(proc_dir, 'ptransfer.ini')
-        config = SafeConfigParser()
+        config = ConfigParser()
         config_files_read = config.read(stamp_file)
         if not config_files_read:
             logger.debug('Directory %s has no stamp file', dir_)
@@ -526,7 +523,7 @@ def _sort_files(files):
     name, and use these to sort the files.
     """
 
-    pattern = re.compile('(\d{8})_(\d{5})')
+    pattern = re.compile(r'(\d{8})_(\d{5})')
 
     file_info = []
 

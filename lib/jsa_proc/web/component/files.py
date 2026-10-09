@@ -44,8 +44,8 @@ def make_output_file_list(db, job_id, preview_filter=None):
 
                 if preview_filter is None or any((f in i for f in preview_filter)):
                     caption = i
-                    caption = re.sub('^jcmt_', '', caption)
-                    caption = re.sub('_(preview_)?\d+\.png', '', caption)
+                    caption = re.sub(r'^jcmt_', '', caption)
+                    caption = re.sub(r'_(preview_)?\d+\.png', '', caption)
 
                     if '_256.png' in i:
                         previews256.append(PreviewInfo(url, caption))

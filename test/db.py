@@ -13,11 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.db.sqlite import JSAProcSQLite
 import os
 from datetime import datetime
+
+from .compat import TestCase
+
 schema = None
 
 

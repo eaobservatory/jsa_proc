@@ -21,10 +21,10 @@ from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.web.util import HTTPError, HTTPNotFound
 
 valid_preview_patterns = {
-    'png': re.compile('^[-+_a-zA-Z0-9]+\.png$'),
-    'pdf': re.compile('^[-+_a-zA-Z0-9]+\.pdf$'),
-    'txt': re.compile('^[-+_a-zA-Z0-9]+\.txt$'),
-    'fits': re.compile('^[-+_a-zA-Z0-9]+\.fits$'),
+    'png': re.compile(r'^[-+_a-zA-Z0-9]+\.png$'),
+    'pdf': re.compile(r'^[-+_a-zA-Z0-9]+\.pdf$'),
+    'txt': re.compile(r'^[-+_a-zA-Z0-9]+\.txt$'),
+    'fits': re.compile(r'^[-+_a-zA-Z0-9]+\.fits$'),
 }
 
 

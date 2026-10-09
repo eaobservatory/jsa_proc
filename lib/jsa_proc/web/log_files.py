@@ -22,13 +22,13 @@ from jsa_proc.admin.directories import get_log_dir
 from jsa_proc.web.util import url_for
 
 log_types = {
-    'Wesley': re.compile('wesley.*\.html'),
-    'ORAC-DR': re.compile('oracdr.*\.html'),
-    'PICARD': re.compile('picard.*\.html'),
-    'JSA Wrap DR': re.compile('jsawrapdr.*\.log'),
-    'Ingestion': re.compile('ingestion.*\.log'),
-    'Transfer': re.compile('transfer.*\.log'),
-    'Log Ingestion': re.compile('ingest_log.*\.log'),
+    'Wesley': re.compile(r'wesley.*\.html'),
+    'ORAC-DR': re.compile(r'oracdr.*\.html'),
+    'PICARD': re.compile(r'picard.*\.html'),
+    'JSA Wrap DR': re.compile(r'jsawrapdr.*\.log'),
+    'Ingestion': re.compile(r'ingestion.*\.log'),
+    'Transfer': re.compile(r'transfer.*\.log'),
+    'Log Ingestion': re.compile(r'ingest_log.*\.log'),
 }
 
 LogInfo = namedtuple('LogInfo', ['name', 'url', 'mtime'])

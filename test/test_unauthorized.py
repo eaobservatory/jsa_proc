@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.action.unauthorized import IdentifiedProblem, \
     investigate_unauthorized_errors
+
+from .compat import TestCase

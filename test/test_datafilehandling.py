@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.action.datafile_handling import valid_hds
 from jsa_proc.action.datafile_handling import assemble_input_data_for_job
 from jsa_proc.action.datafile_handling import get_output_files
 from jsa_proc.action.datafile_handling import filter_file_list
+
+from .compat import TestCase
 
 
 class ValidHDSTestCase(TestCase):
@@ -32,8 +32,8 @@ class FileHandingTest(TestCase):
                         '3.png', 'jcmts20140925_00018_850_reduced001_nit_000.fits']
 
         # Check it does something apppropriate
-        self.assertEqual(['3.png'],filter_file_list(testfilelist, '\.png$'))
+        self.assertEqual(['3.png'],filter_file_list(testfilelist, r'\.png$'))
 
         self.assertEqual(['2.fits',
                           'jcmts20140925_00018_850_reduced001_nit_000.fits'],
-                         filter_file_list(testfilelist, '\.fits$'))
+                         filter_file_list(testfilelist, r'\.fits$'))

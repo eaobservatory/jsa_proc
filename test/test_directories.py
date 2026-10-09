@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.admin.directories \
     import get_input_dir, get_output_dir, get_scratch_dir, get_log_dir
 from jsa_proc.error import JSAProcError
+
+from .compat import TestCase
 
 
 class DirectoryTestCase(TestCase):

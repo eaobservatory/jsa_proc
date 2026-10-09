@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,18 +18,22 @@ from __future__ import absolute_import, division
 
 import math
 from collections import namedtuple
+from urllib.parse import urljoin, urlencode
 
 import flask
 import functools
 import werkzeug.exceptions
 import werkzeug.routing
-import werkzeug.urls
 
 Pagination = namedtuple('Pagination', 'first prev next last up count')
 
 url_for = flask.url_for
 
-url_for_omp = werkzeug.urls.Href('https://omp.eao.hawaii.edu/cgi-bin')
+
+def url_for_omp(page, params):
+    return (
+        urljoin('https://omp.eao.hawaii.edu/cgi-bin/', page)
+        + '?' + urlencode(params))
 
 
 def url_for_omp_comment(obsid, instrument, obsnum, date_obs):

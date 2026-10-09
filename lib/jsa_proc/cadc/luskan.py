@@ -35,15 +35,15 @@ class Luskan():
 
     patterns = [
         # SCUBA-2 raw file.
-        (re.compile('^(s)[48][abcd]([0-9]{8}_[0-9]{5}_)[0-9]{4}(\.sdf)$'),
+        (re.compile(r'^(s)[48][abcd]([0-9]{8}_[0-9]{5}_)[0-9]{4}(\.sdf)$'),
          '{0}%{1}%{2}'),
 
         # ACSIS raw file.
-        (re.compile('^(a[0-9]{8}_[0-9]{5}_)[0-9]{2}_[0-9]{4}(\.sdf)$'),
+        (re.compile(r'^(a[0-9]{8}_[0-9]{5}_)[0-9]{2}_[0-9]{4}(\.sdf)$'),
          '{0}%{1}'),
 
         # RxH3 raw file.
-        (re.compile('^(rxh3-[0-9]{8}-)[0-9]{6}(\.fits)'),
+        (re.compile(r'^(rxh3-[0-9]{8}-)[0-9]{6}(\.fits)'),
          '{0}%{1}'),
     ]
 

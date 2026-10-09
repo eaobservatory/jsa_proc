@@ -14,11 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from unittest import TestCase
 
 import jsa_proc.config
 from jsa_proc.config import get_config
 from jsa_proc.error import JSAProcError
+
+from .compat import TestCase
 
 
 class ConfigTestCase(TestCase):

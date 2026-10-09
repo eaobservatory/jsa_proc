@@ -13,13 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
-
 import os
 
+from jsa_proc.compat import ConfigParser
 from jsa_proc.error import JSAProcError
 from jsa_proc.db.mysql import JSAProcMySQL
 
@@ -32,7 +28,7 @@ database = None
 def get_config():
     """Read the configuration file.
 
-    Returns a SafeConfigParser object.
+    Returns a ConfigParser object.
     """
 
     global config
@@ -44,7 +40,7 @@ def get_config():
         if not os.path.exists(file):
             raise JSAProcError('Config file {0} doesn\'t exist'.format(file))
 
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.read(file)
 
     return config

@@ -40,7 +40,7 @@ def add_types(query):
     is known to happen in the JSAProcDB class.
     """
 
-    query = re.sub('((MIN|MAX)\(([a-z]+\.)?datetime\)) AS ([a-z]+)',
+    query = re.sub(r'((MIN|MAX)\(([a-z]+\.)?datetime\)) AS ([a-z]+)',
                    '\\1 AS "\\2 [timestamp]"', query)
 
     return query
@@ -61,7 +61,7 @@ class FormatCursor(sqlite3.Cursor):
         marks (?).  This allows queries intended for MySQL to be used
         with SQLite.
         """
-        query = re.sub('\%s', '?', query)
+        query = re.sub(r'\%s', '?', query)
         query = add_types(query)
         return sqlite3.Cursor.execute(self, query, *args, **kwargs)
 
@@ -79,7 +79,7 @@ class AtCursor(sqlite3.Cursor):
         # now assume there are either 0 or 1 placeholders, in which case
         # we can simply replace the placeholder and use the single argument
         # if present.
-        query = re.sub('\@[a-z]+', '?', query)
+        query = re.sub(r'\@[a-z]+', '?', query)
         query = add_types(query)
         if args:
             args = (args[0].values(),)

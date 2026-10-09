@@ -15,7 +15,11 @@
 
 from __future__ import print_function, division, absolute_import
 
-from crypt import crypt
+try:
+    from crypt import crypt
+except ImportError:
+    # Try "legacy" package from PyPI.
+    from legacycrypt import crypt
 
 from omp.siteconfig import get_omp_siteconfig
 

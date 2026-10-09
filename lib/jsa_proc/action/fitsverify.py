@@ -24,7 +24,7 @@ from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
 
-fitsverify_output = re.compile(' (\d+) warnings and (\d+) errors')
+fitsverify_output = re.compile(r' (\d+) warnings and (\d+) errors')
 
 
 def valid_fits(filename, allow_warnings=True):

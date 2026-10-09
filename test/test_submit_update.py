@@ -58,10 +58,10 @@ class SubmitUpdateTest(DBTestCase):
             'task': 'task-coadd',
             'priority': 50,
             'parent_jobs': [job_1, job_2],
-            'filters': ['.*\.fits', '.*\.fits'],
+            'filters': [r'.*\.fits', r'.*\.fits'],
         }
 
-        with self.assertRaisesRegexp(JSAProcError, 'adding is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'adding is turned off'):
             add_upd_del_job(allow_add=False, **kwargs)
 
         job_id = add_upd_del_job(**kwargs)
@@ -90,7 +90,7 @@ class SubmitUpdateTest(DBTestCase):
         # Try updating child job: change parents.  State should be reset.
         kwargs['parent_jobs'] = [job_1, job_3]
 
-        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'updating is turned off'):
             add_upd_del_job(allow_upd=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -104,7 +104,7 @@ class SubmitUpdateTest(DBTestCase):
         # Test updating child job: change mode.
         kwargs['mode'] = 'project'
 
-        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'updating is turned off'):
             add_upd_del_job(allow_upd=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -122,7 +122,7 @@ class SubmitUpdateTest(DBTestCase):
         # Test updating child job: change parameters.
         kwargs['parameters'] = 'PARAM-C2'
 
-        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'updating is turned off'):
             add_upd_del_job(allow_upd=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -139,7 +139,7 @@ class SubmitUpdateTest(DBTestCase):
         kwargs['parent_jobs'] = []
         kwargs['filters'] = []
 
-        with self.assertRaisesRegexp(JSAProcError, 'deleting is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'deleting is turned off'):
             add_upd_del_job(allow_del=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -189,7 +189,7 @@ class SubmitUpdateTest(DBTestCase):
 
         # Insert into database and test.
 
-        with self.assertRaisesRegexp(JSAProcError, 'adding is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'adding is turned off'):
             add_upd_del_job(allow_add=False, **kwargs)
 
         job_id = add_upd_del_job(**kwargs)
@@ -218,7 +218,7 @@ class SubmitUpdateTest(DBTestCase):
         # Try updating regular job: change input files.
         kwargs['input_file_names'] = ['s4a_x.sdf', 's4a_z.sdf']
 
-        with self.assertRaisesRegexp(JSAProcError, 'updating is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'updating is turned off'):
             add_upd_del_job(allow_upd=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -231,7 +231,7 @@ class SubmitUpdateTest(DBTestCase):
         # Try deleting a regular job: set empty input file list.
         kwargs['input_file_names'] = []
 
-        with self.assertRaisesRegexp(JSAProcError, 'deleting is turned off'):
+        with self.assertRaisesRegex(JSAProcError, 'deleting is turned off'):
             add_upd_del_job(allow_del=False, **kwargs)
 
         job_id_upd = add_upd_del_job(**kwargs)
@@ -244,7 +244,7 @@ class SubmitUpdateTest(DBTestCase):
         # Try deleting a regular job in an active state: should need force.
         self.db.change_state(job_id, JSAProcState.TRANSFERRING, 'test')
 
-        with self.assertRaisesRegexp(JSAProcError, 'currently active'):
+        with self.assertRaisesRegex(JSAProcError, 'currently active'):
             add_upd_del_job(**kwargs)
 
         job = self.db.get_job(job_id)
@@ -259,7 +259,7 @@ class SubmitUpdateTest(DBTestCase):
         self.db.change_state(job_id, JSAProcState.RUNNING, 'test')
         kwargs['input_file_names'] = ['s4a_w.sdf']
 
-        with self.assertRaisesRegexp(JSAProcError, 'currently active'):
+        with self.assertRaisesRegex(JSAProcError, 'currently active'):
             add_upd_del_job(**kwargs)
 
         job = self.db.get_job(job_id)

@@ -2,13 +2,9 @@
 #
 # TODO: insert license statement.
 
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
-
 from omp.siteconfig import get_omp_siteconfig
 from omp.db.db import OMPDB
+from jsa_proc.compat import ConfigParser
 from jsa_proc.error import JSAProcError
 
 omp_database_access = {}
@@ -56,7 +52,7 @@ def get_enterdata_config():
 
     enterdata_config_file = '/jac_sw/etc/enterdata/enterdata.cfg'
 
-    config = SafeConfigParser()
+    config = ConfigParser()
 
     config.read(enterdata_config_file)
 

@@ -23,12 +23,13 @@ from jsa_proc.state import JSAProcState
 logger = logging.getLogger(__name__)
 
 valid_modes = ('obs', 'night', 'project', 'public')
-valid_file = re.compile('^[_a-z0-9]+\.sdf$')
+valid_file = re.compile(r'^[_a-z0-9]+\.sdf$')
 
 valid_preview_sizes = set([64, 256, 1024])
 valid_preview_file = re.compile(
-    '^(jcmt[hs][-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
-valid_product_file = re.compile('^jcmt[hs][-_a-z0-9]+\.fits$')
+    r'^(jcmt[hs][-_a-z0-9]+)_preview_([0-9]{2,4})\.png$')
+valid_product_file = re.compile(
+    r'^jcmt[hs][-_a-z0-9]+\.fits$')
 
 
 class ValidationError(Exception):

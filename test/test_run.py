@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.action.run import run_job
 from jsa_proc.action.run import run_a_job
+
+from .compat import TestCase

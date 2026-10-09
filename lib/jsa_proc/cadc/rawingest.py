@@ -29,7 +29,7 @@ from jsa_proc.util import restore_signals
 
 logger = logging.getLogger(__name__)
 
-obsid_date = re.compile('_(\d{8})T')
+obsid_date = re.compile(r'_(\d{8})T')
 
 
 def poll_raw_ingestion(

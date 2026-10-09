@@ -25,7 +25,7 @@ from jsa_proc.action.preview import scale_preview
 
 logger = logging.getLogger(__name__)
 
-preview_pattern = re.compile('_preview_\d+\.png$')
+preview_pattern = re.compile(r'_preview_\d+\.png$')
 
 
 def fetch_cadc_previews(output_files, output_directory):

@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.error import JSAProcError
 from jsa_proc.cadc.param import parse_cadc_param
+
+from .compat import TestCase
 
 
 class CADCParamTestCase(TestCase):

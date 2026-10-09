@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
-
 from jsa_proc.action.verify_png import valid_png
+
+from .compat import TestCase
 
 
 class ValidFITSTestCase(TestCase):
