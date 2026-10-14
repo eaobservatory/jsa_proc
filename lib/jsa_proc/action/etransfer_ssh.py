@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
+# Copyright (C) 2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +24,7 @@ from jsa_proc.config import get_config
 logger = logging.getLogger(__name__)
 
 
-def ssh_etransfer_send_output(job_id):
+def ssh_etransfer_send_output(job_id, dry_run=False):
     """SSH to the e-transfer host to request the e-transfer of
     a job's output files."""
 
@@ -31,10 +32,18 @@ def ssh_etransfer_send_output(job_id):
 
     logger.debug('Attempting e-transfer of job %i output', job_id)
 
-    subprocess.check_call([
+    command = [
         '/usr/bin/ssh', '-x',  '-i',
         config.get('etransfer', 'key'),
-        '{0}@{1}'.format(config.get('etransfer', 'user'),
-                         config.get('etransfer', 'machine')),
-        str(job_id)],
-        shell=False)
+        '{0}@{1}'.format(
+            config.get('etransfer', 'user'),
+            config.get('etransfer', 'machine')),
+        str(job_id)]
+
+    if dry_run:
+        logger.info(
+            'DRY-RUN: would have run command: %s',
+            ' '.join(command))
+
+    else:
+        subprocess.check_call(command, shell=False)

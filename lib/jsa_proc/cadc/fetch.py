@@ -134,7 +134,7 @@ def fetch_cadc_file_info(filename, cookies=None):
         raise JSAProcError('Error fetching CADC file info: ' + str(e))
 
 
-def check_cadc_files(files):
+def check_cadc_files(files, cookies=None):
     """Check whether the given files are at CADC.
 
     Returns a boolean list of the same length as the input list,
@@ -145,7 +145,8 @@ def check_cadc_files(files):
     result = []
 
     for filename in files:
-        result.append(fetch_cadc_file_info(filename) is not None)
+        result.append(
+            fetch_cadc_file_info(filename, cookies=cookies) is not None)
 
     return result
 

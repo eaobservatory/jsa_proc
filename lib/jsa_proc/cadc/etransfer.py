@@ -42,7 +42,7 @@ class ETransferError(Exception):
     pass
 
 
-def etransfer_poll_output(dry_run):
+def etransfer_poll_output(cookies=None, dry_run=False):
     """High level polling function to use from scripts."""
 
     logger.debug('Preparing to poll the e-transfer system for job output')
@@ -107,7 +107,8 @@ def etransfer_poll_output(dry_run):
             logger.debug('Checking if all files are at CADC')
             lost = []
             for info in file_info:
-                cadc_file_info = fetch_cadc_file_info(info.filename)
+                cadc_file_info = fetch_cadc_file_info(
+                    info.filename, cookies=cookies)
 
                 if cadc_file_info is None:
                     logger.error('Job %i file %s gone from e-transfer '
@@ -146,7 +147,7 @@ def etransfer_poll_output(dry_run):
         raise CommandError('Errors were encountered polling e-transfer')
 
 
-def etransfer_send_output(job_id, dry_run=False, force=False):
+def etransfer_send_output(job_id, cookies=None, dry_run=False, force=False):
     """High level e-transfer function for use from scripts.
 
     This function makes some basic checks and then launches
@@ -177,13 +178,15 @@ def etransfer_send_output(job_id, dry_run=False, force=False):
             logger.error(message)
             raise CommandError(message)
 
-    _etransfer_send(job_id, dry_run=dry_run, db=db, force=force)
+    _etransfer_send(
+        job_id, db=db, cookies=cookies,
+        dry_run=dry_run, force=force)
 
     logger.debug('Done adding output for job {0} to e-transfer'.format(job_id))
 
 
 @ErrorDecorator
-def _etransfer_send(job_id, dry_run, db, force):
+def _etransfer_send(job_id, db, cookies=None, dry_run=False, force=False):
     """Private function to copy job output into the e-transfer
     directories.
 
@@ -235,7 +238,7 @@ def _etransfer_send(job_id, dry_run, db, force):
 
     for info in file_info:
         file = info.filename
-        cadc_file_info = fetch_cadc_file_info(file)
+        cadc_file_info = fetch_cadc_file_info(file, cookies=cookies)
 
         if cadc_file_info is not None:
             # We need to check whether the file is not, in fact, different
@@ -281,7 +284,8 @@ def _etransfer_send(job_id, dry_run, db, force):
             state_prev=(None if force else JSAProcState.PROCESSED))
 
 
-def etransfer_query_output(job_id, assume_yes=False, dry_run=False):
+def etransfer_query_output(
+        job_id, cookies=None, assume_yes=False, dry_run=False):
     """Investigate the e-transfer status of the output of a job."""
 
     db = get_database()
@@ -297,7 +301,7 @@ def etransfer_query_output(job_id, assume_yes=False, dry_run=False):
 
     for file in zip(files,
                     etransfer_file_status(files),
-                    check_cadc_files(files)):
+                    check_cadc_files(files, cookies=cookies)):
         (filename, etransfer_status, ad_status) = file
 
         if etransfer_status is None:
@@ -328,7 +332,8 @@ def etransfer_query_output(job_id, assume_yes=False, dry_run=False):
                 # removed the files from the e-transfer directories.
                 _etransfer_clear_cache()
 
-                etransfer_send_output(job_id, dry_run=dry_run, force=True)
+                etransfer_send_output(
+                    job_id, cookies=cookies, dry_run=dry_run, force=True)
 
 
 def etransfer_file_status(files):

@@ -28,8 +28,8 @@ Usage:
     jsa_proc minoc [-v | -q] [--cookie] compare <file>...
     jsa_proc minoc [-v | -q] [--cookie] get [--parents] <file>...
     jsa_proc minoc [-v | -q] [--cookie] put <file>...
-    jsa_proc etransfer [-v | -q] [--dry-run] --poll
-    jsa_proc etransfer [-v | -q] [--dry-run] (--query [-y] | [--force]) --job-id <id>...
+    jsa_proc etransfer [-v | -q] [--dry-run] [--cookie] --poll
+    jsa_proc etransfer [-v | -q] [--dry-run] [--cookie] (--query [-y] | [--force]) --job-id <id>...
     jsa_proc fetch [-v | -q] [--dry-run] [--force] [--cookie] ([--replaceparent] | output [--location <location>]) [--job-id <id>]... [--task <task>...]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>...
     jsa_proc ingest [-v | -q] [--dry-run] [--count <number>] --task <task>... [--location <location>]
@@ -51,7 +51,7 @@ Usage:
     jsa_proc run [-v | -q] [--dry-run] [--job-id <id>...] [--force] [--task <task>...]
     jsa_proc search [-v | -q] log [--name <pattern>] [--task <task>...] [--state <state>] [--project <project>] [--after-context <lines>] [--notes] <search>
     jsa_proc search [-v | -q] (message | obsid | output) [--task <task>...] [--state <state>] <search>
-    jsa_proc transfer [-v | -q] [--dry-run] [--count <number>] [--task <task>...]
+    jsa_proc transfer [-v | -q] [--dry-run] [--cookie] [--count <number>] [--task <task>...]
     jsa_proc unauthorized [-v | -q] [-y] [--check-at-cadc]
     jsa_proc --help [<helptopic>]
 
@@ -489,12 +489,14 @@ def etransfer(args):
 
     if args['--poll']:
         etransfer_poll_output(
+            cookies=cookies,
             dry_run=args['--dry-run'])
 
     elif args['--query']:
         for id_ in args['--job-id']:
             etransfer_query_output(
                 id_,
+                cookies=cookies,
                 assume_yes=args['--assumeyes'],
                 dry_run=args['--dry-run'])
 
@@ -502,6 +504,7 @@ def etransfer(args):
         for id_ in args['--job-id']:
             etransfer_send_output(
                 id_,
+                cookies=cookies,
                 dry_run=args['--dry-run'],
                 force=args['--force'])
 
@@ -1010,7 +1013,8 @@ def transfer(args):
 
     # Poll the JAC jobs.
     status = transfer_poll(
-        db, count=args['--count'], task=args['--task'], dry_run=args['--dry-run'])
+        db, count=args['--count'], task=args['--task'], cookies=cookies,
+        dry_run=args['--dry-run'])
 
     # Return a status of 1 if status is not True.
     if not status:

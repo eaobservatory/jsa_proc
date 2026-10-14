@@ -1,5 +1,5 @@
 # Copyright (C) 2014 Science and Technology Facilities Council.
-# Copyright (C) 2016 East Asian Observatory.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from jsa_proc.util import restore_signals
 logger = logging.getLogger(__name__)
 
 
-def transfer_poll(db, count=None, task=None, dry_run=False):
+def transfer_poll(db, count=None, task=None, cookies=None, dry_run=False):
     # Get full list of tasks.
     task_info = db.get_task_info()
 
@@ -155,13 +155,13 @@ def transfer_poll(db, count=None, task=None, dry_run=False):
                     if etransfer_needs_ssh:
                         logger.debug('E-transferring output '
                                      'of job %i via SSH', job.id)
-                        if not dry_run:
-                            ssh_etransfer_send_output(job.id)
+                        ssh_etransfer_send_output(job.id, dry_run=dry_run)
+
                     else:
                         logger.debug('E-transferring output '
                                      'of job %i directly', job.id)
-                        if not dry_run:
-                            etransfer_send_output(job.id)
+                        etransfer_send_output(
+                            job.id, cookies=cookies, dry_run=dry_run)
 
             n += 1
 
