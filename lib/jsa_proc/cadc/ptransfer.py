@@ -1,5 +1,5 @@
 # Copyright (C) 2015 Science and Technology Facilities Council.
-# Copyright (C) 2016 East Asian Observatory.
+# Copyright (C) 2016-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ class PTransferFailure(Exception):
     pass
 
 
-def ptransfer_poll(stream=None, dry_run=False):
+def ptransfer_poll(stream=None, cookies=None, dry_run=False):
     """Attempt to put files into the archive at CADC.
 
     This function is controlled by the configuration file
@@ -183,7 +183,8 @@ def ptransfer_poll(stream=None, dry_run=False):
             # Check the file.
             md5sum = get_md5sum(proc_file)
             ad_stream = ptransfer_check(
-                proc_sub_dir, file.name, file.stream, md5sum)
+                proc_sub_dir, file.name, file.stream, md5sum,
+                cookies=cookies)
 
             if dry_run:
                 logger.info('Accepted file %s (%s) (DRY RUN)',
@@ -191,11 +192,14 @@ def ptransfer_poll(stream=None, dry_run=False):
 
             else:
                 # Transfer the file.
-                ptransfer_put(proc_sub_dir, file.name, ad_stream, md5sum)
+                ptransfer_put(
+                    proc_sub_dir, file.name, ad_stream, md5sum,
+                    cookies=cookies)
 
                 # Check it was transferred correctly.
                 try:
-                    cadc_file_info = fetch_cadc_file_info(file.name)
+                    cadc_file_info = fetch_cadc_file_info(
+                        file.name, cookies=cookies)
                 except JSAProcError:
                     raise PTransferFailure('Unable to check CADC file info')
 
@@ -270,7 +274,7 @@ def ptransfer_poll(stream=None, dry_run=False):
                            ' ({0} error(s))'.format(n_err))
 
 
-def ptransfer_check(proc_dir, filename, stream, md5sum):
+def ptransfer_check(proc_dir, filename, stream, md5sum, cookies=None):
     """Check if a file is suitable for transfer to CADC.
 
     Given the directory, file name and stream ("new" or "replace"), determine
@@ -338,7 +342,7 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
 
     # Check correct new/replacement stream.
     try:
-        cadc_file_info = fetch_cadc_file_info(filename)
+        cadc_file_info = fetch_cadc_file_info(filename, cookies=cookies)
     except JSAProcError:
         raise PTransferFailure('Unable to check CADC file info')
 
@@ -358,7 +362,7 @@ def ptransfer_check(proc_dir, filename, stream, md5sum):
     return ad_stream
 
 
-def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
+def ptransfer_put(proc_dir, filename, ad_stream, md5sum, cookies=None):
     """Attempt to put the given file into the archive at CADC.
 
     Retries settings are given by the configuration file entries
@@ -372,7 +376,7 @@ def ptransfer_put(proc_dir, filename, ad_stream, md5sum):
 
     try:
         return retry(
-            (lambda: put_cadc_file(filename, proc_dir)),
+            (lambda: put_cadc_file(filename, proc_dir, cookies=cookies)),
             max_retries=max_retries, retry_delay=retry_delay,
             log_message='Failed to put file {0}'.format(filename))
 

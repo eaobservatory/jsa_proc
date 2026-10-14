@@ -40,7 +40,7 @@ Usage:
     jsa_proc outputs [-v | -q] --task <task>...
     jsa_proc poll [-v | -q] [--dry-run] [--task <task>...]
     jsa_proc pollparents [-v | -q] [--dry-run] --task <task>...
-    jsa_proc ptransfer [-v | -q] [--dry-run] [--stream <stream>]
+    jsa_proc ptransfer [-v | -q] [--dry-run] [--cookie] [--stream <stream>]
     jsa_proc ptransfer [-v | -q] [--dry-run] [--clean]
     jsa_proc query [-v | -q] [--cookie] [--ams] (jcmtinfo | caom2 | caom2file | common | ompstatus | minoc | luskan) [--raw | --reduced] <search>
     jsa_proc rawingest [-v | -q] [--dry-run] --obsid <obsid>
@@ -754,7 +754,9 @@ def ptransfer(args):
     if args['--clean']:
         ptransfer_clean_up(dry_run=args['--dry-run'])
     else:
-        ptransfer_poll(stream=args['--stream'], dry_run=args['--dry-run'])
+        ptransfer_poll(
+            stream=args['--stream'], cookies=cookies,
+            dry_run=args['--dry-run'])
 
 
 @command
