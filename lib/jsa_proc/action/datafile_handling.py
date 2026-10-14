@@ -171,7 +171,7 @@ def setup_input_directory(job_id):
 
 
 def assemble_parent_data_for_job(
-        job_id, parent_job_id, parent_files, force_new=False):
+        job_id, parent_job_id, parent_files, force_new=False, cookies=None):
     """
     This routine ensures that all the input data from parent jobs is
     available for running a job.
@@ -215,7 +215,7 @@ def assemble_parent_data_for_job(
                 files_list.append(filepath)
 
             else:
-                filepath = fetch_cadc_file(f, input_directory)
+                filepath = fetch_cadc_file(f, input_directory, cookies=cookies)
                 valid = valid_hds(filepath)
                 # If downloaded file is not valid:
                 if not valid:
@@ -228,7 +228,7 @@ def assemble_parent_data_for_job(
     return files_list
 
 
-def assemble_input_data_for_job(job_id, input_file_list):
+def assemble_input_data_for_job(job_id, input_file_list, cookies=None):
     """
     This routine ensure that all the input data in the input table is
     available for running a job.
@@ -270,12 +270,14 @@ def assemble_input_data_for_job(job_id, input_file_list):
                 files_list.append(filepath)
             else:
                 try:
-                    filepath = fetch_cadc_file(f, input_directory)
+                    filepath = fetch_cadc_file(
+                        f, input_directory, cookies=cookies)
                 except JSAProcNotFound:
                     if f.endswith('.gz'):
                         raise
                     # Try again with .gz suffix?
-                    filepath = fetch_cadc_file('{}.gz'.format(f), input_directory)
+                    filepath = fetch_cadc_file(
+                        '{}.gz'.format(f), input_directory, cookies=cookies)
                 valid = valid_hds(filepath)
 
                 if not valid:

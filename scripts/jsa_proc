@@ -30,7 +30,7 @@ Usage:
     jsa_proc minoc [-v | -q] [--cookie] put <file>...
     jsa_proc etransfer [-v | -q] [--dry-run] --poll
     jsa_proc etransfer [-v | -q] [--dry-run] (--query [-y] | [--force]) --job-id <id>...
-    jsa_proc fetch [-v | -q] [--dry-run] [--force] ([--replaceparent] | output [--location <location>]) [--job-id <id>]... [--task <task>...]
+    jsa_proc fetch [-v | -q] [--dry-run] [--force] [--cookie] ([--replaceparent] | output [--location <location>]) [--job-id <id>]... [--task <task>...]
     jsa_proc ingest [-v | -q] [--dry-run] [--force] --job-id <id>...
     jsa_proc ingest [-v | -q] [--dry-run] [--count <number>] --task <task>... [--location <location>]
     jsa_proc inputs [-v | -q] --job-id <id>...
@@ -527,15 +527,21 @@ def fetch_(args):
     from jsa_proc.action.fetch import fetch, fetch_output
 
     if args['output']:
-        fetch_output(job_id=args['--job-id'],
-                     location=args['--location'], task=args['--task'],
-                     dry_run=args['--dry-run'], force=args['--force'])
-    else:
+        fetch_output(
+            job_id=args['--job-id'],
+            location=args['--location'], task=args['--task'],
+            force=args['--force'],
+            cookies=cookies,
+            dry_run=args['--dry-run'])
 
-        fetch(job_id=args['--job-id'], force=args['--force'],
-              replaceparent=args['--replaceparent'],
-              task=args['--task'],
-              dry_run=args['--dry-run'])
+    else:
+        fetch(
+            job_id=args['--job-id'],
+            replaceparent=args['--replaceparent'],
+            task=args['--task'],
+            force=args['--force'],
+            cookies=cookies,
+            dry_run=args['--dry-run'])
 
 
 def help(args):

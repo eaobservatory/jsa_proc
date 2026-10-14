@@ -33,7 +33,8 @@ logger = logging.getLogger(__name__)
 
 
 def fetch(
-        job_id=None, db=None, force=False, replaceparent=False, task=None,
+        job_id=None, db=None, replaceparent=False, task=None, force=False,
+        cookies=None,
         dry_run=False):
     """
     Assemble the files required to process a job.
@@ -84,11 +85,14 @@ def fetch(
             logger.info('DRY-RUN: would have fetched job %i', id_)
 
         else:
-            fetch_a_job(id_, db=db, force=force, replaceparent=replaceparent)
+            fetch_a_job(
+                id_, db=db, force=force, replaceparent=replaceparent,
+                cookies=cookies)
 
 
 @ErrorDecorator
-def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
+def fetch_a_job(
+        job_id, db=None, force=False, replaceparent=False, cookies=None):
     """
     Assemble the files required to process a job.
 
@@ -129,8 +133,8 @@ def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
     # Assemble any files listed in the input files tree
     try:
         input_files = db.get_input_files(job_id)
-        input_files_with_paths = assemble_input_data_for_job(job_id,
-                                                             input_files)
+        input_files_with_paths = assemble_input_data_for_job(
+            job_id, input_files, cookies=cookies)
     except NoRowsError:
         input_files_with_paths = []
 
@@ -148,7 +152,8 @@ def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
             outputs = db.get_output_files(parent.id)
             parent_files = filter_file_list(outputs, parent.filter)
             parent_files_with_paths += assemble_parent_data_for_job(
-                job_id, parent.id, parent_files, force_new=replaceparent)
+                job_id, parent.id, parent_files, force_new=replaceparent,
+                cookies=cookies)
     except NoRowsError:
         parent_files_with_paths = []
 
@@ -167,8 +172,10 @@ def fetch_a_job(job_id, db=None, force=False, replaceparent=False):
     return job_id
 
 
-def fetch_output(job_id=None, location=None, task=None,
-                 dry_run=False, force=False):
+def fetch_output(
+        job_id=None, location=None, task=None, force=False,
+        cookies=None,
+        dry_run=False):
     """Output fetch function for use from scripts."""
 
     logger.debug('Connecting to JSA processing database')
@@ -192,11 +199,12 @@ def fetch_output(job_id=None, location=None, task=None,
             return
 
     for id_ in (job_id if isinstance(job_id, list) else (job_id,)):
-        _fetch_job_output(id_, db=db, force=force, dry_run=dry_run)
+        _fetch_job_output(
+            id_, db=db, force=force, cookies=cookies, dry_run=dry_run)
 
 
 @ErrorDecorator
-def _fetch_job_output(job_id, db, force=False, dry_run=False):
+def _fetch_job_output(job_id, db, force=False, cookies=None, dry_run=False):
     """Private function to perform retrieval of job output files from CADC.
     """
 
@@ -261,7 +269,7 @@ def _fetch_job_output(job_id, db, force=False, dry_run=False):
                     os.makedirs(output_dir)
 
                 logger.info('Fetching file %s', filename)
-                fetch_cadc_file(filename, output_dir)
+                fetch_cadc_file(filename, output_dir, cookies=cookies)
 
                 if file.md5 is None:
                     logger.warning('MD5 sum missing: %s', filename)
