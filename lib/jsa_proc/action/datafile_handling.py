@@ -33,6 +33,7 @@ from jsa_proc.error import JSAProcError, JSAProcNotFound, \
 from jsa_proc.config import get_config, get_database
 from jsa_proc.files import get_md5sum, get_size, get_size_by_suffix
 from jsa_proc.state import JSAProcState
+from jsa_proc.util import retry
 
 """
 Routines for handling input and output files when running jobs.
@@ -200,8 +201,8 @@ def assemble_parent_data_for_job(
         filepath = is_file_in_a_dir(f, input_directory)
         if filepath and not force_new:
             files_list.append(filepath)
-        else:
 
+        else:
             # Then check if file is in parent output directory, copy
             # it in if so.
             logger.debug('Parent file: %s', f)
@@ -215,7 +216,11 @@ def assemble_parent_data_for_job(
                 files_list.append(filepath)
 
             else:
-                filepath = fetch_cadc_file(f, input_directory, cookies=cookies)
+                filepath = retry(
+                    (lambda: fetch_cadc_file(
+                        f, input_directory, cookies=cookies)),
+                    raise_=JSAProcNotFound)
+
                 valid = valid_hds(filepath)
                 # If downloaded file is not valid:
                 if not valid:
@@ -225,6 +230,7 @@ def assemble_parent_data_for_job(
                     invalid_file = os.path.join(invalid_dir,
                                                 os.path.split(filepath)[1])
                     shutil.move(filepath, invalid_file)
+
     return files_list
 
 
@@ -270,18 +276,25 @@ def assemble_input_data_for_job(job_id, input_file_list, cookies=None):
                 files_list.append(filepath)
             else:
                 try:
-                    filepath = fetch_cadc_file(
-                        f, input_directory, cookies=cookies)
+                    filepath = retry(
+                        (lambda: fetch_cadc_file(
+                            f, input_directory,
+                            cookies=cookies)),
+                        raise_=JSAProcNotFound)
+
                 except JSAProcNotFound:
                     if f.endswith('.gz'):
                         raise
+
                     # Try again with .gz suffix?
-                    filepath = fetch_cadc_file(
-                        '{}.gz'.format(f), input_directory, cookies=cookies)
+                    filepath = retry(
+                        (lambda: fetch_cadc_file(
+                            '{}.gz'.format(f), input_directory,
+                            cookies=cookies)),
+                        raise_=JSAProcNotFound)
+
                 valid = valid_hds(filepath)
-
                 if not valid:
-
                     # Move invalid file to different directory and raise an
                     # error.
                     invalid_dir = setup_invalid_dir(input_directory)
@@ -291,6 +304,7 @@ def assemble_input_data_for_job(job_id, input_file_list, cookies=None):
                     raise JSAProcError(
                         'Downloaded file %s fails hds validation'
                         ' Moved to %s' % (filepath, invalid_file))
+
                 else:
                     files_list.append(filepath)
 
