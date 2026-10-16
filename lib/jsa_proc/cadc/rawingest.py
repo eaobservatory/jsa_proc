@@ -1,4 +1,5 @@
 # Copyright (C) 2015 Science and Technology Facilities Council.
+# Copyright (C) 2015-2026 East Asian Observatory.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +36,7 @@ obsid_date = re.compile(r'_(\d{8})T')
 def poll_raw_ingestion(
         date_start, date_end, min_age_hours,
         quick=False, no_transfer_check=False,
-        dry_run=False):
+        cookies=None, dry_run=False):
     ignore_instruments = [x.strip() for x in get_config().get(
         'rawingest', 'ignore_instruments').split(',')]
 
@@ -57,7 +58,8 @@ def poll_raw_ingestion(
 
     n_ok = n_err = 0
     for obsid in obsids:
-        if _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
+        if _ingest_raw_observation(
+                obsid, db=db, cookies=cookies, dry_run=dry_run):
             n_ok += 1
         else:
             n_err += 1
@@ -68,7 +70,7 @@ def poll_raw_ingestion(
         raise CommandError('Errors encountered during ingestion')
 
 
-def ingest_raw_observation(obsid, dry_run=False):
+def ingest_raw_observation(obsid, cookies=None, dry_run=False):
     """Perform raw ingestion of an observation.
 
     This function connects to Sybase and then performs the raw
@@ -85,11 +87,12 @@ def ingest_raw_observation(obsid, dry_run=False):
     if info is None:
         raise CommandError('Observation {0} does not exist'.format(obsid))
 
-    if not _ingest_raw_observation(obsid, db=db, dry_run=dry_run):
+    if not _ingest_raw_observation(
+            obsid, db=db, cookies=cookies, dry_run=dry_run):
         raise CommandError("Ingestion failed")
 
 
-def _ingest_raw_observation(obsid, db, dry_run=False):
+def _ingest_raw_observation(obsid, db, cookies=None, dry_run=False):
     """Perform raw ingestion of an observation.
 
     This internal function requires an OMP database object with write
@@ -138,6 +141,11 @@ def _ingest_raw_observation(obsid, db, dry_run=False):
         '--obsid', obsid,
         '--verbose',
     ]
+
+    if cookies is not None:
+        # Avoid passing the cookie itself on the command line -- jsaraw
+        # will have to log in again.
+        command.append('--cookie')
 
     try:
         if not dry_run:
