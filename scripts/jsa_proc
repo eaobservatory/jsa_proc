@@ -785,7 +785,7 @@ def query(args):
 
     if args['caom2']:
         from jsa_proc.cadc.tap import CADCTap
-        caom2 = CADCTap(ams=args['--ams'])
+        caom2 = CADCTap(ams=args['--ams'], cookies=cookies)
         for (obsid, planeid) in sorted(caom2.obsids_by_pattern(
                 search.lower(), with_productid=True,
                 calibration_level=(
@@ -796,7 +796,7 @@ def query(args):
 
     elif args['caom2file']:
         from jsa_proc.cadc.tap import CADCTap
-        caom2 = CADCTap(ams=args['--ams'])
+        caom2 = CADCTap(ams=args['--ams'], cookies=cookies)
         print(repr(caom2.check_files([search])))
 
     elif args['jcmtinfo']:

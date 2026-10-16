@@ -37,11 +37,11 @@ class CADCTap():
          '{0}%{1}%'),
     ]
 
-    def __init__(self, ams=False):
+    def __init__(self, ams=False, **kwargs):
         if ams:
-            self.tap = tapclient_ams()
+            self.tap = tapclient_ams(**kwargs)
         else:
-            self.tap = tapclient()
+            self.tap = tapclient(**kwargs)
 
         self.obsids_found = {}
 
