@@ -27,10 +27,11 @@ from requests.exceptions import HTTPError, RequestException
 import os.path
 
 from tools4caom2.artifact_uri import make_artifact_uri
+from tools4caom2.resources import resources
 
 from jsa_proc.error import JSAProcError, JSAProcNotFound
 
-jcmt_data_url = 'https://ws-cadc.canfar.net/minoc'
+jcmt_data_url = resources['minoc']
 
 proxy_certificate = os.path.expanduser('~/.ssl/cadcproxy.pem')
 
@@ -189,7 +190,7 @@ def _prepare_cadc_request(filename, cookies=None):
     """
 
     # Data path.
-    url = '{}/files/{}'.format(
+    url = '{}/{}'.format(
         jcmt_data_url,
         make_artifact_uri(filename, archive='JCMT'))
     kwargs = {}
