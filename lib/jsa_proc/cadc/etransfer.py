@@ -247,7 +247,7 @@ def _etransfer_send(job_id, db, cookies=None, dry_run=False, force=False):
             cadc_file_md5 = cadc_file_info['content-md5']
 
             if info.md5 == cadc_file_md5:
-                logger.info('File %s in unchanged, skipping replacement',
+                logger.info('File %s is unchanged, skipping replacement',
                             file)
                 continue
 
