@@ -16,8 +16,8 @@
 from __future__ import absolute_import, division
 
 import datetime
-from flask import Flask, flash, request, Response, render_template, \
-    send_file, session
+from flask import Flask, flash, g as flask_g, request, Response, \
+    render_template, send_file, session
 from functools import wraps
 import os.path
 
@@ -90,6 +90,18 @@ def create_web_app(auto_reload_templates=False):
                                         redirect=request.referrer),
                         401, {'WWW-Authenticate': loginstring})
 
+    @app.before_request
+    def identify_request_user():
+        """Record the request's identity and authentication method."""
+        remote_user = request.environ.get('REMOTE_USER')
+        if remote_user:
+            flask_g.authenticated_username = remote_user
+            flask_g.authentication_external = True
+        else:
+            auth = request.authorization
+            flask_g.authenticated_username = auth.username if auth else None
+            flask_g.authentication_external = False
+
     def requires_auth(f):
         """
         A decorator to wrap functions that require authorization.
@@ -97,9 +109,11 @@ def create_web_app(auto_reload_templates=False):
 
         @wraps(f)
         def decorated(*args, **kwargs):
-            auth = request.authorization
-            if not auth or not check_auth(auth.password):
-                return authenticate()
+            if not flask_g.authentication_external:
+                auth = request.authorization
+                if not auth or not check_auth(auth.password):
+                    return authenticate()
+
             return f(*args, **kwargs)
 
         return decorated
@@ -226,7 +240,7 @@ def create_web_app(auto_reload_templates=False):
     @requires_auth
     def job_add_note(job_id):
         message = request.form['message']
-        username = request.authorization['username']
+        username = flask_g.authenticated_username
 
         try:
             # Add the note.
@@ -254,7 +268,7 @@ def create_web_app(auto_reload_templates=False):
 
         elif is_confirm:
             prepare_job_reset(
-                db, job, request.authorization['username'])
+                db, job, flask_g.authenticated_username)
 
             flash('Job %i has been reset.' % job.id)
 
@@ -275,7 +289,7 @@ def create_web_app(auto_reload_templates=False):
 
         elif is_confirm:
             prepare_job_delete(
-                db, job, request.authorization['username'])
+                db, job, flask_g.authenticated_username)
 
             flash('Job %i has been deleted.' % job.id)
 
@@ -291,7 +305,7 @@ def create_web_app(auto_reload_templates=False):
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
         url = request.form['url']
-        username = request.authorization['username']
+        username = flask_g.authenticated_username
 
         try:
             # Change the state.
@@ -321,7 +335,7 @@ def create_web_app(auto_reload_templates=False):
         qa_state = request.form['qa_state']
         message = request.form['message']
         job_ids = request.form.getlist('job_id')
-        username = request.authorization['username']
+        username = flask_g.authenticated_username
 
         try:
             # Change the state.
@@ -496,6 +510,8 @@ def create_web_app(auto_reload_templates=False):
             'url_for_omp': url_for_omp,
             'url_for_omp_comment': url_for_omp_comment,
             'database_name': database_name,
+            'authenticated_username': flask_g.authenticated_username,
+            'authentication_external': flask_g.authentication_external,
         }
 
     # Return the Application.

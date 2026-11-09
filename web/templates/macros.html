@@ -15,11 +15,14 @@
             </li>
         {% endfor %}
             <li class="login" >
-              {% if request.authorization and 'username' in request.authorization %}
-              <a href={{ url_for('logout') }} > {{ request.authorization.username }} (logout) </a>
-              {% else %}
-              <a href= {{ url_for('login') }}>login </a>
-              {% endif %}
+                {% if authenticated_username %}
+                    {{ authenticated_username }}
+                    {% if not authentication_external %}
+                        <a href="{{ url_for('logout') }}">(log out)</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('login') }}">log in</a>
+                {% endif %}
             </li>
     </ul>
 {% endmacro %}
