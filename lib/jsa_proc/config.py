@@ -24,6 +24,8 @@ config = None
 
 database = None
 
+home_directory = None
+
 
 def get_config():
     """Read the configuration file.
@@ -69,5 +71,21 @@ def get_home():
     an environment variable $JSA_PROC_DIR exists.
     """
 
+    global home_directory
+
+    if home_directory is not None:
+        return home_directory
+
     env = os.environ
     return env.get('JSA_PROC_DIR', os.getcwd())
+
+
+def set_home(directory):
+    """Set the processing system home directory.
+
+    Changes the value returned by calls to `get_home`.
+    """
+
+    global home_directory
+
+    home_directory = directory
