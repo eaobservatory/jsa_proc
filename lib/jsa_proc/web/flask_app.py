@@ -207,7 +207,7 @@ def create_web_app(auto_reload_templates=False):
     def error_summary():
         return prepare_error_summary(
             db,
-            redirect_url=request.full_path,
+            redirect_url=(request.script_root + request.full_path),
             filtering=request.args.get('filtering', None),
             chosentask=request.args.get('chosentask', None),
             extrafilter=request.args.get('extrafilter', None),
