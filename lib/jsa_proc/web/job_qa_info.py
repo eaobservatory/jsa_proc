@@ -28,7 +28,7 @@ from jsa_proc.web.log_files import get_log_files
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
-def prepare_job_qa_info(db, job_id, query):
+def prepare_job_qa_info(db, job_id, query, query_param=None):
     # Fetch job and qa information from the database.
     try:
         job = db.get_job(job_id)
@@ -99,10 +99,10 @@ def prepare_job_qa_info(db, job_id, query):
     qalog = db.get_qas(job_id)
     qalog.reverse()
 
-    # If we know what the user's job query was (from the session information)
+    # If we know what the user's job query was
     # then set up pagination based on the previous and next job identifiers.
     if query is not None:
-        (url_query, job_query) = job_search(**query)
+        (_, job_query) = job_search(**query)
 
         # prev_next query should not  contain kwarg 'number'.
         pnquery = job_query.copy()
@@ -113,10 +113,12 @@ def prepare_job_qa_info(db, job_id, query):
         count = db.find_jobs(count=True, **job_query)
         pagination = Pagination(
             None,
-            None if prev is None else url_for('job_qa', job_id=prev),
-            None if next is None else url_for('job_qa', job_id=next),
+            None if prev is None else url_for(
+                'job_qa', job_id=prev, job_query=query_param),
+            None if next is None else url_for(
+                'job_qa', job_id=next, job_query=query_param),
             None,
-            url_for('job_list', **url_query),
+            url_for('job_list', job_query=query_param),
             count,)
     else:
         pagination = None

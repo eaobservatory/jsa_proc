@@ -26,7 +26,7 @@ from jsa_proc.web.job_search import job_search
 from jsa_proc.web.util import Pagination, url_for, HTTPNotFound
 
 
-def prepare_job_info(db, job_id, query):
+def prepare_job_info(db, job_id, query, query_param=None):
     # Fetch job information from the database.
     try:
         job = db.get_job(job_id)
@@ -108,11 +108,10 @@ def prepare_job_info(db, job_id, query):
     # Get notes.
     notes = db.get_notes(job_id)
 
-    # If we know what the user's job query was (from the session information)
+    # If we know what the user's job query was
     # then set up pagination based on the previous and next job identifiers.
     if query is not None:
-
-        (url_query, job_query) = job_search(**query)
+        (_, job_query) = job_search(**query)
 
         # Need to remove 'number' option from job_query to.
         pnquery = job_query.copy()
@@ -122,10 +121,12 @@ def prepare_job_info(db, job_id, query):
         count = db.find_jobs(count=True, **job_query)
         pagination = Pagination(
             None,
-            None if prev is None else url_for('job_info', job_id=prev),
-            None if next is None else url_for('job_info', job_id=next),
+            None if prev is None else url_for(
+                'job_info', job_id=prev, job_query=query_param),
+            None if next is None else url_for(
+                'job_info', job_id=next, job_query=query_param),
             None,
-            url_for('job_list', **url_query),
+            url_for('job_list', job_query=query_param),
             count,)
     else:
         pagination = None

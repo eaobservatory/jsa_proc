@@ -19,12 +19,13 @@ from jsa_proc.db.db import Fuzzy, Range
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 
 
-def job_search(location, state, task,
-               date_min, date_max, qa_state,
-               sourcename, obsnum, project,
-               mode, number, tau_min, tau_max, parameters,
-               **kwargs):
-
+def job_search(
+        location=None, state=None, task=None,
+        date_min=None, date_max=None, qa_state=None,
+        sourcename=None, obsnum=None, project=None,
+        mode=None, number=None, tau_min=None, tau_max=None,
+        parameters=None,
+        **kwargs):
     # If number is None, reset to default
     if not number or number is None:
         number = 24
@@ -91,7 +92,7 @@ def job_search(location, state, task,
 
     # Get the values based on the strings passed to this.
     for key, info in ObsQueryDict.items():
-        value = kwargs[key]
+        value = kwargs.get(key)
         if value is not None:
             # Add the filtering information to the obsquery dictionary.
             (obsidssquery if key == 'subsystem' else obsquery).update(info[value].where)

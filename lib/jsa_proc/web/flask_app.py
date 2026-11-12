@@ -15,9 +15,12 @@
 
 from __future__ import absolute_import, division
 
+import base64
+from codecs import ascii_decode, ascii_encode, utf_8_decode, utf_8_encode
 import datetime
+import json
 from flask import Flask, flash, g as flask_g, request, Response, \
-    render_template, send_file, session
+    render_template, send_file
 from functools import wraps
 import os.path
 
@@ -127,47 +130,49 @@ def create_web_app(auto_reload_templates=False):
     @app.route('/job/')
     @templated('job_list.html')
     def job_list():
-        # Prepare query arguments list: special parameters first.
-        kwargs = {
-            'state': request.args.getlist('state'),
-            'mode': request.args.get('mode', 'JSAProc'),
-            'tiles': request.args.get('tiles')
-        }
+        job_query_param = request.args.get('job_query')
+        kwargs = decode_job_query(job_query_param)
 
-        # Now add regular string parameters, including those from
-        # jcmtobsinfo.
-        params = [
-            'location',
-            'task',
-            'date_min',
-            'date_max',
-            'qa_state',
-            'sourcename',
-            'obsnum',
-            'project',
-            'number',
-            'tau_min',
-            'tau_max',
-            'parameters',
-        ]
+        if kwargs is None:
+            # Prepare query arguments list: special parameters first.
+            kwargs = {
+                'state': request.args.getlist('state'),
+                'mode': request.args.get('mode', 'JSAProc'),
+                'tiles': request.args.get('tiles')
+            }
 
-        params.extend(ObsQueryDict.keys())
+            # Now add regular string parameters, including those from
+            # jcmtobsinfo.
+            params = [
+                'location',
+                'task',
+                'date_min',
+                'date_max',
+                'qa_state',
+                'sourcename',
+                'obsnum',
+                'project',
+                'number',
+                'tau_min',
+                'tau_max',
+                'parameters',
+            ]
 
-        for key in params:
-            kwargs[key] = request.args.get(key, None)
+            params.extend(ObsQueryDict.keys())
 
-        # Process empty strings used as null form parameters.
-        for argname in kwargs:
-            if kwargs[argname] == '':
-                kwargs[argname] = None
+            for key in params:
+                kwargs[key] = request.args.get(key, None)
 
-        # Store the query in the session.
-        session['job_query'] = kwargs
+            # Process empty strings used as null form parameters.
+            for argname in kwargs:
+                if kwargs[argname] == '':
+                    kwargs[argname] = None
 
         # Finally prepare the template context.
         return prepare_job_list(
             db,
             page=request.args.get('page', None),
+            job_query_param=encode_job_query(kwargs),
             **kwargs)
 
     @app.route('/image/<task>/piechart')
@@ -219,12 +224,16 @@ def create_web_app(auto_reload_templates=False):
     @app.route('/job/<int:job_id>', methods=['GET'])
     @templated('job_info.html')
     def job_info(job_id):
-        return prepare_job_info(db, job_id, session.get('job_query'))
+        query_param = request.args.get('job_query')
+        return prepare_job_info(
+            db, job_id, decode_job_query(query_param), query_param)
 
     @app.route('/job/<int:job_id>/qa', methods=['GET'])
     @templated('job_qa.html')
     def job_qa(job_id):
-        return prepare_job_qa_info(db, job_id, session.get('job_query'))
+        query_param = request.args.get('job_query')
+        return prepare_job_qa_info(
+            db, job_id, decode_job_query(query_param), query_param)
 
     @app.route('/job/<int:job_id>/parents', methods=['GET'])
     @templated('job_relations.html')
@@ -523,3 +532,38 @@ def _is_confirm():
         None
         if (request.method != 'POST')
         else ('submit_confirm' in request.form))
+
+
+def encode_job_query(query):
+    """Encode a job query as compact, URL-safe JSON."""
+
+    non_null = {
+        key: value for key, value in query.items()
+        if value is not None}
+
+    return ascii_decode(base64.urlsafe_b64encode(
+        utf_8_encode(json.dumps(
+            non_null, separators=(',', ':')))[0]
+    ))[0].rstrip('=')
+
+
+def decode_job_query(value):
+    """Decode a URL job query, returning None if it is missing or invalid."""
+
+    if not value:
+        return None
+
+    try:
+        padded = value + '=' * (-len(value) % 4)
+
+        query = json.loads(utf_8_decode(
+            base64.b64decode(
+                ascii_encode(padded)[0],
+                altchars=b'-_',
+                validate=True)
+            )[0])
+
+    except (ValueError, UnicodeError):
+        return None
+
+    return query if isinstance(query, dict) else None
