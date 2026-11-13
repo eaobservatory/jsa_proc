@@ -257,7 +257,9 @@ def create_web_app(auto_reload_templates=False):
 
             # Redirect back to the job info page.
             flash('The note has been saved.')
-            raise HTTPRedirect(url_for('job_info', job_id=job_id))
+            raise HTTPRedirect(url_for(
+                'job_info', job_id=job_id,
+                job_query=request.form.get('job_query')))
 
         except ErrorPage as err:
             return error_page_response(err)
@@ -281,7 +283,9 @@ def create_web_app(auto_reload_templates=False):
 
             flash('Job %i has been reset.' % job.id)
 
-        raise HTTPRedirect(url_for('job_info', job_id=job.id))
+        raise HTTPRedirect(url_for(
+            'job_info', job_id=job.id,
+            job_query=request.args.get('job_query')))
 
     @app.route('/job/<int:job_id>/delete', methods=['GET', 'POST'])
     @requires_auth
@@ -302,7 +306,9 @@ def create_web_app(auto_reload_templates=False):
 
             flash('Job %i has been deleted.' % job.id)
 
-        raise HTTPRedirect(url_for('job_info', job_id=job.id))
+        raise HTTPRedirect(url_for(
+            'job_info', job_id=job.id,
+            job_query=request.args.get('job_query')))
 
     @app.route('/job_change_state', methods=['POST'])
     @requires_auth

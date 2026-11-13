@@ -156,6 +156,7 @@ def prepare_job_qa_info(db, job_id, query, query_param=None):
         'parent_overall_qa': parent_overall_qa,
         'qa_states': JSAQAState.STATE_ALL,
         'pagination': pagination,
+        'job_query': query_param,
         'nopreview': nopreview,
         'parent_fits': parent_fits,
     }

@@ -147,6 +147,7 @@ def prepare_job_info(db, job_id, query, query_param=None):
         'states': JSAProcState.STATE_ALL,
         'obsinfo': obs_info,
         'parent_obs': parent_obs,
+        'job_query': query_param,
         'pagination': pagination,
     }
 
