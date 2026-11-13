@@ -21,6 +21,7 @@ Functions for examining the files and disks.
 from __future__ import absolute_import, division, print_function
 
 from collections import defaultdict
+import gzip
 from hashlib import md5
 import os
 import subprocess
@@ -28,12 +29,14 @@ import subprocess
 from jsa_proc.config import get_config
 
 
-def get_md5sum(filename):
+def get_md5sum(filename, allow_ungzip=False):
     """Return the MD5 sum of a file."""
+
+    ungzip = (allow_ungzip and filename.endswith('.gz'))
 
     sum = md5()
 
-    with open(filename, 'rb') as f:
+    with (gzip.open(filename, 'rb') if ungzip else open(filename, 'rb')) as f:
         while True:
             data = f.read(1024)
 
