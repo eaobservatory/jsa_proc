@@ -20,7 +20,11 @@ from codecs import latin_1_encode
 from datetime import datetime
 import logging
 
-from pytz import UTC
+try:
+    from datetime import timezone
+    UTC = timezone.utc
+except ImportError:
+    from pytz import UTC
 
 from omp.obs.state import OMPState
 

@@ -13,7 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from jsa_proc.action.unauthorized import IdentifiedProblem, \
+from datetime import datetime
+
+from jsa_proc.action.unauthorized import IdentifiedProblem, UTC, \
     investigate_unauthorized_errors
 
 from .compat import TestCase
+
+
+class UnauthorizedTestCase(TestCase):
+    def test_utc(self):
+        # Test using the UTC object the same way as
+        # investigate_unauthorized_errors does.
+        now = datetime.now(UTC)
+        self.assertIsInstance(now, datetime)
