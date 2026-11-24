@@ -972,23 +972,30 @@ class JSAProcDB:
         Will raise an NoRowsError if there are no output files found.
         """
 
+        result = []
+        all_job_ids = job_id if isinstance(job_id, list) else [job_id]
+
         with self.db as c:
-            c.execute(
-                'SELECT filename, md5 FROM output_file WHERE job_id = %s',
-                (job_id,))
-            output_files = c.fetchall()
-            if len(output_files) == 0:
-                raise NoRowsError(
-                    'output_file',
-                    'SELECT filename FROM output_file WHERE job_id = ' +
-                    (str(job_id)))
+            for jobs in list_in_blocks(all_job_ids):
+                query = 'SELECT id, job_id, filename, md5 ' \
+                    'FROM output_file WHERE job_id IN ({})'.format(
+                        ', '.join(('%s',) * len(jobs)))
 
-        if with_info:
-            return [JSAProcFileInfo(*row) for row in output_files]
+                c.execute(query, jobs)
+                output_files = c.fetchall()
+                if len(output_files) == 0:
+                    raise NoRowsError(
+                        'output_file', query % tuple(jobs))
 
-        else:
-            # Turn list of tuples into single list of strings.
-            return [row[0] for row in output_files]
+                if with_info:
+                    result.extend(
+                        JSAProcFileInfoExtra(*row) for row in output_files)
+
+                else:
+                    # Turn list of tuples into single list of strings.
+                    result.extend(row[2] for row in output_files)
+
+        return result
 
     def set_output_files(self, job_id, output_files):
 
@@ -1932,3 +1939,25 @@ def _validate_parents_to_remove(job_id, parents, db):
         raise JSAProcError('Not all parent-jobs to be removed are ' +
                            "present in parent table for child %s" % job_id)
     return isvalid
+
+
+def list_in_blocks(iterable, block_size=100):
+    """
+    Divide the objects in the given iterable into blocks.
+    From the hedwig.util module.
+    """
+
+    block = []
+
+    for value in iterable:
+        block.append(value)
+
+        if len(block) >= block_size:
+            yield block
+
+            # Assign a new list rather than clearing in case the caller
+            # keeps a reference to a previously yielded list.
+            block = []
+
+    if block:
+        yield block

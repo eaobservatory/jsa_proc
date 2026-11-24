@@ -15,10 +15,12 @@
 
 from collections import OrderedDict
 from datetime import date, datetime
+from itertools import count
 from socket import gethostname
 
 from jsa_proc.db.db import _dict_query_where_clause, Not, Fuzzy, Range, \
-        JSAProcFileInfo, JSAProcJobParent, JSAProcTaskInfo
+        JSAProcFileInfo, JSAProcFileInfoExtra, \
+        JSAProcJobParent, JSAProcTaskInfo
 from jsa_proc.error import JSAProcError, NoRowsError, ExcessRowsError
 from jsa_proc.jcmtobsinfo import ObsQueryDict
 from jsa_proc.state import JSAProcState
@@ -387,19 +389,24 @@ class InterfaceDBTest(DBTestCase):
                          JSAProcFileInfo('myoutputfile4',
                                          'c10a05bfd8cd7a1d0c1aae71a351b4ad')]
 
+        # Counter to compare with auto-increment field.
+        c = count(1)
+
         # Update the output files for this job.
         self.db.set_output_files(job_id, output_files1)
 
         # Check the values
         out_f = self.db.get_output_files(job_id, with_info=True)
-        self.assertEqual(set(out_f), set(output_files1))
+        self.assertEqual(set(out_f), set(
+            JSAProcFileInfoExtra(next(c), job_id, *x) for x in output_files1))
 
         # Re update to check it works when there are already files written in.
         self.db.set_output_files(job_id, output_files2)
 
         # Check new values
         out_f = self.db.get_output_files(job_id, with_info=True)
-        self.assertEqual(set(out_f), set(output_files2))
+        self.assertEqual(set(out_f), set(
+            JSAProcFileInfoExtra(next(c), job_id, *x) for x in output_files2))
 
     def test_output_files(self):
         """
