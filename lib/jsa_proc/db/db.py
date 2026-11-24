@@ -420,30 +420,40 @@ class JSAProcDB:
 
         List of NamedTuples with entries from obs table.
         """
-        logger.debug('Getting observation info for job %i', job_id)
+
+        result = []
+        all_job_ids = job_id if isinstance(job_id, list) else [job_id]
+
+        logger.debug('Getting observation info for job %r', job_id)
         with self.db as c:
-            # Get all observations with job_id
             self.db.unlock()
-            c.execute(
-                'SELECT job_id, obsidss.obsid, obsidss.obsid_subsysnr, date_obs, date_end, utdate, ' +
-                ' obsnum, ' +
-                ' CASE WHEN instrume="SCUBA-2" AND inbeam like "%%POL" THEN "POL-2" ELSE instrume END as instrume, ' +
-                ' backend, project, survey, obsidss.subsys, '+
-                " CASE WHEN jcmt.COMMON.sam_mode='SCAN' THEN jcmt.COMMON.scan_pat ELSE jcmt.COMMON.sam_mode END AS scanmode, " +
-                ' object, obs_type, ' +
-                " CASE WHEN o.commentstatus is NULL THEN 0 ELSE o.commentstatus END AS omp_status, " +
-                " (wvmtaust + wvmtauen)/2.0 AS tau, " +
-                " (seeingst + seeingen)/2.0 AS seeing " +
-                ' FROM obsidss LEFT JOIN jcmt.COMMON  ON obsidss.obsid=jcmt.COMMON.obsid ' +
-                ' LEFT OUTER JOIN omp.ompobslog AS o ON o.obslogid = (SELECT MAX(obslogid) FROM omp.ompobslog AS o2 WHERE o2.obsid=jcmt.COMMON.obsid ) ' +
-                ' WHERE job_id = %s '
-                ' ORDER BY utdate ASC, obsnum ASC',
-                (job_id,))
-            results = c.fetchall()
+            for jobs in list_in_blocks(all_job_ids):
+                query = (
+                    'SELECT job_id, obsidss.obsid, obsidss.obsid_subsysnr, '
+                    'date_obs, date_end, utdate, obsnum, '
+                    'CASE WHEN instrume="SCUBA-2" AND inbeam LIKE "%%POL" '
+                    'THEN "POL-2" ELSE instrume END AS instrume, '
+                    'backend, project, survey, obsidss.subsys, '
+                    'CASE WHEN jcmt.COMMON.sam_mode="SCAN" '
+                    'THEN jcmt.COMMON.scan_pat ELSE jcmt.COMMON.sam_mode END AS scanmode, '
+                    'object, obs_type, '
+                    'CASE WHEN o.commentstatus is NULL THEN 0 ELSE o.commentstatus END AS omp_status, '
+                    '(wvmtaust + wvmtauen)/2.0 AS tau, '
+                    '(seeingst + seeingen)/2.0 AS seeing '
+                    'FROM obsidss LEFT JOIN jcmt.COMMON  ON obsidss.obsid=jcmt.COMMON.obsid '
+                    'LEFT OUTER JOIN omp.ompobslog AS o ON o.obslogid = '
+                    '(SELECT MAX(obslogid) FROM omp.ompobslog AS o2 WHERE o2.obsid=jcmt.COMMON.obsid) '
+                    'WHERE job_id IN ({}) '
+                    'ORDER BY job_id ASC, utdate ASC, obsnum ASC'
+                ).format(', '.join(('%s',) * len(jobs)))
 
-        results = [JSAProcObs(*obs) for obs in results]
+                c.execute(query, jobs)
 
-        return results
+                rows = c.fetchall()
+
+                result.extend(JSAProcObs(*row) for row in rows)
+
+        return result
 
     def update_obs_info(self, obsidss, obsinfodict):
         """
