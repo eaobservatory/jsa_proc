@@ -22,12 +22,14 @@ from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
 from jsa_proc.web.util import url_for
 
-FileInfo = namedtuple('FileInfo', ['name', 'url', 'mtype'])
+FileInfo = namedtuple('FileInfo', ['name', 'url', 'mtype', 'job_id'])
 PreviewInfo = namedtuple('PreviewInfo', ['url', 'caption'])
 
 
-def make_output_file_list(db, job_id, preview_filter=None):
+def make_output_file_list(db, job_ids, preview_filter=None):
     """Prepare output file lists for job information pages.
+
+    :param job_ids: either a single job ID or a list of multiple values.
     """
 
     output_files = []
@@ -35,7 +37,9 @@ def make_output_file_list(db, job_id, preview_filter=None):
     previews256 = []
 
     try:
-        for i in sorted(db.get_output_files(job_id)):
+        for file_info in sorted(db.get_output_files(job_ids, with_info=True)):
+            job_id = file_info.job_id
+            i = file_info.filename
             url = None
             mtype = None
 
@@ -80,7 +84,7 @@ def make_output_file_list(db, job_id, preview_filter=None):
                 if mtype is None:
                     url = None
 
-            output_files.append(FileInfo(i, url, mtype))
+            output_files.append(FileInfo(i, url, mtype, job_id=job_id))
 
     except NoRowsError:
         pass

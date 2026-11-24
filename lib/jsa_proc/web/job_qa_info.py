@@ -17,6 +17,7 @@ from __future__ import absolute_import, division
 
 from collections import namedtuple, OrderedDict
 import os
+import re
 
 from jsa_proc.admin.directories import get_output_dir
 from jsa_proc.error import NoRowsError
@@ -135,11 +136,16 @@ def prepare_job_qa_info(db, job_id, query, query_param=None):
     # Get parent output .fits files.
     parent_fits = []
     if parents:
-        for i in parents.keys():
-            (parent_outputs, _, _) = make_output_file_list(db, i)
-            # remove everything that isn't a .fits file from output list.
-            [parent_fits.append(i)
-             for i in parent_outputs if '.fits' in i.name]
+        (parent_outputs, _, _) = make_output_file_list(db, pjobs)
+
+        for parent in parents.values():
+            filter_ = re.compile(parent.filter)
+
+            for output in parent_outputs:
+                if parent.id == output.job_id and filter_.search(output.name):
+                    parent_fits.append(output)
+
+        parent_fits.sort(key=lambda x: x.name)
 
     return {
         'title': 'Job {}'.format(job_id),
