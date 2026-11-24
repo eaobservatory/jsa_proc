@@ -60,10 +60,10 @@ def prepare_job_qa_info(db, job_id, query, query_param=None):
         parent_obs = OrderedDict()
         pjobs = list(parents.keys())
         pjobs.sort()
+        all_obsinfo = db.get_obs_info(pjobs)
         for i in pjobs:
-            obsinfo = db.get_obs_info(i)
+            obsinfo = [o._asdict() for o in all_obsinfo if o.job_id == i]
             if obsinfo != []:
-                obsinfo = [o._asdict() for o in db.get_obs_info(i)]
                 qa_state = parents[i].qa_state
                 for o in obsinfo:
                     o['qa_state'] = qa_state
