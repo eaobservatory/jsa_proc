@@ -204,6 +204,10 @@ class SubmitUpdateTest(DBTestCase):
         obsinfo_fetched = self.db.get_obs_info(job_id)
         self.assertEqual(len(obsinfo_fetched), 1)
 
+        self.assertEqual(obsinfo_fetched[0].obsid, 'x')
+        self.assertEqual(obsinfo_fetched[0].obsidss, 'x_450')
+        self.assertEqual(obsinfo_fetched[0].subsys, 450)
+
         self.db.change_state(job_id, JSAProcState.COMPLETE, 'test')
 
         # Try updating regular job: no change.

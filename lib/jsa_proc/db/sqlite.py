@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from contextlib import contextmanager
 import os
 import re
 import sqlite3
@@ -142,9 +143,23 @@ class JSAProcSQLiteLock():
 
         self._conn.close()
 
-    def unlock(self):
-        """ Does nothing in sqlite? """
-        pass
+    @property
+    @contextmanager
+    def without_lock(self):
+        """Dummy without_lock implementation for SQLite since we do
+        not lock tables here."""
+
+        try:
+            cursor = self.__enter__()
+
+            yield cursor
+
+        except BaseException as e:
+            if not self.__exit__(type(e), e, e.__traceback__):
+                raise
+
+        else:
+            self.__exit__(None, None, None)
 
 
 class JSAProcSQLite(JSAProcDB):

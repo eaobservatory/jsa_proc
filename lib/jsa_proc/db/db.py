@@ -52,6 +52,9 @@ JSAProcObs = namedtuple(
      'obsnum', 'instrument', 'backend', 'project', 'survey', 'subsys',
      'scanmode', 'sourcename', 'obstype', 'omp_status',
      'tau', 'seeing'])
+JSAProcObsIDInfo = namedtuple(
+    'JSAProcObsIDInfo',
+    ('obsid_subsysnr', 'obsid', 'subsysnr'))
 JSAProcJobInfo = namedtuple(
     'JSAProcJobInfo',
     'id tag state location foreign_id task qa_state outputs md5s')
@@ -281,6 +284,10 @@ class JSAProcDB:
             job_id, parents, filters = _validate_parents(None, parent_jobs,
                                                          filters=filters)
 
+        if obsidss:
+            # Fetch obsid_subsysnr info first (uses cursor without lock).
+            obsidss_info = self._get_obsidss_info(obsidss)
+
         with self.db as c:
             # Check if the tag already exists.  The database constraints
             # should already check for this, but with MySQL's InnoDB
@@ -327,7 +334,7 @@ class JSAProcDB:
 
             # If present, replace/update the observation list.
             if obsidss:
-                self._set_obsidss(c, job_id, obsidss, False)
+                self._set_obsidss(c, job_id, obsidss, obsidss_info, False)
 
         # job_id may not be necessary but sometimes useful.
         return job_id
@@ -425,8 +432,7 @@ class JSAProcDB:
         all_job_ids = job_id if isinstance(job_id, list) else [job_id]
 
         logger.debug('Getting observation info for job %r', job_id)
-        with self.db as c:
-            self.db.unlock()
+        with self.db.without_lock as c:
             for jobs in list_in_blocks(all_job_ids):
                 query = (
                     'SELECT job_id, obsidss.obsid, obsidss.obsid_subsysnr, '
@@ -492,28 +498,35 @@ class JSAProcDB:
         If set True, delete all existing entries for the job_id before
         updating the table with the obsinfo dictionaries.
         """
+
+        # Fetch information from FILES table (without lock).
+        obsidss_info = self._get_obsidss_info(obsidss)
+
+        # Store with a regular cursor (with lock).
         with self.db as c:
-            self._set_obsidss(c, job_id, obsidss, replace_all)
+            self._set_obsidss(c, job_id, obsidss, obsidss_info, replace_all)
 
-    def _set_obsidss(self, c, job_id, obsidss, replace_all):
+    def _get_obsidss_info(self, obsidss):
+        with self.db.without_lock as c:
+            query = (
+                'SELECT obsid_subsysnr, obsid, subsysnr '
+                'FROM jcmt.FILES WHERE obsid_subsysnr IN ({0}) '
+                'GROUP BY obsid_subsysnr, obsid'
+            ).format(', '.join(('%s',) * len(obsidss)))
 
+            c.execute(query, obsidss)
+
+            rows = c.fetchall()
+
+        return [JSAProcObsIDInfo(*x) for x in rows]
+
+    def _set_obsidss(self, c, job_id, obsidss, obsidss_info, replace_all):
         # If replace_all is set, then delete the existing observations.
         if replace_all:
             c.execute('DELETE FROM obsidss WHERE job_id = %s', (job_id,))
 
-        # Get the obsid from jcmt.FILES
-        self.db.unlock()
-
-        query = 'SELECT obsid_subsysnr, obsid, subsysnr FROM jcmt.FILES WHERE obsid_subsysnr IN ({0}) GROUP BY obsid_subsysnr, obsid'.format(
-            ', '.join(('%s',)*len(obsidss)))
-
-        c.execute(query, tuple(obsidss))
-
-        results = c.fetchall()
-
-
         # Check if any are missing, and warn if so.
-        obsidss_fromquery = [i[0] for i in results]
+        obsidss_fromquery = set(i.obsid_subsysnr for i in obsidss_info)
         for o in obsidss:
             if o not in obsidss_fromquery:
                 logger.warning(
@@ -522,12 +535,10 @@ class JSAProcDB:
 
         # Go through each pair of obsid_subsysnr and obsid, and insert
         # into obsidss for current job.
-        for (obsid_subsysnr, obsid, subsys) in results:
-
+        for o in obsidss_info:
             c.execute('INSERT INTO obsidss (job_id, obsid_subsysnr, obsid, subsys) ' +
                       ' VALUES (%s, %s, %s, %s)' ,
-                      (job_id, obsid_subsysnr, obsid, subsys))
-
+                      (job_id, o.obsid_subsysnr, o.obsid, o.subsysnr))
 
     def change_state(self, job_id, newstate, message, state_prev=None,
                      username=None, priority=None):
@@ -928,8 +939,7 @@ class JSAProcDB:
             select += ' WHERE job.task = %s'
             params = (task,)
 
-        with self.db as c:
-            self.db.unlock()
+        with self.db.without_lock as c:
             c.execute(select, params)
 
             times = c.fetchall()[0]
@@ -1246,10 +1256,7 @@ class JSAProcDB:
 
         result = []
 
-        with self.db as c:
-
-            if 'jcmt.COMMON' in query:
-                self.db.unlock()
+        with (self.db.without_lock if 'jcmt.COMMON' in query else self.db) as c:
             logger.debug([query, param])
             c.execute(query, param)
             while True:
@@ -1428,16 +1435,12 @@ class JSAProcDB:
             ' WHERE ' + ' AND '.join(where) + \
             group_query
 
-        with self.db as c:
-            if 'jcmt.COMMON' in query:
-                self.db.unlock()
+        with (self.db.without_lock if 'jcmt.COMMON' in query else self.db) as c:
             c.execute(query, [JSAProcState.RUNNING] + param)
             startresults = c.fetchall()
             columns = c.description
 
-        with self.db as c:
-            if 'jcmt.COMMON' in query:
-                self.db.unlock()
+        with (self.db.without_lock if 'jcmt.COMMON' in query else self.db) as c:
             c.execute(query_processed,
                       [JSAProcState.RUNNING, JSAProcState.PROCESSED] + param)
             endresults = c.fetchall()

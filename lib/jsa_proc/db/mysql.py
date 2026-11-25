@@ -15,6 +15,7 @@
 
 from __future__ import absolute_import
 
+from contextlib import contextmanager
 import mysql.connector
 from threading import Lock
 
@@ -47,9 +48,12 @@ class JSAProcMySQLLock():
 
         self._tables = result
 
+    def __enter__(self, lock_tables=True):
+        """Context manager block entry method.
 
-    def __enter__(self):
-        """Context manager block entry method."""
+        :param lock_tables: extra argument set False by our
+            `without_lock` method.  If true, lock all tables.
+        """
 
         self._lock.acquire(True)
 
@@ -58,26 +62,29 @@ class JSAProcMySQLLock():
 
         self._cursor = self._conn.cursor()
 
-        if self._tables is not None:
+        if lock_tables and (self._tables is not None):
             self._cursor.execute(
                 'LOCK TABLES ' +
-                ', '.join([x + ' WRITE' for x in self._tables] #+ 
-                          #[x + ' READ' for x in self._readonlytables]
-                      ))
-
-
+                ', '.join(
+                    [x + ' WRITE' for x in self._tables]
+                    # + [x + ' READ' for x in self._readonlytables]
+                ))
 
         return self._cursor
 
-    def __exit__(self, type_, value, tb):
-        """Context manager block exit method."""
+    def __exit__(self, type_, value, tb, lock_tables=True):
+        """Context manager block exit method.
+
+        :param lock_tables: extra argument set False by our
+            `without_lock` method.  If true, unlock tables.
+        """
 
         if type_ is None:
             self._conn.commit()
         else:
             self._conn.rollback()
 
-        if self._tables is not None:
+        if lock_tables and (self._tables is not None):
             self._cursor.execute('UNLOCK TABLES')
 
         self._cursor.close()
@@ -95,10 +102,30 @@ class JSAProcMySQLLock():
 
         self._conn.close()
 
+    @property
+    @contextmanager
+    def without_lock(self):
+        """Alternative context manager which does not lock the database
+        tables.
 
-    def unlock(self):
-        """ UNLOCK tables """
-        self._cursor.execute('UNLOCK TABLES')
+        Passes the `lock_tables` extra argument to our `__enter__` and
+        `__exit__` methods.
+        """
+
+        kwargs = {'lock_tables': False}
+
+        try:
+            cursor = self.__enter__(**kwargs)
+
+            yield cursor
+
+        except BaseException as e:
+            if not self.__exit__(type(e), e, e.__traceback__, **kwargs):
+                raise
+
+        else:
+            self.__exit__(None, None, None, **kwargs)
+
 
 class JSAProcMySQL(JSAProcDB):
     """JSA processing database MySQL database access class."""
