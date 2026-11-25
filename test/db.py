@@ -20,12 +20,16 @@ from datetime import datetime
 from .compat import TestCase
 
 schema = None
+jcmtschema = None
+ompschema = None
 
 
 def create_dummy_database():
     """Create an in-memory SQLite database from the schema."""
 
     global schema
+    global jcmtschema
+    global ompschema
 
     if schema is None:
         with open('doc/schema.sql') as f:
@@ -36,13 +40,13 @@ def create_dummy_database():
     with db.db as c:
         c.executescript(schema)
 
+    if jcmtschema is None:
+        with open('doc/test-jcmt-schema.sql') as f:
+            jcmtschema = f.read()
 
-    # Can't have 2 databases in memory
-    with open('doc/test-jcmt-schema.sql') as f:
-        jcmtschema = f.read()
+    with db.db as c:
+        c.execute('ATTACH DATABASE ":memory:" AS jcmt')
 
-    db2 = JSAProcSQLite('tmpjcmtfile.db', file_already_exists=False)
-    with db2.db as c:
         c.executescript(jcmtschema)
 
         # Insert test data into database.
@@ -77,22 +81,15 @@ def create_dummy_database():
                       (obs['obsid'], obs['utdate'], obs['obsnum'], obs['instrume'],
                        obs['backend'], obs['survey'], obs['project'], obs['date_obs']))
 
+    if ompschema is None:
+        with open('doc/test-omp-schema.sql') as f:
+            ompschema = f.read()
 
     with db.db as c:
-        c.execute('ATTACH DATABASE "tmpjcmtfile.db" AS jcmt')
+        c.execute('ATTACH DATABASE ":memory:" AS omp')
 
-    with open('doc/test-omp-schema.sql') as f:
-        ompschema = f.read()
-    db3 = JSAProcSQLite('tmpompfile.db', file_already_exists=False)
-    with db3.db as c:
         c.executescript(ompschema)
-    print('attaching omp database')
-    with db.db as c:
-        c.execute('ATTACH DATABASE "tmpompfile.db" AS omp')
 
-
-    del(db3)
-    del(db2)
     return db
 
 
@@ -107,23 +104,9 @@ class DBTestCase(TestCase):
 
         self.db = create_dummy_database()
 
-
-
     def tearDown(self):
         """Disconnect from the database by deleting the
         JSAProcDB object.
         """
 
-
-        try:
-            os.remove('tmpjcmtfile.db')
-        except:
-            warning('Could not remove tmpjcmtfile.db')
-        try:
-            os.remove('tmpompfile.db')
-        except:
-            warning('Could not remove tmpompfile.db')
-
         del(self.db)
-        #del self.db2
-        #del self.db3

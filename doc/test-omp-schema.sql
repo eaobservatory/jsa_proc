@@ -1,4 +1,4 @@
-CREATE TABLE ompobslog (
+CREATE TABLE omp.ompobslog (
   obslogid INTEGER PRIMARY KEY AUTOINCREMENT,
   runnr int(11) NOT NULL,
   instrument varchar(32) NOT NULL,
